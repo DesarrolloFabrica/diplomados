@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Sistema de diseño — "Formación con dirección".
+  Marca: teal profundo (confianza, foco). Emerald reservado para estados de
+  éxito/progreso (semántico, no decorativo). Neutrales slate frescos.
+  Modo claro como principal; el modo oscuro queda listo para más adelante.
+*/
+
+@layer base {
+  :root {
+    --background: 210 33% 99%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --primary: 187 78% 26%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 24% 96%;
+    --secondary-foreground: 222 40% 20%;
+
+    --muted: 210 24% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 187 45% 94%;
+    --accent-foreground: 187 78% 22%;
+
+    --success: 158 64% 38%;
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 24% 90%;
+    --input: 214 24% 90%;
+    --ring: 187 78% 30%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 215 40% 8%;
+    --foreground: 210 20% 96%;
+    --card: 215 38% 11%;
+    --card-foreground: 210 20% 96%;
+    --primary: 185 62% 46%;
+    --primary-foreground: 215 40% 8%;
+    --secondary: 215 30% 16%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 215 30% 16%;
+    --muted-foreground: 215 16% 65%;
+    --accent: 187 40% 18%;
+    --accent-foreground: 185 62% 70%;
+    --success: 158 55% 45%;
+    --success-foreground: 215 40% 8%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 210 20% 96%;
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 185 62% 46%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
