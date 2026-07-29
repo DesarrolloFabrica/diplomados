@@ -3,65 +3,87 @@
 @tailwind utilities;
 
 /*
-  Sistema de diseño — "Formación con dirección".
-  Marca: teal profundo (confianza, foco). Emerald reservado para estados de
-  éxito/progreso (semántico, no decorativo). Neutrales slate frescos.
-  Modo claro como principal; el modo oscuro queda listo para más adelante.
+  Sistema de diseño CUN — Montserrat + tokens semánticos.
+  Marca: azul #061120, verde #91DC00.
+  Modo oscuro por defecto (localStorage: cun-theme).
+  Variables en canales HSL para compatibilidad con hsl(var(--token)).
 */
 
 @layer base {
   :root {
-    --background: 210 33% 99%;
-    --foreground: 222 47% 11%;
+    /* Marca CUN (hex directo) */
+    --cun-blue: #061120;
+    --cun-green: #91dc00;
+
+    /* Superficies — light (#f5f7fa / #ffffff / #edf1f5) */
+    --background: 216 33% 97%;
+    --foreground: 215 68% 7%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 215 68% 7%;
 
-    --primary: 187 78% 26%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 68% 7%;
+
+    /* Primary / accent = azul CUN */
+    --primary: 215 68% 7%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 24% 96%;
-    --secondary-foreground: 222 40% 20%;
+    --secondary: 210 29% 95%;
+    --secondary-foreground: 215 68% 7%;
 
-    --muted: 210 24% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 210 29% 95%;
+    --muted-foreground: 213 13% 46%;
 
-    --accent: 187 45% 94%;
-    --accent-foreground: 187 78% 22%;
+    --accent: 215 68% 7%;
+    --accent-foreground: 0 0% 100%;
 
-    --success: 158 64% 38%;
-    --success-foreground: 0 0% 100%;
+    --success: 80 100% 43%;
+    --success-foreground: 215 68% 7%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 24% 90%;
-    --input: 214 24% 90%;
-    --ring: 187 78% 30%;
+    --border: 210 23% 88%;
+    --input: 210 23% 88%;
+    --ring: 215 68% 7%;
 
     --radius: 0.625rem;
   }
 
   .dark {
-    --background: 215 40% 8%;
-    --foreground: 210 20% 96%;
-    --card: 215 38% 11%;
-    --card-foreground: 210 20% 96%;
-    --primary: 185 62% 46%;
-    --primary-foreground: 215 40% 8%;
-    --secondary: 215 30% 16%;
-    --secondary-foreground: 210 20% 96%;
-    --muted: 215 30% 16%;
-    --muted-foreground: 215 16% 65%;
-    --accent: 187 40% 18%;
-    --accent-foreground: 185 62% 70%;
-    --success: 158 55% 45%;
-    --success-foreground: 215 40% 8%;
+    /* Superficies — dark (#061120 / #0b1b2b / #10263a) */
+    --background: 215 68% 7%;
+    --foreground: 216 33% 97%;
+
+    --card: 210 59% 11%;
+    --card-foreground: 216 33% 97%;
+
+    --popover: 210 59% 11%;
+    --popover-foreground: 216 33% 97%;
+
+    /* Primary / accent = verde CUN */
+    --primary: 80 100% 43%;
+    --primary-foreground: 215 68% 7%;
+
+    --secondary: 209 57% 15%;
+    --secondary-foreground: 216 33% 97%;
+
+    --muted: 209 57% 15%;
+    --muted-foreground: 213 19% 72%;
+
+    --accent: 80 100% 43%;
+    --accent-foreground: 215 68% 7%;
+
+    --success: 80 100% 43%;
+    --success-foreground: 215 68% 7%;
+
     --destructive: 0 62% 50%;
-    --destructive-foreground: 210 20% 96%;
-    --border: 215 25% 20%;
-    --input: 215 25% 20%;
-    --ring: 185 62% 46%;
+    --destructive-foreground: 216 33% 97%;
+
+    --border: 0 0% 100% / 0.14;
+    --input: 0 0% 100% / 0.14;
+    --ring: 80 100% 43%;
   }
 }
 
@@ -69,8 +91,264 @@
   * {
     @apply border-border;
   }
+
+  html,
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    min-height: 100%;
+  }
+
+  body {
+    min-height: 100vh;
+    font-family: var(--font-montserrat), sans-serif;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  html.light body {
+    background:
+      radial-gradient(
+        circle at 90% 5%,
+        rgba(6, 17, 32, 0.035),
+        transparent 30%
+      ),
+      linear-gradient(
+        145deg,
+        #ffffff 0%,
+        #f5f7fa 48%,
+        #edf1f5 100%
+      );
+  }
+
+  html.dark body {
+    background:
+      radial-gradient(
+        circle at 15% 10%,
+        rgba(145, 220, 0, 0.08),
+        transparent 30%
+      ),
+      radial-gradient(
+        circle at 85% 90%,
+        rgba(28, 80, 112, 0.22),
+        transparent 36%
+      ),
+      linear-gradient(
+        145deg,
+        #061120 0%,
+        #0b1b2b 55%,
+        #061120 100%
+      );
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+}
+
+@layer utilities {
+  .bg-cun-auth-panel {
+    background:
+      radial-gradient(
+        circle at 20% 20%,
+        rgba(145, 220, 0, 0.08),
+        transparent 35%
+      ),
+      linear-gradient(
+        145deg,
+        #061120 0%,
+        #0a1c2c 55%,
+        #061120 100%
+      );
+  }
+
+  @keyframes cun-caret-blink {
+    0%,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .animate-cun-caret {
+    animation: cun-caret-blink 1s step-end infinite;
+  }
+
+  .roadmap-section {
+    position: relative;
+    min-height: 100%;
+    overflow: hidden;
+  }
+
+  html.light .roadmap-section {
+    background: #f7fafa;
+  }
+
+  html.light .roadmap-dots {
+    background-image: radial-gradient(
+      circle,
+      rgba(120, 140, 150, 0.2) 1.2px,
+      transparent 1.3px
+    );
+    background-size: 18px 18px;
+    mask-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.7),
+      rgba(0, 0, 0, 0.32)
+    );
+  }
+
+  /* Formas laterales neutras (sin mancha verde). */
+  html.light .roadmap-shapes {
+    background:
+      radial-gradient(
+        circle at 6% 82%,
+        rgba(150, 170, 190, 0.12) 0%,
+        rgba(150, 170, 190, 0.05) 18%,
+        transparent 34%
+      ),
+      radial-gradient(
+        circle at 94% 14%,
+        rgba(140, 165, 190, 0.11) 0%,
+        rgba(140, 165, 190, 0.04) 22%,
+        transparent 38%
+      ),
+      radial-gradient(
+        circle at 96% 58%,
+        rgba(145, 168, 188, 0.08) 0%,
+        transparent 28%
+      );
+  }
+
+  html.light .roadmap-vectors {
+    opacity: 1;
+  }
+
+  html.dark .roadmap-dots,
+  html.dark .roadmap-shapes,
+  html.dark .roadmap-vectors {
+    display: none;
+  }
+
+  .roadmap-connector-svg {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 7px;
+  }
+
+  html.light .roadmap-connector-svg-completed {
+    stroke: url("#roadmap-completed");
+    filter: drop-shadow(0 0 4px rgba(67, 213, 177, 0.4));
+  }
+
+  html.light .roadmap-connector-svg-pending {
+    stroke: url("#roadmap-pending");
+  }
+
+  html.dark .roadmap-connector-svg {
+    stroke: hsl(var(--border));
+    stroke-width: 6px;
+    filter: none;
+  }
+
+  .roadmap-connector {
+    width: 7px;
+    border-radius: 999px;
+  }
+
+  html.light .roadmap-connector-completed {
+    background: linear-gradient(180deg, #117d8b 0%, #17b8d4 55%, #0454bd 100%);
+    box-shadow:
+      0 0 10px rgba(67, 213, 177, 0.4),
+      0 0 20px rgba(126, 240, 208, 0.24);
+  }
+
+  html.light .roadmap-connector-pending {
+    background: linear-gradient(180deg, #d7e6e3 0%, #c8d9d6 100%);
+  }
+
+  html.dark .roadmap-connector {
+    width: 6px;
+    background: hsl(var(--border));
+    box-shadow: none;
+  }
+
+  .roadmap-progress {
+    height: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(99, 130, 133, 0.16);
+    border-radius: 999px;
+    background: #dce8e5;
+    box-shadow: inset 0 1px 3px rgba(6, 17, 32, 0.08);
+  }
+
+  .roadmap-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #2fb9a5 0%, #4fc9b3 45%, #91dc00 100%);
+    box-shadow:
+      0 0 8px rgba(79, 201, 179, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: width 500ms ease;
+  }
+
+  html.dark .roadmap-progress {
+    height: 0.5rem;
+    border: 0;
+    background: hsl(var(--primary) / 0.2);
+    box-shadow: none;
+  }
+
+  html.dark .roadmap-progress-fill {
+    background: hsl(var(--primary));
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 640px) {
+  html.light .roadmap-dots {
+    background-size: 16px 16px;
+  }
+
+  html.light .roadmap-shapes {
+    opacity: 0.55;
+  }
+
+  html.light .roadmap-vectors {
+    opacity: 0.45;
+  }
+
+  html.light .roadmap-vector-left,
+  html.light .roadmap-vector-right,
+  html.light .roadmap-poly {
+    transform-origin: center;
+  }
+
+  html.light .roadmap-connector {
+    width: 5px;
+    box-shadow: 0 0 10px rgba(126, 240, 208, 0.22);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  html.light .roadmap-vectors {
+    opacity: 0.7;
+  }
+
+  html.light .roadmap-shapes {
+    opacity: 0.75;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roadmap-progress-fill {
+    transition: none;
   }
 }

@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
+import { Montserrat } from "next/font/google";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ThemeScript } from "@/components/providers/theme-script";
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const display = Bricolage_Grotesque({
+const montserrat = Montserrat({
   subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const body = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-body",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal"],
+  variable: "--font-montserrat",
   display: "swap",
 });
 
@@ -24,10 +23,19 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={`${display.variable} ${body.variable}`}>
-      <body className="font-sans">
-        {children}
-        <Toaster position="top-center" richColors />
+    <html lang="es" className="dark" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
+      <body
+        className={`${montserrat.className} ${montserrat.variable} min-h-screen antialiased`}
+        suppressHydrationWarning
+      >
+        <ThemeProvider>
+          {children}
+          <ThemeSwitcher />
+          <Toaster position="top-center" richColors />
+        </ThemeProvider>
       </body>
     </html>
   );

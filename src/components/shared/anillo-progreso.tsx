@@ -19,7 +19,7 @@ export function AnilloProgreso({ porcentaje, tamano, grosor = 5, className }: An
         cy={tamano / 2}
         r={radio}
         fill="none"
-        stroke="hsl(var(--border))"
+        className="stroke-[#DCE3EA] dark:stroke-border"
         strokeWidth={grosor}
       />
       <circle
@@ -27,7 +27,7 @@ export function AnilloProgreso({ porcentaje, tamano, grosor = 5, className }: An
         cy={tamano / 2}
         r={radio}
         fill="none"
-        stroke="hsl(var(--primary))"
+        className="stroke-cun-green dark:stroke-primary"
         strokeWidth={grosor}
         strokeDasharray={circunferencia}
         strokeDashoffset={offset}

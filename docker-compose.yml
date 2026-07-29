@@ -1,0 +1,27 @@
+# Postgres local para desarrollo.
+# Arranca con: docker compose up -d
+# Luego: npm run db:migrate
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: diplomados-postgres
+    restart: unless-stopped
+    ports:
+      # 5433 en el host para no chocar con Postgres nativo (suele usar 5432)
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: dev_postgres_password
+      POSTGRES_DB: plataforma_formacion
+    volumes:
+      - diplomados_pgdata:/var/lib/postgresql/data
+      - ./db/docker-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d plataforma_formacion"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  diplomados_pgdata:

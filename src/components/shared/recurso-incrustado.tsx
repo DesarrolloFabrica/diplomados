@@ -1,5 +1,15 @@
-import { FileText, Presentation, Link2, File, Download } from "lucide-react";
+import {
+  Download,
+  File,
+  FileText,
+  Image as ImageIcon,
+  Link2,
+  Music,
+  Presentation,
+  Video,
+} from "lucide-react";
 import { obtenerEmbedYoutube, obtenerEmbedGoogleDrive } from "@/lib/media";
+import { ImagenRecurso } from "@/components/shared/imagen-recurso";
 import type { TipoRecurso } from "@/lib/db/schema";
 
 interface RecursoIncrustadoProps {
@@ -10,9 +20,9 @@ interface RecursoIncrustadoProps {
 
 const ICONO_DESCARGA: Record<TipoRecurso, typeof FileText> = {
   pdf: FileText,
-  video: FileText,
-  audio: FileText,
-  imagen: FileText,
+  video: Video,
+  audio: Music,
+  imagen: ImageIcon,
   presentacion: Presentation,
   enlace: Link2,
   archivo: File,
@@ -87,8 +97,7 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
     return (
       <div className="space-y-1.5">
         <p className="text-sm font-medium">{nombre}</p>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={nombre} className="w-full rounded-lg border border-border" />
+        <ImagenRecurso url={url} nombre={nombre} />
       </div>
     );
   }

@@ -51,7 +51,11 @@ export function EncabezadoCurso({ curso, empresas }: EncabezadoCursoProps) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex gap-4">
           <div className="h-20 w-32 shrink-0">
-            <PortadaCurso url={curso.imagenPortadaUrl} esDiplomado={curso.esDiplomado} />
+            <PortadaCurso
+              url={curso.imagenPortadaUrl}
+              esDiplomado={curso.esDiplomado}
+              titulo={curso.titulo}
+            />
           </div>
           <div>
             <div className="flex items-center gap-2">

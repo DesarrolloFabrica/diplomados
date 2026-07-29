@@ -1,28 +1,36 @@
-import { GraduationCap, BookOpen } from "lucide-react";
+"use client";
+
+import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { iconoTematico } from "@/components/shared/icono-tematico";
 
 interface PortadaCursoProps {
   url: string | null;
   esDiplomado: boolean;
+  titulo?: string;
   className?: string;
 }
 
 // <img> plano (no next/image): la portada es una URL externa arbitraria
 // que el instructor pega a mano, no un dominio fijo que se pueda
-// registrar de antemano en next.config.mjs.
-export function PortadaCurso({ url, esDiplomado, className }: PortadaCursoProps) {
-  if (url) {
+// registrar de antemano en next.config.mjs. Si esa URL no carga se cae al
+// icono del tema del curso en vez de dejar la imagen rota del navegador.
+export function PortadaCurso({ url, esDiplomado, titulo = "", className }: PortadaCursoProps) {
+  const [urlFallida, setUrlFallida] = useState<string | null>(null);
+
+  if (url && urlFallida !== url) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={url}
         alt=""
+        onError={() => setUrlFallida(url)}
         className={cn("h-full w-full rounded-md object-cover", className)}
       />
     );
   }
 
-  const Icono = esDiplomado ? GraduationCap : BookOpen;
+  const Icono = iconoTematico(titulo, esDiplomado);
   return (
     <div
       className={cn(
@@ -35,10 +43,10 @@ export function PortadaCurso({ url, esDiplomado, className }: PortadaCursoProps)
   );
 }
 
-export function PortadaMiniatura({ url, esDiplomado }: Omit<PortadaCursoProps, "className">) {
+export function PortadaMiniatura({ url, esDiplomado, titulo }: Omit<PortadaCursoProps, "className">) {
   return (
     <div className="h-10 w-14 overflow-hidden rounded-md border border-border">
-      <PortadaCurso url={url} esDiplomado={esDiplomado} />
+      <PortadaCurso url={url} esDiplomado={esDiplomado} titulo={titulo} />
     </div>
   );
 }

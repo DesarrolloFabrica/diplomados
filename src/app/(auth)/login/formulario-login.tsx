@@ -12,6 +12,21 @@ import { Label } from "@/components/ui/label";
 import { iniciarSesion } from "@/server/actions/auth";
 import { loginSchema, type LoginInput } from "@/lib/validators/auth";
 
+const inputLoginClassName =
+  "h-11 rounded-lg border border-[#d5dbe3] bg-white text-cun-blue placeholder:text-slate-400 " +
+  "dark:border-white/15 dark:bg-[#0b1b2b] dark:text-[#f5f7fa] dark:placeholder:text-[#aab6c5] " +
+  "focus-visible:border-cun-green focus-visible:outline-none focus-visible:ring-[3px] " +
+  "focus-visible:ring-[rgba(145,220,0,0.18)] focus-visible:ring-offset-0 " +
+  "dark:focus-visible:border-cun-green dark:focus-visible:ring-[rgba(145,220,0,0.28)]";
+
+const botonLoginClassName =
+  "h-11 w-full rounded-lg bg-cun-green font-bold text-cun-blue shadow-none " +
+  "transition-[background-color,transform,box-shadow] duration-200 ease-in-out " +
+  "hover:-translate-y-px hover:bg-[#7fc400] hover:text-cun-blue " +
+  "active:translate-y-0 " +
+  "focus-visible:ring-cun-green focus-visible:ring-offset-2 " +
+  "disabled:translate-y-0 disabled:opacity-60";
+
 export function FormularioLogin() {
   const [enviando, iniciar] = useTransition();
   const {
@@ -35,12 +50,15 @@ export function FormularioLogin() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
       <div className="space-y-2">
-        <Label htmlFor="email">Correo electrónico</Label>
+        <Label htmlFor="email" className="text-cun-blue dark:text-[#f5f7fa]">
+          Correo electrónico
+        </Label>
         <Input
           id="email"
           type="email"
           autoComplete="email"
           placeholder="nombre@empresa.com"
+          className={inputLoginClassName}
           {...register("email")}
         />
         {errors.email && (
@@ -49,11 +67,13 @@ export function FormularioLogin() {
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Contraseña</Label>
+        <div className="flex items-center justify-between gap-3">
+          <Label htmlFor="password" className="text-cun-blue dark:text-[#f5f7fa]">
+            Contraseña
+          </Label>
           <Link
             href="/recuperar-clave"
-            className="text-sm text-primary hover:underline"
+            className="text-sm text-cun-blue underline-offset-4 transition-colors hover:text-[#5f9200] hover:underline decoration-cun-green dark:text-[#aab6c5] dark:hover:text-cun-green"
           >
             ¿Olvidaste tu contraseña?
           </Link>
@@ -63,6 +83,7 @@ export function FormularioLogin() {
           type="password"
           autoComplete="current-password"
           placeholder="••••••••"
+          className={inputLoginClassName}
           {...register("password")}
         />
         {errors.password && (
@@ -70,7 +91,7 @@ export function FormularioLogin() {
         )}
       </div>
 
-      <Button type="submit" className="w-full" disabled={enviando}>
+      <Button type="submit" className={botonLoginClassName} disabled={enviando}>
         {enviando && <Loader2 className="animate-spin" />}
         Entrar
       </Button>

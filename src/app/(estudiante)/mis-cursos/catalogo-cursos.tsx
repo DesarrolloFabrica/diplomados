@@ -79,9 +79,10 @@ function HeroContinuar({ curso }: { curso: CursoCatalogoFila }) {
       <PortadaCurso
         url={curso.imagenPortadaUrl}
         esDiplomado={curso.esDiplomado}
+        titulo={curso.titulo}
         className="rounded-none transition-transform duration-500 group-hover:scale-105"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/10" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#061120] via-[#164A73] to-[#164A73] dark:from-black/85 dark:via-black/50 dark:to-black/10" />
       <div className="absolute inset-0 flex items-center justify-between gap-4 p-6">
         <div className="max-w-md space-y-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-white/70">
@@ -95,7 +96,7 @@ function HeroContinuar({ curso }: { curso: CursoCatalogoFila }) {
         </div>
         <div className="relative hidden shrink-0 items-center justify-center sm:flex" style={{ width: 88, height: 88 }}>
           <AnilloProgreso porcentaje={porcentaje} tamano={88} grosor={6} className="absolute inset-0" />
-          <span className="font-display text-lg font-semibold text-white">{Math.round(porcentaje)}%</span>
+          <span className="font-display text-lg font-semibold text-white dark:text-white">{Math.round(porcentaje)}%</span>
         </div>
       </div>
     </Link>

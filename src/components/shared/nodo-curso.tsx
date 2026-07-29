@@ -36,7 +36,12 @@ export function NodoCurso({
           className="absolute overflow-hidden rounded-full border-2 border-card shadow-md"
           style={{ width: tamano, height: tamano, left: (anillo - tamano) / 2, top: (anillo - tamano) / 2 }}
         >
-          <PortadaCurso url={imagenPortadaUrl} esDiplomado={esDiplomado} className="rounded-none" />
+          <PortadaCurso
+            url={imagenPortadaUrl}
+            esDiplomado={esDiplomado}
+            titulo={titulo}
+            className="rounded-none"
+          />
         </div>
         {esDiplomado && (
           <span className="absolute -right-0.5 -top-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">

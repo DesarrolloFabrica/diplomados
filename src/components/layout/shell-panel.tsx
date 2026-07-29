@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, Menu, X } from "lucide-react";
+import { GraduationCap, Menu, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NAVEGACION_POR_ROL } from "@/config/navegacion";
 import { ETIQUETA_ROL } from "@/config/roles";
@@ -14,6 +14,14 @@ interface ShellPanelProps {
   rol: Rol;
   nombre: string | null;
   children: React.ReactNode;
+}
+
+function isRouteActive(pathname: string, href: string, exact = false) {
+  if (exact) {
+    return pathname === href;
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function ShellPanel({ rol, nombre, children }: ShellPanelProps) {
@@ -35,9 +43,7 @@ export function ShellPanel({ rol, nombre, children }: ShellPanelProps) {
 
       <nav className="mt-6 flex-1 space-y-1">
         {items.map((item) => {
-          const activo =
-            pathname === item.href ||
-            (item.href !== "/mis-cursos" && pathname.startsWith(item.href + "/"));
+          const activo = isRouteActive(pathname, item.href, item.exact);
           const Icono = item.icono;
           return (
             <Link
@@ -45,13 +51,29 @@ export function ShellPanel({ rol, nombre, children }: ShellPanelProps) {
               href={item.href}
               onClick={() => setAbierto(false)}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg border border-transparent px-3 py-2 text-sm font-medium",
+                "transition-[background-color,border-color,color,box-shadow] duration-200",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cun-green",
+                "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 activo
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                  ? [
+                      "border-cun-green/70",
+                      "bg-cun-blue",
+                      "text-white",
+                      "shadow-[0_0_14px_rgba(145,220,0,0.24)]",
+                      "dark:border-cun-green/80",
+                      "dark:bg-gradient-to-r dark:from-cun-green dark:via-[#74AF13] dark:to-[#36591e]",
+                      "dark:text-white",
+                      "dark:shadow-[0_0_14px_rgba(145,220,0,0.28)]",
+                    ]
+                  : [
+                      "text-muted-foreground",
+                      "hover:bg-muted",
+                      "hover:text-foreground",
+                    ],
               )}
             >
-              <Icono className="h-4 w-4" />
+              <Icono className="size-5 shrink-0 text-current" aria-hidden="true" />
               {item.titulo}
             </Link>
           );
@@ -59,7 +81,8 @@ export function ShellPanel({ rol, nombre, children }: ShellPanelProps) {
       </nav>
 
       <div className="border-t border-border pt-3">
-        <p className="truncate px-3 pb-2 text-xs text-muted-foreground">
+        <p className="flex items-center gap-2 truncate px-3 pb-2 text-xs text-muted-foreground">
+          <UserRound className="size-4 shrink-0" aria-hidden="true" />
           {nombre ?? "Usuario"}
         </p>
         <CerrarSesion />
@@ -68,7 +91,7 @@ export function ShellPanel({ rol, nombre, children }: ShellPanelProps) {
   );
 
   return (
-    <div className="min-h-screen bg-background lg:grid lg:grid-cols-[16rem_1fr]">
+    <div className="min-h-screen bg-transparent lg:grid lg:grid-cols-[16rem_1fr]">
       {/* Barra lateral fija en escritorio */}
       <aside className="hidden border-r border-border bg-card lg:flex lg:flex-col lg:p-4">
         {contenidoNav}

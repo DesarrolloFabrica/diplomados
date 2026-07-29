@@ -82,6 +82,7 @@ export function TablaCursos({ cursos, empresas }: TablaCursosProps) {
                   <PortadaMiniatura
                     url={curso.imagenPortadaUrl}
                     esDiplomado={curso.esDiplomado}
+                    titulo={curso.titulo}
                   />
                 </TableCell>
                 <TableCell className="font-medium">{curso.titulo}</TableCell>
