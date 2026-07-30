@@ -74,85 +74,92 @@ export function RutaAprendizaje({
                 ))}
               </div>
 
-              {/* Escritorio: zigzag dentro de una columna central reservada. */}
-              <div className="hidden w-full lg:block">
+              {/* Escritorio: zigzag; el texto se ancla al nodo (~24px). */}
+              <div className="relative mx-auto hidden w-full max-w-[760px] lg:block">
                 {grupo.nodos.map((nodo, indice) => {
                   const columnas = [0, 1, 2, 1] as const;
-                  const posiciones = [40, 180, 320] as const;
+                  // Márgenes laterales para texto a ~24px del nodo sin recorte.
+                  const posiciones = [300, 380, 460] as const;
+                  const anchoTrack = 760;
                   const columna = columnas[indice % columnas.length] ?? 0;
                   const siguienteColumna = columnas[(indice + 1) % columnas.length] ?? 0;
                   const textoALaIzquierda =
                     columna === 0 || (columna === 1 && indice % columnas.length === 3);
+                  const leftPct = (posiciones[columna] / anchoTrack) * 100;
+                  const gapNodoTexto = 24;
 
                   return (
-                    <div
-                      key={nodo.id}
-                      className="grid min-h-36 w-full grid-cols-[minmax(220px,320px)_minmax(300px,360px)_minmax(220px,320px)] items-center justify-center gap-x-6"
-                    >
-                      <div className="min-w-0 justify-self-end">
-                        {textoALaIzquierda && (
-                          <EtiquetaNodo nodo={nodo} alineacion="right" />
-                        )}
-                      </div>
-
-                      <div className="relative h-36 w-full">
-                        {nodo.id !== ultimoNodoGrupo && (
-                          <svg
-                            aria-hidden="true"
-                            className="pointer-events-none absolute left-0 top-1/2 z-0 h-36 w-full overflow-visible"
-                            viewBox="0 0 360 144"
-                            preserveAspectRatio="none"
-                          >
-                            <defs>
-                              <linearGradient
-                                id="roadmap-completed"
-                                x1="0"
-                                y1="0"
-                                x2="0"
-                                y2="1"
-                              >
-                                <stop offset="0%" stopColor="#43d5b1" />
-                                <stop offset="55%" stopColor="#7ef0d0" />
-                                <stop offset="100%" stopColor="#a6f5e1" />
-                              </linearGradient>
-                              <linearGradient
-                                id="roadmap-pending"
-                                x1="0"
-                                y1="0"
-                                x2="0"
-                                y2="1"
-                              >
-                                <stop offset="0%" stopColor="#d7e6e3" />
-                                <stop offset="100%" stopColor="#c8d9d6" />
-                              </linearGradient>
-                            </defs>
-                            <line
-                              x1={posiciones[columna]}
-                              y1="0"
-                              x2={posiciones[siguienteColumna]}
-                              y2="144"
-                              className={cn(
-                                "roadmap-connector-svg",
-                                nodo.completado
-                                  ? "roadmap-connector-svg-completed"
-                                  : "roadmap-connector-svg-pending",
-                              )}
-                            />
-                          </svg>
-                        )}
-
-                        <div
-                          className="absolute top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
-                          style={{ left: `${(posiciones[columna] / 360) * 100}%` }}
+                    <div key={nodo.id} className="relative h-36 w-full">
+                      {nodo.id !== ultimoNodoGrupo && (
+                        <svg
+                          aria-hidden="true"
+                          className="pointer-events-none absolute left-0 top-1/2 z-0 h-36 w-full overflow-visible"
+                          viewBox={`0 0 ${anchoTrack} 144`}
+                          preserveAspectRatio="none"
                         >
-                          <NodoEnlace nodo={nodo} soloIcono />
-                        </div>
+                          <defs>
+                            <linearGradient
+                              id="roadmap-completed"
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop offset="0%" stopColor="#43d5b1" />
+                              <stop offset="55%" stopColor="#7ef0d0" />
+                              <stop offset="100%" stopColor="#a6f5e1" />
+                            </linearGradient>
+                            <linearGradient
+                              id="roadmap-pending"
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop offset="0%" stopColor="#d7e6e3" />
+                              <stop offset="100%" stopColor="#c8d9d6" />
+                            </linearGradient>
+                          </defs>
+                          <line
+                            x1={posiciones[columna]}
+                            y1="0"
+                            x2={posiciones[siguienteColumna]}
+                            y2="144"
+                            className={cn(
+                              "roadmap-connector-svg",
+                              nodo.completado
+                                ? "roadmap-connector-svg-completed"
+                                : "roadmap-connector-svg-pending",
+                            )}
+                          />
+                        </svg>
+                      )}
+
+                      <div
+                        className="absolute top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
+                        style={{ left: `${leftPct}%` }}
+                      >
+                        <NodoEnlace nodo={nodo} soloIcono />
                       </div>
 
-                      <div className="min-w-0 justify-self-start">
-                        {!textoALaIzquierda && (
-                          <EtiquetaNodo nodo={nodo} alineacion="left" />
-                        )}
+                      <div
+                        className="absolute top-1/2 z-10 w-[min(240px,34%)]"
+                        style={
+                          textoALaIzquierda
+                            ? {
+                                left: `calc(${leftPct}% - ${NODO / 2 + gapNodoTexto}px)`,
+                                transform: "translate(-100%, -50%)",
+                              }
+                            : {
+                                left: `calc(${leftPct}% + ${NODO / 2 + gapNodoTexto}px)`,
+                                transform: "translateY(-50%)",
+                              }
+                        }
+                      >
+                        <EtiquetaNodo
+                          nodo={nodo}
+                          alineacion={textoALaIzquierda ? "right" : "left"}
+                        />
                       </div>
                     </div>
                   );
