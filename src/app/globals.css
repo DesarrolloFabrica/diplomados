@@ -352,3 +352,23 @@
     transition: none;
   }
 }
+
+/* Vista de lección — acentos premium sutiles */
+@layer components {
+  html.light .lesson-view {
+    background: #f7f9fb;
+  }
+
+  html.light .lesson-segmented {
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(6, 17, 32, 0.06), 0 8px 24px rgba(6, 17, 32, 0.04);
+  }
+
+  html.light .lesson-content-surface {
+    background: #ffffff;
+  }
+
+  html.light .lesson-outline {
+    background: rgba(255, 255, 255, 0.72);
+  }
+}

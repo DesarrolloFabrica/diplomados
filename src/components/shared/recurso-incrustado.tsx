@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { obtenerEmbedYoutube, obtenerEmbedGoogleDrive } from "@/lib/media";
 import { ImagenRecurso } from "@/components/shared/imagen-recurso";
+import { ReproductorPodcast } from "@/components/shared/reproductor-podcast";
 import type { TipoRecurso } from "@/lib/db/schema";
 
 interface RecursoIncrustadoProps {
@@ -34,7 +35,7 @@ const ICONO_DESCARGA: Record<TipoRecurso, typeof FileText> = {
 export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps) {
   if (!url) {
     return (
-      <div className="rounded-lg border border-dashed border-border bg-card p-4 text-sm text-muted-foreground">
+      <div className="rounded-xl border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground">
         {nombre} — no disponible
       </div>
     );
@@ -47,11 +48,11 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
   const embedDrive = obtenerEmbedGoogleDrive(url);
   if (embedDrive) {
     return (
-      <div className="space-y-1.5">
-        <p className="text-sm font-medium">{nombre}</p>
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-foreground">{nombre}</p>
         <div
-          className={`w-full overflow-hidden rounded-lg border border-border bg-muted ${
-            tipo === "video" ? "aspect-video" : "h-[70vh] max-h-[600px]"
+          className={`lesson-media w-full overflow-hidden rounded-2xl border border-border/70 bg-muted shadow-[0_8px_30px_rgba(6,17,32,0.06)] ring-1 ring-emerald-500/10 ${
+            tipo === "video" ? "aspect-video" : "h-[70vh] max-h-[640px]"
           }`}
         >
           <iframe src={embedDrive} title={nombre} className="h-full w-full" allow="autoplay" />
@@ -63,9 +64,9 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
   if (tipo === "video") {
     const embedYoutube = obtenerEmbedYoutube(url);
     return (
-      <div className="space-y-1.5">
-        <p className="text-sm font-medium">{nombre}</p>
-        <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-foreground">{nombre}</p>
+        <div className="lesson-media aspect-video w-full overflow-hidden rounded-2xl border border-border/70 bg-black shadow-[0_8px_30px_rgba(6,17,32,0.08)] ring-1 ring-emerald-500/15">
           {embedYoutube ? (
             <iframe
               src={embedYoutube}
@@ -84,37 +85,63 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
   }
 
   if (tipo === "audio") {
-    return (
-      <div className="space-y-1.5 rounded-lg border border-border bg-card p-4">
-        <p className="text-sm font-medium">{nombre}</p>
-        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-        <audio controls src={url} className="w-full" />
-      </div>
-    );
+    return <ReproductorPodcast nombre={nombre} url={url} />;
   }
 
   if (tipo === "imagen") {
     return (
-      <div className="space-y-1.5">
-        <p className="text-sm font-medium">{nombre}</p>
-        <ImagenRecurso url={url} nombre={nombre} />
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-foreground">{nombre}</p>
+        <div className="overflow-hidden rounded-2xl border border-border/70 bg-card p-2 shadow-sm ring-1 ring-emerald-500/10">
+          <ImagenRecurso url={url} nombre={nombre} />
+        </div>
+      </div>
+    );
+  }
+
+  if (tipo === "presentacion") {
+    const Icono = ICONO_DESCARGA.presentacion;
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 rounded-t-2xl border border-b-0 border-border/70 bg-muted/40 px-4 py-2.5">
+          <Icono className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
+          <span className="text-sm font-medium text-foreground">{nombre}</span>
+        </div>
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center justify-between rounded-b-2xl border border-border/70 bg-card p-4 shadow-sm transition-colors hover:border-emerald-500/40 hover:bg-emerald-50/40 dark:hover:bg-emerald-500/5"
+        >
+          <div className="flex items-center gap-2">
+            <Icono className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Abrir presentación</span>
+          </div>
+          <Download className="h-4 w-4 text-muted-foreground" />
+        </a>
       </div>
     );
   }
 
   const Icono = ICONO_DESCARGA[tipo];
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noreferrer"
-      className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary"
-    >
-      <div className="flex items-center gap-2">
-        <Icono className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-medium">{nombre}</span>
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 rounded-t-2xl border border-b-0 border-border/70 bg-muted/40 px-4 py-2.5">
+        <Icono className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
+        <span className="text-sm font-medium text-foreground">{nombre}</span>
       </div>
-      <Download className="h-4 w-4 text-muted-foreground" />
-    </a>
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="flex items-center justify-between rounded-b-2xl border border-border/70 bg-card p-4 shadow-sm transition-colors hover:border-emerald-500/40 hover:bg-emerald-50/40 dark:hover:bg-emerald-500/5"
+      >
+        <div className="flex items-center gap-2">
+          <Icono className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Abrir documento</span>
+        </div>
+        <Download className="h-4 w-4 text-muted-foreground" />
+      </a>
+    </div>
   );
 }
