@@ -1,5 +1,5 @@
 # Aprovisiona la infraestructura de GCP para plataforma-formacion y deja
-# lista la integracion con GitHub Actions (Workload Identity Federation).
+# lista la integracion con GitHub Actions vía Service Account (JSON key).
 #
 # Ejecutar una sola vez, autenticado con una cuenta que tenga rol Owner o
 # Editor + Security Admin sobre el proyecto:
@@ -31,9 +31,7 @@ $SERVICE       = "plataforma-formacion"
 $RUNTIME_SA_NAME = "plataforma-formacion-run"
 $DEPLOY_SA_NAME   = "plataforma-formacion-deploy"
 $GCS_BUCKET    = "$PROJECT_ID-plataforma-formacion"
-$GITHUB_REPO   = "haiderbellocun/diplomados"
-$WIF_POOL      = "github-pool"
-$WIF_PROVIDER  = "github-provider"
+$KEY_FILE      = Join-Path $PSScriptRoot "github-actions-sa-key.json"
 
 $RUNTIME_SA = "$RUNTIME_SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
 $DEPLOY_SA  = "$DEPLOY_SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
@@ -48,8 +46,7 @@ gcloud services enable `
   secretmanager.googleapis.com `
   artifactregistry.googleapis.com `
   storage.googleapis.com `
-  iamcredentials.googleapis.com `
-  sts.googleapis.com
+  iam.googleapis.com
 Assert-GCloudOk "services enable"
 
 Write-Output "== 2. Artifact Registry =="
@@ -115,7 +112,7 @@ if ($LASTEXITCODE -ne 0) {
 "CAMBIAR_POR_TU_SENDGRID_API_KEY" | gcloud secrets create sendgrid-api-key --data-file=-
 # Ignore "already exists"
 
-Write-Output "== 7. Workload Identity Federation para GitHub Actions =="
+Write-Output "== 7. Service account de deploy (GitHub Actions) =="
 gcloud iam service-accounts create $DEPLOY_SA_NAME --display-name="GitHub Actions (deploy plataforma-formacion)"
 # Ignore "already exists"
 
@@ -123,33 +120,15 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$DEP
 Assert-GCloudOk "iam run.admin"
 gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$DEPLOY_SA" --role="roles/artifactregistry.writer" --condition=None | Out-Null
 Assert-GCloudOk "iam artifactregistry.writer"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$DEPLOY_SA" --role="roles/secretmanager.secretAccessor" --condition=None | Out-Null
+Assert-GCloudOk "iam secretmanager.secretAccessor (deploy)"
 gcloud iam service-accounts add-iam-policy-binding $RUNTIME_SA --member="serviceAccount:$DEPLOY_SA" --role="roles/iam.serviceAccountUser" | Out-Null
 Assert-GCloudOk "iam serviceAccountUser"
 
-gcloud iam workload-identity-pools create $WIF_POOL --location=global --display-name="GitHub Actions"
-# Ignore "already exists"
-
-gcloud iam workload-identity-pools providers create-oidc $WIF_PROVIDER `
-  --location=global `
-  --workload-identity-pool=$WIF_POOL `
-  --display-name="GitHub" `
-  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" `
-  --attribute-condition="assertion.repository == '$GITHUB_REPO'" `
-  --issuer-uri="https://token.actions.githubusercontent.com"
-# Ignore "already exists"
-
-$PROJECT_NUMBER = (gcloud projects describe $PROJECT_ID --format="value(projectNumber)").Trim()
-Assert-GCloudOk "projects describe"
-if ([string]::IsNullOrWhiteSpace($PROJECT_NUMBER)) {
-  throw "No se pudo obtener el projectNumber"
-}
-
-gcloud iam service-accounts add-iam-policy-binding $DEPLOY_SA `
-  --role="roles/iam.workloadIdentityUser" `
-  --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/$WIF_POOL/attribute.repository/$GITHUB_REPO" | Out-Null
-Assert-GCloudOk "iam workloadIdentityUser"
-
-$WIF_PROVIDER_FULL = "projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/$WIF_POOL/providers/$WIF_PROVIDER"
+Write-Output "== 8. Generando JSON key de la SA de deploy =="
+if (Test-Path $KEY_FILE) { Remove-Item $KEY_FILE -Force }
+gcloud iam service-accounts keys create $KEY_FILE --iam-account=$DEPLOY_SA
+Assert-GCloudOk "service-accounts keys create"
 
 Write-Output ""
 Write-Output "===================================================================="
@@ -157,8 +136,7 @@ Write-Output "Aprovisionamiento listo. Carga esto en GitHub (Settings > Secrets 
 Write-Output "variables > Actions):"
 Write-Output ""
 Write-Output "Secrets:"
-Write-Output "  WIF_PROVIDER        = $WIF_PROVIDER_FULL"
-Write-Output "  WIF_SERVICE_ACCOUNT = $DEPLOY_SA"
+Write-Output "  GCP_SA_KEY = (pega el contenido completo de $KEY_FILE)"
 Write-Output ""
 Write-Output "Variables:"
 Write-Output "  RUNTIME_SERVICE_ACCOUNT = $RUNTIME_SA"
@@ -166,6 +144,9 @@ Write-Output "  INSTANCE_CONNECTION_NAME = ${PROJECT_ID}:${REGION}:${INSTANCE}"
 Write-Output "  GCS_BUCKET = $GCS_BUCKET"
 Write-Output "  DB_NAME = $DB_NAME"
 Write-Output "  NEXT_PUBLIC_SITE_URL = (la URL de Cloud Run, se conoce tras el primer deploy)"
+Write-Output ""
+Write-Output "IMPORTANTE: tras cargar GCP_SA_KEY en GitHub, BORRA el archivo local:"
+Write-Output "  Remove-Item '$KEY_FILE'"
 Write-Output ""
 Write-Output "Password del rol 'postgres' (guardalo en un gestor de secretos, lo necesitas"
 Write-Output "para correr 'npm run db:migrate' contra Cloud SQL vía MIGRATIONS_DATABASE_URL):"

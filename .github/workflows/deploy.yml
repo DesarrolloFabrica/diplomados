@@ -6,7 +6,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write # requerido por Workload Identity Federation
 
 env:
   PROJECT_ID: it-fab-contenido-edu-4
@@ -24,8 +23,7 @@ jobs:
       - id: auth
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - uses: google-github-actions/setup-gcloud@v2
 
