@@ -44,7 +44,7 @@ jobs:
             --project="$PROJECT_ID" \
             --image="$IMAGE" \
             --region="$REGION" \
-            --service-account="${{ vars.RUNTIME_SERVICE_ACCOUNT }}" \
+            --service-account="203821029278-compute@developer.gserviceaccount.com" \
             --add-cloudsql-instances="${{ vars.INSTANCE_CONNECTION_NAME }}" \
             --set-env-vars="INSTANCE_CONNECTION_NAME=${{ vars.INSTANCE_CONNECTION_NAME }},DB_USER=app_user,DB_NAME=${{ vars.DB_NAME }},GCS_BUCKET=${{ vars.GCS_BUCKET }},NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}" \
             --set-secrets="DB_PASSWORD=db-password:latest,JWT_SECRET=jwt-secret:latest,SENDGRID_API_KEY=sendgrid-api-key:latest" \
