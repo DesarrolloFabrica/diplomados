@@ -46,60 +46,19 @@ npm run db:studio   # explorador visual de datos (Drizzle Studio)
 
 ## 3. Aprovisionar la infraestructura en GCP
 
-Estos comandos los ejecutas tú (no se corrieron automáticamente). Ajusta
-`PROJECT_ID`, `REGION` e `INSTANCE` a tu gusto.
+Todo el aprovisionamiento (APIs, Cloud SQL, Artifact Registry, bucket y service
+accounts para GitHub Actions) está en
+[`infra/provision-gcp.ps1`](infra/provision-gcp.ps1). Es un script de un solo
+uso: se ejecuta una vez, no como parte del CI.
 
-```bash
-export PROJECT_ID=tu-proyecto-gcp
-export REGION=southamerica-west1        # Santiago; usa la región que prefieras
-export INSTANCE=plataforma-formacion-db
-export DB_NAME=plataforma_formacion
-
-gcloud config set project "$PROJECT_ID"
-
-# 3.1 Habilitar APIs
-gcloud services enable \
-  sqladmin.googleapis.com \
-  run.googleapis.com \
-  secretmanager.googleapis.com \
-  artifactregistry.googleapis.com \
-  cloudbuild.googleapis.com \
-  storage.googleapis.com
-
-# 3.2 Cloud SQL for PostgreSQL (arranca en el tier más chico; súbelo si hace falta)
-gcloud sql instances create "$INSTANCE" \
-  --database-version=POSTGRES_16 \
-  --region="$REGION" \
-  --tier=db-f1-micro \
-  --storage-auto-increase
-
-gcloud sql databases create "$DB_NAME" --instance="$INSTANCE"
-
-# Contraseña del usuario admin (el que usa MIGRATIONS_DATABASE_URL)
-gcloud sql users set-password postgres \
-  --instance="$INSTANCE" \
-  --password="$(openssl rand -base64 24)"   # guarda este valor
-
-# 3.3 Bucket privado en Cloud Storage
-gsutil mb -l "$REGION" -b on "gs://${PROJECT_ID}-plataforma-formacion"
-
-# 3.4 Cuenta de servicio para Cloud Run
-gcloud iam service-accounts create plataforma-formacion-run \
-  --display-name="Plataforma Formación (Cloud Run)"
-
-export SA="plataforma-formacion-run@${PROJECT_ID}.iam.gserviceaccount.com"
-
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-  --member="serviceAccount:${SA}" --role="roles/cloudsql.client"
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-  --member="serviceAccount:${SA}" --role="roles/secretmanager.secretAccessor"
-gsutil iam ch "serviceAccount:${SA}:roles/storage.objectAdmin" \
-  "gs://${PROJECT_ID}-plataforma-formacion"
-
-# 3.5 Artifact Registry para la imagen Docker
-gcloud artifacts repositories create plataforma-formacion \
-  --repository-format=docker --location="$REGION"
+```powershell
+gcloud auth login
+./infra/provision-gcp.ps1
 ```
+
+Al final imprime los Secrets/Variables que debes cargar en GitHub (ver sección
+8) y los pasos manuales pendientes (API key de SendGrid, password de
+`app_user` tras migrar).
 
 ## 4. Aplicar las migraciones
 
@@ -176,30 +135,44 @@ values (
 
 Intentar entrar a un panel que no te corresponde te devuelve al tuyo.
 
-## 8. Build y despliegue en Cloud Run
+## 8. Despliegue: CI/CD con GitHub Actions
+
+`main` es la rama de producción: **no se le hace push directo**, solo se
+actualiza mezclando Pull Requests (branch protection activada, ver más
+abajo). Cada vez que un PR se mezcla a `main`, el workflow
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) construye la
+imagen, la sube a Artifact Registry y despliega a Cloud Run automáticamente.
+Los PRs contra `main` corren primero
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) (lint, typecheck,
+build) como chequeo obligatorio.
+
+El desarrollo del día a día ocurre en ramas de feature (o en `Cambios`), que
+se abren como PR hacia `main` cuando están listas para producción.
+
+Autenticación de GitHub Actions contra GCP: Service Account con JSON key,
+generada por [`infra/provision-gcp.ps1`](infra/provision-gcp.ps1). Ese script
+imprime los Secrets y Variables que hay que cargar en **Settings → Secrets and
+variables → Actions** del repo:
+
+**Secrets:**
+- `GCP_SA_KEY` (contenido completo del JSON de la SA de deploy)
+
+**Variables:**
+- `RUNTIME_SERVICE_ACCOUNT`
+- `INSTANCE_CONNECTION_NAME`
+- `GCS_BUCKET`
+- `DB_NAME`
+- `NEXT_PUBLIC_SITE_URL` (se conoce tras el primer deploy; actualízala después)
+
+Tras cargar `GCP_SA_KEY` en GitHub, borra el archivo JSON local para no dejar
+credenciales en disco.
+
+Para desplegar manualmente sin pasar por CI (solo depuración puntual):
 
 ```bash
 export IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/plataforma-formacion/app:latest"
-
 gcloud builds submit --tag "$IMAGE"
-
-gcloud run deploy plataforma-formacion \
-  --image="$IMAGE" \
-  --region="$REGION" \
-  --service-account="$SA" \
-  --add-cloudsql-instances="${PROJECT_ID}:${REGION}:${INSTANCE}" \
-  --set-env-vars="INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:${INSTANCE},DB_USER=app_user,DB_NAME=${DB_NAME},GCS_BUCKET=${PROJECT_ID}-plataforma-formacion,NEXT_PUBLIC_SITE_URL=https://TU-URL-DE-CLOUD-RUN" \
-  --set-secrets="DB_PASSWORD=db-password:latest,JWT_SECRET=jwt-secret:latest,SENDGRID_API_KEY=sendgrid-api-key:latest" \
-  --allow-unauthenticated
-```
-
-Antes de este paso, sube los secretos referenciados (`--set-secrets`) a
-Secret Manager:
-
-```bash
-echo -n "TU_PASSWORD_DE_APP_USER" | gcloud secrets create db-password --data-file=-
-echo -n "TU_JWT_SECRET" | gcloud secrets create jwt-secret --data-file=-
-echo -n "TU_SENDGRID_API_KEY" | gcloud secrets create sendgrid-api-key --data-file=-
+gcloud run deploy plataforma-formacion --image="$IMAGE" --region="$REGION"
 ```
 
 ---
