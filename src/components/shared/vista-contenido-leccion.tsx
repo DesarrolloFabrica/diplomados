@@ -12,6 +12,12 @@ import {
 import { cn } from "@/lib/utils";
 import { RecursoIncrustado } from "@/components/shared/recurso-incrustado";
 import type { TipoRecurso } from "@/lib/db/schema";
+import {
+  ETIQUETA_TAB,
+  ORDEN_TABS,
+  tabDeTipo,
+  type TabContenido,
+} from "@/lib/contenido-leccion";
 
 export interface RecursoVista {
   id: string;
@@ -20,45 +26,19 @@ export interface RecursoVista {
   url: string | null;
 }
 
-type TabContenido =
-  | "video"
-  | "podcast"
-  | "documento"
-  | "infografia"
-  | "presentacion";
+const ICONOS_TAB: Record<TabContenido, LucideIcon> = {
+  video: Video,
+  podcast: AudioLines,
+  documento: FileText,
+  infografia: ChartNoAxesCombined,
+  presentacion: Presentation,
+};
 
-const TABS: {
-  id: TabContenido;
-  etiqueta: string;
-  Icono: LucideIcon;
-}[] = [
-  { id: "video", etiqueta: "Video", Icono: Video },
-  { id: "podcast", etiqueta: "Pódcast", Icono: AudioLines },
-  { id: "documento", etiqueta: "Documento", Icono: FileText },
-  { id: "infografia", etiqueta: "Infografía", Icono: ChartNoAxesCombined },
-  { id: "presentacion", etiqueta: "Presentación", Icono: Presentation },
-];
-
-function tabDeTipo(tipo: TipoRecurso): TabContenido {
-  switch (tipo) {
-    case "video":
-      return "video";
-    case "audio":
-      return "podcast";
-    case "imagen":
-      return "infografia";
-    case "presentacion":
-      return "presentacion";
-    case "pdf":
-    case "enlace":
-    case "archivo":
-      return "documento";
-    default: {
-      const _exhaustive: never = tipo;
-      return _exhaustive;
-    }
-  }
-}
+const TABS = ORDEN_TABS.map((id) => ({
+  id,
+  etiqueta: ETIQUETA_TAB[id],
+  Icono: ICONOS_TAB[id],
+}));
 
 interface VistaContenidoLeccionProps {
   recursos: RecursoVista[];

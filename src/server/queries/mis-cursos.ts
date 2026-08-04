@@ -2,7 +2,9 @@ import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import { conSesion } from "@/lib/db";
 import {
   cursos,
+  empresas,
   inscripciones,
+  profiles,
   unidades,
   lecciones,
   progresoLecciones,
@@ -207,5 +209,37 @@ export async function listarEvaluacionesConEstado(
       });
     }
     return resultado;
+  });
+}
+
+export interface PerfilColaboradorFila {
+  nombreCompleto: string;
+  email: string;
+  cargo: string | null;
+  area: string | null;
+  activo: boolean;
+  createdAt: Date;
+  empresaNombre: string | null;
+}
+
+export async function obtenerPerfilColaborador(
+  usuarioId: string,
+): Promise<PerfilColaboradorFila | null> {
+  return conSesion(usuarioId, async (tx) => {
+    const [fila] = await tx
+      .select({
+        nombreCompleto: profiles.nombreCompleto,
+        email: profiles.email,
+        cargo: profiles.cargo,
+        area: profiles.area,
+        activo: profiles.activo,
+        createdAt: profiles.createdAt,
+        empresaNombre: empresas.nombre,
+      })
+      .from(profiles)
+      .leftJoin(empresas, eq(profiles.empresaId, empresas.id))
+      .where(and(eq(profiles.id, usuarioId), isNull(profiles.deletedAt)))
+      .limit(1);
+    return fila ?? null;
   });
 }

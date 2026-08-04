@@ -182,12 +182,30 @@
 
   .roadmap-section {
     position: relative;
-    min-height: 100%;
-    overflow: hidden;
   }
 
-  html.light .roadmap-section {
-    background: #f7fafa;
+  html.light .roadmap-background {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--background)) 0%,
+      #f4f9f9 5%,
+      #eaf7f5 20%,
+      #eaf1f8 42%,
+      #f2eefa 65%,
+      #e8f5f2 84%,
+      #f8fbfc 100%
+    );
+  }
+
+  html.dark .roadmap-background {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--background)) 0%,
+      #0b1b2b 12%,
+      #10263a 48%,
+      #14233d 72%,
+      #061120 100%
+    );
   }
 
   html.light .roadmap-dots {
@@ -230,10 +248,33 @@
     opacity: 1;
   }
 
-  html.dark .roadmap-dots,
-  html.dark .roadmap-shapes,
+  html.dark .roadmap-dots {
+    background-image: radial-gradient(
+      circle,
+      rgba(120, 150, 170, 0.14) 1.2px,
+      transparent 1.3px
+    );
+    background-size: 18px 18px;
+    opacity: 0.55;
+  }
+
+  html.dark .roadmap-shapes {
+    background:
+      radial-gradient(
+        circle at 6% 82%,
+        rgba(40, 70, 100, 0.18) 0%,
+        transparent 34%
+      ),
+      radial-gradient(
+        circle at 94% 14%,
+        rgba(35, 65, 95, 0.16) 0%,
+        transparent 38%
+      );
+    opacity: 0.7;
+  }
+
   html.dark .roadmap-vectors {
-    display: none;
+    opacity: 0.35;
   }
 
   .roadmap-connector-svg {
@@ -244,17 +285,20 @@
   }
 
   html.light .roadmap-connector-svg-completed {
-    stroke: url("#roadmap-completed");
-    filter: drop-shadow(0 0 4px rgba(67, 213, 177, 0.4));
+    filter:
+      drop-shadow(0 0 4px rgba(67, 213, 177, 0.4))
+      drop-shadow(0 0 10px rgba(23, 184, 212, 0.35));
   }
 
   html.light .roadmap-connector-svg-pending {
-    stroke: url("#roadmap-pending");
+    filter: none;
   }
 
-  html.dark .roadmap-connector-svg {
-    stroke: hsl(var(--border));
-    stroke-width: 6px;
+  html.dark .roadmap-connector-svg-completed {
+    filter: drop-shadow(0 0 5px rgba(47, 185, 165, 0.35));
+  }
+
+  html.dark .roadmap-connector-svg-pending {
     filter: none;
   }
 
@@ -337,7 +381,7 @@
   }
 }
 
-@media (min-width: 641px) and (max-width: 1024px) {
+@media (min-width: 641px) and (max-width: 1023px) {
   html.light .roadmap-vectors {
     opacity: 0.7;
   }
@@ -347,10 +391,79 @@
   }
 }
 
+@media (min-width: 1024px) {
+  html.light .roadmap-connector-svg {
+    stroke-width: 7px;
+  }
+
+  html.light .roadmap-connector-svg-completed {
+    filter:
+      drop-shadow(0 0 6px rgba(67, 213, 177, 0.45))
+      drop-shadow(0 0 14px rgba(126, 240, 208, 0.28));
+  }
+
+  .roadmap-pulse-ring {
+    opacity: 1;
+  }
+
+  .station-core {
+    transform: translateZ(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .roadmap-progress-fill {
     transition: none;
   }
+
+  .roadmap-pulse-ring {
+    animation: none !important;
+    opacity: 0.14;
+    transform: scale(1.12);
+  }
+}
+
+/* Estación activa del roadmap — ondas tipo sondeo */
+@keyframes roadmap-pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.22;
+  }
+  100% {
+    transform: scale(1.58);
+    opacity: 0;
+  }
+}
+
+.roadmap-pulse-ring {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  border-radius: 9999px;
+  border: 1px solid rgba(30, 93, 142, 0.22);
+  pointer-events: none;
+  animation: roadmap-pulse-ring 2.8s ease-out infinite;
+}
+
+.roadmap-pulse-ring-1 {
+  animation-delay: 0s;
+}
+
+.roadmap-pulse-ring-2 {
+  animation-delay: 0.95s;
+}
+
+.roadmap-pulse-ring-3 {
+  animation-delay: 1.9s;
+}
+
+.sidebar-scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar-scrollbar-hidden::-webkit-scrollbar {
+  display: none;
 }
 
 /* Vista de lección — acentos premium sutiles */

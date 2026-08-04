@@ -77,6 +77,7 @@ function HeroContinuar({ curso }: { curso: CursoCatalogoFila }) {
       className="group relative block h-56 w-full overflow-hidden rounded-2xl shadow-md"
     >
       <PortadaCurso
+        cursoId={curso.id}
         url={curso.imagenPortadaUrl}
         esDiplomado={curso.esDiplomado}
         titulo={curso.titulo}

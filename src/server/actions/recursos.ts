@@ -151,6 +151,62 @@ export async function agregarRecursoEnlace(
   return { ok: true };
 }
 
+export async function actualizarRecursoEnlace(
+  cursoId: string,
+  moduloId: string,
+  leccionId: string,
+  recursoId: string,
+  _prev: ResultadoAccion | null,
+  formData: FormData,
+): Promise<ResultadoAccion> {
+  const sesion = await requerirRol("superadmin", "instructor");
+
+  const parsed = recursoEnlaceSchema.safeParse({
+    nombre: formData.get("nombre"),
+    tipo: formData.get("tipo"),
+    urlExterna: formData.get("urlExterna"),
+  });
+  if (!parsed.success) {
+    return { ok: false, mensaje: parsed.error.issues[0]?.message ?? "Datos no válidos" };
+  }
+
+  const filas = await conSesion(sesion.id, async (tx) => {
+    const [existente] = await tx
+      .select({ id: recursos.id, urlExterna: recursos.urlExterna })
+      .from(recursos)
+      .where(
+        and(
+          eq(recursos.id, recursoId),
+          eq(recursos.leccionId, leccionId),
+          isNull(recursos.deletedAt),
+        ),
+      )
+      .limit(1);
+
+    if (!existente?.urlExterna) {
+      return [];
+    }
+
+    return tx
+      .update(recursos)
+      .set({
+        nombre: parsed.data.nombre,
+        tipo: parsed.data.tipo,
+        urlExterna: parsed.data.urlExterna,
+        updatedAt: new Date(),
+      })
+      .where(eq(recursos.id, recursoId))
+      .returning({ id: recursos.id });
+  });
+
+  if (!filas.length) {
+    return { ok: false, mensaje: "No se pudo editar el enlace." };
+  }
+
+  revalidatePath(`/instructor/cursos/${cursoId}/modulos/${moduloId}/lecciones/${leccionId}`);
+  return { ok: true };
+}
+
 export async function eliminarRecurso(
   cursoId: string,
   moduloId: string,

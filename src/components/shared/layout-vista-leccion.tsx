@@ -10,7 +10,8 @@ import {
 
 interface LayoutVistaLeccionProps {
   cursoId: string;
-  leccionActivaId: string;
+  leccionActivaId?: string;
+  evaluacionActivaId?: string;
   grupos: GrupoEsquema[];
   children: React.ReactNode;
 }
@@ -18,6 +19,7 @@ interface LayoutVistaLeccionProps {
 export function LayoutVistaLeccion({
   cursoId,
   leccionActivaId,
+  evaluacionActivaId,
   grupos,
   children,
 }: LayoutVistaLeccionProps) {
@@ -30,11 +32,11 @@ export function LayoutVistaLeccion({
   return (
     <div
       className={cn(
-        "mx-auto grid max-w-[1600px] grid-cols-1",
-        esquemaVisible && "xl:grid-cols-[minmax(0,1fr)_300px]",
+        "grid min-h-full w-full grid-cols-1",
+        esquemaVisible && "xl:grid-cols-[minmax(0,1fr)_320px]",
       )}
     >
-      <section className="relative px-5 py-6 sm:px-6 lg:px-10 lg:py-8">
+      <section className="relative min-w-0 px-5 py-6 sm:px-6 lg:px-10 lg:py-8">
         {!esquemaVisible && (
           <button
             type="button"
@@ -57,17 +59,21 @@ export function LayoutVistaLeccion({
       </section>
 
       {esquemaVisible && (
-        <div
+        <aside
           id="esquema-contenidos-panel"
-          className="border-t border-border xl:sticky xl:top-0 xl:h-[calc(100vh-4rem)] xl:border-t-0 xl:self-start"
+          className={cn(
+            "min-w-0 border-t border-border bg-card/60",
+            "xl:sticky xl:top-0 xl:h-[calc(100vh-4rem)] xl:self-start xl:border-l xl:border-t-0",
+          )}
         >
           <EsquemaContenidos
             cursoId={cursoId}
             leccionActivaId={leccionActivaId}
+            evaluacionActivaId={evaluacionActivaId}
             grupos={grupos}
             onCerrar={alternarEsquema}
           />
-        </div>
+        </aside>
       )}
     </div>
   );

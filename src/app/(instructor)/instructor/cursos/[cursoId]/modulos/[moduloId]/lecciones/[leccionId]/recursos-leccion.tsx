@@ -5,7 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, Link2, Upload, Trash2 } from "lucide-react";
+import { Loader2, Link2, Upload, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +34,7 @@ import {
 import { recursoEnlaceSchema, type RecursoEnlaceInput } from "@/lib/validators/recursos";
 import {
   agregarRecursoEnlace,
+  actualizarRecursoEnlace,
   solicitarUrlSubidaRecurso,
   agregarRecursoArchivo,
   eliminarRecurso,
@@ -77,6 +78,7 @@ export function RecursosLeccion({
   const router = useRouter();
   const [dialogoEnlace, setDialogoEnlace] = useState(false);
   const [dialogoArchivo, setDialogoArchivo] = useState(false);
+  const [recursoEditando, setRecursoEditando] = useState<RecursoFila | null>(null);
   const [, iniciar] = useTransition();
 
   function eliminar(recurso: RecursoFila) {
@@ -133,9 +135,26 @@ export function RecursosLeccion({
                   {recurso.urlExterna ? "Enlace externo" : "Archivo (Storage)"}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => eliminar(recurso)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex justify-end gap-1">
+                    {recurso.urlExterna && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Editar enlace ${recurso.nombre}`}
+                        onClick={() => setRecursoEditando(recurso)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Eliminar recurso ${recurso.nombre}`}
+                      onClick={() => eliminar(recurso)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -154,6 +173,28 @@ export function RecursosLeccion({
             leccionId={leccionId}
             onExito={() => setDialogoEnlace(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={recursoEditando !== null}
+        onOpenChange={(abierto) => {
+          if (!abierto) setRecursoEditando(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar enlace externo</DialogTitle>
+          </DialogHeader>
+          {recursoEditando && (
+            <FormularioEnlace
+              cursoId={cursoId}
+              moduloId={moduloId}
+              leccionId={leccionId}
+              recurso={recursoEditando}
+              onExito={() => setRecursoEditando(null)}
+            />
+          )}
         </DialogContent>
       </Dialog>
 
@@ -178,15 +219,18 @@ function FormularioEnlace({
   cursoId,
   moduloId,
   leccionId,
+  recurso,
   onExito,
 }: {
   cursoId: string;
   moduloId: string;
   leccionId: string;
+  recurso?: RecursoFila;
   onExito: () => void;
 }) {
   const router = useRouter();
   const [enviando, iniciar] = useTransition();
+  const esEdicion = Boolean(recurso);
   const {
     register,
     handleSubmit,
@@ -194,7 +238,11 @@ function FormularioEnlace({
     formState: { errors },
   } = useForm<RecursoEnlaceInput>({
     resolver: zodResolver(recursoEnlaceSchema),
-    defaultValues: { nombre: "", tipo: "enlace", urlExterna: "" },
+    defaultValues: {
+      nombre: recurso?.nombre ?? "",
+      tipo: recurso?.tipo ?? "enlace",
+      urlExterna: recurso?.urlExterna ?? "",
+    },
   });
 
   const onSubmit = (values: RecursoEnlaceInput) => {
@@ -204,12 +252,21 @@ function FormularioEnlace({
     datos.set("urlExterna", values.urlExterna);
 
     iniciar(async () => {
-      const res = await agregarRecursoEnlace(cursoId, moduloId, leccionId, null, datos);
+      const res = esEdicion
+        ? await actualizarRecursoEnlace(
+            cursoId,
+            moduloId,
+            leccionId,
+            recurso!.id,
+            null,
+            datos,
+          )
+        : await agregarRecursoEnlace(cursoId, moduloId, leccionId, null, datos);
       if (!res.ok) {
-        toast.error(res.mensaje ?? "No se pudo agregar");
+        toast.error(res.mensaje ?? (esEdicion ? "No se pudo editar" : "No se pudo agregar"));
         return;
       }
-      toast.success("Enlace agregado");
+      toast.success(esEdicion ? "Enlace actualizado" : "Enlace agregado");
       router.refresh();
       onExito();
     });
@@ -252,7 +309,7 @@ function FormularioEnlace({
       </div>
       <Button type="submit" className="w-full" disabled={enviando}>
         {enviando && <Loader2 className="animate-spin" />}
-        Agregar
+        {esEdicion ? "Guardar cambios" : "Agregar"}
       </Button>
     </form>
   );

@@ -110,7 +110,7 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
         <a
           href={url}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="flex items-center justify-between rounded-b-2xl border border-border/70 bg-card p-4 shadow-sm transition-colors hover:border-emerald-500/40 hover:bg-emerald-50/40 dark:hover:bg-emerald-500/5"
         >
           <div className="flex items-center gap-2">
@@ -133,7 +133,7 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
       <a
         href={url}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
         className="flex items-center justify-between rounded-b-2xl border border-border/70 bg-card p-4 shadow-sm transition-colors hover:border-emerald-500/40 hover:bg-emerald-50/40 dark:hover:bg-emerald-500/5"
       >
         <div className="flex items-center gap-2">
