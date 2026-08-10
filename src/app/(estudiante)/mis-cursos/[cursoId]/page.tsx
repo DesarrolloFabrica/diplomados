@@ -1,11 +1,6 @@
 import { notFound } from "next/navigation";
 import { requerirSesion } from "@/lib/auth/sesion";
-import { obtenerCurso, listarModulos } from "@/server/queries/cursos";
-import {
-  obtenerInscripcion,
-  listarLeccionesConProgreso,
-  listarEvaluacionesConEstado,
-} from "@/server/queries/mis-cursos";
+import { cargarVistaCursoColaborador } from "@/server/queries/mis-cursos";
 import { HeroCurso } from "@/components/shared/hero-curso";
 import { PortadaCurso } from "@/components/shared/portada-curso";
 import { EstadisticasCurso } from "@/components/shared/estadisticas-curso";
@@ -25,11 +20,10 @@ export default async function CursoColaboradorPage({ params }: CursoColaboradorP
   const { cursoId } = await params;
   const sesion = await requerirSesion();
 
-  const curso = await obtenerCurso(sesion.id, cursoId);
-  if (!curso) notFound();
+  const vista = await cargarVistaCursoColaborador(sesion.id, cursoId);
+  if (!vista) notFound();
 
-  const modulos = await listarModulos(sesion.id, cursoId);
-  const inscripcion = await obtenerInscripcion(sesion.id, cursoId);
+  const { curso, modulos, inscripcion, modulosConLecciones, evaluaciones } = vista;
 
   if (!inscripcion) {
     return (
@@ -59,14 +53,6 @@ export default async function CursoColaboradorPage({ params }: CursoColaboradorP
       </div>
     );
   }
-
-  const modulosConLecciones = await Promise.all(
-    modulos.map(async (modulo) => ({
-      ...modulo,
-      lecciones: await listarLeccionesConProgreso(sesion.id, modulo.id, inscripcion.id),
-    })),
-  );
-  const evaluaciones = await listarEvaluacionesConEstado(sesion.id, cursoId);
 
   // La navegación "obligatoria" bloquea un nodo hasta completar todos los
   // anteriores en la ruta (lecciones y evaluaciones, en orden). Con "libre"

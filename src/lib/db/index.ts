@@ -3,13 +3,46 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 import * as schema from "./schema";
 
-// En Cloud Run, al desplegar con `--add-cloudsql-instances`, Cloud SQL
-// queda disponible como socket unix en /cloudsql/<INSTANCE_CONNECTION_NAME>
-// (no hace falta librería adicional ni IP pública). En local se usa
-// DATABASE_URL normal, apuntando al Cloud SQL Auth Proxy o a un Postgres local.
+// En Cloud Run el secreto DATABASE_URL suele traer el socket unix
+// (`?host=/cloudsql/<INSTANCE>`). En local se usa DATABASE_URL con TCP
+// (IP autorizada o Auth Proxy). INSTANCE_CONNECTION_NAME solo se usa
+// como fallback legacy cuando no hay DATABASE_URL.
 function crearPool() {
-  const instanceConnectionName = process.env.INSTANCE_CONNECTION_NAME;
+  if (process.env.DATABASE_URL) {
+    const raw = process.env.DATABASE_URL;
+    const esSocketUnix = raw.includes("/cloudsql/");
 
+    // Socket de Cloud Run: sin tocar SSL.
+    if (esSocketUnix) {
+      return new Pool({ connectionString: raw, max: 10 });
+    }
+
+    // En pg reciente, sslmode=require se trata como verify-full y rompe
+    // con inspección SSL corporativa / CA de Cloud SQL. Quitamos sslmode
+    // y controlamos SSL a mano.
+    const sinSslMode = raw
+      .replace(/([?&])sslmode=[^&]*/gi, "$1")
+      .replace(/[?&]$/, "")
+      .replace(/\?&/, "?")
+      .replace(/\?$/, "");
+
+    const hostLocal =
+      /@localhost[:/]/i.test(raw) || /@127\.0\.0\.1[:/]/i.test(raw);
+    const pedíaSsl = /[?&]sslmode=/i.test(raw);
+
+    return new Pool({
+      connectionString: sinSslMode,
+      max: 10,
+      keepAlive: true,
+      idleTimeoutMillis: 60_000,
+      connectionTimeoutMillis: 15_000,
+      ...(!hostLocal || pedíaSsl
+        ? { ssl: { rejectUnauthorized: false } }
+        : {}),
+    });
+  }
+
+  const instanceConnectionName = process.env.INSTANCE_CONNECTION_NAME;
   if (instanceConnectionName) {
     return new Pool({
       host: `/cloudsql/${instanceConnectionName}`,
@@ -20,7 +53,7 @@ function crearPool() {
     });
   }
 
-  return new Pool({ connectionString: process.env.DATABASE_URL, max: 10 });
+  throw new Error("Falta DATABASE_URL (o INSTANCE_CONNECTION_NAME + DB_*).");
 }
 
 export const pool = crearPool();

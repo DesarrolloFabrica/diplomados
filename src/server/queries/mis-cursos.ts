@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { conSesion } from "@/lib/db";
 import {
   cursos,
@@ -10,7 +10,9 @@ import {
   progresoLecciones,
   evaluaciones,
   intentosEvaluacion,
+  modulos,
 } from "@/lib/db/schema";
+import type { CursoDetalle, ModuloFila } from "@/server/queries/cursos";
 
 export interface CursoCatalogoFila {
   id: string;
@@ -164,51 +166,190 @@ export async function listarEvaluacionesConEstado(
   usuarioId: string,
   cursoId: string,
 ): Promise<EvaluacionEstadoFila[]> {
+  return conSesion(usuarioId, async (tx) => listarEvaluacionesConEstadoEnTx(tx, usuarioId, cursoId));
+}
+
+async function listarEvaluacionesConEstadoEnTx(
+  tx: Parameters<Parameters<typeof conSesion>[1]>[0],
+  usuarioId: string,
+  cursoId: string,
+): Promise<EvaluacionEstadoFila[]> {
+  const filasEvaluaciones = await tx
+    .select({
+      id: evaluaciones.id,
+      titulo: evaluaciones.titulo,
+      maxIntentos: evaluaciones.maxIntentos,
+      puntajeMinimo: evaluaciones.puntajeMinimo,
+    })
+    .from(evaluaciones)
+    .where(and(eq(evaluaciones.cursoId, cursoId), isNull(evaluaciones.deletedAt)));
+
+  if (filasEvaluaciones.length === 0) return [];
+
+  const ids = filasEvaluaciones.map((e) => e.id);
+  const intentos = await tx
+    .select({
+      evaluacionId: intentosEvaluacion.evaluacionId,
+      puntaje: intentosEvaluacion.puntaje,
+      aprobado: intentosEvaluacion.aprobado,
+      estado: intentosEvaluacion.estado,
+    })
+    .from(intentosEvaluacion)
+    .where(
+      and(
+        inArray(intentosEvaluacion.evaluacionId, ids),
+        eq(intentosEvaluacion.profileId, usuarioId),
+      ),
+    );
+
+  const intentosPorEval = new Map<string, typeof intentos>();
+  for (const intento of intentos) {
+    const lista = intentosPorEval.get(intento.evaluacionId) ?? [];
+    lista.push(intento);
+    intentosPorEval.set(intento.evaluacionId, lista);
+  }
+
+  return filasEvaluaciones.map((evaluacion) => {
+    const deEval = intentosPorEval.get(evaluacion.id) ?? [];
+    const finalizados = deEval.filter((i) => i.estado === "finalizado");
+    const mejorPuntaje = finalizados.reduce<number | null>((mejor, i) => {
+      const puntaje = i.puntaje ? Number(i.puntaje) : null;
+      if (puntaje === null) return mejor;
+      return mejor === null || puntaje > mejor ? puntaje : mejor;
+    }, null);
+
+    return {
+      id: evaluacion.id,
+      titulo: evaluacion.titulo,
+      maxIntentos: evaluacion.maxIntentos,
+      puntajeMinimo: evaluacion.puntajeMinimo,
+      intentosUsados: finalizados.length,
+      mejorPuntaje,
+      aprobado: finalizados.some((i) => i.aprobado === true),
+    };
+  });
+}
+
+export interface ModuloConLeccionesProgreso extends ModuloFila {
+  lecciones: LeccionProgresoFila[];
+}
+
+export interface VistaCursoColaborador {
+  curso: CursoDetalle;
+  modulos: ModuloFila[];
+  inscripcion: InscripcionFila | null;
+  modulosConLecciones: ModuloConLeccionesProgreso[];
+  evaluaciones: EvaluacionEstadoFila[];
+}
+
+// Una sola transacción/conexión a Cloud SQL: evita N+1 round-trips
+// (cada conSesion aparte suma cientos de ms en local).
+export async function cargarVistaCursoColaborador(
+  usuarioId: string,
+  cursoId: string,
+): Promise<VistaCursoColaborador | null> {
   return conSesion(usuarioId, async (tx) => {
-    const filasEvaluaciones = await tx
+    const [curso] = await tx
+      .select()
+      .from(cursos)
+      .where(and(eq(cursos.id, cursoId), isNull(cursos.deletedAt)))
+      .limit(1);
+    if (!curso) return null;
+
+    const listaModulos = await tx
       .select({
-        id: evaluaciones.id,
-        titulo: evaluaciones.titulo,
-        maxIntentos: evaluaciones.maxIntentos,
-        puntajeMinimo: evaluaciones.puntajeMinimo,
+        id: modulos.id,
+        titulo: modulos.titulo,
+        descripcion: modulos.descripcion,
+        orden: modulos.orden,
       })
-      .from(evaluaciones)
-      .where(and(eq(evaluaciones.cursoId, cursoId), isNull(evaluaciones.deletedAt)));
+      .from(modulos)
+      .where(and(eq(modulos.cursoId, cursoId), isNull(modulos.deletedAt)))
+      .orderBy(asc(modulos.orden), asc(modulos.createdAt));
 
-    const resultado: EvaluacionEstadoFila[] = [];
-    for (const evaluacion of filasEvaluaciones) {
-      const intentos = await tx
-        .select({
-          puntaje: intentosEvaluacion.puntaje,
-          aprobado: intentosEvaluacion.aprobado,
-          estado: intentosEvaluacion.estado,
-        })
-        .from(intentosEvaluacion)
-        .where(
-          and(
-            eq(intentosEvaluacion.evaluacionId, evaluacion.id),
-            eq(intentosEvaluacion.profileId, usuarioId),
-          ),
-        );
+    const [inscripcionRaw] = await tx
+      .select({
+        id: inscripciones.id,
+        estado: inscripciones.estado,
+        porcentajeAvance: inscripciones.porcentajeAvance,
+        calificacionFinal: inscripciones.calificacionFinal,
+      })
+      .from(inscripciones)
+      .where(and(eq(inscripciones.cursoId, cursoId), eq(inscripciones.profileId, usuarioId)))
+      .limit(1);
 
-      const finalizados = intentos.filter((i) => i.estado === "finalizado");
-      const mejorPuntaje = finalizados.reduce<number | null>((mejor, i) => {
-        const puntaje = i.puntaje ? Number(i.puntaje) : null;
-        if (puntaje === null) return mejor;
-        return mejor === null || puntaje > mejor ? puntaje : mejor;
-      }, null);
+    const inscripcion = inscripcionRaw ?? null;
 
-      resultado.push({
-        id: evaluacion.id,
-        titulo: evaluacion.titulo,
-        maxIntentos: evaluacion.maxIntentos,
-        puntajeMinimo: evaluacion.puntajeMinimo,
-        intentosUsados: finalizados.length,
-        mejorPuntaje,
-        aprobado: finalizados.some((i) => i.aprobado === true),
-      });
+    if (!inscripcion) {
+      return {
+        curso,
+        modulos: listaModulos,
+        inscripcion: null,
+        modulosConLecciones: [],
+        evaluaciones: [],
+      };
     }
-    return resultado;
+
+    const moduloIds = listaModulos.map((m) => m.id);
+    const leccionesFilas =
+      moduloIds.length === 0
+        ? []
+        : await tx
+            .select({
+              id: lecciones.id,
+              titulo: lecciones.titulo,
+              tipoContenido: lecciones.tipoContenido,
+              esObligatoria: lecciones.esObligatoria,
+              orden: lecciones.orden,
+              completada: sql<boolean>`coalesce(${progresoLecciones.completada}, false)`,
+              moduloId: unidades.moduloId,
+            })
+            .from(lecciones)
+            .innerJoin(unidades, eq(lecciones.unidadId, unidades.id))
+            .leftJoin(
+              progresoLecciones,
+              and(
+                eq(progresoLecciones.leccionId, lecciones.id),
+                eq(progresoLecciones.inscripcionId, inscripcion.id),
+              ),
+            )
+            .where(
+              and(
+                inArray(unidades.moduloId, moduloIds),
+                isNull(unidades.deletedAt),
+                isNull(lecciones.deletedAt),
+              ),
+            )
+            .orderBy(asc(unidades.orden), asc(lecciones.orden), asc(lecciones.createdAt));
+
+    const leccionesPorModulo = new Map<string, LeccionProgresoFila[]>();
+    for (const fila of leccionesFilas) {
+      const lista = leccionesPorModulo.get(fila.moduloId) ?? [];
+      lista.push({
+        id: fila.id,
+        titulo: fila.titulo,
+        tipoContenido: fila.tipoContenido,
+        esObligatoria: fila.esObligatoria,
+        orden: fila.orden,
+        completada: fila.completada,
+      });
+      leccionesPorModulo.set(fila.moduloId, lista);
+    }
+
+    const modulosConLecciones: ModuloConLeccionesProgreso[] = listaModulos.map((modulo) => ({
+      ...modulo,
+      lecciones: leccionesPorModulo.get(modulo.id) ?? [],
+    }));
+
+    const listaEvaluaciones = await listarEvaluacionesConEstadoEnTx(tx, usuarioId, cursoId);
+
+    return {
+      curso,
+      modulos: listaModulos,
+      inscripcion,
+      modulosConLecciones,
+      evaluaciones: listaEvaluaciones,
+    };
   });
 }
 
