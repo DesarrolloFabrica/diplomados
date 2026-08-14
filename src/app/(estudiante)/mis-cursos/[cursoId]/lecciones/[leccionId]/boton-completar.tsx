@@ -25,7 +25,7 @@ export function BotonCompletar({
 
   if (completada) {
     return (
-      <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">
+      <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 shadow-[0_0_18px_rgba(16,185,129,0.16)] dark:bg-emerald-500/10 dark:text-emerald-300">
         <CheckCircle2 className="h-4 w-4" />
         Lección completada
       </div>
@@ -40,7 +40,18 @@ export function BotonCompletar({
         return;
       }
       toast.success("Lección completada");
-      router.refresh();
+
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem(
+          `roadmap-transition:${cursoId}`,
+          JSON.stringify({ nodoId: leccionId, timestamp: Date.now() }),
+        );
+      }
+
+      router.push(
+        `/mis-cursos/${cursoId}?roadmapTransition=${encodeURIComponent(leccionId)}`,
+        { scroll: false },
+      );
     });
   }
 

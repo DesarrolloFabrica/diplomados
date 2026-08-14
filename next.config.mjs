@@ -17,6 +17,12 @@ const nextConfig = {
       // Google Cloud Storage sirve las URLs firmadas de archivos privados.
       { protocol: "https", hostname: "storage.googleapis.com" },
     ],
+    localPatterns: [
+      // Proxy interno de portadas almacenadas en Google Drive.
+      { pathname: "/api/imagenes/google-drive" },
+      // Assets estáticos del roadmap de aprendizaje (public/images/roadmap_asset).
+      { pathname: "/images/roadmap_asset/**" },
+    ],
   },
 };
 

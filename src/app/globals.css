@@ -302,6 +302,99 @@
     filter: none;
   }
 
+  .roadmap-stage {
+    isolation: isolate;
+  }
+
+  .roadmap-isometric-track-shadow,
+  .roadmap-isometric-track-base,
+  .roadmap-isometric-track-tiles,
+  .roadmap-isometric-track-core {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  html.light .roadmap-isometric-track-shadow {
+    stroke: rgba(6, 17, 32, 0.08);
+    stroke-width: 34px;
+    filter: drop-shadow(0 16px 24px rgba(6, 17, 32, 0.1));
+  }
+
+  html.light .roadmap-isometric-track-base {
+    stroke: rgba(255, 255, 255, 0.84);
+    stroke-width: 27px;
+  }
+
+  html.light .roadmap-isometric-track-tiles {
+    stroke: rgba(120, 150, 170, 0.24);
+    stroke-dasharray: 36 20;
+    stroke-width: 19px;
+  }
+
+  html.light .roadmap-isometric-track-core {
+    stroke-width: 8px;
+    filter:
+      drop-shadow(0 0 5px rgba(67, 213, 177, 0.5))
+      drop-shadow(0 0 16px rgba(23, 184, 212, 0.22));
+  }
+
+  html.dark .roadmap-isometric-track-shadow {
+    stroke: rgba(3, 8, 16, 0.34);
+    stroke-width: 32px;
+    filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.28));
+  }
+
+  html.dark .roadmap-isometric-track-base {
+    stroke: rgba(16, 38, 58, 0.9);
+    stroke-width: 25px;
+  }
+
+  html.dark .roadmap-isometric-track-tiles {
+    stroke: rgba(120, 180, 195, 0.22);
+    stroke-dasharray: 36 20;
+    stroke-width: 17px;
+  }
+
+  html.dark .roadmap-isometric-track-core {
+    stroke-width: 7px;
+    filter: drop-shadow(0 0 8px rgba(47, 185, 165, 0.26));
+  }
+
+  .roadmap-route-chip {
+    width: 22px;
+    height: 30px;
+    border-radius: 8px 8px 12px 12px;
+    border: 1px solid rgba(47, 185, 165, 0.34);
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(234, 247, 245, 0.82) 100%),
+      linear-gradient(180deg, #2fb9a5 0%, #0454bd 100%);
+    box-shadow:
+      0 8px 18px rgba(6, 17, 32, 0.08),
+      inset 0 -3px 0 rgba(4, 84, 189, 0.18);
+  }
+
+  html.dark .roadmap-route-chip {
+    border-color: rgba(79, 201, 179, 0.32);
+    background:
+      linear-gradient(135deg, rgba(16, 38, 58, 0.92) 0%, rgba(12, 34, 64, 0.9) 100%),
+      linear-gradient(180deg, #2fb9a5 0%, #0454bd 100%);
+    box-shadow:
+      0 8px 18px rgba(0, 0, 0, 0.18),
+      inset 0 -3px 0 rgba(47, 185, 165, 0.18);
+  }
+
+  .roadmap-asset-soft {
+    opacity: 0.86;
+  }
+
+  .roadmap-asset-quiz {
+    opacity: 0.98;
+    filter:
+      drop-shadow(0 16px 24px rgba(6, 17, 32, 0.12))
+      drop-shadow(0 0 12px rgba(251, 191, 36, 0.16));
+  }
+
   .roadmap-connector {
     width: 7px;
     border-radius: 999px;
@@ -421,6 +514,16 @@
     opacity: 0.14;
     transform: scale(1.12);
   }
+
+  .roadmap-node-just-completed::after {
+    animation: none !important;
+    opacity: 0;
+  }
+
+  .roadmap-node-just-completed .station-core,
+  .roadmap-node-next-highlight {
+    animation: none !important;
+  }
 }
 
 /* Estación activa del roadmap — ondas tipo sondeo */
@@ -432,6 +535,96 @@
   100% {
     transform: scale(1.58);
     opacity: 0;
+  }
+}
+
+.roadmap-node-just-completed::after {
+  position: absolute;
+  inset: -14px;
+  z-index: 5;
+  border: 1px solid rgba(145, 220, 0, 0.48);
+  border-radius: 9999px;
+  box-shadow:
+    0 0 18px rgba(16, 185, 129, 0.36),
+    0 0 36px rgba(145, 220, 0, 0.18);
+  content: "";
+  pointer-events: none;
+  animation: roadmap-completed-halo 1200ms ease-out both;
+}
+
+.roadmap-node-just-completed .station-core {
+  animation: roadmap-completed-pop 1200ms ease-out both;
+}
+
+.roadmap-node-just-completed svg {
+  transition:
+    stroke-dashoffset 700ms ease,
+    opacity 250ms ease,
+    filter 250ms ease;
+}
+
+.roadmap-node-next-highlight {
+  animation: roadmap-next-focus 1100ms ease-out both;
+}
+
+@keyframes roadmap-completed-pop {
+  0% {
+    filter: brightness(1) drop-shadow(0 0 0 rgba(16, 185, 129, 0));
+    transform: scale(1);
+  }
+  35% {
+    filter:
+      brightness(1.18)
+      drop-shadow(0 0 14px rgba(16, 185, 129, 0.56))
+      drop-shadow(0 0 22px rgba(145, 220, 0, 0.26));
+    transform: scale(1.12);
+  }
+  68% {
+    filter:
+      brightness(1.1)
+      drop-shadow(0 0 18px rgba(16, 185, 129, 0.46))
+      drop-shadow(0 0 30px rgba(145, 220, 0, 0.2));
+    transform: scale(1.06);
+  }
+  100% {
+    filter: brightness(1) drop-shadow(0 0 8px rgba(16, 185, 129, 0.24));
+    transform: scale(1);
+  }
+}
+
+@keyframes roadmap-completed-halo {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  72% {
+    opacity: 0.72;
+    transform: scale(1.18);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.32);
+  }
+}
+
+@keyframes roadmap-next-focus {
+  0% {
+    filter: drop-shadow(0 0 0 rgba(47, 185, 165, 0));
+    transform: scale(1);
+  }
+  35% {
+    filter:
+      drop-shadow(0 0 10px rgba(47, 185, 165, 0.42))
+      drop-shadow(0 0 22px rgba(30, 93, 142, 0.22));
+    transform: scale(1.08);
+  }
+  100% {
+    filter: drop-shadow(0 0 0 rgba(47, 185, 165, 0));
+    transform: scale(1);
   }
 }
 

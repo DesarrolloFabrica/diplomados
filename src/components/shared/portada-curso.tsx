@@ -91,7 +91,7 @@ export function PortadaCurso(props: PortadaCursoProps) {
         unoptimized={requiereUnoptimized}
         sizes="100vw"
         className={cn(
-          "object-cover object-center transition-opacity duration-300",
+          "absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300",
           imageLoaded ? "opacity-100" : "opacity-0",
         )}
         onLoad={() => setImageLoaded(true)}

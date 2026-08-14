@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { sql } from "drizzle-orm";
 import { conSesion } from "@/lib/db";
 import { requerirSesion } from "@/lib/auth/sesion";
+import { obtenerInscripcion } from "@/server/queries/mis-cursos";
 import type { ResultadoAccion } from "@/types";
 
 export async function marcarLeccionCompletada(
@@ -12,6 +13,14 @@ export async function marcarLeccionCompletada(
   leccionId: string,
 ): Promise<ResultadoAccion> {
   const sesion = await requerirSesion();
+
+  const inscripcion = await obtenerInscripcion(sesion.id, cursoId);
+  if (!inscripcion || inscripcion.id !== inscripcionId) {
+    return {
+      ok: false,
+      mensaje: "No tienes una inscripción válida en este curso. Cierra sesión y vuelve a entrar.",
+    };
+  }
 
   try {
     await conSesion(sesion.id, (tx) =>

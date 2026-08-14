@@ -66,18 +66,19 @@ export function HeroCurso({
         cursoId={cursoId}
         imagenPortadaUrl={imagenPortadaUrl}
         esDiplomado={esDiplomado}
+        titulo={titulo}
         alt={`Portada de ${titulo}`}
         fallback="abstract"
-        className="absolute inset-0 z-0 size-full"
+        className="absolute inset-0 z-0 h-full w-full rounded-none"
       />
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(90deg,rgba(4,12,24,0.94)_0%,rgba(7,22,38,0.76)_45%,rgba(6,17,32,0.42)_100%)]"
+        className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(90deg,rgba(4,12,24,0.82)_0%,rgba(7,22,38,0.58)_48%,rgba(6,17,32,0.3)_100%)]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_62%_30%,rgba(83,230,220,0.22),transparent_25%),radial-gradient(circle_at_42%_22%,rgba(157,104,255,0.18),transparent_30%),radial-gradient(circle_at_80%_65%,rgba(32,144,181,0.16),transparent_28%)]"
+        className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_62%_30%,rgba(83,230,220,0.18),transparent_27%),radial-gradient(circle_at_42%_22%,rgba(157,104,255,0.16),transparent_32%),radial-gradient(circle_at_80%_65%,rgba(32,144,181,0.14),transparent_30%)]"
       />
 
       <IlustracionCursoGeometrica variant="hero" />

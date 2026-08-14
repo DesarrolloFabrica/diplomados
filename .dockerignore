@@ -8,3 +8,11 @@ out
 .git
 db
 README.md
+
+# Volcados de base de datos y binarios de utilidades: no forman parte de la
+# imagen y hacen pesado el contexto de build.
+*.dump
+*.sql
+tools
+infra
+.github

@@ -14,10 +14,15 @@ import { BotonInscribirme } from "./boton-inscribirme";
 
 interface CursoColaboradorPageProps {
   params: Promise<{ cursoId: string }>;
+  searchParams: Promise<{ roadmapTransition?: string }>;
 }
 
-export default async function CursoColaboradorPage({ params }: CursoColaboradorPageProps) {
+export default async function CursoColaboradorPage({
+  params,
+  searchParams,
+}: CursoColaboradorPageProps) {
   const { cursoId } = await params;
+  const { roadmapTransition } = await searchParams;
   const sesion = await requerirSesion();
 
   const vista = await cargarVistaCursoColaborador(sesion.id, cursoId);
@@ -124,7 +129,11 @@ export default async function CursoColaboradorPage({ params }: CursoColaboradorP
 
         {hayContenido ? (
           <VistaRoadmap>
-            <RutaAprendizaje grupos={grupos} />
+            <RutaAprendizaje
+              grupos={grupos}
+              cursoId={cursoId}
+              transicionNodoId={roadmapTransition}
+            />
           </VistaRoadmap>
         ) : (
           <p className="px-6 py-10 text-center text-muted-foreground">
