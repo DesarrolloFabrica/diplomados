@@ -1,5 +1,9 @@
+import { urlMiniaturaDrive, type DriveImagenMeta } from "@/lib/images/google-drive";
+
 const DRIVE_FILE_ID = /^[a-zA-Z0-9_-]{5,200}$/;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const LH3_URL = /https:\/\/lh3\.googleusercontent\.com\/[^"'\\s<>]+/i;
+const CONFIRM_TOKEN = /confirm=([0-9A-Za-z_-]+)/;
 
 const HEADERS_NAVEGADOR = {
   Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
@@ -15,10 +19,16 @@ function agregarResourceKey(url: URL, resourceKey: string | null) {
 }
 
 function construirFuentes(id: string, resourceKey: string | null): URL[] {
-  const thumbnailUrl = new URL("https://drive.google.com/thumbnail");
-  thumbnailUrl.searchParams.set("id", id);
-  thumbnailUrl.searchParams.set("sz", "w2000");
+  const meta: DriveImagenMeta = { id, resourceKey };
+
+  const thumbnailUrl = new URL(urlMiniaturaDrive(meta));
   agregarResourceKey(thumbnailUrl, resourceKey);
+
+  const userContentUrl = new URL("https://drive.usercontent.google.com/download");
+  userContentUrl.searchParams.set("export", "download");
+  userContentUrl.searchParams.set("id", id);
+  userContentUrl.searchParams.set("authuser", "0");
+  agregarResourceKey(userContentUrl, resourceKey);
 
   const viewUrl = new URL("https://drive.google.com/uc");
   viewUrl.searchParams.set("export", "view");
@@ -30,7 +40,9 @@ function construirFuentes(id: string, resourceKey: string | null): URL[] {
   downloadUrl.searchParams.set("id", id);
   agregarResourceKey(downloadUrl, resourceKey);
 
-  return [thumbnailUrl, viewUrl, downloadUrl];
+  const lh3Url = new URL(`https://lh3.googleusercontent.com/d/${id}=w2000`);
+
+  return [thumbnailUrl, userContentUrl, lh3Url, viewUrl, downloadUrl];
 }
 
 function detectarTipoImagen(buffer: ArrayBuffer): string | null {
@@ -80,6 +92,42 @@ function resolverTipoImagen(contentType: string, buffer: ArrayBuffer): string | 
   return detectarTipoImagen(buffer);
 }
 
+function esHtml(contentType: string, buffer: ArrayBuffer): boolean {
+  const normalizado = contentType.split(";")[0]?.trim().toLowerCase() ?? "";
+  if (normalizado.includes("html")) {
+    return true;
+  }
+
+  const bytes = new Uint8Array(buffer.slice(0, 64));
+  const inicio = new TextDecoder().decode(bytes).trimStart().toLowerCase();
+  return inicio.startsWith("<!doctype html") || inicio.startsWith("<html");
+}
+
+function extraerUrlsDesdeHtml(html: string, id: string, resourceKey: string | null): URL[] {
+  const urls: URL[] = [];
+
+  const confirm = html.match(CONFIRM_TOKEN)?.[1];
+  if (confirm) {
+    const confirmUrl = new URL("https://drive.google.com/uc");
+    confirmUrl.searchParams.set("export", "download");
+    confirmUrl.searchParams.set("confirm", confirm);
+    confirmUrl.searchParams.set("id", id);
+    agregarResourceKey(confirmUrl, resourceKey);
+    urls.push(confirmUrl);
+  }
+
+  const lh3 = html.match(LH3_URL)?.[0];
+  if (lh3) {
+    try {
+      urls.push(new URL(lh3));
+    } catch {
+      // Ignorar URL mal formada en el HTML de Drive.
+    }
+  }
+
+  return urls;
+}
+
 async function intentarFuenteImagen(url: URL) {
   const upstream = await fetch(url, {
     headers: HEADERS_NAVEGADOR,
@@ -98,11 +146,63 @@ async function intentarFuenteImagen(url: URL) {
 
   const contentType = upstream.headers.get("content-type") ?? "";
   const tipoImagen = resolverTipoImagen(contentType, buffer);
-  if (!tipoImagen) {
+  if (tipoImagen) {
+    return { body: buffer, contentType: tipoImagen };
+  }
+
+  if (esHtml(contentType, buffer)) {
     return null;
   }
 
-  return { body: buffer, contentType: tipoImagen };
+  return null;
+}
+
+async function intentarFuenteConHtml(
+  url: URL,
+  id: string,
+  resourceKey: string | null,
+  visitados: Set<string>,
+) {
+  if (visitados.has(url.toString())) {
+    return null;
+  }
+  visitados.add(url.toString());
+
+  const upstream = await fetch(url, {
+    headers: HEADERS_NAVEGADOR,
+    redirect: "follow",
+    cache: "no-store",
+  });
+
+  if (!upstream.ok) {
+    return null;
+  }
+
+  const buffer = await upstream.arrayBuffer();
+  if (buffer.byteLength === 0 || buffer.byteLength > MAX_IMAGE_BYTES) {
+    return null;
+  }
+
+  const contentType = upstream.headers.get("content-type") ?? "";
+  const tipoImagen = resolverTipoImagen(contentType, buffer);
+  if (tipoImagen) {
+    return { body: buffer, contentType: tipoImagen };
+  }
+
+  if (!esHtml(contentType, buffer)) {
+    return null;
+  }
+
+  const html = new TextDecoder().decode(buffer);
+  const derivadas = extraerUrlsDesdeHtml(html, id, resourceKey);
+  for (const derivada of derivadas) {
+    const resultado = await intentarFuenteImagen(derivada);
+    if (resultado) {
+      return resultado;
+    }
+  }
+
+  return null;
 }
 
 export async function GET(request: Request) {
@@ -115,10 +215,14 @@ export async function GET(request: Request) {
   }
 
   const sources = construirFuentes(id, resourceKey);
+  const visitados = new Set<string>();
 
   try {
     for (const source of sources) {
-      const resultado = await intentarFuenteImagen(source);
+      const resultado =
+        (await intentarFuenteImagen(source)) ??
+        (await intentarFuenteConHtml(source, id, resourceKey, visitados));
+
       if (!resultado) {
         continue;
       }

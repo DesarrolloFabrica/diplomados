@@ -93,6 +93,14 @@ export function PresentarEvaluacion({
     });
   }
 
+  function volverAlCursoDesdeResultado() {
+    const parametro = resultado?.aprobado ? "roadmapTransition" : "roadmapFocus";
+    router.push(
+      `/mis-cursos/${cursoId}?${parametro}=${encodeURIComponent(evaluacionId)}`,
+      { scroll: false },
+    );
+  }
+
   if (resultado) {
     return (
       <Card>
@@ -108,6 +116,13 @@ export function PresentarEvaluacion({
               ? "¡Aprobaste esta evaluación!"
               : `No alcanzaste el mínimo de ${puntajeMinimo}% para aprobar.`}
           </p>
+          <Button
+            type="button"
+            onClick={volverAlCursoDesdeResultado}
+            className="mt-4"
+          >
+            Volver al curso
+          </Button>
         </CardContent>
       </Card>
     );

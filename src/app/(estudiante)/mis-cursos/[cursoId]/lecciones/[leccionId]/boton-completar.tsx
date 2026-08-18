@@ -41,13 +41,6 @@ export function BotonCompletar({
       }
       toast.success("Lección completada");
 
-      if (typeof window !== "undefined") {
-        window.sessionStorage.setItem(
-          `roadmap-transition:${cursoId}`,
-          JSON.stringify({ nodoId: leccionId, timestamp: Date.now() }),
-        );
-      }
-
       router.push(
         `/mis-cursos/${cursoId}?roadmapTransition=${encodeURIComponent(leccionId)}`,
         { scroll: false },

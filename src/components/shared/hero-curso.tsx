@@ -1,7 +1,7 @@
-import { Clock3, Gauge, Layers3 } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Check, Clock3, Gauge, Layers3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PortadaCurso } from "@/components/shared/portada-curso";
-import { IlustracionCursoGeometrica } from "@/components/shared/ilustracion-curso-geometrica";
 
 interface HeroCursoProps {
   cursoId: string;
@@ -12,6 +12,12 @@ interface HeroCursoProps {
   nivelDificultad: "basico" | "intermedio" | "avanzado";
   cantidadModulos: number;
   porcentajeAvance: number;
+  siguienteContenido?: {
+    titulo: string;
+    href: string;
+    moduloTitulo: string;
+  } | null;
+  cursoCompletado?: boolean;
 }
 
 const ETIQUETA_DIFICULTAD = {
@@ -44,6 +50,65 @@ function ChipHero({
   );
 }
 
+function CtaContinuarHero({
+  titulo,
+  href,
+  moduloTitulo,
+}: {
+  titulo: string;
+  href: string;
+  moduloTitulo: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "group mt-6 flex w-full max-w-2xl items-center justify-between gap-4 rounded-2xl border border-white/90 px-5 py-4",
+        "bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.96)_48%,rgba(241,245,249,0.94)_100%)]",
+        "shadow-[0_10px_36px_rgba(6,17,32,0.28),0_2px_8px_rgba(255,255,255,0.45)_inset] backdrop-blur-md",
+        "transition-[transform,box-shadow,background-color] duration-300",
+        "hover:-translate-y-0.5 hover:bg-[linear-gradient(135deg,#ffffff_0%,#f8fafc_52%,#eef2f7_100%)] hover:shadow-[0_14px_44px_rgba(6,17,32,0.34),0_2px_10px_rgba(255,255,255,0.55)_inset]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+      )}
+    >
+      <span className="min-w-0 flex-1 text-left">
+        <span className="block text-sm font-normal text-slate-600">Continuar</span>
+        <span className="mt-1 block truncate text-xs font-medium text-slate-500">
+          {moduloTitulo}
+        </span>
+        <span className="mt-0.5 block truncate text-base font-bold leading-snug text-slate-900 md:text-lg">
+          {titulo}
+        </span>
+      </span>
+
+      <span
+        aria-hidden="true"
+        className="grid size-10 shrink-0 place-items-center rounded-full border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f1f5f9_100%)] shadow-sm transition-transform duration-300 group-hover:translate-x-0.5"
+      >
+        <ArrowRight className="size-4 text-slate-800" />
+      </span>
+    </Link>
+  );
+}
+
+function EstadoCursoCompletadoHero() {
+  return (
+    <div
+      aria-live="polite"
+      className={cn(
+        "mt-6 inline-flex w-full max-w-2xl items-center gap-3 rounded-2xl border border-white/90 px-5 py-4",
+        "bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.96)_48%,rgba(241,245,249,0.94)_100%)]",
+        "shadow-[0_10px_36px_rgba(6,17,32,0.28),0_2px_8px_rgba(255,255,255,0.45)_inset] backdrop-blur-md",
+      )}
+    >
+      <span className="grid size-10 shrink-0 place-items-center rounded-full border border-emerald-600/20 bg-emerald-500/20">
+        <Check className="size-4 text-emerald-900" aria-hidden="true" />
+      </span>
+      <span className="text-base font-semibold text-slate-900">Curso completado</span>
+    </div>
+  );
+}
+
 export function HeroCurso({
   cursoId,
   titulo,
@@ -53,6 +118,8 @@ export function HeroCurso({
   nivelDificultad,
   cantidadModulos,
   porcentajeAvance,
+  siguienteContenido,
+  cursoCompletado = false,
 }: HeroCursoProps) {
   const porcentaje = Math.round(porcentajeAvance);
   const modulosTexto =
@@ -74,24 +141,16 @@ export function HeroCurso({
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(90deg,rgba(4,12,24,0.82)_0%,rgba(7,22,38,0.58)_48%,rgba(6,17,32,0.3)_100%)]"
+        className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(90deg,rgba(4,12,24,0.62)_0%,rgba(7,22,38,0.35)_48%,rgba(6,17,32,0.12)_100%)]"
       />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_62%_30%,rgba(83,230,220,0.18),transparent_27%),radial-gradient(circle_at_42%_22%,rgba(157,104,255,0.16),transparent_32%),radial-gradient(circle_at_80%_65%,rgba(32,144,181,0.14),transparent_30%)]"
-      />
-
-      <IlustracionCursoGeometrica variant="hero" />
 
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-24 bg-gradient-to-b from-transparent to-[#f4f9f9] dark:to-[#061120]"
       />
 
-      <div className="relative z-30 mx-auto flex min-h-[360px] w-full max-w-7xl items-end px-6 pb-8 pt-20 md:min-h-[430px] md:pb-10 md:pt-24 lg:px-12">
+      <div className="relative z-30 mx-auto flex min-h-[360px] w-full max-w-7xl items-end px-6 pb-8 pt-8 md:min-h-[430px] md:pb-10 md:pt-10 lg:px-12">
         <div className="max-w-3xl">
-          <IlustracionCursoGeometrica variant="compact" className="mb-4" />
-
           <h1 className="max-w-3xl text-2xl font-bold leading-tight tracking-tight text-white md:text-4xl">
             {titulo}
           </h1>
@@ -122,6 +181,16 @@ export function HeroCurso({
             </div>
             <p className="mt-2 text-sm text-white/65">{porcentaje}% completado</p>
           </div>
+
+          {siguienteContenido ? (
+            <CtaContinuarHero
+              titulo={siguienteContenido.titulo}
+              href={siguienteContenido.href}
+              moduloTitulo={siguienteContenido.moduloTitulo}
+            />
+          ) : cursoCompletado ? (
+            <EstadoCursoCompletadoHero />
+          ) : null}
         </div>
       </div>
     </section>

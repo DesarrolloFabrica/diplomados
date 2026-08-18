@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { normalizarUrlImagen } from "@/lib/images/normalizar-url-imagen";
+import {
+  candidatosPortadaDrive,
+  type CandidatoPortadaDrive,
+} from "@/lib/images/google-drive";
 import { iconoTematico } from "@/components/shared/icono-tematico";
 
 interface PortadaCursoProps {
@@ -34,7 +37,74 @@ function resolverUrlPortada(props: PortadaCursoProps): string | null {
   return props.imagenPortadaUrl ?? props.url ?? null;
 }
 
-// next/image con unoptimized: portadas externas y proxy de Drive no usan dominios fijos.
+function esUrlExterna(url: string): boolean {
+  return (
+    url.startsWith("/api/imagenes/google-drive") ||
+    url.startsWith("http://") ||
+    url.startsWith("https://")
+  );
+}
+
+function PortadaDriveIframe({
+  src,
+  titulo,
+  className,
+}: {
+  src: string;
+  titulo: string;
+  className?: string;
+}) {
+  return (
+    <iframe
+      src={src}
+      title={titulo ? `Vista previa de ${titulo}` : "Portada del curso"}
+      className={cn(
+        "pointer-events-none absolute left-1/2 top-1/2 h-[145%] w-[145%] -translate-x-1/2 -translate-y-1/2 border-0",
+        className,
+      )}
+      loading="lazy"
+      referrerPolicy="no-referrer-when-downgrade"
+    />
+  );
+}
+
+function PortadaImagen({
+  src,
+  alt,
+  onFallo,
+}: {
+  src: string;
+  alt: string;
+  onFallo: () => void;
+}) {
+  const externa = esUrlExterna(src);
+
+  if (externa) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={alt}
+        decoding="async"
+        referrerPolicy="no-referrer"
+        className="absolute inset-0 h-full w-full object-cover object-center"
+        onError={onFallo}
+      />
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="(max-width: 768px) 100vw, 400px"
+      className="object-cover object-center"
+      onError={onFallo}
+    />
+  );
+}
+
 export function PortadaCurso(props: PortadaCursoProps) {
   const {
     cursoId,
@@ -46,19 +116,30 @@ export function PortadaCurso(props: PortadaCursoProps) {
   } = props;
 
   const rawUrl = resolverUrlPortada(props);
-  const srcNormalizado = normalizarUrlImagen(rawUrl);
-  const [imageError, setImageError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const candidatos = useMemo(() => candidatosPortadaDrive(rawUrl), [rawUrl]);
+  const [indiceCandidato, setIndiceCandidato] = useState(0);
+  const [agotado, setAgotado] = useState(false);
 
   useEffect(() => {
-    setImageError(false);
-    setImageLoaded(false);
-  }, [srcNormalizado, cursoId]);
+    setIndiceCandidato(0);
+    setAgotado(false);
+  }, [rawUrl, cursoId]);
 
-  const imageKey = `${cursoId ?? "portada"}-${srcNormalizado}`;
-  const usarImagen = Boolean(srcNormalizado) && !imageError;
+  const candidatoActual: CandidatoPortadaDrive | undefined = candidatos[indiceCandidato];
+  const hayPortada = Boolean(candidatoActual) && !agotado;
 
-  if (!usarImagen) {
+  function avanzarCandidato() {
+    setIndiceCandidato((actual) => {
+      const siguiente = actual + 1;
+      if (siguiente >= candidatos.length) {
+        setAgotado(true);
+        return actual;
+      }
+      return siguiente;
+    });
+  }
+
+  if (!hayPortada) {
     if (fallback === "abstract") {
       return <FondoAbstractoPortada className={className} />;
     }
@@ -76,27 +157,24 @@ export function PortadaCurso(props: PortadaCursoProps) {
     );
   }
 
-  const requiereUnoptimized =
-    srcNormalizado.startsWith("/api/imagenes/google-drive") ||
-    srcNormalizado.startsWith("http://") ||
-    srcNormalizado.startsWith("https://");
+  const clave = `${cursoId ?? "portada"}-${indiceCandidato}-${candidatoActual.url}`;
 
   return (
     <div className={cn("relative h-full w-full overflow-hidden", className)}>
-      <Image
-        key={imageKey}
-        src={srcNormalizado}
-        alt={alt}
-        fill
-        unoptimized={requiereUnoptimized}
-        sizes="100vw"
-        className={cn(
-          "absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300",
-          imageLoaded ? "opacity-100" : "opacity-0",
-        )}
-        onLoad={() => setImageLoaded(true)}
-        onError={() => setImageError(true)}
-      />
+      {candidatoActual.modo === "iframe" ? (
+        <PortadaDriveIframe
+          key={clave}
+          src={candidatoActual.url}
+          titulo={titulo}
+        />
+      ) : (
+        <PortadaImagen
+          key={clave}
+          src={candidatoActual.url}
+          alt={alt || titulo}
+          onFallo={avanzarCandidato}
+        />
+      )}
     </div>
   );
 }

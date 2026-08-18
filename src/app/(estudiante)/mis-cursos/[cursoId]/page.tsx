@@ -11,10 +11,14 @@ import {
   type NodoRuta,
 } from "@/components/shared/ruta-aprendizaje";
 import { BotonInscribirme } from "./boton-inscribirme";
+import {
+  cursoRoadmapCompletado,
+  obtenerSiguienteNodoRoadmap,
+} from "@/lib/roadmap/siguiente-nodo";
 
 interface CursoColaboradorPageProps {
   params: Promise<{ cursoId: string }>;
-  searchParams: Promise<{ roadmapTransition?: string }>;
+  searchParams: Promise<{ roadmapFocus?: string; roadmapTransition?: string }>;
 }
 
 export default async function CursoColaboradorPage({
@@ -22,7 +26,7 @@ export default async function CursoColaboradorPage({
   searchParams,
 }: CursoColaboradorPageProps) {
   const { cursoId } = await params;
-  const { roadmapTransition } = await searchParams;
+  const { roadmapFocus, roadmapTransition } = await searchParams;
   const sesion = await requerirSesion();
 
   const vista = await cargarVistaCursoColaborador(sesion.id, cursoId);
@@ -105,6 +109,7 @@ export default async function CursoColaboradorPage({
     }
 
     return {
+      moduloId: modulo.id,
       titulo: `Módulo ${indiceModulo + 1}: ${modulo.titulo}`,
       nodos,
     };
@@ -112,10 +117,12 @@ export default async function CursoColaboradorPage({
 
   const hayContenido = grupos.some((g) => g.nodos.length > 0);
   const porcentajeAvance = Number(inscripcion.porcentajeAvance);
+  const siguienteNodo = obtenerSiguienteNodoRoadmap(grupos);
+  const cursoCompletado = cursoRoadmapCompletado(grupos);
 
   return (
     <div className="min-w-0">
-      <div className="-mx-5 w-auto min-w-0 sm:-mx-6 lg:-mx-8 xl:-mx-10">
+      <div className="-mx-5 -mt-5 w-auto min-w-0 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 xl:-mx-10 xl:-mt-10">
         <HeroCurso
           cursoId={curso.id}
           titulo={curso.titulo}
@@ -125,13 +132,23 @@ export default async function CursoColaboradorPage({
           nivelDificultad={curso.nivelDificultad}
           cantidadModulos={modulos.length}
           porcentajeAvance={porcentajeAvance}
+          siguienteContenido={
+            siguienteNodo
+              ? {
+                  titulo: siguienteNodo.nodo.titulo,
+                  href: siguienteNodo.nodo.href,
+                  moduloTitulo: grupos[siguienteNodo.indiceModulo]?.titulo ?? "",
+                }
+              : null
+          }
+          cursoCompletado={cursoCompletado}
         />
 
         {hayContenido ? (
           <VistaRoadmap>
             <RutaAprendizaje
               grupos={grupos}
-              cursoId={cursoId}
+              focoNodoId={roadmapFocus}
               transicionNodoId={roadmapTransition}
             />
           </VistaRoadmap>

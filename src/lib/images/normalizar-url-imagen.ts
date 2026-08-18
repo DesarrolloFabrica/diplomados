@@ -1,31 +1,4 @@
-const DRIVE_FILE_PATH = /^\/file\/d\/([^/?#]+)/i;
-
-interface DriveImagenMeta {
-  id: string;
-  resourceKey: string | null;
-}
-
-function extraerMetaGoogleDrive(url: URL): DriveImagenMeta | null {
-  if (url.hostname !== "drive.google.com") {
-    return null;
-  }
-
-  const resourceKey = url.searchParams.get("resourcekey");
-
-  const pathMatch = url.pathname.match(DRIVE_FILE_PATH);
-  if (pathMatch?.[1]) {
-    return { id: pathMatch[1], resourceKey };
-  }
-
-  if (url.pathname === "/open" || url.pathname === "/uc") {
-    const id = url.searchParams.get("id");
-    if (id) {
-      return { id, resourceKey };
-    }
-  }
-
-  return null;
-}
+import { extraerMetaGoogleDrive, urlProxyDrive } from "@/lib/images/google-drive";
 
 /**
  * Normaliza URLs de imagen para renderizado.
@@ -38,17 +11,13 @@ export function normalizarUrlImagen(url: string | null | undefined): string {
   }
 
   const cleanUrl = url.trim();
+  const meta = extraerMetaGoogleDrive(cleanUrl);
+  if (meta) {
+    return urlProxyDrive(meta);
+  }
 
   try {
-    const parsed = new URL(cleanUrl);
-    const meta = extraerMetaGoogleDrive(parsed);
-    if (meta) {
-      const params = new URLSearchParams({ id: meta.id });
-      if (meta.resourceKey) {
-        params.set("resourcekey", meta.resourceKey);
-      }
-      return `/api/imagenes/google-drive?${params.toString()}`;
-    }
+    new URL(cleanUrl);
   } catch {
     return cleanUrl;
   }

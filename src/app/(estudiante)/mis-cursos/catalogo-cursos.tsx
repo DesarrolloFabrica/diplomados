@@ -94,13 +94,17 @@ function HeroContinuar({ curso }: { curso: CursoCatalogoFila }) {
     >
       <PortadaCurso
         cursoId={curso.id}
-        url={curso.imagenPortadaUrl}
+        imagenPortadaUrl={curso.imagenPortadaUrl}
         esDiplomado={curso.esDiplomado}
         titulo={curso.titulo}
-        className="rounded-none transition-transform duration-500 group-hover:scale-105"
+        fallback="abstract"
+        className="absolute inset-0 rounded-none transition-transform duration-500 group-hover:scale-105"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#061120] via-[#164A73] to-[#164A73] dark:from-black/85 dark:via-black/50 dark:to-black/10" />
-      <div className="absolute inset-0 flex items-center justify-between gap-4 p-6">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(6,17,32,0.72)_0%,rgba(6,17,32,0.4)_45%,rgba(6,17,32,0.15)_100%)]"
+      />
+      <div className="relative z-10 flex h-full items-center justify-between gap-4 p-6">
         <div className="max-w-md space-y-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-white/70">
             Continúa aprendiendo
@@ -198,7 +202,7 @@ function ContenidoTarjetaCurso({
           imagenPortadaUrl={curso.imagenPortadaUrl}
           esDiplomado={curso.esDiplomado}
           titulo={curso.titulo}
-          className="rounded-none transition-transform duration-300 group-hover:scale-[1.04]"
+          className="absolute inset-0 rounded-none transition-transform duration-300 group-hover:scale-[1.04]"
         />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#061120]/45 to-transparent" />
         {curso.esDiplomado && (

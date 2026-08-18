@@ -32,7 +32,7 @@ export default async function EvaluacionColaboradorPage({
     <div className="max-w-2xl space-y-6">
       <div>
         <Link
-          href={`/mis-cursos/${cursoId}`}
+          href={`/mis-cursos/${cursoId}?roadmapFocus=${encodeURIComponent(evaluacionId)}`}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />

@@ -40,7 +40,7 @@ export function NodoCurso({
             url={imagenPortadaUrl}
             esDiplomado={esDiplomado}
             titulo={titulo}
-            className="rounded-none"
+            className="absolute inset-0 rounded-none"
           />
         </div>
         {esDiplomado && (

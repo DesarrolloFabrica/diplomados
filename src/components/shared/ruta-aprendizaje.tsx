@@ -14,6 +14,7 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
+import { obtenerSiguienteNodoRoadmap } from "@/lib/roadmap/siguiente-nodo";
 import { cn } from "@/lib/utils";
 
 export interface NodoRuta {
@@ -26,6 +27,7 @@ export interface NodoRuta {
 }
 
 export interface GrupoRuta {
+  moduloId: string;
   titulo: string;
   nodos: NodoRuta[];
 }
@@ -46,13 +48,20 @@ const ROADMAP_ASSETS = {
   avatar: "/images/roadmap_asset/Avatar.png",
 } as const;
 
-const ROADMAP_TRANSITION_STORAGE_KEY = "roadmap:last-completed-node";
-
 /** Secuencia fija por módulo: intro → práctica → lectura → actividad. */
 const ICONOS_LECCION: LucideIcon[] = [BookOpen, Play, FileText, Wrench];
 
 type EstadoEstacion = "completado" | "activo" | "pendiente" | "bloqueado";
 type TipoAssetEstacion = "inicio" | "mid" | "fin" | "quiz";
+type FaseTransicionRoadmap =
+  | "idle"
+  | "scrolling-to-origin"
+  | "waiting"
+  | "completing"
+  | "holding"
+  | "moving"
+  | "scrolling-to-destination"
+  | "arrived";
 
 interface ColorModulo {
   inicio: string;
@@ -81,6 +90,16 @@ function estadoEstacion(nodo: NodoRuta, esActivo: boolean): EstadoEstacion {
   if (nodo.completado) return "completado";
   if (esActivo) return "activo";
   return "pendiente";
+}
+
+function nodoParaFaseVisual(nodo: NodoRuta, estadoForzado?: EstadoEstacion): NodoRuta {
+  if (!estadoForzado) return nodo;
+
+  return {
+    ...nodo,
+    completado: estadoForzado === "completado" ? true : false,
+    bloqueado: estadoForzado === "bloqueado" ? true : false,
+  };
 }
 
 function progresoAnilloVisual(
@@ -139,20 +158,20 @@ interface NodoPlanoRoadmap {
   indiceNodo: number;
 }
 
-interface TransicionCompletadoStorage {
-  cursoId?: string;
-  nodoId?: string;
-  at?: number;
-  timestamp?: number;
+interface PuntoAvatarRoadmap {
+  x: number;
+  y: number;
+}
+
+interface MovimientoAvatarRoadmap {
+  origen: PuntoAvatarRoadmap;
+  destino: PuntoAvatarRoadmap;
+  activo: boolean;
+  duracionMs: number;
 }
 
 function idNodoActivoGlobal(grupos: GrupoRuta[]): string | null {
-  for (const grupo of grupos) {
-    const activo = grupo.nodos.find((nodo) => !nodo.completado && !nodo.bloqueado);
-    if (activo) return activo.id;
-  }
-
-  return null;
+  return obtenerSiguienteNodoRoadmap(grupos)?.nodo.id ?? null;
 }
 
 function calcularProgresoModulo(nodos: NodoRuta[]): ProgresoModulo {
@@ -168,9 +187,46 @@ function calcularProgresoModulo(nodos: NodoRuta[]): ProgresoModulo {
   };
 }
 
-function hrefInicioModulo(grupo: GrupoRuta | undefined): string | null {
-  if (!grupo) return null;
-  return grupo.nodos.find((nodo) => !nodo.bloqueado)?.href ?? grupo.nodos[0]?.href ?? null;
+function moduloDisponible(grupo: GrupoRuta): boolean {
+  return grupo.nodos.some((nodo) => !nodo.bloqueado);
+}
+
+function indiceModuloPorNodo(grupos: GrupoRuta[], nodoId: string | null | undefined): number {
+  if (!nodoId) return -1;
+  return grupos.findIndex((grupo) => grupo.nodos.some((nodo) => nodo.id === nodoId));
+}
+
+function indiceModuloInicial(
+  grupos: GrupoRuta[],
+  transicionNodoId?: string,
+  focoNodoId?: string,
+): number {
+  if (grupos.length === 0) return 0;
+
+  const indiceParametro = indiceModuloPorNodo(grupos, transicionNodoId ?? focoNodoId);
+  if (indiceParametro >= 0) return indiceParametro;
+
+  const nodoActivoId = idNodoActivoGlobal(grupos);
+  const indiceActivo = indiceModuloPorNodo(grupos, nodoActivoId);
+  if (indiceActivo >= 0) return indiceActivo;
+
+  const indiceIncompleto = grupos.findIndex(
+    (grupo) => moduloDisponible(grupo) && !calcularProgresoModulo(grupo.nodos).completo,
+  );
+  if (indiceIncompleto >= 0) return indiceIncompleto;
+
+  return grupos.length - 1;
+}
+
+function siguienteIndiceModuloDisponible(
+  grupos: GrupoRuta[],
+  indiceActual: number,
+): number | null {
+  const siguiente = grupos.findIndex(
+    (grupo, indice) => indice > indiceActual && moduloDisponible(grupo),
+  );
+
+  return siguiente >= 0 ? siguiente : null;
 }
 
 function aplanarNodosRoadmap(grupos: GrupoRuta[]): NodoPlanoRoadmap[] {
@@ -250,130 +306,90 @@ async function esperarElementoNodoRoadmap(
   return null;
 }
 
-function estaSuficientementeVisible(elemento: HTMLElement): boolean {
-  const rect = elemento.getBoundingClientRect();
-  const altoViewport = window.innerHeight || document.documentElement.clientHeight;
-  const margenSuperior = altoViewport * 0.18;
-  const margenInferior = altoViewport * 0.82;
-
-  return rect.top >= margenSuperior && rect.bottom <= margenInferior;
-}
-
-function contenedorScrollVertical(elemento: HTMLElement): HTMLElement | null {
-  let actual = elemento.parentElement;
-
-  while (actual && actual !== document.body && actual !== document.documentElement) {
-    const estilos = window.getComputedStyle(actual);
-    const overflowY = estilos.overflowY;
-    const puedeScroll = /(auto|scroll|overlay)/.test(overflowY);
-
-    if (puedeScroll && actual.scrollHeight > actual.clientHeight) {
-      return actual;
-    }
-
-    actual = actual.parentElement;
-  }
-
-  return null;
-}
-
 async function centrarNodoRoadmap(
   nodoId: string,
   reducido: boolean,
-  forzar = false,
-): Promise<boolean> {
+): Promise<HTMLElement | null> {
   const elemento = await esperarElementoNodoRoadmap(nodoId);
-  if (!elemento) return false;
+  if (!elemento) return null;
 
-  if (forzar || !estaSuficientementeVisible(elemento)) {
-    const contenedor = contenedorScrollVertical(elemento);
-    const rect = elemento.getBoundingClientRect();
-
-    if (contenedor) {
-      const rectContenedor = contenedor.getBoundingClientRect();
-      const destino = Math.max(
-        0,
-        contenedor.scrollTop +
-          rect.top -
-          rectContenedor.top +
-          rect.height / 2 -
-          contenedor.clientHeight / 2,
-      );
-
-      contenedor.scrollTo({
-        top: destino,
-        behavior: reducido ? "auto" : "smooth",
-      });
-    } else {
-      const altoViewport = window.innerHeight || document.documentElement.clientHeight;
-      const destino = Math.max(0, window.scrollY + rect.top + rect.height / 2 - altoViewport / 2);
-
-      window.scrollTo({
-        top: destino,
-        behavior: reducido ? "auto" : "smooth",
-      });
-    }
-
-    return true;
-  }
-
-  return false;
+  elemento.scrollIntoView({
+    behavior: reducido ? "auto" : "smooth",
+    block: "center",
+    inline: "nearest",
+  });
+  return elemento;
 }
 
-async function centrarNodoRoadmapEstable(
-  nodoId: string,
+function esperarFinScroll(
+  elemento: HTMLElement,
   reducido: boolean,
-  forzar = false,
-): Promise<boolean> {
-  const primerScroll = await centrarNodoRoadmap(nodoId, reducido, forzar);
-  await wait(reducido ? 0 : 180);
-  const segundoScroll = await centrarNodoRoadmap(nodoId, true, forzar);
+  timeoutMs = 850,
+): Promise<void> {
+  if (reducido) return wait(0);
 
-  return primerScroll || segundoScroll;
+  return new Promise((resolve) => {
+    let resuelto = false;
+    const terminar = () => {
+      if (resuelto) return;
+      resuelto = true;
+      window.removeEventListener("scrollend", terminar);
+      elemento.removeEventListener("scrollend", terminar);
+      window.clearTimeout(timeoutId);
+      resolve();
+    };
+
+    const timeoutId = window.setTimeout(terminar, timeoutMs);
+    window.addEventListener("scrollend", terminar, { once: true });
+    elemento.addEventListener("scrollend", terminar, { once: true });
+  });
 }
 
-function claveTransicionRoadmap(cursoId: string | undefined): string {
-  return cursoId ? `roadmap-transition:${cursoId}` : ROADMAP_TRANSITION_STORAGE_KEY;
+function puntoCentroElemento(elemento: HTMLElement): PuntoAvatarRoadmap {
+  const rect = elemento.getBoundingClientRect();
+  return {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+  };
 }
 
-function leerTransicionPendiente(cursoId: string | undefined): string | null {
-  if (typeof window === "undefined") return null;
-
-  const claves = [claveTransicionRoadmap(cursoId), ROADMAP_TRANSITION_STORAGE_KEY];
-
-  try {
-    const clave = claves.find((item) => window.sessionStorage.getItem(item));
-    if (!clave) return null;
-
-    const raw = window.sessionStorage.getItem(clave);
-    if (!raw) return null;
-
-    const data = JSON.parse(raw) as TransicionCompletadoStorage;
-    const timestamp = data.timestamp ?? data.at;
-    const reciente = typeof timestamp === "number" && Date.now() - timestamp < 120_000;
-    return reciente && data.nodoId ? data.nodoId : null;
-  } catch {
-    return null;
-  } finally {
-    for (const clave of claves) {
-      window.sessionStorage.removeItem(clave);
-    }
-  }
-}
-
-function limpiarParametroTransicionRoadmap(): void {
+function limpiarParametrosRoadmap(parametros: string[]): void {
   if (typeof window === "undefined") return;
 
   const url = new URL(window.location.href);
-  if (!url.searchParams.has("roadmapTransition")) return;
+  const hayParametros = parametros.some((parametro) => url.searchParams.has(parametro));
+  if (!hayParametros) return;
 
-  url.searchParams.delete("roadmapTransition");
+  parametros.forEach((parametro) => url.searchParams.delete(parametro));
   const query = url.searchParams.toString();
   window.history.replaceState(
     window.history.state,
     "",
     `${url.pathname}${query ? `?${query}` : ""}${url.hash}`,
   );
+}
+
+function estadoVisualTransicion(
+  nodoId: string,
+  nodoTransicionId: string | null,
+  nodoDestinoId: string | null,
+  fase: FaseTransicionRoadmap,
+): EstadoEstacion | undefined {
+  if (nodoId === nodoDestinoId && fase === "arrived") return "activo";
+  if (nodoId !== nodoTransicionId) return undefined;
+
+  if (fase === "scrolling-to-origin" || fase === "waiting") return "activo";
+  if (
+    fase === "completing" ||
+    fase === "holding" ||
+    fase === "moving" ||
+    fase === "scrolling-to-destination" ||
+    fase === "arrived"
+  ) {
+    return "completado";
+  }
+
+  return undefined;
 }
 
 function indiceLeccionEnNodo(nodos: NodoRuta[], indice: number): number {
@@ -508,10 +524,10 @@ function AnilloEstacion({
       "drop-shadow-[0_0_6px_rgba(214,184,93,0.42)] drop-shadow-[0_0_10px_rgba(185,150,60,0.2)]",
     estado === "activo" &&
       !esQuiz &&
-      "drop-shadow-[0_0_5px_rgba(30,93,142,0.35)]",
+      "drop-shadow-[0_0_10px_rgba(45,212,191,0.55)] drop-shadow-[0_0_22px_rgba(34,211,238,0.25)]",
     estado === "activo" &&
       esQuiz &&
-      "drop-shadow-[0_0_5px_rgba(214,184,93,0.32)]",
+      "drop-shadow-[0_0_10px_rgba(45,212,191,0.52)] drop-shadow-[0_0_22px_rgba(34,211,238,0.24)]",
   );
 
   const glowStyle: CSSProperties | undefined = anilloModuloCompletado
@@ -629,7 +645,7 @@ function NucleoHexagonal({
     colorIcono = "#5C4A1A";
   } else if (esActivo) {
     relleno = `url(#${gradId}-active)`;
-    borde = "#D6B85D";
+    borde = "#22D3EE";
     colorIcono = "#FFFFFF";
   }
 
@@ -642,6 +658,9 @@ function NucleoHexagonal({
         className={cn(
           "drop-shadow-md",
           nodo.completado && "drop-shadow-[0_0_8px_rgba(214,184,93,0.35)]",
+          esActivo &&
+            !nodo.completado &&
+            "drop-shadow-[0_0_10px_rgba(45,212,191,0.55)] drop-shadow-[0_0_22px_rgba(34,211,238,0.25)]",
         )}
         aria-hidden="true"
       >
@@ -677,6 +696,7 @@ function NucleoEstacion({
   totalModulo,
   indiceModulo,
   esActivo,
+  estadoVisualForzado,
 }: {
   nodo: NodoRuta;
   variant: VarianteRoadmap;
@@ -685,13 +705,15 @@ function NucleoEstacion({
   totalModulo: number;
   indiceModulo: number;
   esActivo: boolean;
+  estadoVisualForzado?: EstadoEstacion;
 }) {
-  const estado = estadoEstacion(nodo, esActivo);
+  const nodoVisual = nodoParaFaseVisual(nodo, estadoVisualForzado);
+  const estado = estadoVisualForzado ?? estadoEstacion(nodoVisual, esActivo);
   const progreso = progresoAnilloVisual(estado, indiceEnModulo, totalModulo);
-  const esQuiz = nodo.tipo === "evaluacion";
-  const Icono = iconoEstacion(nodo, indiceLeccion);
+  const esQuiz = nodoVisual.tipo === "evaluacion";
+  const Icono = iconoEstacion(nodoVisual, indiceLeccion);
   const colorModulo = colorModuloPorIndice(indiceModulo);
-  const nucleoCompletadoModulo = nodo.completado && !esQuiz;
+  const nucleoCompletadoModulo = estado === "completado" && !esQuiz;
 
   const estiloNucleoCompletado: CSSProperties | undefined = nucleoCompletadoModulo
     ? {
@@ -707,7 +729,7 @@ function NucleoEstacion({
     <div
       className={cn(
         "relative flex shrink-0 items-center justify-center overflow-visible transition-transform duration-300",
-        esActivo && "z-30 scale-[1.16]",
+        esActivo && estado !== "completado" && "roadmap-station-active z-30 scale-[1.1] md:scale-[1.14]",
       )}
       style={{ width: ANILLO, height: ANILLO }}
     >
@@ -721,18 +743,18 @@ function NucleoEstacion({
         colorModulo={colorModulo}
       />
       {esQuiz ? (
-        <NucleoHexagonal nodo={nodo} variant={variant} esActivo={esActivo} Icono={Icono} />
+        <NucleoHexagonal nodo={nodoVisual} variant={variant} esActivo={esActivo} Icono={Icono} />
       ) : (
         <div
           className={cn(
             "station-core relative z-20 flex items-center justify-center rounded-full border-2 shadow-md transition-transform",
             nucleoCompletadoModulo && "text-white",
             esActivo &&
-              !nodo.completado &&
-              "border-[#4FC9B3]/70 bg-gradient-to-br from-[#0C2240] via-[#153B63] to-[#1E5D8E] text-white shadow-[0_0_8px_rgba(30,93,142,0.35)] hover:scale-105",
+              estado !== "completado" &&
+              "roadmap-station-active-core border-[#22D3EE] bg-gradient-to-br from-[#071B30] via-[#0B2A46] to-[#123B60] text-white shadow-[0_0_14px_rgba(45,212,191,0.42)] hover:scale-105",
             estado === "pendiente" &&
               "border-[#B8D4CE] bg-gradient-to-br from-[#EAF7F5] to-[#D0E8E3] text-[#1A4D45]",
-            nodo.bloqueado && "border-slate-300 bg-slate-100 text-slate-400",
+            estado === "bloqueado" && "border-slate-300 bg-slate-100 text-slate-400",
           )}
           style={estiloNucleoCompletado}
         >
@@ -804,12 +826,47 @@ function AvatarRoadmap({ variant }: { variant: VarianteRoadmap }) {
   );
 }
 
+function AvatarRoadmapEnMovimiento({
+  movimiento,
+}: {
+  movimiento: MovimientoAvatarRoadmap | null;
+}) {
+  if (!movimiento) return null;
+
+  const dx = movimiento.destino.x - movimiento.origen.x;
+  const dy = movimiento.destino.y - movimiento.origen.y;
+
+  return (
+    <Image
+      src={ROADMAP_ASSETS.avatar}
+      alt="Avance hacia la siguiente estacion"
+      width={76}
+      height={76}
+      className={cn(
+        "roadmap-transition-avatar pointer-events-none fixed z-[80] size-[76px] object-contain",
+        movimiento.activo && "roadmap-transition-avatar-moving",
+      )}
+      style={
+        {
+          left: movimiento.origen.x,
+          top: movimiento.origen.y,
+          "--roadmap-avatar-dx": `${dx}px`,
+          "--roadmap-avatar-dy": `${dy}px`,
+          "--roadmap-avatar-duration": `${movimiento.duracionMs}ms`,
+        } as CSSProperties
+      }
+    />
+  );
+}
+
 function CaminoRoadmap({
   layouts,
   indiceModulo,
+  nodoActivoId,
 }: {
   layouts: LayoutNodoRoadmap[];
   indiceModulo: number;
+  nodoActivoId: string | null;
 }) {
   if (layouts.length < 2) return null;
 
@@ -817,6 +874,13 @@ function CaminoRoadmap({
   const points = layouts.map((layout) => `${layout.x},${layout.y}`).join(" ");
   const alto = layouts.at(-1)!.y + 96;
   const gradId = `roadmap-path-${indiceModulo}`;
+  const indiceActivo = nodoActivoId
+    ? layouts.findIndex((layout) => layout.nodo.id === nodoActivoId)
+    : -1;
+  const segmentoActivo =
+    indiceActivo > 0
+      ? `${layouts[indiceActivo - 1]!.x},${layouts[indiceActivo - 1]!.y} ${layouts[indiceActivo]!.x},${layouts[indiceActivo]!.y}`
+      : null;
 
   return (
     <svg
@@ -836,6 +900,9 @@ function CaminoRoadmap({
       <polyline className="roadmap-isometric-track-base" points={points} />
       <polyline className="roadmap-isometric-track-tiles" points={points} />
       <polyline className="roadmap-isometric-track-core" points={points} stroke={`url(#${gradId})`} />
+      {segmentoActivo && (
+        <polyline className="roadmap-isometric-track-active-segment" points={segmentoActivo} />
+      )}
     </svg>
   );
 }
@@ -879,18 +946,21 @@ function ModuloRoadmapDesktop({
   grupo,
   indiceModulo,
   nodoActivoGlobalId,
-  nodoCompletadoAnimadoId,
-  nodoResaltadoId,
+  nodoTransicionId,
+  nodoDestinoId,
+  faseTransicion,
 }: {
   grupo: GrupoRuta;
   indiceModulo: number;
   nodoActivoGlobalId: string | null;
-  nodoCompletadoAnimadoId: string | null;
-  nodoResaltadoId: string | null;
+  nodoTransicionId: string | null;
+  nodoDestinoId: string | null;
+  faseTransicion: FaseTransicionRoadmap;
 }) {
   const layouts = layoutNodosRoadmap(grupo.nodos);
   const alto = Math.max(420, (layouts.at(-1)?.y ?? ROADMAP_TOP_Y) + 130);
-  const nodoActivoModuloId = idNodoActivoModulo(grupo.nodos);
+  const nodoActivoSegmentoId =
+    faseTransicion === "arrived" ? nodoDestinoId : faseTransicion === "idle" ? nodoActivoGlobalId : null;
 
   return (
     <div
@@ -901,12 +971,34 @@ function ModuloRoadmapDesktop({
         <AssetEstacion key={`asset-${layout.nodo.id}`} layout={layout} variant="desktop" />
       ))}
 
-      <CaminoRoadmap layouts={layouts} indiceModulo={indiceModulo} />
+      <CaminoRoadmap
+        layouts={layouts}
+        indiceModulo={indiceModulo}
+        nodoActivoId={nodoActivoSegmentoId}
+      />
       <CaminoDecoracion layouts={layouts} />
 
       {layouts.map((layout) => {
-        const esNodoResaltado = layout.nodo.id === nodoResaltadoId;
-        const mostrarAvatar = layout.nodo.id === nodoActivoGlobalId || esNodoResaltado;
+        const estadoForzado = estadoVisualTransicion(
+          layout.nodo.id,
+          nodoTransicionId,
+          nodoDestinoId,
+          faseTransicion,
+        );
+        const animandoCompletado =
+          layout.nodo.id === nodoTransicionId && faseTransicion === "completing";
+        const sosteniendoCompletado =
+          layout.nodo.id === nodoTransicionId && faseTransicion === "holding";
+        const llegandoDestino =
+          layout.nodo.id === nodoDestinoId && faseTransicion === "arrived";
+        const transicionActiva = faseTransicion !== "idle";
+        const esNodoActivoVisual =
+          (!transicionActiva && layout.nodo.id === nodoActivoGlobalId) ||
+          estadoForzado === "activo";
+        const mostrarAvatar =
+          (!transicionActiva && layout.nodo.id === nodoActivoGlobalId) ||
+          (faseTransicion === "arrived" && layout.nodo.id === nodoDestinoId);
+        const nodoEtiqueta = nodoParaFaseVisual(layout.nodo, estadoForzado);
         const gapNodoTexto = 26;
 
         return (
@@ -917,8 +1009,9 @@ function ModuloRoadmapDesktop({
               data-roadmap-node={layout.nodo.id}
               className={cn(
                 "absolute z-30 overflow-visible",
-                layout.nodo.id === nodoCompletadoAnimadoId && "roadmap-node-just-completed",
-                esNodoResaltado && "roadmap-node-next-highlight",
+                animandoCompletado && "roadmap-node-just-completed",
+                sosteniendoCompletado && "roadmap-node-completed-hold",
+                llegandoDestino && "roadmap-node-next-highlight",
               )}
               style={{
                 left: layout.x - ANILLO / 2,
@@ -934,7 +1027,8 @@ function ModuloRoadmapDesktop({
                 indiceEnModulo={layout.indice}
                 totalModulo={grupo.nodos.length}
                 indiceModulo={indiceModulo}
-                esActivo={layout.nodo.id === nodoActivoModuloId || esNodoResaltado}
+                esActivo={esNodoActivoVisual}
+                estadoVisualForzado={estadoForzado}
                 soloIcono
               />
               {mostrarAvatar && <AvatarRoadmap variant="desktop" />}
@@ -960,8 +1054,9 @@ function ModuloRoadmapDesktop({
               }
             >
               <EtiquetaNodo
-                nodo={layout.nodo}
+                nodo={nodoEtiqueta}
                 alineacion={layout.textoALaIzquierda ? "right" : "left"}
+                esActivo={esNodoActivoVisual}
               />
             </div>
           </div>
@@ -1015,14 +1110,97 @@ function IndicadorProgresoModulo({
   );
 }
 
+function NavegacionModulosRoadmap({
+  grupos,
+  indicesDisponibles,
+  indiceModuloVisible,
+  onSeleccionarModulo,
+}: {
+  grupos: GrupoRuta[];
+  indicesDisponibles: number[];
+  indiceModuloVisible: number;
+  onSeleccionarModulo: (indiceModulo: number) => void;
+}) {
+  if (indicesDisponibles.length <= 1) return null;
+
+  return (
+    <nav
+      aria-label="Navegacion de modulos"
+      className="relative z-40 mb-8 w-full overflow-x-auto overscroll-x-contain pb-2"
+    >
+      <div className="mx-auto flex w-max max-w-full items-start justify-center gap-2 px-1 sm:gap-3">
+        {indicesDisponibles.map((indiceModulo, indiceDisponible) => {
+          const grupo = grupos[indiceModulo]!;
+          const progreso = calcularProgresoModulo(grupo.nodos);
+          const colorModulo = colorModuloPorIndice(indiceModulo);
+          const visible = indiceModulo === indiceModuloVisible;
+          const label = `Modulo ${indiceModulo + 1}`;
+          const ariaLabel = progreso.completo
+            ? `Ver ${label}. Modulo completado`
+            : `Ver ${label}`;
+
+          return (
+            <div key={grupo.moduloId} className="flex items-start gap-2 sm:gap-3">
+              {indiceDisponible > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="mt-[18px] h-px w-5 rounded-full bg-slate-300/80 dark:bg-white/20 sm:w-8"
+                />
+              )}
+              <button
+                type="button"
+                aria-current={visible ? "step" : undefined}
+                aria-label={ariaLabel}
+                title={`${label} · ${grupo.titulo}`}
+                onClick={() => onSeleccionarModulo(indiceModulo)}
+                className={cn(
+                  "group flex min-w-10 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-xs font-semibold text-slate-500 transition-[color,transform] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:text-slate-300",
+                  visible && "scale-105 text-[#071B30] dark:text-white",
+                )}
+              >
+                <span
+                  className={cn(
+                    "grid size-8 place-items-center rounded-full border bg-white shadow-sm transition-[border-color,box-shadow,transform,background-color] duration-300 dark:bg-white/8",
+                    visible &&
+                      "size-9 border-[#22D3EE] bg-[#071B30] text-white shadow-[0_0_18px_rgba(34,211,238,0.35)]",
+                    !visible &&
+                      progreso.completo &&
+                      "text-white shadow-[0_0_12px_rgba(6,17,32,0.08)]",
+                    !visible &&
+                      !progreso.completo &&
+                      "border-slate-300 text-slate-400 dark:border-white/20",
+                  )}
+                  style={
+                    !visible && progreso.completo
+                      ? {
+                          borderColor: `${colorModulo.final}cc`,
+                          background: `linear-gradient(to bottom right, ${colorModulo.inicio}, ${colorModulo.final})`,
+                        }
+                      : undefined
+                  }
+                >
+                  {progreso.completo ? <Check className="size-4" aria-hidden="true" /> : null}
+                </span>
+                <span>{indiceModulo + 1}</span>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
 function CierreModulo({
   indiceModulo,
   esUltimoModulo,
-  hrefSiguienteModulo,
+  indiceModuloDestino,
+  onContinuarModulo,
 }: {
   indiceModulo: number;
   esUltimoModulo: boolean;
-  hrefSiguienteModulo: string | null;
+  indiceModuloDestino: number | null;
+  onContinuarModulo: (indiceModulo: number) => void;
 }) {
   const titulo = esUltimoModulo ? "Último módulo completado" : "Módulo completado";
   const descripcion = esUltimoModulo
@@ -1037,14 +1215,15 @@ function CierreModulo({
       <h3 className="font-display text-base font-semibold text-foreground">{titulo}</h3>
       <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{descripcion}</p>
 
-      {!esUltimoModulo && hrefSiguienteModulo && (
-        <Link
-          href={hrefSiguienteModulo}
+      {!esUltimoModulo && indiceModuloDestino !== null && (
+        <button
+          type="button"
+          onClick={() => onContinuarModulo(indiceModuloDestino)}
           className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#061120] px-4 py-3 text-sm font-semibold text-white transition-[background-color,transform] duration-300 hover:bg-[#123A32] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto dark:bg-[#91DC00] dark:text-[#061120]"
         >
           Continuar al Módulo {indiceModulo + 2}
           <ArrowRight className="size-4" aria-hidden="true" />
-        </Link>
+        </button>
       )}
     </div>
   );
@@ -1148,19 +1327,96 @@ export function VistaRoadmap({ children }: { children: React.ReactNode }) {
 
 export function RutaAprendizaje({
   grupos,
-  cursoId,
+  focoNodoId,
   transicionNodoId,
   legacy = false,
 }: {
   grupos: GrupoRuta[];
-  cursoId?: string;
+  focoNodoId?: string;
   transicionNodoId?: string;
   legacy?: boolean;
 }) {
   const nodosPlanos = useMemo(() => aplanarNodosRoadmap(grupos), [grupos]);
   const mapaCompletadosPrevio = useRef<Map<string, boolean> | null>(null);
-  const [nodoCompletadoAnimadoId, setNodoCompletadoAnimadoId] = useState<string | null>(null);
-  const [nodoResaltadoId, setNodoResaltadoId] = useState<string | null>(null);
+  const [nodoTransicionId, setNodoTransicionId] = useState<string | null>(null);
+  const [nodoDestinoId, setNodoDestinoId] = useState<string | null>(null);
+  const [faseTransicion, setFaseTransicion] = useState<FaseTransicionRoadmap>("idle");
+  const [movimientoAvatar, setMovimientoAvatar] = useState<MovimientoAvatarRoadmap | null>(null);
+  const [indiceModuloVisible, setIndiceModuloVisible] = useState(() =>
+    indiceModuloInicial(grupos, transicionNodoId, focoNodoId),
+  );
+  const [moduloEnCambio, setModuloEnCambio] = useState(false);
+  const inicioModuloRef = useRef<HTMLDivElement>(null);
+  const cambioModuloTimeoutRef = useRef<number | null>(null);
+
+  function desplazarAInicioModulo() {
+    const reducido = prefiereMovimientoReducido();
+    window.requestAnimationFrame(() => {
+      inicioModuloRef.current?.scrollIntoView({
+        behavior: reducido ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+  }
+
+  function seleccionarModulo(indiceModulo: number) {
+    const grupoDestino = grupos[indiceModulo];
+    if (!grupoDestino || !moduloDisponible(grupoDestino)) return;
+
+    if (cambioModuloTimeoutRef.current !== null) {
+      window.clearTimeout(cambioModuloTimeoutRef.current);
+      cambioModuloTimeoutRef.current = null;
+    }
+
+    if (indiceModulo === indiceModuloVisible) {
+      desplazarAInicioModulo();
+      return;
+    }
+
+    const reducido = prefiereMovimientoReducido();
+    const aplicarCambio = () => {
+      cambioModuloTimeoutRef.current = null;
+      setIndiceModuloVisible(indiceModulo);
+      setModuloEnCambio(false);
+      desplazarAInicioModulo();
+    };
+
+    setModuloEnCambio(true);
+
+    if (reducido) {
+      aplicarCambio();
+      return;
+    }
+
+    cambioModuloTimeoutRef.current = window.setTimeout(aplicarCambio, 220);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (cambioModuloTimeoutRef.current !== null) {
+        window.clearTimeout(cambioModuloTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const indiceDeseado = indiceModuloInicial(grupos, transicionNodoId, focoNodoId);
+
+    setIndiceModuloVisible((actual) => {
+      const grupoActual = grupos[actual];
+      const debeSeguirParametro = Boolean(transicionNodoId || focoNodoId);
+
+      if (!grupoActual || (debeSeguirParametro && actual !== indiceDeseado)) {
+        return indiceDeseado;
+      }
+
+      if (!moduloDisponible(grupoActual) && actual !== indiceDeseado) {
+        return indiceDeseado;
+      }
+
+      return actual;
+    });
+  }, [focoNodoId, grupos, transicionNodoId]);
 
   useEffect(() => {
     if (legacy) return;
@@ -1168,28 +1424,24 @@ export function RutaAprendizaje({
     const completadosActuales = mapaCompletados(grupos);
     const completadosPrevios = mapaCompletadosPrevio.current;
     let nodoCompletadoId: string | null = null;
+    const nodoParametroValido =
+      transicionNodoId && nodosPlanos.some(({ nodo }) => nodo.id === transicionNodoId)
+        ? transicionNodoId
+        : null;
 
-    if (completadosPrevios) {
+    if (nodoParametroValido) {
+      nodoCompletadoId = nodoParametroValido;
+    } else if (completadosPrevios) {
       for (const { nodo } of nodosPlanos) {
         if (!completadosPrevios.get(nodo.id) && completadosActuales.get(nodo.id)) {
           nodoCompletadoId = nodo.id;
           break;
         }
       }
-    } else if (
-      transicionNodoId &&
-      nodosPlanos.some(({ nodo }) => nodo.id === transicionNodoId)
-    ) {
-      nodoCompletadoId = transicionNodoId;
-    } else {
-      const nodoPendienteStorage = leerTransicionPendiente(cursoId);
-      if (nodoPendienteStorage && completadosActuales.get(nodoPendienteStorage)) {
-        nodoCompletadoId = nodoPendienteStorage;
-      }
     }
 
     if (transicionNodoId) {
-      limpiarParametroTransicionRoadmap();
+      limpiarParametrosRoadmap(["roadmapTransition"]);
     }
 
     mapaCompletadosPrevio.current = completadosActuales;
@@ -1197,103 +1449,270 @@ export function RutaAprendizaje({
     if (!nodoCompletadoId) return;
 
     const nodoCompletadoTransicionId = nodoCompletadoId;
+    const nodoOrigen = nodosPlanos.find(({ nodo }) => nodo.id === nodoCompletadoTransicionId);
+    if (!nodoOrigen || nodoOrigen.indiceGrupo !== indiceModuloVisible) return;
+
+    const nodoDestinoCandidato = siguienteNodoDisponible(nodosPlanos, nodoCompletadoTransicionId);
+    const nodoDestinoPlano = nodoDestinoCandidato
+      ? nodosPlanos.find(({ nodo }) => nodo.id === nodoDestinoCandidato.id)
+      : null;
+    const nodoDestino =
+      nodoDestinoPlano?.indiceGrupo === nodoOrigen.indiceGrupo ? nodoDestinoCandidato : null;
     const reducido = prefiereMovimientoReducido();
-    const nodoCompletadoPlano = nodosPlanos.find(({ nodo }) => nodo.id === nodoCompletadoTransicionId);
-    const moduloCompletado = nodoCompletadoPlano
-      ? calcularProgresoModulo(grupos[nodoCompletadoPlano.indiceGrupo]?.nodos ?? []).completo
-      : false;
-    const siguiente = siguienteNodoDisponible(nodosPlanos, nodoCompletadoTransicionId);
-    const esperaPostScrollCompletado = reducido ? 0 : 650;
-    const duracionCompletado = reducido ? 180 : 1200;
-    const pausaAntesSiguiente = reducido ? 0 : moduloCompletado ? 420 : 180;
-    const esperaPostScrollSiguiente = reducido ? 0 : 560;
-    const duracionResaltado = reducido ? 300 : 1200;
+    const pausaDespuesScroll = reducido ? 0 : 320;
+    const duracionCompletado = reducido ? 120 : 1150;
+    const duracionHold = reducido ? 250 : 650;
+    const moduloCompletado =
+      nodoOrigen
+        ? calcularProgresoModulo(grupos[nodoOrigen.indiceGrupo]?.nodos ?? []).completo
+        : false;
+    const pausaCierreModulo = reducido ? 0 : moduloCompletado ? 850 : 0;
+    const duracionMovimiento = reducido ? 0 : 1100;
+    const duracionLlegada = reducido ? 250 : 1000;
     let cancelado = false;
 
     async function ejecutarTransicion() {
+      setNodoTransicionId(nodoCompletadoTransicionId);
+      setNodoDestinoId(nodoDestino?.id ?? null);
+      setMovimientoAvatar(null);
+      setFaseTransicion("scrolling-to-origin");
+
       await esperarDoblePintado();
       if (cancelado) return;
 
-      await centrarNodoRoadmapEstable(nodoCompletadoTransicionId, reducido, true);
-      await wait(esperaPostScrollCompletado);
+      const estacionOrigen = await centrarNodoRoadmap(nodoCompletadoTransicionId, reducido);
+      if (!estacionOrigen) {
+        setFaseTransicion("idle");
+        setNodoTransicionId(null);
+        return;
+      }
+
+      await esperarFinScroll(estacionOrigen, reducido);
       if (cancelado) return;
 
-      await centrarNodoRoadmap(nodoCompletadoTransicionId, true, true);
+      setFaseTransicion("waiting");
+      await wait(pausaDespuesScroll);
       if (cancelado) return;
 
-      setNodoCompletadoAnimadoId(nodoCompletadoTransicionId);
+      setFaseTransicion("completing");
       await wait(duracionCompletado);
       if (cancelado) return;
 
-      setNodoCompletadoAnimadoId((actual) =>
-        actual === nodoCompletadoTransicionId ? null : actual,
-      );
-
-      if (!siguiente) return;
-
-      await wait(pausaAntesSiguiente);
+      setFaseTransicion("holding");
+      await wait(duracionHold);
       if (cancelado) return;
 
-      await centrarNodoRoadmapEstable(siguiente.id, reducido, true);
-      await wait(esperaPostScrollSiguiente);
+      if (!nodoDestino) {
+        if (pausaCierreModulo > 0) {
+          await wait(pausaCierreModulo);
+          if (cancelado) return;
+        }
+
+        setFaseTransicion("idle");
+        setNodoTransicionId(null);
+        setNodoDestinoId(null);
+        setMovimientoAvatar(null);
+        return;
+      }
+
+      if (pausaCierreModulo > 0) {
+        await wait(pausaCierreModulo);
+        if (cancelado) return;
+      }
+
+      setFaseTransicion("moving");
+      await esperarDoblePintado();
       if (cancelado) return;
 
-      await centrarNodoRoadmap(siguiente.id, true, true);
+      const origen = await esperarElementoNodoRoadmap(nodoCompletadoTransicionId);
+      const destino = await esperarElementoNodoRoadmap(nodoDestino.id);
+
+      if (!origen || !destino) {
+        setFaseTransicion("idle");
+        setNodoTransicionId(null);
+        setNodoDestinoId(null);
+        setMovimientoAvatar(null);
+        return;
+      }
+
+      setMovimientoAvatar({
+        origen: puntoCentroElemento(origen),
+        destino: puntoCentroElemento(destino),
+        activo: false,
+        duracionMs: duracionMovimiento,
+      });
+
+      await esperarDoblePintado();
       if (cancelado) return;
 
-      setNodoResaltadoId(siguiente.id);
-      await wait(duracionResaltado);
+      setMovimientoAvatar((actual) => (actual ? { ...actual, activo: true } : actual));
+
+      if (!reducido) {
+        await wait(duracionMovimiento);
+      }
+
       if (cancelado) return;
 
-      setNodoResaltadoId((actual) => (actual === siguiente.id ? null : actual));
+      setMovimientoAvatar(null);
+      setFaseTransicion("scrolling-to-destination");
+
+      const estacionDestino = await centrarNodoRoadmap(nodoDestino.id, reducido);
+      if (estacionDestino) {
+        await esperarFinScroll(estacionDestino, reducido, reducido ? 0 : 650);
+      }
+      if (cancelado) return;
+
+      setFaseTransicion("arrived");
+      await wait(duracionLlegada);
+      if (cancelado) return;
+
+      setFaseTransicion("idle");
+      setNodoTransicionId(null);
+      setNodoDestinoId(null);
+      setMovimientoAvatar(null);
     }
 
     void ejecutarTransicion();
 
     return () => {
       cancelado = true;
+      setMovimientoAvatar(null);
     };
-  }, [cursoId, grupos, legacy, nodosPlanos, transicionNodoId]);
+  }, [grupos, indiceModuloVisible, legacy, nodosPlanos, transicionNodoId]);
+
+  useEffect(() => {
+    if (legacy || transicionNodoId || !focoNodoId) return;
+
+    const nodoFocoPlano = nodosPlanos.find(({ nodo }) => nodo.id === focoNodoId) ?? null;
+    const nodoFoco = nodoFocoPlano?.nodo ?? null;
+
+    limpiarParametrosRoadmap(["roadmapFocus"]);
+
+    if (!nodoFoco) return;
+    if (nodoFocoPlano?.indiceGrupo !== indiceModuloVisible) return;
+
+    const nodoFocoRoadmapId = nodoFoco.id;
+    const resaltarFoco = !nodoFoco.completado && !nodoFoco.bloqueado;
+    const reducido = prefiereMovimientoReducido();
+    const duracionLlegada = reducido ? 250 : 1000;
+    let cancelado = false;
+
+    async function enfocarNodoActivo() {
+      setNodoTransicionId(null);
+      setNodoDestinoId(resaltarFoco ? nodoFocoRoadmapId : null);
+      setMovimientoAvatar(null);
+      setFaseTransicion("scrolling-to-destination");
+
+      await esperarDoblePintado();
+      if (cancelado) return;
+
+      const estacionFoco = await centrarNodoRoadmap(nodoFocoRoadmapId, reducido);
+      if (estacionFoco) {
+        await esperarFinScroll(estacionFoco, reducido, reducido ? 0 : 650);
+      }
+      if (cancelado) return;
+
+      setFaseTransicion("arrived");
+      await wait(duracionLlegada);
+      if (cancelado) return;
+
+      setFaseTransicion("idle");
+      setNodoDestinoId(null);
+      setMovimientoAvatar(null);
+    }
+
+    void enfocarNodoActivo();
+
+    return () => {
+      cancelado = true;
+      setMovimientoAvatar(null);
+    };
+  }, [focoNodoId, indiceModuloVisible, legacy, nodosPlanos, transicionNodoId]);
 
   if (!legacy) {
     const nodoActivoGlobalId = idNodoActivoGlobal(grupos);
+    const indicesDisponibles = grupos
+      .map((grupo, indice) => ({ grupo, indice }))
+      .filter(({ grupo }) => moduloDisponible(grupo))
+      .map(({ indice }) => indice);
+    const indiceSeguro =
+      grupos[indiceModuloVisible] && moduloDisponible(grupos[indiceModuloVisible]!)
+        ? indiceModuloVisible
+        : indiceModuloInicial(grupos, transicionNodoId, focoNodoId);
+    const grupoVisible = grupos[indiceSeguro];
+
+    if (!grupoVisible) return null;
+
+    const ultimoNodoGrupo = grupoVisible.nodos.at(-1)?.id;
+    const nodoActivoSegmentoId =
+      faseTransicion === "arrived"
+        ? nodoDestinoId
+        : faseTransicion === "idle"
+          ? nodoActivoGlobalId
+          : null;
+    const layoutsMobile = layoutNodosRoadmap(grupoVisible.nodos);
+    const progresoModulo = calcularProgresoModulo(grupoVisible.nodos);
+    const esUltimoModulo = indiceSeguro === grupos.length - 1;
+    const indiceModuloDestino = siguienteIndiceModuloDisponible(grupos, indiceSeguro);
 
     return (
-      <div className="relative z-10 w-full overflow-x-clip lg:overflow-x-visible">
-        {grupos.map((grupo, indiceModulo) => {
-          const ultimoNodoGrupo = grupo.nodos.at(-1)?.id;
-          const nodoActivoId = idNodoActivoModulo(grupo.nodos);
-          const layoutsMobile = layoutNodosRoadmap(grupo.nodos);
-          const progresoModulo = calcularProgresoModulo(grupo.nodos);
-          const esUltimoModulo = indiceModulo === grupos.length - 1;
-          const hrefSiguienteModulo = hrefInicioModulo(grupos[indiceModulo + 1]);
+      <>
+        <AvatarRoadmapEnMovimiento movimiento={movimientoAvatar} />
+        <div
+          ref={inicioModuloRef}
+          className="relative z-10 w-full scroll-mt-20 overflow-x-clip lg:overflow-x-visible"
+        >
+          <NavegacionModulosRoadmap
+            grupos={grupos}
+            indicesDisponibles={indicesDisponibles}
+            indiceModuloVisible={indiceSeguro}
+            onSeleccionarModulo={seleccionarModulo}
+          />
 
-          return (
-            <div key={grupo.titulo} className="relative mb-10 w-full last:mb-0 lg:mb-14">
-              {indiceModulo > 0 && (
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none relative z-0 mx-auto mb-8 h-px max-w-md bg-border/35"
-                />
-              )}
-
+          <div
+            key={grupoVisible.moduloId}
+            className={cn(
+              "relative mb-10 w-full transition-[opacity,transform] duration-300 last:mb-0 lg:mb-14",
+              moduloEnCambio && "translate-y-3 opacity-0",
+            )}
+          >
               <div className="relative z-30 mb-10 w-full">
                 <h2 className="w-full max-w-[420px] whitespace-normal break-words text-2xl font-bold leading-tight text-foreground">
-                  {grupo.titulo}
+                  {grupoVisible.titulo}
                 </h2>
                 <IndicadorProgresoModulo
-                  indiceModulo={indiceModulo}
+                  indiceModulo={indiceSeguro}
                   progreso={progresoModulo}
                 />
               </div>
 
               <div className="relative z-20 mx-auto flex w-full max-w-md flex-col items-center px-5 lg:hidden">
-                {grupo.nodos.map((nodo, indiceEnModulo) => {
-                  const idx = indiceLeccionEnNodo(grupo.nodos, indiceEnModulo);
-                  const esActivo = nodo.id === nodoActivoId;
+                {grupoVisible.nodos.map((nodo, indiceEnModulo) => {
+                  const idx = indiceLeccionEnNodo(grupoVisible.nodos, indiceEnModulo);
                   const esAvatarActual = nodo.id === nodoActivoGlobalId;
-                  const esNodoResaltado = nodo.id === nodoResaltadoId;
                   const layout = layoutsMobile[indiceEnModulo]!;
+                  const estadoForzado = estadoVisualTransicion(
+                    nodo.id,
+                    nodoTransicionId,
+                    nodoDestinoId,
+                    faseTransicion,
+                  );
+                  const animandoCompletado =
+                    nodo.id === nodoTransicionId && faseTransicion === "completing";
+                  const sosteniendoCompletado =
+                    nodo.id === nodoTransicionId && faseTransicion === "holding";
+                  const llegandoDestino =
+                    nodo.id === nodoDestinoId && faseTransicion === "arrived";
+                  const nodoEtiqueta = nodoParaFaseVisual(nodo, estadoForzado);
+                  const transicionActiva = faseTransicion !== "idle";
+                  const esActivo =
+                    (!transicionActiva && nodo.id === nodoActivoGlobalId) ||
+                    estadoForzado === "activo";
+                  const segmentoMovilActivo =
+                    grupoVisible.nodos[indiceEnModulo + 1]?.id === nodoActivoSegmentoId;
+                  const mostrarAvatar =
+                    (!transicionActiva && esAvatarActual) ||
+                    (faseTransicion === "arrived" && nodo.id === nodoDestinoId);
 
                   return (
                     <div key={`${nodo.id}-mobile`} className="relative flex w-full flex-col items-center">
@@ -1304,8 +1723,9 @@ export function RutaAprendizaje({
                         data-roadmap-node={nodo.id}
                         className={cn(
                           "relative",
-                          nodo.id === nodoCompletadoAnimadoId && "roadmap-node-just-completed",
-                          esNodoResaltado && "roadmap-node-next-highlight",
+                          animandoCompletado && "roadmap-node-just-completed",
+                          sosteniendoCompletado && "roadmap-node-completed-hold",
+                          llegandoDestino && "roadmap-node-next-highlight",
                         )}
                       >
                         <NodoEnlace
@@ -1313,21 +1733,23 @@ export function RutaAprendizaje({
                           variant="mobile"
                           indiceLeccion={idx}
                           indiceEnModulo={indiceEnModulo}
-                          totalModulo={grupo.nodos.length}
-                          indiceModulo={indiceModulo}
-                          esActivo={esActivo || esNodoResaltado}
+                          totalModulo={grupoVisible.nodos.length}
+                          indiceModulo={indiceSeguro}
+                          esActivo={esActivo}
+                          estadoVisualForzado={estadoForzado}
                           soloIcono
                         />
-                        {(esAvatarActual || esNodoResaltado) && <AvatarRoadmap variant="mobile" />}
+                        {mostrarAvatar && <AvatarRoadmap variant="mobile" />}
                       </div>
                       <div className="relative z-30 mt-3 w-full">
-                        <EtiquetaNodo nodo={nodo} alineacion="center" />
+                        <EtiquetaNodo nodo={nodoEtiqueta} alineacion="center" esActivo={esActivo} />
                       </div>
                       {nodo.id !== ultimoNodoGrupo && (
                         <div
                           aria-hidden="true"
                           className={cn(
                             "roadmap-connector relative z-10 my-4 h-16",
+                            segmentoMovilActivo && "roadmap-connector-active-segment",
                             nodo.completado
                               ? "roadmap-connector-completed"
                               : "roadmap-connector-pending",
@@ -1340,24 +1762,25 @@ export function RutaAprendizaje({
               </div>
 
               <ModuloRoadmapDesktop
-                grupo={grupo}
-                indiceModulo={indiceModulo}
+                grupo={grupoVisible}
+                indiceModulo={indiceSeguro}
                 nodoActivoGlobalId={nodoActivoGlobalId}
-                nodoCompletadoAnimadoId={nodoCompletadoAnimadoId}
-                nodoResaltadoId={nodoResaltadoId}
+                nodoTransicionId={nodoTransicionId}
+                nodoDestinoId={nodoDestinoId}
+                faseTransicion={faseTransicion}
               />
 
               {progresoModulo.completo && (
                 <CierreModulo
-                  indiceModulo={indiceModulo}
+                  indiceModulo={indiceSeguro}
                   esUltimoModulo={esUltimoModulo}
-                  hrefSiguienteModulo={hrefSiguienteModulo}
+                  indiceModuloDestino={indiceModuloDestino}
+                  onContinuarModulo={seleccionarModulo}
                 />
               )}
             </div>
-          );
-        })}
-      </div>
+        </div>
+      </>
     );
   }
 
@@ -1467,10 +1890,12 @@ export function RutaAprendizaje({
 function EtiquetaNodo({
   nodo,
   alineacion,
+  esActivo = false,
   tipoRama = "compacta",
 }: {
   nodo: NodoRuta;
   alineacion: AlineacionEtiqueta;
+  esActivo?: boolean;
   tipoRama?: "simple" | "compacta";
 }) {
   if (tipoRama === "compacta" && alineacion !== "center") {
@@ -1481,6 +1906,8 @@ function EtiquetaNodo({
           alineacion === "right" && "flex-row-reverse text-right",
           nodo.tipo === "evaluacion" && "border-[#d7ad30]/35 bg-[#fff8df]/85 text-[#5c4a1a] dark:bg-[#34270a]/50 dark:text-[#f3df96]",
           nodo.bloqueado && "bg-slate-100/82 text-slate-500 dark:bg-slate-900/55 dark:text-slate-400",
+          esActivo &&
+            "roadmap-active-label border-[#22D3EE]/60 bg-white/94 text-[#071B30] shadow-[0_14px_34px_rgba(6,17,32,0.12),0_0_22px_rgba(45,212,191,0.18)] dark:border-[#22D3EE]/45 dark:bg-[#071B30]/84 dark:text-white",
         )}
       >
         <span
@@ -1491,6 +1918,7 @@ function EtiquetaNodo({
             nodo.completado && "border-[#13a476]",
             nodo.tipo === "evaluacion" && "border-[#d7ad30]",
             nodo.bloqueado && "border-slate-300",
+            esActivo && "border-[#22D3EE]",
           )}
         />
         <span
@@ -1500,6 +1928,7 @@ function EtiquetaNodo({
             nodo.completado && "bg-[#13a476] text-white",
             nodo.tipo === "evaluacion" && "rounded-lg bg-[#d7ad30] text-white",
             nodo.bloqueado && "bg-slate-200 text-slate-500",
+            esActivo && "bg-[#0B2A46] text-[#67E8F9] shadow-[0_0_14px_rgba(45,212,191,0.3)]",
           )}
         >
           {nodo.completado ? (
@@ -1525,6 +1954,8 @@ function EtiquetaNodo({
         alineacion === "left" && "text-left",
         alineacion === "center" && "mx-auto text-center",
         alineacion === "right" && "text-right",
+        esActivo &&
+          "rounded-xl border border-[#22D3EE]/45 bg-white/90 px-4 py-3 text-[#071B30] shadow-[0_12px_28px_rgba(6,17,32,0.1),0_0_18px_rgba(45,212,191,0.16)] dark:bg-[#071B30]/80 dark:text-white",
       )}
     >
       {nodo.titulo}
@@ -1540,6 +1971,7 @@ function NodoEnlace({
   totalModulo,
   indiceModulo,
   esActivo,
+  estadoVisualForzado,
   soloIcono = false,
 }: {
   nodo: NodoRuta;
@@ -1549,6 +1981,7 @@ function NodoEnlace({
   totalModulo: number;
   indiceModulo: number;
   esActivo: boolean;
+  estadoVisualForzado?: EstadoEstacion;
   soloIcono?: boolean;
 }) {
   const contenido = (
@@ -1561,6 +1994,7 @@ function NodoEnlace({
         totalModulo={totalModulo}
         indiceModulo={indiceModulo}
         esActivo={esActivo}
+        estadoVisualForzado={estadoVisualForzado}
       />
       {!soloIcono && (
         <span className="w-32 whitespace-normal break-words text-center text-xs font-medium leading-tight text-foreground">
