@@ -1,7 +1,9 @@
 import { Pool } from "pg";
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 import * as schema from "./schema";
+
+type Db = NodePgDatabase<typeof schema>;
 
 // En Cloud Run el secreto DATABASE_URL suele traer el socket unix
 // (`?host=/cloudsql/<INSTANCE>`). En local se usa DATABASE_URL con TCP
@@ -56,8 +58,33 @@ function crearPool() {
   throw new Error("Falta DATABASE_URL (o INSTANCE_CONNECTION_NAME + DB_*).");
 }
 
-export const pool = crearPool();
-export const db = drizzle(pool, { schema });
+let poolSingleton: Pool | undefined;
+let dbSingleton: Db | undefined;
+
+function obtenerPool(): Pool {
+  poolSingleton ??= crearPool();
+  return poolSingleton;
+}
+
+function obtenerDb(): Db {
+  dbSingleton ??= drizzle(obtenerPool(), { schema });
+  return dbSingleton;
+}
+
+function proxyInstancia<T extends object>(resolver: () => T): T {
+  return new Proxy({} as T, {
+    get(_target, prop, receiver) {
+      const instancia = resolver();
+      const valor = Reflect.get(instancia, prop, receiver);
+      return typeof valor === "function"
+        ? (valor as (...args: unknown[]) => unknown).bind(instancia)
+        : valor;
+    },
+  });
+}
+
+export const pool = proxyInstancia(obtenerPool);
+export const db = proxyInstancia(obtenerDb);
 
 // Toda query autenticada de la app debe pasar por aquí: abre una
 // transacción y fija `app.current_user_id` para esa transacción, que es
@@ -66,9 +93,9 @@ export const db = drizzle(pool, { schema });
 // null y RLS deniega todo lo que no sea explícitamente público.
 export async function conSesion<T>(
   usuarioId: string | null,
-  fn: (tx: Parameters<Parameters<typeof db.transaction>[0]>[0]) => Promise<T>,
+  fn: (tx: Parameters<Parameters<Db["transaction"]>[0]>[0]) => Promise<T>,
 ): Promise<T> {
-  return db.transaction(async (tx) => {
+  return obtenerDb().transaction(async (tx) => {
     if (usuarioId) {
       await tx.execute(sql`select set_config('app.current_user_id', ${usuarioId}, true)`);
     }
