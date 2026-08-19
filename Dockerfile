@@ -3,6 +3,8 @@
 FROM node:20-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
+COPY frontend/package.json ./frontend/
+COPY backend/package.json ./backend/
 RUN npm ci
 
 FROM node:20-slim AS build
@@ -16,9 +18,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=8080
 
-COPY --from=build /app/public ./public
-COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/.next/static ./.next/static
+COPY --from=build /app/frontend/public ./frontend/public
+COPY --from=build /app/frontend/.next/standalone ./
+COPY --from=build /app/frontend/.next/static ./frontend/.next/static
 
 EXPOSE 8080
-CMD ["node", "server.js"]
+CMD ["node", "frontend/server.js"]

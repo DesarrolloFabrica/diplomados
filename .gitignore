@@ -8,3 +8,6 @@ out
 .vercel
 next-env.d.ts
 *-key.json
+.claude
+tsconfig.tsbuildinfo
+*.dump

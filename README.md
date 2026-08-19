@@ -25,40 +25,48 @@ Recharts.
 
 ## 2. Instalación local
 
+El proyecto es un **monorepo** con dos paquetes:
+
+- `frontend/` — aplicación Next.js (UI, páginas, componentes)
+- `backend/` — lógica de servidor (Server Actions, queries, DB, auth, migraciones)
+
 ```bash
 npm install
 cp .env.example .env.local   # y completa los valores (ver secciones 3-6)
-npm run db:migrate           # aplica db/migrations/ contra tu Postgres
+npm run db:migrate           # aplica backend/db/migrations/ contra tu Postgres
 npm run dev                  # http://localhost:3000
 ```
 
-Scripts disponibles:
+Scripts disponibles (desde la raíz del monorepo):
 
 ```bash
-npm run dev         # entorno de desarrollo
+npm run dev         # entorno de desarrollo (frontend/)
 npm run build       # build de producción
 npm run start       # servir el build
-npm run typecheck   # verificación de tipos (tsc --noEmit)
+npm run typecheck   # verificación de tipos (frontend + backend)
 npm run lint        # ESLint
-npm run db:migrate  # aplica las migraciones pendientes de db/migrations/
+npm run db:migrate  # aplica las migraciones pendientes de backend/db/migrations/
 npm run db:studio   # explorador visual de datos (Drizzle Studio)
 ```
 
 ## 3. Aprovisionar la infraestructura en GCP
 
-Todo el aprovisionamiento (APIs, Cloud SQL, Artifact Registry, bucket y service
-accounts para GitHub Actions) está en
-[`infra/provision-gcp.ps1`](infra/provision-gcp.ps1). Es un script de un solo
-uso: se ejecuta una vez, no como parte del CI.
+El aprovisionamiento (APIs, Cloud SQL, Artifact Registry, bucket y service
+accounts para GitHub Actions) se hace manualmente en la consola de GCP o con
+`gcloud`. Recursos necesarios:
 
-```powershell
-gcloud auth login
-./infra/provision-gcp.ps1
-```
+- Instancia **Cloud SQL for PostgreSQL**
+- Bucket **Google Cloud Storage** privado
+- **Artifact Registry** para imágenes Docker
+- Service account para el deploy de GitHub Actions
 
-Al final imprime los Secrets/Variables que debes cargar en GitHub (ver sección
-8) y los pasos manuales pendientes (API key de SendGrid, password de
-`app_user` tras migrar).
+Configura los Secrets y Variables en GitHub según la sección 8. Pasos
+manuales pendientes habituales: API key de SendGrid y contraseña de
+`app_user` tras migrar.
+
+Para conectar en local, usa el [Cloud SQL Auth
+Proxy](https://cloud.google.com/sql/docs/postgres/sql-proxy) (descarga el
+binario desde la documentación de Google; no va versionado en el repo).
 
 ## 4. Aplicar las migraciones
 
@@ -149,9 +157,8 @@ build) como chequeo obligatorio.
 El desarrollo del día a día ocurre en ramas de feature (o en `Cambios`), que
 se abren como PR hacia `main` cuando están listas para producción.
 
-Autenticación de GitHub Actions contra GCP: Service Account con JSON key,
-generada por [`infra/provision-gcp.ps1`](infra/provision-gcp.ps1). Ese script
-imprime los Secrets y Variables que hay que cargar en **Settings → Secrets and
+Autenticación de GitHub Actions contra GCP: Service Account con JSON key.
+Configura los Secrets y Variables en **Settings → Secrets and
 variables → Actions** del repo:
 
 **Secrets:**
@@ -180,28 +187,35 @@ gcloud run deploy plataforma-formacion --image="$IMAGE" --region="$REGION"
 ## Estructura del proyecto
 
 ```
-db/migrations/         Migraciones SQL (esquema, RLS, funciones, rol de app)
-src/
-  app/
-    (auth)/            Login, recuperar y restablecer contraseña
-    (superadmin)/      Panel superadmin  → /admin
-    (empresa)/         Panel empresa      → /empresa
-    (instructor)/      Panel instructor   → /instructor
-    (estudiante)/      Panel colaborador  → /mis-cursos
-  components/
-    ui/                Componentes base (shadcn/ui)
-    layout/            Shell de panel, barra lateral, panel de marca
-    shared/             Componentes reutilizables
-  config/              Roles, rutas y navegación
-  lib/
-    db/                Esquema Drizzle, pool de conexión, runner de migraciones
-    auth/              JWT, cookies, hashing de contraseñas, sesión, middleware
-    storage/           Google Cloud Storage (URLs firmadas)
-    email/             Envío de correo transaccional (SendGrid)
-    validators/        Esquemas Zod
-  server/actions/      Server Actions (mutaciones)
-  types/               Tipos del dominio
-middleware.ts          Refresco de sesión (JWT) y protección de rutas
+backend/
+  db/migrations/       Migraciones SQL (esquema, RLS, funciones, rol de app)
+  src/
+    server/
+      actions/         Server Actions (mutaciones)
+      queries/         Consultas de lectura
+    lib/
+      db/              Esquema Drizzle, pool de conexión, runner de migraciones
+      auth/            JWT, cookies, hashing de contraseñas, sesión
+      storage/         Google Cloud Storage (URLs firmadas)
+      email/           Envío de correo transaccional (SendGrid)
+      validators/      Esquemas Zod
+    config/roles.ts    Rutas y permisos por rol
+    types/             Tipos del dominio
+frontend/
+  src/
+    app/
+      (auth)/          Login, recuperar y restablecer contraseña
+      (superadmin)/    Panel superadmin  → /admin
+      (empresa)/       Panel empresa      → /empresa
+      (instructor)/    Panel instructor   → /instructor
+      (estudiante)/    Panel colaborador  → /mis-cursos
+    components/
+      ui/              Componentes base (shadcn/ui)
+      layout/          Shell de panel, barra lateral, panel de marca
+      shared/          Componentes reutilizables
+    config/            Navegación por rol
+    lib/               Utilidades de UI (media, roadmap, imágenes)
+  middleware.ts        Refresco de sesión (JWT) y protección de rutas
 Dockerfile             Imagen para Cloud Run
 ```
 
@@ -211,7 +225,7 @@ Dockerfile             Imagen para Cloud Run
   `empresa_id` y las políticas impiden ver o tocar datos de otra empresa. La
   app se conecta siempre como el rol `app_user` (no superusuario, no dueño de
   las tablas) para que RLS se aplique de verdad; cada transacción autenticada
-  fija `app.current_user_id` (ver `src/lib/db/index.ts`), que es lo que leen
+  fija `app.current_user_id` (ver `backend/src/lib/db/index.ts`), que es lo que leen
   las políticas a través de `auth_uid()`.
 - **Cursos como catálogo compartido:** `empresa_id` nulo = curso global; con
   valor = curso privado de esa empresa.
