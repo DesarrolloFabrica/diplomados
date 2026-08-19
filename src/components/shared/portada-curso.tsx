@@ -126,7 +126,6 @@ export function PortadaCurso(props: PortadaCursoProps) {
   }, [rawUrl, cursoId]);
 
   const candidatoActual: CandidatoPortadaDrive | undefined = candidatos[indiceCandidato];
-  const hayPortada = Boolean(candidatoActual) && !agotado;
 
   function avanzarCandidato() {
     setIndiceCandidato((actual) => {
@@ -139,7 +138,7 @@ export function PortadaCurso(props: PortadaCursoProps) {
     });
   }
 
-  if (!hayPortada) {
+  if (!candidatoActual || agotado) {
     if (fallback === "abstract") {
       return <FondoAbstractoPortada className={className} />;
     }
