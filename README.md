@@ -1,245 +1,336 @@
-# Plataforma Empresarial de Formación Autoguiada
+# Plataforma de Formación Autoguiada — CUN
 
-Aplicación web multiempresa (SaaS) para que las empresas capaciten a sus
-colaboradores con cursos y diplomados autoguiados. Inspirada en la lógica de un
-LMS como Moodle, pero más simple y directa.
+Plataforma web **multiempresa (SaaS)** para capacitar colaboradores con cursos y diplomados autoguiados. Inspirada en la lógica de un LMS como Moodle, pero más simple y directa.
 
-**Stack:** Next.js 15 (App Router) · TypeScript estricto · Tailwind CSS ·
-shadcn/ui · PostgreSQL propio (Drizzle ORM) sobre **Google Cloud SQL** ·
-Autenticación propia (JWT + cookie httpOnly) · **Google Cloud Storage** ·
-**SendGrid** (correo) · Despliegue en **Cloud Run** · React Hook Form · Zod ·
-Recharts.
-
-> Estado actual: **Etapa 2 — Cimientos** completada (configuración, base de
-> datos, migraciones, seguridad RLS, autenticación y protección de rutas por
-> rol), migrada de Supabase a infraestructura propia sobre GCP. Los paneles
-> muestran páginas placeholder que se completan en las etapas siguientes.
+Desarrollada para la **Corporación Unificada Nacional de Educación Superior (CUN)**.
 
 ---
 
-## 1. Requisitos
+## Tabla de contenidos
 
-- Node.js 20 o superior
-- `gcloud` CLI autenticado, con un proyecto de GCP elegido
-- Docker (solo para construir la imagen de Cloud Run)
+- [Descripción general](#descripción-general)
+- [Características principales](#características-principales)
+- [Stack tecnológico](#stack-tecnológico)
+- [Arquitectura](#arquitectura)
+- [Roles y paneles](#roles-y-paneles)
+- [Estructura del repositorio](#estructura-del-repositorio)
+- [Requisitos previos](#requisitos-previos)
+- [Instalación local](#instalación-local)
+- [Variables de entorno](#variables-de-entorno)
+- [Base de datos](#base-de-datos)
+- [Primer usuario (superadmin)](#primer-usuario-superadmin)
+- [Scripts disponibles](#scripts-disponibles)
+- [Despliegue (CI/CD)](#despliegue-cicd)
+- [Seguridad](#seguridad)
+- [Licencia](#licencia)
 
-## 2. Instalación local
+---
 
-El proyecto es un **monorepo** con dos paquetes:
+## Descripción general
 
-- `frontend/` — aplicación Next.js (UI, páginas, componentes)
-- `backend/` — lógica de servidor (Server Actions, queries, DB, auth, migraciones)
+La plataforma permite que distintas empresas gestionen la formación de sus colaboradores desde un mismo sistema, con **aislamiento de datos por empresa** (Row Level Security en PostgreSQL).
+
+Cada empresa puede:
+
+- Tener cursos propios o acceder a un catálogo global.
+- Inscribir y dar seguimiento a colaboradores.
+- Consultar reportes de progreso.
+
+Los colaboradores avanzan por una **ruta de aprendizaje visual** (roadmap), completan lecciones, recursos multimedia y evaluaciones con reintentos configurables.
+
+---
+
+## Características principales
+
+| Módulo | Funcionalidad |
+|--------|---------------|
+| **Autenticación** | Login, recuperación y restablecimiento de contraseña (JWT + cookie httpOnly) |
+| **Superadmin** | Gestión de empresas, usuarios, cursos globales y reportes consolidados |
+| **Admin empresa** | Colaboradores, asignaciones y reportes por empresa |
+| **Instructor** | CRUD de cursos, módulos, lecciones, recursos (GCS/Drive/enlaces) y evaluaciones (importación GIFT) |
+| **Colaborador** | Catálogo de cursos, inscripción libre, roadmap de progreso, lecciones y evaluaciones |
+| **Contenidos** | Texto, video, PDF, audio, presentaciones, imágenes y embeds (YouTube, Google Drive, Adobe InDesign) |
+| **Almacenamiento** | Google Cloud Storage con URLs firmadas para archivos privados |
+| **Correo** | SendGrid para invitaciones y recuperación de contraseña |
+
+---
+
+## Stack tecnológico
+
+| Capa | Tecnología |
+|------|------------|
+| Frontend | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, shadcn/ui |
+| Backend | Server Actions, Drizzle ORM, Zod, React Hook Form |
+| Base de datos | PostgreSQL 16 (Cloud SQL en producción) |
+| Autenticación | JWT (`jose`) + bcrypt, sesión deslizante en middleware |
+| Archivos | Google Cloud Storage |
+| Correo | SendGrid |
+| Gráficos | Recharts |
+| Infraestructura | Google Cloud Run, Artifact Registry, GitHub Actions |
+| Local | Docker Compose (Postgres), Cloud SQL Auth Proxy (opcional) |
+
+---
+
+## Arquitectura
+
+Monorepo **npm workspaces** con dos paquetes. Next.js sigue siendo el runtime único en producción (no hay API REST separada).
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Cloud Run (producción)                │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │              frontend/ (Next.js 15)               │  │
+│  │   Páginas · Componentes · Middleware · API routes │  │
+│  └───────────────────────┬───────────────────────────┘  │
+│                          │ importa                       │
+│  ┌───────────────────────▼───────────────────────────┐  │
+│  │         backend/ (@plataforma/backend)              │  │
+│  │   Server Actions · Queries · DB · Auth · Storage  │  │
+│  └───────────────────────┬───────────────────────────┘  │
+└──────────────────────────┼──────────────────────────────┘
+                           │
+              ┌────────────▼────────────┐
+              │  PostgreSQL (Cloud SQL) │
+              │  + Google Cloud Storage │
+              └─────────────────────────┘
+```
+
+---
+
+## Roles y paneles
+
+| Rol | Panel de inicio | Permisos |
+|-----|-----------------|----------|
+| `superadmin` | `/admin` | Acceso total: empresas, usuarios, cursos, reportes globales |
+| `admin_empresa` | `/empresa` | Gestión de su empresa: colaboradores, asignaciones, reportes |
+| `instructor` | `/instructor` | Creación y edición de cursos, módulos, lecciones y evaluaciones |
+| `colaborador` | `/mis-cursos` | Consumo de cursos, progreso y evaluaciones |
+
+El **middleware** bloquea el acceso cruzado entre paneles según el rol del usuario autenticado.
+
+---
+
+## Estructura del repositorio
+
+```
+diplomados/
+├── backend/                    # Lógica de servidor (@plataforma/backend)
+│   ├── db/
+│   │   ├── migrations/         # Migraciones SQL (esquema, RLS, funciones)
+│   │   └── docker-init/        # Init script para Postgres local
+│   └── src/
+│       ├── server/
+│       │   ├── actions/        # Mutaciones (Server Actions)
+│       │   └── queries/        # Consultas de lectura
+│       ├── lib/
+│       │   ├── db/             # Drizzle ORM, pool, schema
+│       │   ├── auth/           # JWT, cookies, sesión, contraseñas
+│       │   ├── storage/        # Google Cloud Storage
+│       │   ├── email/          # SendGrid
+│       │   └── validators/     # Esquemas Zod
+│       ├── config/roles.ts
+│       └── types/
+├── frontend/                   # Aplicación Next.js
+│   ├── public/                 # Assets estáticos
+│   └── src/
+│       ├── app/
+│       │   ├── (auth)/         # Login, recuperar/restablecer clave
+│       │   ├── (superadmin)/   # Panel /admin
+│       │   ├── (empresa)/      # Panel /empresa
+│       │   ├── (instructor)/   # Panel /instructor
+│       │   ├── (estudiante)/   # Panel /mis-cursos
+│       │   └── api/            # API routes (p. ej. proxy imágenes Drive)
+│       ├── components/         # UI (shadcn) y componentes compartidos
+│       ├── config/             # Navegación por rol
+│       ├── lib/                # Utilidades de UI (media, roadmap, imágenes)
+│       └── middleware.ts       # Protección de rutas y sesión
+├── .github/workflows/          # CI (lint, typecheck, build) y deploy a Cloud Run
+├── docker-compose.yml          # Postgres local para desarrollo
+├── Dockerfile                  # Imagen de producción
+├── .env.example                # Plantilla de variables de entorno
+└── package.json                # Scripts del monorepo (workspaces)
+```
+
+---
+
+## Requisitos previos
+
+- **Node.js** 20 o superior
+- **npm** 10+
+- **Docker** (opcional, para Postgres local con `docker compose`)
+- **gcloud CLI** (para producción y Cloud Storage local)
+- Cuenta de **Google Cloud Platform** con Cloud SQL, GCS y Cloud Run configurados
+
+---
+
+## Instalación local
+
+### 1. Clonar e instalar dependencias
 
 ```bash
+git clone https://github.com/haiderbellocun/diplomados.git
+cd diplomados
 npm install
-cp .env.example .env.local   # y completa los valores (ver secciones 3-6)
-npm run db:migrate           # aplica backend/db/migrations/ contra tu Postgres
-npm run dev                  # http://localhost:3000
 ```
 
-Scripts disponibles (desde la raíz del monorepo):
+### 2. Configurar entorno
 
 ```bash
-npm run dev         # entorno de desarrollo (frontend/)
-npm run build       # build de producción
-npm run start       # servir el build
-npm run typecheck   # verificación de tipos (frontend + backend)
-npm run lint        # ESLint
-npm run db:migrate  # aplica las migraciones pendientes de backend/db/migrations/
-npm run db:studio   # explorador visual de datos (Drizzle Studio)
+cp .env.example .env
+# Edita .env con tus credenciales (ver sección Variables de entorno)
 ```
 
-## 3. Aprovisionar la infraestructura en GCP
+> El archivo `.env` vive en la **raíz del monorepo** y es compartido por frontend y backend.
 
-El aprovisionamiento (APIs, Cloud SQL, Artifact Registry, bucket y service
-accounts para GitHub Actions) se hace manualmente en la consola de GCP o con
-`gcloud`. Recursos necesarios:
+### 3. Levantar Postgres local (opcional)
 
-- Instancia **Cloud SQL for PostgreSQL**
-- Bucket **Google Cloud Storage** privado
-- **Artifact Registry** para imágenes Docker
-- Service account para el deploy de GitHub Actions
+```bash
+docker compose up -d
+```
 
-Configura los Secrets y Variables en GitHub según la sección 8. Pasos
-manuales pendientes habituales: API key de SendGrid y contraseña de
-`app_user` tras migrar.
+Postgres queda disponible en `localhost:5433` (usuario `postgres`, contraseña `dev_postgres_password`, base `plataforma_formacion`).
 
-Para conectar en local, usa el [Cloud SQL Auth
-Proxy](https://cloud.google.com/sql/docs/postgres/sql-proxy) (descarga el
-binario desde la documentación de Google; no va versionado en el repo).
+Ajusta `DATABASE_URL` y `MIGRATIONS_DATABASE_URL` en `.env` apuntando al puerto **5433**.
 
-## 4. Aplicar las migraciones
-
-Conéctate a Cloud SQL desde tu máquina con el [Cloud SQL Auth
-Proxy](https://cloud.google.com/sql/docs/postgres/sql-proxy), o usa la IP
-pública/privada de la instancia. Con `MIGRATIONS_DATABASE_URL` apuntando al
-usuario `postgres` (ver `.env.example`):
+### 4. Aplicar migraciones
 
 ```bash
 npm run db:migrate
 ```
 
-La migración `005_app_role_and_grants.sql` crea el rol `app_user` (sin
-contraseña). Asígnasela después:
+### 5. Iniciar la aplicación
 
 ```bash
-gcloud sql users set-password app_user \
-  --instance="$INSTANCE" \
-  --password="$(openssl rand -base64 24)"   # este es el que va en DATABASE_URL/DB_PASSWORD
+npm run dev
 ```
 
-> Por qué dos roles: en Postgres, el dueño de las tablas y los superusuarios
-> **no** están sujetos a Row Level Security. Las migraciones corren como
-> `postgres` (dueño del esquema); la app **siempre** se conecta como
-> `app_user` para que las políticas RLS de aislamiento por empresa se
-> apliquen de verdad.
+Abre [http://localhost:3000](http://localhost:3000). Sin sesión activa redirige a `/login`.
 
-## 5. Variables de entorno
+---
 
-Completa `.env.local` según `.env.example`: base de datos (`DATABASE_URL`,
-`MIGRATIONS_DATABASE_URL`), `JWT_SECRET` (genera uno con
-`openssl rand -base64 48`), `GCS_BUCKET`, y las credenciales de SendGrid
-(`SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`).
+## Variables de entorno
 
-Para desarrollo local con Cloud Storage, autentica con:
+Copia `.env.example` a `.env` en la raíz del proyecto:
+
+| Variable | Descripción |
+|----------|-------------|
+| `DATABASE_URL` | Conexión de la app (rol `app_user`, sujeto a RLS) |
+| `MIGRATIONS_DATABASE_URL` | Conexión privilegiada solo para migraciones (rol `postgres`) |
+| `JWT_SECRET` | Secreto para firmar tokens de sesión (`openssl rand -base64 48`) |
+| `NEXT_PUBLIC_SITE_URL` | URL base de la app (enlaces de recuperación de contraseña) |
+| `GCS_BUCKET` | Bucket privado de Google Cloud Storage |
+| `SENDGRID_API_KEY` | API key de SendGrid |
+| `SENDGRID_FROM_EMAIL` | Remitente de correos transaccionales |
+
+Para **Cloud Storage en local**:
 
 ```bash
 gcloud auth application-default login
 ```
 
-## 6. Crear el primer superadministrador
+En **Cloud Run**, las credenciales se obtienen automáticamente de la cuenta de servicio del servicio.
 
-Como no hay auto-registro, el primer usuario se crea a mano contra la base de
-datos (por ejemplo con `npm run db:studio` o `psql`):
+---
+
+## Base de datos
+
+- **Motor:** PostgreSQL 16
+- **ORM:** Drizzle (schema en `backend/src/lib/db/schema.ts`)
+- **Migraciones:** archivos SQL en `backend/db/migrations/`, aplicados con `npm run db:migrate`
+- **Seguridad:** Row Level Security (RLS) con aislamiento por `empresa_id`
+- **Roles de conexión:**
+  - `postgres` — solo migraciones (dueño del esquema)
+  - `app_user` — conexión de la aplicación en runtime (RLS activo)
+
+Explorar datos visualmente:
+
+```bash
+npm run db:studio
+```
+
+---
+
+## Primer usuario (superadmin)
+
+No hay auto-registro. El primer usuario se crea directamente en la base de datos:
 
 ```sql
-insert into public.profiles (email, password_hash, rol, nombre_completo)
-values (
+INSERT INTO public.profiles (email, password_hash, rol, nombre_completo)
+VALUES (
   'admin@tuempresa.com',
-  -- genera el hash con bcrypt (12 rounds), p. ej. con:
-  --   node -e "console.log(require('bcryptjs').hashSync('tu-clave', 12))"
+  -- Genera el hash: node -e "console.log(require('bcryptjs').hashSync('tu-clave', 12))"
   '$2a$12$...',
   'superadmin',
   'Nombre del Superadmin'
 );
 ```
 
-> Para crear un `admin_empresa`, `instructor` o `colaborador`, incluye
-> `empresa_id` (referencia a una fila de `empresas`) y el `rol`
-> correspondiente. La gestión de usuarios desde la interfaz llega en la
-> Etapa 3.
+Los demás roles (`admin_empresa`, `instructor`, `colaborador`) se gestionan desde la interfaz de administración e incluyen `empresa_id` cuando aplica.
 
-## 7. Probar el acceso
+---
 
-`npm run dev` → entra a `http://localhost:3000`. Sin sesión te lleva a
-`/login`. Al entrar, el middleware te redirige al panel según tu rol:
+## Scripts disponibles
 
-| Rol | Panel |
-|-----|-------|
-| superadmin | `/admin` |
-| admin_empresa | `/empresa` |
-| instructor | `/instructor/cursos` |
-| colaborador | `/mis-cursos` |
+Ejecutar desde la **raíz del monorepo**:
 
-Intentar entrar a un panel que no te corresponde te devuelve al tuyo.
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Servidor de desarrollo (`http://localhost:3000`) |
+| `npm run build` | Build de producción |
+| `npm run start` | Servir el build compilado |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Verificación de tipos (frontend + backend) |
+| `npm run db:migrate` | Aplicar migraciones SQL pendientes |
+| `npm run db:studio` | Explorador visual Drizzle Studio |
 
-## 8. Despliegue: CI/CD con GitHub Actions
+---
 
-`main` es la rama de producción: **no se le hace push directo**, solo se
-actualiza mezclando Pull Requests (branch protection activada, ver más
-abajo). Cada vez que un PR se mezcla a `main`, el workflow
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) construye la
-imagen, la sube a Artifact Registry y despliega a Cloud Run automáticamente.
-Los PRs contra `main` corren primero
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) (lint, typecheck,
-build) como chequeo obligatorio.
+## Despliegue (CI/CD)
 
-El desarrollo del día a día ocurre en ramas de feature (o en `Cambios`), que
-se abren como PR hacia `main` cuando están listas para producción.
+La rama **`main`** es producción. Al hacer merge a `main`:
 
-Autenticación de GitHub Actions contra GCP: Service Account con JSON key.
-Configura los Secrets y Variables en **Settings → Secrets and
-variables → Actions** del repo:
+1. **CI** (`.github/workflows/ci.yml`) — lint, typecheck y build en cada Pull Request.
+2. **Deploy** (`.github/workflows/deploy.yml`) — construye imagen Docker, la sube a Artifact Registry y despliega en **Cloud Run**.
+
+### Secrets y variables en GitHub Actions
 
 **Secrets:**
-- `GCP_SA_KEY` (contenido completo del JSON de la SA de deploy)
+
+| Nombre | Descripción |
+|--------|-------------|
+| `GCP_SA_KEY` | JSON de la service account de deploy |
+| `DATABASE_URL` | URL de conexión (Secret Manager en Cloud Run) |
+| `JWT_SECRET` | Secreto JWT (Secret Manager en Cloud Run) |
 
 **Variables:**
-- `RUNTIME_SERVICE_ACCOUNT`
-- `INSTANCE_CONNECTION_NAME`
-- `GCS_BUCKET`
-- `DB_NAME`
-- `NEXT_PUBLIC_SITE_URL` (se conoce tras el primer deploy; actualízala después)
 
-Tras cargar `GCP_SA_KEY` en GitHub, borra el archivo JSON local para no dejar
-credenciales en disco.
+| Nombre | Descripción |
+|--------|-------------|
+| `INSTANCE_CONNECTION_NAME` | Conexión Cloud SQL (`proyecto:region:instancia`) |
+| `GCS_BUCKET` | Nombre del bucket de archivos |
+| `NEXT_PUBLIC_SITE_URL` | URL pública de la app |
 
-Para desplegar manualmente sin pasar por CI (solo depuración puntual):
+### Deploy manual (solo depuración)
 
 ```bash
-export IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/plataforma-formacion/app:latest"
-gcloud builds submit --tag "$IMAGE"
-gcloud run deploy plataforma-formacion --image="$IMAGE" --region="$REGION"
+docker build -t diplomados .
+# Subir a Artifact Registry y desplegar con gcloud run deploy
 ```
 
 ---
 
-## Estructura del proyecto
+## Seguridad
 
-```
-backend/
-  db/migrations/       Migraciones SQL (esquema, RLS, funciones, rol de app)
-  src/
-    server/
-      actions/         Server Actions (mutaciones)
-      queries/         Consultas de lectura
-    lib/
-      db/              Esquema Drizzle, pool de conexión, runner de migraciones
-      auth/            JWT, cookies, hashing de contraseñas, sesión
-      storage/         Google Cloud Storage (URLs firmadas)
-      email/           Envío de correo transaccional (SendGrid)
-      validators/      Esquemas Zod
-    config/roles.ts    Rutas y permisos por rol
-    types/             Tipos del dominio
-frontend/
-  src/
-    app/
-      (auth)/          Login, recuperar y restablecer contraseña
-      (superadmin)/    Panel superadmin  → /admin
-      (empresa)/       Panel empresa      → /empresa
-      (instructor)/    Panel instructor   → /instructor
-      (estudiante)/    Panel colaborador  → /mis-cursos
-    components/
-      ui/              Componentes base (shadcn/ui)
-      layout/          Shell de panel, barra lateral, panel de marca
-      shared/          Componentes reutilizables
-    config/            Navegación por rol
-    lib/               Utilidades de UI (media, roadmap, imágenes)
-  middleware.ts        Refresco de sesión (JWT) y protección de rutas
-Dockerfile             Imagen para Cloud Run
-```
+- **Aislamiento multiempresa** mediante RLS en PostgreSQL; cada transacción autenticada fija `app.current_user_id` para que las políticas apliquen correctamente.
+- **Dos roles de BD:** migraciones con `postgres`, runtime con `app_user` (sujeto a RLS).
+- **Sesión JWT** en cookie httpOnly (1 día, renovación deslizante en middleware).
+- **Autorización por rol** en middleware y Server Actions (`requerirRol`, `requerirSesion`).
+- **Validación Zod** compartida entre formularios cliente y Server Actions.
+- **Archivos privados** servidos con URLs firmadas de GCS; imágenes de Drive via proxy interno.
 
-## Modelo de seguridad (resumen)
+---
 
-- **Aislamiento por empresa** con RLS: cada fila de datos operativos lleva
-  `empresa_id` y las políticas impiden ver o tocar datos de otra empresa. La
-  app se conecta siempre como el rol `app_user` (no superusuario, no dueño de
-  las tablas) para que RLS se aplique de verdad; cada transacción autenticada
-  fija `app.current_user_id` (ver `backend/src/lib/db/index.ts`), que es lo que leen
-  las políticas a través de `auth_uid()`.
-- **Cursos como catálogo compartido:** `empresa_id` nulo = curso global; con
-  valor = curso privado de esa empresa.
-- **Inscripción libre:** un colaborador puede matricularse él mismo en
-  cualquier curso publicado que pueda ver (global o de su empresa). La
-  asignación forzada por `admin_empresa`/`superadmin` se conserva como
-  capacidad adicional.
-- **Autorización centralizada** en funciones `SECURITY DEFINER`
-  (`auth_rol`, `auth_empresa_id`, `puede_ver_curso`, `puede_editar_curso`)
-  para evitar recursión en las políticas.
-- **Sesión propia:** JWT de corta duración (1 día) en cookie httpOnly,
-  firmado con `JWT_SECRET`. El middleware solo lee el JWT (rápido, sin ir a
-  la base); `obtenerSesion()` (usada en Server Components/Actions) sí
-  vuelve a consultar el `profile`, así que un rol cambiado o una cuenta
-  desactivada tienen efecto inmediato ahí.
-- **Mutaciones vía Server Actions** con validación Zod compartida
-  cliente/servidor.
+## Licencia
+
+Proyecto privado — Corporación Unificada Nacional de Educación Superior (CUN).  
+Todos los derechos reservados.

@@ -37,6 +37,7 @@ import { VistaContenidoLeccion } from "@/components/shared/vista-contenido-lecci
 import { LayoutVistaLeccion } from "@/components/shared/layout-vista-leccion";
 import { ProximosContenidos } from "@/components/shared/proximos-contenidos";
 import { ProgresoCursoLeccion } from "@/components/shared/progreso-curso-leccion";
+import { obtenerInfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
 import { BotonCompletar } from "./boton-completar";
 
 
@@ -255,8 +256,12 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
 
   const contenidoTexto = (leccion.contenido as { texto?: string } | null)?.texto;
-
-
+  const primeraLeccionId = modulosRuta[0]?.lecciones[0]?.id;
+  const infografiaInteractiva = obtenerInfografiaInteractivaLeccion(
+    curso.titulo,
+    leccionId,
+    primeraLeccionId,
+  );
 
   return (
 
@@ -304,8 +309,6 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
           total={progresoCurso.total}
         />
 
-
-
         <VistaContenidoLeccion
 
           recursos={recursosConUrl.map((r) => ({
@@ -321,6 +324,8 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
           }))}
 
           contenidoTexto={contenidoTexto}
+
+          infografiaInteractiva={infografiaInteractiva}
 
         />
 
