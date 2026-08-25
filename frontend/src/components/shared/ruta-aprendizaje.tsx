@@ -907,41 +907,6 @@ function CaminoRoadmap({
   );
 }
 
-function CaminoDecoracion({
-  layouts,
-}: {
-  layouts: LayoutNodoRoadmap[];
-}) {
-  return (
-    <>
-      {layouts.slice(0, -1).map((layout, indice) => {
-        const siguiente = layouts[indice + 1];
-        if (!siguiente) return null;
-
-        const midX = (layout.x + siguiente.x) / 2;
-        const midY = (layout.y + siguiente.y) / 2;
-        const haciaDerecha = siguiente.x > layout.x;
-
-        return (
-          <div
-            key={`decoracion-${layout.nodo.id}`}
-            aria-hidden="true"
-            className="pointer-events-none absolute z-20"
-            style={{ left: midX - 24, top: midY - 24 }}
-          >
-            <span
-              className={cn(
-                "roadmap-route-chip block",
-                haciaDerecha ? "rotate-12" : "-rotate-12",
-              )}
-            />
-          </div>
-        );
-      })}
-    </>
-  );
-}
-
 function ModuloRoadmapDesktop({
   grupo,
   indiceModulo,
@@ -976,7 +941,6 @@ function ModuloRoadmapDesktop({
         indiceModulo={indiceModulo}
         nodoActivoId={nodoActivoSegmentoId}
       />
-      <CaminoDecoracion layouts={layouts} />
 
       {layouts.map((layout) => {
         const estadoForzado = estadoVisualTransicion(

@@ -14,6 +14,7 @@ import {
   FileText,
   Headphones,
   LockKeyhole,
+  MousePointerClick,
   PanelRightClose,
   PlayCircle,
   Presentation,
@@ -66,6 +67,7 @@ const ICONOS_CATEGORIA: Record<TabContenido, LucideIcon> = {
   podcast: AudioLines,
   documento: FileText,
   infografia: ChartNoAxesCombined,
+  infografia_interactiva: MousePointerClick,
   presentacion: Presentation,
 };
 

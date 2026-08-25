@@ -5,12 +5,14 @@ import {
   AudioLines,
   ChartNoAxesCombined,
   FileText,
+  MousePointerClick,
   Presentation,
   Video,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RecursoIncrustado } from "@/components/shared/recurso-incrustado";
+import { EmbedAdobeIndesign } from "@/components/shared/embed-adobe-indesign";
 import type { TipoRecurso } from "@backend/lib/db/schema";
 import {
   ETIQUETA_TAB,
@@ -18,6 +20,7 @@ import {
   tabDeTipo,
   type TabContenido,
 } from "@/lib/contenido-leccion";
+import type { InfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
 
 export interface RecursoVista {
   id: string;
@@ -31,6 +34,7 @@ const ICONOS_TAB: Record<TabContenido, LucideIcon> = {
   podcast: AudioLines,
   documento: FileText,
   infografia: ChartNoAxesCombined,
+  infografia_interactiva: MousePointerClick,
   presentacion: Presentation,
 };
 
@@ -43,23 +47,30 @@ const TABS = ORDEN_TABS.map((id) => ({
 interface VistaContenidoLeccionProps {
   recursos: RecursoVista[];
   contenidoTexto?: string | null;
+  infografiaInteractiva?: InfografiaInteractivaLeccion | null;
 }
 
 export function VistaContenidoLeccion({
   recursos,
   contenidoTexto,
+  infografiaInteractiva = null,
 }: VistaContenidoLeccionProps) {
   const tabsDisponibles = useMemo(() => {
     const presentes = new Set(recursos.map((r) => tabDeTipo(r.tipo)));
     if (contenidoTexto && !presentes.has("documento")) {
       presentes.add("documento");
     }
+    if (infografiaInteractiva) {
+      presentes.add("infografia_interactiva");
+    }
     const orden = TABS.filter((t) => presentes.has(t.id));
     return orden.length > 0 ? orden : TABS.filter((t) => t.id === "documento");
-  }, [recursos, contenidoTexto]);
+  }, [recursos, contenidoTexto, infografiaInteractiva]);
 
   const [tabActiva, setTabActiva] = useState<TabContenido>(
-    () => tabsDisponibles[0]?.id ?? "documento",
+    () => infografiaInteractiva?.src
+      ? "infografia_interactiva"
+      : (tabsDisponibles[0]?.id ?? "documento"),
   );
 
   const tabActual = tabsDisponibles.some((t) => t.id === tabActiva)
@@ -68,6 +79,8 @@ export function VistaContenidoLeccion({
 
   const recursosFiltrados = recursos.filter((r) => tabDeTipo(r.tipo) === tabActual);
   const mostrarTexto = Boolean(contenidoTexto) && tabActual === "documento";
+  const mostrarInfografiaInteractiva =
+    tabActual === "infografia_interactiva" && infografiaInteractiva !== null;
 
   return (
     <div className="space-y-6">
@@ -112,6 +125,13 @@ export function VistaContenidoLeccion({
       )}
 
       <div className="lesson-content-surface rounded-2xl border border-border/70 bg-card p-4 shadow-sm sm:p-6">
+        {mostrarInfografiaInteractiva ? (
+          <EmbedAdobeIndesign
+            src={infografiaInteractiva.src}
+            titulo={infografiaInteractiva.titulo}
+          />
+        ) : null}
+
         {mostrarTexto && (
           <p className="mb-5 whitespace-pre-wrap text-base leading-relaxed text-muted-foreground">
             {contenidoTexto}
@@ -130,7 +150,8 @@ export function VistaContenidoLeccion({
             ))}
           </div>
         ) : (
-          !mostrarTexto && (
+          !mostrarTexto &&
+          !mostrarInfografiaInteractiva && (
             <div className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-10 text-center text-sm text-muted-foreground">
               No hay contenido de este tipo en la lección.
             </div>

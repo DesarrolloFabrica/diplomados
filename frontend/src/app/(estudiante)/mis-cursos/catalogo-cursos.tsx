@@ -34,7 +34,7 @@ export function CatalogoCursos({ misCursos, disponibles }: CatalogoCursosProps) 
             Todavía no te has inscrito en ningún curso. Elige uno abajo, en el catálogo.
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5">
             {misCursos.map((curso) => (
               <TarjetaCursoProgreso key={curso.id} curso={curso} />
             ))}
@@ -66,20 +66,76 @@ export function CatalogoCursos({ misCursos, disponibles }: CatalogoCursosProps) 
 function TarjetaCursoProgreso({ curso }: { curso: CursoCatalogoFila }) {
   const porcentaje = porcentajeCurso(curso);
   const completado = cursoCompletado(curso, porcentaje);
-  const textoAccion = completado
-    ? "Revisar curso"
-    : porcentaje > 0
-      ? "Continuar"
-      : "Comenzar curso";
+  const descripcion =
+    curso.descripcion?.trim() || "Continua desarrollando tus conocimientos con este curso.";
 
   return (
-    <Link href={`/mis-cursos/${curso.id}`} className={CLASE_TARJETA_CURSO}>
-      <ContenidoTarjetaCurso
-        curso={curso}
-        porcentaje={porcentaje}
-        completado={completado}
-        textoAccion={textoAccion}
+    <Link
+      href={`/mis-cursos/${curso.id}`}
+      aria-label={`${completado ? "Revisar" : "Continuar"} ${curso.titulo}`}
+      className="group relative block aspect-[5/6] min-h-[285px] overflow-hidden rounded-[20px] bg-[#061120] text-left shadow-[0_12px_30px_rgba(6,17,32,0.12)] outline-none transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(6,17,32,0.22)] focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-0"
+    >
+      <PortadaCurso
+        cursoId={curso.id}
+        imagenPortadaUrl={curso.imagenPortadaUrl}
+        esDiplomado={curso.esDiplomado}
+        titulo={curso.titulo}
+        fallback="abstract"
+        className="absolute inset-0 rounded-none transition-transform duration-500 group-hover:scale-105"
       />
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-black/10 transition-opacity duration-300 group-hover:opacity-90"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(6,17,32,0.92)_0%,rgba(6,17,32,0.65)_35%,rgba(6,17,32,0.12)_70%,transparent_100%)]"
+      />
+
+      <div className="absolute left-3.5 top-3.5 z-20 flex flex-wrap gap-1.5">
+        {curso.esDiplomado && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm backdrop-blur-md">
+            <GraduationCap className="size-3" aria-hidden="true" />
+            Diplomado
+          </span>
+        )}
+        {completado && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/30 bg-emerald-500/85 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm backdrop-blur-md">
+            <CheckCircle2 className="size-3" aria-hidden="true" />
+            Completado
+          </span>
+        )}
+      </div>
+
+      <div className="absolute inset-x-0 bottom-0 z-20 p-4 pr-16">
+        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">
+          {curso.esDiplomado ? "Diplomado" : "Curso"}
+        </p>
+        <h3 className="line-clamp-2 font-display text-lg font-bold leading-tight text-white drop-shadow-sm">
+          {curso.titulo}
+        </h3>
+        <p className="mt-1.5 line-clamp-2 translate-y-1 text-xs leading-relaxed text-white/80 transition-[opacity,transform] duration-300 group-hover:translate-y-0 group-hover:text-white">
+          {descripcion}
+        </p>
+
+        <div className="mt-3">
+          <div className="mb-1 flex items-center justify-between gap-3 text-[11px] font-medium text-white/82">
+            <span>Progreso</span>
+            <span>{porcentaje}%</span>
+          </div>
+          <div className="h-1 overflow-hidden rounded-full bg-white/20 shadow-inner">
+            <div
+              className="h-full rounded-full bg-[linear-gradient(90deg,#2FB9A5,#4FC9B3,#91DC00)] transition-[width] duration-500"
+              style={{ width: `${porcentaje}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <span className="absolute bottom-4 right-4 z-30 flex size-10 items-center justify-center rounded-full bg-white text-[#061120] shadow-lg transition-[transform,background-color,box-shadow] duration-300 group-hover:scale-110 group-hover:bg-[#91DC00] group-hover:shadow-[0_12px_24px_rgba(145,220,0,0.28)]">
+        <ArrowRight className="size-4" aria-hidden="true" />
+      </span>
     </Link>
   );
 }

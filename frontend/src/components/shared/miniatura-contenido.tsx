@@ -6,6 +6,7 @@ import {
   ChartNoAxesCombined,
   ClipboardCheck,
   FileText,
+  MousePointerClick,
   Presentation,
   Video,
   type LucideIcon,
@@ -30,6 +31,7 @@ const ICONOS_TIPO: Record<TabContenido, LucideIcon> = {
   podcast: AudioLines,
   documento: FileText,
   infografia: ChartNoAxesCombined,
+  infografia_interactiva: MousePointerClick,
   presentacion: Presentation,
 };
 

@@ -5,6 +5,7 @@ export type TabContenido =
   | "podcast"
   | "documento"
   | "infografia"
+  | "infografia_interactiva"
   | "presentacion";
 
 export const ORDEN_TABS: TabContenido[] = [
@@ -12,6 +13,7 @@ export const ORDEN_TABS: TabContenido[] = [
   "podcast",
   "documento",
   "infografia",
+  "infografia_interactiva",
   "presentacion",
 ];
 
@@ -20,6 +22,7 @@ export const ETIQUETA_TAB: Record<TabContenido, string> = {
   podcast: "Pódcast",
   documento: "Documento",
   infografia: "Infografía",
+  infografia_interactiva: "Infografía interactiva",
   presentacion: "Presentación",
 };
 
