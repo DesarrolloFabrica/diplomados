@@ -1,13 +1,13 @@
 import { requerirRol } from "@backend/lib/auth/sesion";
-import { ShellPanel } from "@/components/layout/shell-panel";
+import { ShellPanelSuperadmin } from "@/components/layout/shell-panel-colaborador";
 
 export default async function AdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const sesion = await requerirRol("superadmin");
   return (
-    <ShellPanel rol={sesion.rol} nombre={sesion.nombreCompleto}>
+    <ShellPanelSuperadmin nombre={sesion.nombreCompleto}>
       {children}
-    </ShellPanel>
+    </ShellPanelSuperadmin>
   );
 }

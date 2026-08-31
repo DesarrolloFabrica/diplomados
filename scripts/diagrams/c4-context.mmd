@@ -1,0 +1,22 @@
+C4Context
+    title Diagrama C4 Contexto - Plataforma Diplomados CUN
+
+    Person(colaborador, "Colaborador", "Estudiante de empresa aliada. Inscripcion y consumo autoguiado.")
+    Person(instructor, "Instructor", "Autoria y publicacion de cursos, modulos y evaluaciones.")
+    Person(adminEmp, "Admin empresa", "Gestion de colaboradores e informes de avance del tenant.")
+    Person(superadmin, "Superadmin CUN", "Gestion global de empresas, usuarios y catalogo.")
+
+    System(plataforma, "Plataforma Diplomados CUN", "SaaS multiempresa de formacion autoguiada B2B desplegada en Cloud Run.")
+
+    System_Ext(gcs, "Google Cloud Storage", "Recursos multimedia y archivos de lecciones.")
+    System_Ext(sendgrid, "SendGrid", "Invitaciones, recuperacion de clave y correo transaccional.")
+    System_Ext(gdrive, "Google Drive", "Fuente de imagenes de portada consumida via proxy HTTP.")
+
+    Rel(colaborador, plataforma, "Aprende y evalua", "HTTPS")
+    Rel(instructor, plataforma, "Publica contenidos", "HTTPS")
+    Rel(adminEmp, plataforma, "Supervisa avance", "HTTPS")
+    Rel(superadmin, plataforma, "Administra plataforma", "HTTPS")
+
+    Rel(plataforma, gcs, "Almacena y sirve recursos", "API GCS y URLs firmadas")
+    Rel(plataforma, sendgrid, "Envia correo", "API REST")
+    Rel(plataforma, gdrive, "Obtiene portadas", "HTTP proxy")

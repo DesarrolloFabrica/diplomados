@@ -17,6 +17,11 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "Plataforma de Formación",
   description: "Formación empresarial autoguiada: cursos y diplomados para tu equipo.",
+  icons: {
+    icon: "/images/Favicon.ico",
+    shortcut: "/images/Favicon.ico",
+    apple: "/images/Favicon.ico",
+  },
 };
 
 export default function RootLayout({

@@ -1,0 +1,3558 @@
+﻿CORPORACI├ôN UNIVERSITARIA NACIONAL ÔÇö CUN
+DIRECCI├ôN DE OPERACIONES
+DOCUMENTO DE GESTI├ôN, ACTUALIZACI├ôN,
+CONTROL Y TRAZABILIDAD DE REQUERIMIENTOS
+Gesti├│n de Requerimientos y Solicitudes de Desarrollo de Software
+Proyecto
+Fenix ÔÇô Plataforma Empresarial de Formacion Autoguiada
+Plataforma
+Diplomados
+├ürea
+F├íbrica de Contenido
+Direcci├│n
+Operaciones
+C├│digo documental
+Pendiente de asignaci├│n PMO
+Versi├│n
+1.1
+Fecha
+20/08/2026┬á(creaci├│n)┬áÔÇö ├║ltima actualizaci├│n: 27/08/2026
+Project Manager
+Johan Sebasti├ín Daza Sarmiento
+L├¡der desarrollo
+Haider Yessid Bello Melo
+Product Owner
+Iron Alexander Fuentes Rodr├¡guez; Ra├║l Valencia Cifuentes; Alberto Mario Valencia Zableh
+Estado del documento
+En elaboraci├│n
+Clasificaci├│n documental
+Uso interno CUN
+CONTROL DOCUMENTAL
+Nombre documento
+Gesti├│n de Requerimientos ÔÇö Fenix (Diplomados_Requerimientos_v2)
+Proyecto
+Plataforma Empresarial de Formaci├│n Autoguiada ÔÇö Fenix
+C├│digo
+Pendiente Codigo de asignaci├│n PMO 
+Versi├│n
+1.1
+Fecha creaci├│n
+19/08/2026┬á(fecha solicitud SOL-DIP-2026-001 ÔÇö Secc. 2)
+├Ültima actualizaci├│n
+27/08/2026
+Elabor├│
+Iron Alexander Fuentes Rodr├¡guez (PO) / Haider Yessid Bello Melo (Tech Lead)
+Apoyo diligenciamiento Secc. 35ÔÇô54: Juan Andr├®s Hermida Vargas (QA)
+Revis├│
+Aprob├│
+Pendiente
+Estado
+En elaboraci├│n┬áÔÇö Etapa 3 / Sprint 3 en curso; requerimiento no cerrado (Secc. 50)
+Clasificaci├│n
+Uso interno CUN 
+Historial de versiones
+Versi├│n
+Fecha
+Secci├│n modificada
+Descripci├│n del cambio
+Responsable
+Aprobador
+1.0
+20/08/2026
+Secc. 1ÔÇô2, 6ÔÇô20, 39, 46ÔÇô48
+Creaci├│n del documento: resumen, identificaci├│n, AS IS/TO BE, RF-001, matriz, factibilidad, release R1, status report e indicadores base.
+Iron Alexander Fuentes Rodr├¡guez / Haider Yessid Bello Melo
+Johan Sebasti├ín Daza Sarmiento┬á(revisi├│n)
+1.1
+27/08/2026
+Secc. 35ÔÇô54 + control documental
+Diligenciamiento QA, trazabilidad, UAT, go-live, postproducci├│n, hypercare, RACI, comunicaciones, cadencia de gobierno, dashboard, evidencias, cierre, lecciones aprendidas, backlog, anexos (links GitHub) y actualizaci├│n control documental.
+Juan Andr├®s Hermida Vargas┬á(co-elaborador)
+Iron Alexander Fuentes Rodr├¡guez┬á(pendiente firma formal)
+ÔÜá Nunca reemplazar un cambio sin conservar trazabilidad de la versi├│n anterior.
+TABLA DE CONTENIDO
+Este ├¡ndice se genera autom├íticamente en Word. Para actualizarlo: clic derecho sobre el ├¡ndice ÔåÆ Actualizar campo ÔåÆ Actualizar todo el ├¡ndice.
+CONTROL DOCUMENTAL1
+Historial de versiones1
+TABLA DE CONTENIDO1
+MATRIZ DE APLICABILIDAD DEL DOCUMENTO1
+1. RESUMEN EJECUTIVO1
+2. IDENTIFICACI├ôN DE LA SOLICITUD1
+Ficha maestra1
+3. ORIGEN Y JUSTIFICACI├ôN1
+4. OBJETIVOS1
+5. ALCANCE1
+6. PROCESO ACTUAL ÔÇö AS IS1
+7. PROCESO PROPUESTO ÔÇö TO BE1
+8. STAKEHOLDERS1
+9. REQUERIMIENTOS FUNCIONALES1
+RF-001 ÔÇö Autenticaci├│n y gesti├│n de sesi├│n por rol1
+10. REQUERIMIENTOS NO FUNCIONALES1
+11. REQUERIMIENTOS DE PROCESO1
+RP-001 ÔÇö Gesti├│n de inscripciones y progreso del colaborador1
+12. REGLAS DE NEGOCIO1
+13. REQUERIMIENTOS T├ëCNICOS1
+14. ARQUITECTURA1
+15. EXPERIENCIA DE USUARIO1
+16. MATRIZ MAESTRA DE REQUERIMIENTOS1
+17. PRIORIZACI├ôN1
+18. AN├üLISIS DE IMPACTO1
+19. FACTIBILIDAD1
+20. ESTIMACI├ôN1
+21. DESCOMPOSICI├ôN DEL TRABAJO1
+22. PLAN DE TRABAJO DETALLADO1
+23. CRONOGRAMA E HITOS1
+24. ROADMAP1
+25. DEPENDENCIAS1
+26. RAID LOG1
+27. REGISTRO DE RIESGOS1
+28. CONTROL DE BLOQUEOS1
+29. CONTROL DE CAMBIOS1
+CR-001 Solicitud de cambio1
+30. HIST├ôRICO DE CAMBIOS DEL REQUERIMIENTO1
+31. DECISION LOG1
+32. BACKLOG1
+33. DEFINITION OF READY1
+34. SPRINT / ITERACI├ôN1
+35. DEFINITION OF DONE1
+36. PLAN DE QA1
+37. MATRIZ DE TRAZABILIDAD1
+38. UAT ÔÇö VALIDACI├ôN DEL USUARIO1
+39. PLAN DE RELEASE1
+40. CHECKLIST DE GO-LIVE1
+41. VALIDACI├ôN POSTPRODUCCI├ôN1
+42. HYPERCARE1
+43. RACI1
+44. PLAN DE COMUNICACIONES1
+45. CADENCIA DE GOBIERNO1
+46. STATUS REPORT1
+47. INDICADORES DEL PROYECTO1
+48. DASHBOARD EJECUTIVO1
+49. EVIDENCIAS1
+50. CIERRE DEL REQUERIMIENTO1
+51. CIERRE DEL PROYECTO / FASE1
+52. LECCIONES APRENDIDAS1
+53. PENDIENTES / BACKLOG POSTERIOR1
+54. ANEXOS1
+55. GU├ìA DE DILIGENCIAMIENTO1
+1. Qui├®n diligencia cada secci├│n1
+2. En qu├® momento del proyecto1
+3. Cu├índo debe actualizarse1
+4. Qu├® secciones requieren aprobaci├│n1
+5. Qu├® secciones alimentan la trazabilidad1
+6. Elementos que deben mantenerse durante todo el ciclo de vida1
+7. Elementos que se completan ├║nicamente al cierre1
+MATRIZ DE APLICABILIDAD DEL DOCUMENTO
+Antes de diligenciar la plantilla, el Project Manager y el equipo deben definir qu├® cap├¡tulos aplican al proyecto. Esta decisi├│n debe quedar aprobada y respaldada en el Decision Log (cap├¡tulo 38).
+Secci├│n
+Aplica
+No aplica
+Justificaci├│n
+Requerimientos funcionales
+X
+ÔÿÉ
+La plataforma contempla funcionalidades espec├¡ficas para la gesti├│n de empresas, usuarios, cursos, m├│dulos, lecciones, recursos, evaluaciones, progreso y administraci├│n seg├║n roles.
+Requerimientos no funcionales
+X
+ÔÿÉ
+Se deben definir criterios relacionados con rendimiento, disponibilidad, escalabilidad, seguridad, mantenibilidad, accesibilidad y experiencia de uso de la plataforma.
+UX/UI
+X
+ÔÿÉ
+La soluci├│n cuenta con interfaces diferenciadas seg├║n el rol del usuario y requiere lineamientos de navegaci├│n, dise├▒o responsive, accesibilidad, identidad visual y experiencia de aprendizaje.
+Arquitectura
+X
+ÔÿÉ
+La plataforma posee una arquitectura web fullstack que integra frontend, l├│gica de servidor, autenticaci├│n, persistencia de datos, almacenamiento externo y servicios en la nube.
+Base de datos
+X
+ÔÿÉ
+La soluci├│n utiliza PostgreSQL para almacenar usuarios, empresas, cursos, m├│dulos, progreso, asignaciones y dem├ís informaci├│n necesaria para el funcionamiento de la plataforma.
+Integraciones
+X
+ÔÿÉ
+La plataforma contempla integraci├│n con servicios externos para almacenamiento de archivos, env├¡o de correos y servicios de infraestructura en Google Cloud.
+Seguridad
+X
+ÔÿÉ
+Se gestionan autenticaci├│n, autorizaci├│n basada en roles, sesiones mediante JWT, cookies seguras, pol├¡ticas de acceso a datos y protecci├│n de informaci├│n de usuarios y empresas.
+DevOps
+X
+ÔÿÉ
+El proyecto requiere procesos de versionamiento, despliegue, configuraci├│n de ambientes, variables y secretos, integraci├│n con Cloud Run y Cloud SQL, as├¡ como gesti├│n de versiones del aplicativo.
+QA
+X
+ÔÿÉ
+Se requieren pruebas funcionales y t├®cnicas para validar autenticaci├│n, permisos, flujos de cursos, recursos, evaluaciones, progreso, interfaces e integraciones antes de liberar cambios.
+UAT
+X
+ÔÿÉ
+Es necesaria la validaci├│n de la soluci├│n por parte de usuarios o responsables funcionales antes de su paso definitivo a producci├│n.
+Migraci├│n de datos
+ÔÿÉ
+X
+Actualmente no se contempla la migraci├│n masiva de informaci├│n hist├│rica desde una plataforma o sistema anterior. Los datos ser├ín creados y gestionados directamente en la nueva soluci├│n.
+Hypercare
+X
+ÔÿÉ
+Despu├®s de la salida a producci├│n se requiere un periodo de acompa├▒amiento y monitoreo para identificar y solucionar oportunamente incidentes asociados con el uso real de la plataforma.
+Roadmap
+X
+ÔÿÉ
+El desarrollo de la plataforma se realiza de forma progresiva, por lo que es necesario documentar fases, funcionalidades futuras, mejoras y prioridades de evoluci├│n del producto.
+RAID / Riesgos
+X
+ÔÿÉ
+El proyecto presenta dependencias, riesgos t├®cnicos y operativos relacionados con infraestructura, seguridad, integraciones, base de datos, despliegues y disponibilidad de servicios externos.
+ÔÜá Las secciones marcadas como OBLIGATORIO en este documento no son seleccionables aqu├¡: siempre aplican. Esta matriz cubre ├║nicamente las secciones CONDICIONAL.
+1. RESUMEN EJECUTIVO
+  OBLIGATORIO  
+M├íximo una p├ígina. Debe permitir a un directivo entender la iniciativa sin leer el resto del documento.
+Nombre de la iniciativa
+Plataforma Empresarial de Formaci├│n Autoguiada ÔÇö Diplomados CUN ÔÇö Plataforma Empresarial de Formaci├│n Autoguiada
+Problema principal
+No existe una plataforma digital propia de la CUN para ofrecer diplomados y cursos autoguiados a empresas aliadas, con trazabilidad de progreso, evaluaciones y aislamiento multiempresa.
+Objetivo
+Implementar una plataforma SaaS multiempresa que permita crear, administrar, inscribir y consumir cursos y diplomados autoguiados para colaboradores de empresas clientes.
+Beneficio esperado
+Centralizar la oferta de formaci├│n corporativa B2B, mejorar la experiencia del estudiante, habilitar reportes de avance por empresa y escalar la operaci├│n sin depender de herramientas externas.
+Solicitante
+Iron Alexander Fuentes Rodr├¡guez
+├ürea solicitante
+F├íbrica de Contenido
+Prioridad
+P1 ÔÇö Alta
+Estado
+En desarrollo ÔÇö Etapa 2 completada, Etapa 3 en curso
+Fecha objetivo
+Q4 2026 (octubreÔÇôdiciembre 2026)
+Riesgo principal
+Funcionalidades cr├¡ticas pendientes (certificados, pagos, asignaciones forzadas) y dependencia de servicios GCP/SendGrid.SendGrid.
+Dependencia cr├¡tica
+Infraestructura GCP (Cloud SQL, Cloud Storage, Cloud Run), SendGrid y secretos configurados en GitHub Actions.SendGrid y secretos configurados en GitHub Actions.
+Pr├│ximo hito
+Completar Etapa 3: paneles operativos admin/empresa, asignaciones forzadas y cierre funcional previo a UAT.
+Pr├│xima decisi├│n necesaria
+Definir alcance final de certificados, pagos e integraciones externas para el cierre del MVP.
+Estado general
+­ƒƒí Amarillo
+2. IDENTIFICACI├ôN DE LA SOLICITUD
+  OBLIGATORIO  
+Ficha maestra
+ID Solicitud
+SOL-DIP-2026-001
+Proyecto
+Diplomados
+Nombre solicitud
+Plataforma Empresarial de Formaci├│n Autoguiada ÔÇö Diplomados CUN
+Fecha solicitud
+19/08/2026
+Solicitante
+Iron Alexander Fuentes Rodr├¡guez
+Cargo
+Product Owner Owner
+├ürea
+F├íbrica de Contenido
+Stakeholder responsable
+Iron Alexander Fuentes Rodr├¡guez; Ra├║l Valencia Cifuentes; Alberto Mario Valencia Zableh
+Responsable funcional
+Iron Alexander Fuentes Rodr├¡guez
+PM responsable
+Johan Sebasti├ín Daza Sarmiento
+L├¡der t├®cnico
+Haider Yessid Bello MeloYessid Bello Melo
+Tipo solicitud
+Nuevo desarrollo
+Canal de recepci├│n
+Solicitud interna ÔÇö Direcci├│n de Operaciones / F├íbrica de Contenido
+Prioridad inicial
+P1 ÔÇö Alta
+Deadline solicitado
+31/12/2026
+Estado
+En desarrollo
+Tipos de solicitud sugeridos
+Nuevo desarrollo   ┬À   Evolutivo   ┬À   Mejora   ┬À   Cambio funcional   ┬À   UX/UI   ┬À   Integraci├│n   ┬À   Datos   ┬À   Seguridad   ┬À   DevOps   ┬À   Automatizaci├│n   ┬À   Reporte   ┬À   Deuda t├®cnica   ┬À   Correcci├│n   ┬À   Regulatorio   ┬À   Operativo
+3. ORIGEN Y JUSTIFICACI├ôN
+  OBLIGATORIO  
+10.1 Antecedentes
+La CUN requiere una soluci├│n propia para comercializar y operar diplomados y cursos autoguiados dirigidos a empresas aliadas. El proyecto inici├│ en agosto de 2026 como monorepo interno, evolucionando desde Supabase hacia infraestructura propia en Google Cloud Platform.
+10.2 Situaci├│n actual
+Actualmente no existe una plataforma digital integrada que permita a la CUN ofrecer formaci├│n autoguiada a empresas clientes con aislamiento de datos, gesti├│n de colaboradores, autor├¡a de contenidos, evaluaciones y reportes.
+10.3 Problema identificado
+No existe plataforma digital para ofrecer diplomados y cursos autoguiados a empresas aliadas de la CUN, con trazabilidad de progreso, evaluaciones, reportes y experiencia de usuario moderna.
+10.4 Necesidad
+Disponer de una plataforma SaaS multiempresa que centralice la creaci├│n, publicaci├│n, inscripci├│n, consumo y seguimiento de cursos y diplomados para colaboradores de empresas clientes.
+10.5 Justificaci├│n de negocio
+Permite escalar la oferta de formaci├│n corporativa de la CUN, mejorar la experiencia del usuario final, habilitar reportes por empresa y sostener un modelo B2B con aislamiento de datos por tenant.
+10.6 Usuarios afectados
+Superadministradores, administradores de empresa, instructores y colaboradores de empresas clientes; equipos de Operaciones y F├íbrica de Contenido.
+10.7 Impacto actual
+Experiencia de usuario
+Operativo   ┬À   Financiero   ┬À   Acad├®mico   ┬À   T├®cnico   ┬À   Reputacional   ┬À   Seguridad   ┬À   Cumplimiento   ┬À   Experiencia de usuario
+10.8 Resultado esperado
+Plataforma web desplegada en Cloud Run con autenticaci├│n propia, cat├ílogo de cursos, paneles por rol, inscripci├│n libre, ruta de aprendizaje, evaluaciones, reportes y PostgreSQL con RLS multiempresa.
+4. OBJETIVOS
+  OBLIGATORIO  
+Objetivo general
+Implementar y operar la Plataforma Empresarial de Formaci├│n Autoguiada ÔÇö Diplomados CUN como soluci├│n SaaS multiempresa.
+Objetivos espec├¡ficos
+ID
+Objetivo
+Indicador de cumplimiento
+Optimizar la experiencia de usuario (UX/UI) de la plataforma, mejorando principalmente el roadmap de aprendizaje, la navegaci├│n, la jerarqu├¡a visual y la interfaz de las vistas asociadas al consumo de cursos y diplomados.
+Roadmap e interfaces principales redise├▒adas e implementadas de forma responsive en escritorio, tablet y m├│vil, con los flujos principales de navegaci├│n funcionando correctamente y sin errores cr├¡ticos de interfaz.
+Redise├▒ar la experiencia visual y funcional del inicio de sesi├│n, aline├índola con la identidad gr├ífica de la plataforma y de la CUN, mejorando la claridad, accesibilidad y experiencia de acceso para los diferentes tipos de usuario.
+Nueva interfaz de login implementada y desplegada, adaptable a diferentes resoluciones y con validaciones visuales y mensajes de estado/errores correctamente integrados.
+Implementar y optimizar el backend de autenticaci├│n y autorizaci├│n de la plataforma, permitiendo el acceso seguro tanto de usuarios pertenecientes a la CUN como de usuarios externos, mediante credenciales y permisos asociados a sus respectivos perfiles y roles.
+Autenticaci├│n conectada correctamente con la base de datos, validaci├│n de credenciales operativa para usuarios internos y externos, generaci├│n de sesi├│n segura y redirecci├│n autom├ítica de los usuarios de acuerdo con el rol asignado.
+5. ALCANCE
+  OBLIGATORIO  
+Incluido en alcance
+ÔÇó  Autenticaci├│n y gesti├│n de usuarios por rol; gesti├│n de empresas; autor├¡a de cursos, m├│dulos, lecciones, recursos y evaluaciones; consumo autoguiado; reportes; despliegue GCP.
+Fuera de alcance
+ÔÇó  Pasarela de pagos; emisi├│n de certificados PDF; integraci├│n operativa con Moodle; auto-registro p├║blico; marketplace.
+Alcance futuro
+ÔÇó  Asignaci├│n forzada de cursos; certificados; pagos; integraciones acad├®micas adicionales; marketplace; anal├¡tica avanzada.
+Restricciones
+ÔÇó  Sin auto-registro; usuarios creados por administradores. Dependencia de GCP y SendGrid. Desarrollo incremental por etapas.
+ÔÜá Cualquier elemento nuevo que modifique el alcance aprobado deber├í gestionarse mediante control de cambios (cap├¡tulo 36).
+6. PROCESO ACTUAL ÔÇö AS IS
+  CONDICIONAL  
+Paso
+Actor
+Actividad
+Sistema
+Entrada
+Salida
+Problema actual
+1
+F├íbrica de Contenido / Operaciones
+Recibe solicitud de capacitaci├│n corporativa de una empresa aliada
+Correo, hojas de c├ílculo, carpetas compartidas
+Necesidad de formaci├│n y listado de colaboradores
+Contenido preparado de forma manual fuera de una plataforma integrada
+No hay trazabilidad centralizada ni registro ├║nico del avance
+2
+Instructor / ├írea acad├®mica
+Crea o adapta contenidos de diplomados de forma manual
+Documentos, Drive, herramientas externas
+Material acad├®mico y estructura del curso
+Archivos sueltos o repositorios no conectados a inscripci├│n y evaluaci├│n
+Dificultad para reutilizar contenidos y controlar versiones
+3
+Administrador de empresa
+Gestiona colaboradores e inscripciones sin plataforma propia
+Correo, listados manuales
+Listado de empleados y cursos requeridos
+Confirmaci├│n manual de participaci├│n
+Sin aislamiento multiempresa ni reportes automatizados
+4
+Colaborador / estudiante
+Accede a formaci├│n por canales dispersos
+Correo, PDF, enlaces externos
+Credenciales o enlaces compartidos manualmente
+Consumo parcialmente registrado o no registrado
+Mala experiencia de usuario y baja visibilidad del progreso
+Diagrama BPMN / flujo actual
+7. PROCESO PROPUESTO ÔÇö TO BE
+  CONDICIONAL  
+Paso
+Actor
+Actividad futura
+Sistema
+Regla
+Resultado
+1
+Superadmin / Admin empresa
+Crea empresas, usuarios y asigna roles en la plataforma
+Plataforma Diplomados
+Solo usuarios autenticados con rol autorizado
+Tenants, usuarios activos y permisos RLS aplicados
+2
+Instructor
+Publica cursos, m├│dulos, lecciones, recursos y evaluaciones
+Plataforma Diplomados + GCS
+Curso en borrador hasta publicaci├│n
+Curso publicado visible para empresas autorizadas
+3
+Colaborador
+Inicia sesi├│n, se inscribe y consume la ruta de aprendizaje
+Plataforma Diplomados
+Curso publicado visible para su empresa o global
+Inscripci├│n creada y progreso registrado por lecci├│n
+4
+Admin empresa / Superadmin
+Consulta reportes de avance por colaborador y empresa
+Plataforma Diplomados
+Inscripciones y progreso persistidos en PostgreSQL
+Reportes de avance disponibles para seguimiento operativo
+Diagrama BPMN / flujo futuro
+8. STAKEHOLDERS
+  OBLIGATORIO  
+Stakeholder
+├ürea
+Rol
+Inter├®s
+Influencia
+Responsabilidad
+Iron Alexander Fuentes Rodr├¡guez
+F├íbrica de Contenido
+Product Owner
+Alta
+Alta
+Definici├│n funcional, priorizaci├│n y validaci├│n de negocio
+Johan Sebasti├ín Daza Sarmiento
+Operaciones
+Project Manager
+Alta
+Alta
+Gesti├│n del proyecto, cronograma y gobierno
+Haider Yessid Bello Melo
+Operaciones / TI
+L├¡der de desarrollo
+Alta
+Alta
+Arquitectura, desarrollo, despliegue y soporte t├®cnico
+Colaboradores de empresas clientes
+Empresas aliadas
+Usuario final
+Alta
+Baja
+Consumo de cursos y evaluaciones autoguiadas
+Clasificaci├│n de influencia
+Alta   ┬À   Media   ┬À   Baja
+9. REQUERIMIENTOS FUNCIONALES
+  OBLIGATORIO  
+Diligenciar una ficha por cada requerimiento funcional identificado. Duplicar esta ficha tantas veces como requerimientos existan.
+RF-001 ÔÇö Autenticaci├│n y gesti├│n de sesi├│n por rol
+ID
+RF-001
+Nombre
+Autenticaci├│n y gesti├│n de sesi├│n por rol
+Descripci├│n
+Permitir el acceso seguro a la plataforma mediante credenciales propias, generando sesi├│n JWT en cookie httpOnly y redirigiendo al panel correspondiente seg├║n el rol del usuario.
+Actor
+Superadmin, admin_empresa, instructor y colaborador
+Prioridad
+P1 ÔÇö Alta
+Fuente
+SOL-DIP-2026-001 / An├ílisis funcional y t├®cnico del repositorio
+Dependencias
+PostgreSQL, JWT_SECRET, SendGrid para recuperaci├│n de clave
+Responsable funcional
+Iron Alexander Fuentes Rodr├¡guez
+Estado
+Implementado
+Precondiciones
+Usuario autenticado con rol v├ílido; empresa activa cuando aplique; curso publicado visible para el tenant.
+Flujo principal
+1. El usuario ingresa correo y contrase├▒a en /login.
+2. El sistema valida credenciales, verifica cuenta activa y crea JWT en cookie httpOnly.
+3. El middleware redirige al panel inicial seg├║n rol: /admin, /empresa, /instructor/cursos o /mis-cursos.
+Flujos alternativos
+Si SendGrid falla al invitar usuario, el sistema devuelve enlace manual de restablecimiento de contrase├▒a.
+Excepciones
+Usuario inactivo o rol modificado: la sesi├│n se invalida en Server Actions aunque el JWT permanezca en cookie.
+Resultado esperado
+Operaci├│n segura multiempresa con trazabilidad de progreso, evaluaciones calificadas en servidor e inscripciones auditables.
+Criterios de aceptaci├│n
+Formato Gherkin:
+Dado que existe un colaborador autenticado de una empresa activa
+Cuando se inscribe en un curso publicado visible para su empresa o global
+Entonces se crea una inscripci├│n y puede acceder a la ruta de aprendizaje del curso
+10. REQUERIMIENTOS NO FUNCIONALES
+  OBLIGATORIO  
+ID
+Categor├¡a
+Requerimiento
+M├®trica / criterio
+Prioridad
+RNF-01
+Seguridad
+Aislamiento multiempresa con RLS en PostgreSQL y sesi├│n JWT en cookie httpOnly
+Pruebas QA confirman que un tenant no accede a datos de otro; JWT no accesible desde JS
+P1
+RNF-02
+Disponibilidad
+Servicio desplegado en Cloud Run con pipeline CI/CD automatizado
+Deploy exitoso post-merge a main; health check post-deploy en GitHub Actions
+P1
+RNF-03
+Rendimiento
+Middleware valida JWT sin consulta a base de datos en cada navegaci├│n
+Navegaci├│n fluida en paneles principales; TTFB aceptable en Cloud Run
+P2
+RNF-04
+Integridad de datos
+Todas las mutaciones validadas con esquemas Zod antes de persistir
+Datos inv├ílidos rechazados con mensaje controlado; sin escrituras parciales
+P1
+Categor├¡as sugeridas
+Rendimiento   ┬À   Disponibilidad   ┬À   Seguridad   ┬À   Escalabilidad   ┬À   Accesibilidad   ┬À   Usabilidad   ┬À   Compatibilidad   ┬À   Observabilidad   ┬À   Auditor├¡a   ┬À   Backups   ┬À   Recuperaci├│n   ┬À   Privacidad   ┬À   Integridad de datos
+11. REQUERIMIENTOS DE PROCESO
+  CONDICIONAL  
+RP-001 ÔÇö Gesti├│n de inscripciones y progreso del colaborador
+Nombre proceso
+Gesti├│n de inscripciones y progreso del colaborador
+Objetivo
+Permitir que el colaborador se inscriba de forma aut├│noma en cursos publicados visibles para su empresa (o globales) y registre su avance lecci├│n a lecci├│n, habilitando reportes de seguimiento.
+Responsable
+Iron Alexander Fuentes Rodr├¡guez (funcional) / Haider Yessid Bello Melo (t├®cnico)
+Participantes
+Colaborador, Administrador de empresa, Instructor, Superadmin
+Trigger
+El colaborador solicita inscripci├│n desde el cat├ílogo o completa una lecci├│n en la ruta de aprendizaje
+Entrada
+Usuario autenticado con rol colaborador, empresa activa, curso publicado y visible seg├║n RLS (global o del tenant)
+Actividad
+1) Colaborador selecciona inscribirme. 2) Server Action inscribirme() valida sesi├│n y empresa. 3) RLS verifica puede_ver_curso() y crea inscripci├│n. 4) Colaborador consume la ruta de aprendizaje. 5) Al completar lecci├│n, marcarLeccionCompletada() invoca registrar_progreso_leccion() en PostgreSQL. 6) Progreso visible en UI y reportes.
+Reglas
+Inscripci├│n libre (RN-03); sin duplicados; progreso solo con inscripci├│n v├ílida; aislamiento multiempresa v├¡a RLS; cursos globales visibles para tenants autorizados
+Salida
+Inscripci├│n activa, progreso por lecci├│n persistido y porcentaje de avance visible en cat├ílogo y reportes
+Evidencia
+Tablas inscripciones y progreso_lecciones; funci├│n registrar_progreso_leccion; consultas de reportes admin/empresa
+Sistema
+Plataforma Diplomados (Next.js 15 + PostgreSQL 16 / Drizzle ORM)
+SLA / tiempo esperado
+Inscripci├│n en l├¡nea &lt; 3 s bajo carga normal; registro de progreso inmediato al completar lecci├│n (&lt; 2 s)
+Excepci├│n
+Ya inscrito ÔåÆ mensaje controlado; sin empresa ÔåÆ bloqueo; inscripci├│n inv├ílida al marcar progreso ÔåÆ error y re-login; fallos BD ÔåÆ error sin corrupci├│n de datos
+Escalamiento
+Colaborador ÔåÆ Admin empresa ÔåÆ Haider Yessid Bello Melo / Operaciones TI ante incidentes de RLS, BD o Cloud Run
+12. REGLAS DE NEGOCIO
+  OBLIGATORIO  
+ID
+Regla
+Fuente
+Responsable
+Excepci├│n
+Estado
+RN-01
+Superadmin no tiene empresa_id; dem├ís roles requieren empresa activa.
+Pol├¡tica RLS
+Superadmin
+N/A
+Vigente
+RN-02
+Curso con empresa_id nulo es global; con valor es privado del tenant.
+Modelo cat├ílogo
+Instructor
+N/A
+Vigente
+RN-03
+Colaborador puede auto-inscribirse en cursos publicados visibles.
+Inscripci├│n libre
+Colaborador
+Asignaci├│n forzada
+Vigente
+RN-04
+Solo autor o superadmin puede editar un curso.
+Autorizaci├│n curso
+Instructor
+N/A
+Vigente
+13. REQUERIMIENTOS T├ëCNICOS
+  CONDICIONAL  
+Backend
+Backend: Node.js 20+, Server Actions Next.js, Drizzle ORM, PostgreSQL 16, JWT, bcryptjs, Zod, SendGrid, GCS.
+Frontend
+Frontend: Next.js 15 App Router, React 19, TypeScript, Tailwind CSS, shadcn/ui, React Hook Form, Recharts.
+Base de datos
+PostgreSQL 16 en Cloud SQL con 11 migraciones SQL, RLS por empresa, rol app_user y funciones SECURITY DEFINER.
+Integraciones
+Google Cloud Storage, SendGrid, proxy Google Drive para portadas, importaci├│n GIFT compatible con Moodle.
+Infraestructura
+Cloud Run (servicio diplomados), Artifact Registry, GitHub Actions CI/CD, Docker Compose para Postgres local.
+Seguridad
+JWT httpOnly 1 d├¡a, RLS multiempresa, validaci├│n Zod, URLs firmadas GCS v4, bcrypt 12 rounds.
+DevOps
+GitHub Actions ci.yml y deploy.yml con build Docker y deploy Cloud Run en push a main.
+Observabilidad
+Logs de Cloud Run, health check post-deploy, auditor├¡a en historial_actividad.
+Datos
+Entidades: empresas, profiles, cursos, m├│dulos, unidades, lecciones, recursos, evaluaciones, inscripciones, progreso.
+14. ARQUITECTURA
+  CONDICIONAL  
+Arquitectura actual
+Sin plataforma integrada previa; operaci├│n manual o con herramientas no multiempresa.
+Arquitectura propuesta
+Monorepo Next.js 15 + PostgreSQL (Drizzle) en Cloud Run, con GCS, SendGrid y RLS multiempresa.
+Servicios involucrados
+Cloud Run, Cloud SQL, GCS, SendGrid, Artifact Registry, GitHub Actions.
+Sistemas impactados
+Nuevo sistema Diplomados; procesos de F├íbrica de Contenido y Operaciones.
+APIs
+Server Actions Next.js; route handler GET /api/imagenes/google-drive.
+Bases de datos
+PostgreSQL 16 ÔÇö esquema plataforma_formacion.
+Integraciones
+GCS, SendGrid, proxy Google Drive, importaci├│n GIFT.
+Ambientes
+Local (Docker Postgres 5433); producci├│n Cloud Run.
+Seguridad
+JWT httpOnly, RLS, bcrypt, URLs firmadas GCS, secretos en GCP/GitHub.
+Consideraciones t├®cnicas
+Migraci├│n SupabaseÔåÆGCP completada; app_user sujeto a RLS; deploy autom├ítico en main.
+Diagrama C4 Context
+Diagrama C4 Container
+Deployment Diagram
+15. EXPERIENCIA DE USUARIO
+  CONDICIONAL  
+Usuarios
+Superadmin, admin empresa, instructor, colaborador.
+Roles
+Cuatro roles con paneles dedicados y redirecci├│n post-login.
+Flujos
+Login, gesti├│n acad├®mica, consumo de curso, evaluaciones, reportes.
+Pantallas afectadas
+/admin, /empresa, /instructor, /mis-cursos y flujos de autenticaci├│n.
+Dise├▒o Figma
+No aplica ÔÇö dise├▒o implementado directamente en c├│digo con identidad gr├ífica CUN.
+Prototipo
+Plataforma funcional desplegada en Cloud Run; validaci├│n UX en pantallas principales.
+Accesibilidad
+Componentes shadcn/ui; revisi├│n formal WCAG pendiente.
+Responsive
+S├¡ ÔÇö Tailwind responsive en cat├ílogo, ruta de aprendizaje y paneles.
+Aprobador UX
+Iron Alexander Fuentes Rodr├¡guez
+Evidencias / capturas
+16. MATRIZ MAESTRA DE REQUERIMIENTOS
+  OBLIGATORIO  
+Consolidado de todos los requerimientos del proyecto (funcionales, no funcionales, t├®cnicos y de proceso).
+ID
+Nombre
+Tipo
+Prioridad
+Responsable
+Estado
+Versi├│n
+Sprint
+Release
+RF-001
+Autenticaci├│n y sesi├│n por rol
+Funcional
+P1
+Implementado
+1.0
+Etapa 2
+R1
+RF-002
+Gesti├│n de empresas y usuarios
+Funcional
+P1
+Implementado
+1.0
+Etapa 2-3
+R1
+RF-003
+Autor├¡a de cursos y evaluaciones
+Funcional
+P1
+Implementado
+1.0
+Etapa 2-3
+R1
+RF-004
+Consumo estudiante e inscripci├│n
+Funcional
+P1
+Implementado
+1.0
+Etapa 2-3
+R1
+RF-005
+Reportes superadmin/empresa
+Funcional
+P2
+Implementado
+1.0
+Etapa 3
+R1
+17. PRIORIZACI├ôN
+  OBLIGATORIO  
+Escala de prioridad
+ÔÇó  P0 ÔÇö Cr├¡tica
+ÔÇó  P1 ÔÇö Alta
+ÔÇó  P2 ÔÇö Media
+ÔÇó  P3 ÔÇö Baja
+Matriz de evaluaci├│n objetiva
+Factor
+Peso
+Puntuaci├│n
+Valor de negocio y diferenciaci├│n B2B
+20%
+Contribuci├│n a la propuesta comercial de diplomados CUN frente a empresas aliadas
+Impacto en experiencia de aprendizaje
+25%
+Mejora directa en consumo, retenci├│n y percepci├│n ÔÇ£plataforma educativaÔÇØ
+Urgencia frente a meta Q4 2026
+15%
+Alineaci├│n con cierre MVP, UAT y go-live
+Viabilidad t├®cnica con stack actual
+15%
+Factibilidad con Next.js 15, Cloud Run, PostgreSQL, GCS y componentes existentes
+Riesgo operativo, legal o de seguridad
+15%
+Consecuencias de no implementar (accesos incorrectos, mala UX cr├¡tica, incumplimiento)
+Esfuerzo relativo┬á(5 = bajo esfuerzo)
+10%
+Complejidad estimada vs. capacidad del equipo
+Total
+100%
+ÔÜá La suma ponderada de estos factores debe determinar la prioridad final asignada, evitando decisiones subjetivas.
+18. AN├üLISIS DE IMPACTO
+  OBLIGATORIO  
+Dimensi├│n
+Sin impacto
+Bajo
+Medio
+Alto
+Comentario
+Negocio
+Ôÿæ
+Nueva l├¡nea B2B de diplomados para empresas aliadas; ingresos y operaci├│n comercial por tenant.
+Operaci├│n
+Ôÿæ
+F├íbrica de Contenido gestiona cat├ílogo, inscripciones, evaluaciones y reportes por empresa.
+Usuarios
+Ôÿæ
+Cuatro roles con experiencias distintas: superadmin, admin empresa, instructor y colaborador.
+Frontend
+Ôÿæ
+Next.js 15, roadmap gamificado, hero con CTA, embeds Drive y paneles responsive.
+Backend
+Ôÿæ
+Server Actions, Drizzle ORM, RLS multiempresa, progreso, evaluaciones y auth JWT.
+Base de datos
+Ôÿæ
+PostgreSQL 16 con 11 migraciones, pol├¡ticas RLS y rol app_user dedicado.
+Integraciones
+Ôÿæ
+GCS, SendGrid, proxy Google Drive y piloto Adobe Publish Online para contenidos.
+Seguridad
+Ôÿæ
+JWT httpOnly, bcrypt, RLS por empresa, URLs firmadas y validaci├│n Zod.
+Infraestructura
+Ôÿæ
+Cloud Run, Cloud SQL, Artifact Registry y CI/CD con GitHub Actions.
+QA
+Ôÿæ
+Pruebas funcionales por rol; UAT formal pendiente para cierre MVP Q4 2026.
+Documentaci├│n
+Ôÿæ
+README t├®cnico, plantilla PMO y scripts de soporte documental del proyecto.
+19. FACTIBILIDAD
+  CONDICIONAL  
+Factibilidad funcional
+Alta ÔÇö n├║cleo acad├®mico y multiempresa ya implementado.
+Factibilidad t├®cnica
+Alta ÔÇö stack probado, CI/CD y producci├│n activa en Cloud Run.
+Factibilidad operativa
+Media ÔÇö pendiente UAT formal, certificados y pagos.
+Factibilidad de tiempo
+Media ÔÇö meta Q4 2026 viable con alcance MVP acotado.
+Clasificaci├│n final
+Viable con condiciones ÔÇö pendiente cierre de certificados, pagos y UAT.
+20. ESTIMACI├ôN
+  OBLIGATORIO  
+Componente
+Responsable
+Estimaci├│n
+Complejidad
+Dependencia
+An├ílisis
+Iron Alexander Fuentes Rodr├¡guez
+80 h
+Media
+Definici├│n de alcance MVP, priorizaci├│n PMO y criterios de aceptaci├│n
+UX/UI
+JUAN ANDRES HERMIDA VARGAS 
+120 h
+Alta
+Identidad CUN, roadmap gamificado, hero, lecciones y accesibilidad responsive
+Backend
+Haider Yessid Bello Melo, ZUANY ALEJANDRO ACU├æA VELEZ
+320 h
+Alta
+Cloud SQL, RLS multiempresa, Server Actions, auth JWT y evaluaciones
+Frontend
+JUAN ANDRES HERMIDA VARGAS
+280 h
+Alta
+Next.js 15 App Router, paneles por rol, roadmap, embeds de contenido
+Data
+80 h
+Media
+11 migraciones SQL, carga de contenidos y rol app_user
+QA
+JUAN ANDRES HERMIDA VARGAS
+120 h
+Media
+Pruebas funcionales por rol; ambientes local (Docker) y Cloud Run
+DevOps
+60 h
+Media
+Docker Compose, GitHub Actions CI/CD y despliegue Cloud Run
+21. DESCOMPOSICI├ôN DEL TRABAJO
+  OBLIGATORIO  
+Jerarqu├¡a: Epic ÔåÆ Feature ÔåÆ Historia de Usuario ÔåÆ Tarea ÔåÆ Subtarea
+Nivel
+ID
+Nombre
+Parent
+Responsable
+Epic
+EP-01
+Plataforma Empresarial de Formaci├│n Autoguiada ÔÇö Diplomados CUN
+ÔÇö
+Iron Alexander Fuentes Rodr├¡guez
+Feature
+FT-01
+Autenticaci├│n y gesti├│n de sesi├│n (RF-001)
+EP-01
+Haider Yessid Bello Melo
+Historia de Usuario
+HU-01-01
+Como colaborador quiero iniciar sesi├│n con correo y contrase├▒a
+FT-01
+Haider Yessid Bello Melo
+Tarea
+TK-01-01-01
+Implementar Server Action iniciarSesion y cookie JWT
+FT-01
+Haider Yessid Bello Melo
+Subtarea
+ST-01-01-01-01
+Validaci├│n Zod y mensajes de error en login
+TK-01-01-01
+Haider Yessid Bello Melo
+Subtarea
+ST-01-01-01-02
+Middleware de protecci├│n de rutas por rol
+TK-01-01-01
+Haider Yessid Bello Melo
+Historia de Usuario
+HU-01-02
+Como usuario quiero recuperar y restablecer mi contrase├▒a
+FT-01
+Haider Yessid Bello Melo
+Tarea
+TK-01-02-01
+Flujo recuperar-clave / restablecer-clave con SendGrid
+FT-01
+Haider Yessid Bello Melo
+Feature
+FT-02
+Gesti├│n multiempresa y usuarios (RF-002)
+EP-01
+Haider Yessid Bello Melo
+Historia de Usuario
+HU-02-01
+Como superadmin quiero crear y administrar empresas
+FT-02
+Haider Yessid Bello Melo
+Tarea
+TK-02-01-01
+CRUD empresas en panel /admin
+FT-02
+Haider Yessid Bello Melo
+Historia de Usuario
+HU-02-02
+Como admin empresa quiero gestionar colaboradores de mi tenant
+FT-02
+Haider Yessid Bello Melo
+Tarea
+TK-02-02-01
+Panel /empresa: usuarios, activaci├│n e invitaciones
+FT-02
+Haider Yessid Bello Melo
+Feature
+FT-03
+Autor├¡a acad├®mica ÔÇö cursos, m├│dulos y evaluaciones (RF-003)
+EP-01
+Haider Yessid Bello Melo
+Historia de Usuario
+HU-03-01
+Como instructor quiero crear cursos con m├│dulos, lecciones y recursos
+FT-03
+Haider Yessid Bello Melo
+Tarea
+TK-03-01-01
+Formularios curso, m├│dulo, lecci├│n y carga GCS/Drive
+FT-03
+Haider Yessid Bello Melo
+Historia de Usuario
+HU-03-02
+Como instructor quiero crear evaluaciones e importar GIFT
+FT-03
+Haider Yessid Bello Melo
+Tarea
+TK-03-02-01
+CRUD evaluaciones e importaci├│n preguntas GIFT
+FT-03
+Haider Yessid Bello Melo
+Feature
+FT-04
+Consumo estudiante e inscripci├│n (RF-004)
+EP-01
+Haider Yessid Bello Melo
+Historia de Usuario
+HU-04-01
+Como colaborador quiero ver cat├ílogo e inscribirme en cursos
+FT-04
+Haider Yessid Bello Melo
+Tarea
+TK-04-01-01
+Cat├ílogo, inscripci├│n libre y hero ÔÇ£Contin├║a aprendiendoÔÇØ
+FT-04
+Haider Yessid Bello Melo
+Historia de Usuario
+HU-04-02
+Como colaborador quiero avanzar por el roadmap y completar lecciones
+FT-04
+Haider Yessid Bello Melo
+Tarea
+TK-04-02-01
+Ruta de aprendizaje, avatar, CTA hero y vista de lecci├│n
+FT-04
+Haider Yessid Bello Melo
+Subtarea
+ST-04-02-01-01
+Embed Adobe InDesign Publish Online (piloto)
+TK-04-02-01
+Haider Yessid Bello Melo
+Historia de Usuario
+HU-04-03
+Como colaborador quiero presentar evaluaciones con reintentos
+FT-04
+Haider Yessid Bello Melo
+Tarea
+TK-04-03-01
+Flujo evaluaci├│n, calificaci├│n en servidor y progreso
+FT-04
+Haider Yessid Bello Melo
+Feature
+FT-05
+Reportes y paneles operativos (RF-005)
+EP-01
+Johan Sebasti├ín Daza Sarmiento
+Historia de Usuario
+HU-05-01
+Como superadmin quiero reportes consolidados por empresa
+FT-05
+Johan Sebasti├ín Daza Sarmiento
+Tarea
+TK-05-01-01
+Dashboard /admin y reportes con Recharts
+FT-05
+Haider Yessid Bello Melo
+Feature
+FT-06
+Infraestructura, datos y despliegue
+EP-01
+Haider Yessid Bello Melo
+Historia de Usuario
+HU-06-01
+Como equipo t├®cnico quiero desplegar en Cloud Run con CI/CD
+FT-06
+Haider Yessid Bello Melo
+Tarea
+TK-06-01-01
+Migraciones SQL, RLS, Docker local y GitHub Actions
+FT-06
+Haider Yessid Bello Melo
+Feature
+FT-07
+Asignaciones forzadas y cierre MVP (RF-006) ÔÇö pendiente
+EP-01
+Iron Alexander Fuentes Rodr├¡guez
+Historia de Usuario
+HU-07-01
+Como admin empresa quiero asignar cursos obligatorios a colaboradores
+FT-07
+Por definir
+Feature
+FT-08
+Certificados de diplomado (RF-007) ÔÇö Fase 2
+EP-01
+Iron Alexander Fuentes Rodr├¡guez
+Historia de Usuario
+HU-08-01
+Como colaborador quiero descargar certificado al completar diplomado
+FT-08
+Por definir
+22. PLAN DE TRABAJO DETALLADO
+  OBLIGATORIO  
+ID
+Fase
+Actividad
+Entregable
+Responsable
+Inicio
+Fin
+Duraci├│n
+Dependencia
+Estado
+% Avance
+PL-01
+Discovery
+Alcance inicial y alineaci├│n con F├íbrica de Contenido
+Acta de kickoff y objetivos MVP
+Iron Alexander Fuentes Rodr├¡guez
+01/08/2026
+15/08/2026
+2 semanas
+ÔÇö
+Completado
+100%
+PL-02
+Levantamiento
+Levantamiento funcional por rol y flujos acad├®micos
+Documento de requerimientos v1
+Iron Alexander Fuentes Rodr├¡guez
+16/08/2026
+31/08/2026
+2 semanas
+PL-01
+Completado
+100%
+PL-03
+An├ílisis
+Priorizaci├│n RF/RNF, matriz maestra y reglas de negocio
+Matriz RF-001 a RF-007 y RN documentadas
+Johan Sebasti├ín Daza Sarmiento
+01/09/2026
+15/09/2026
+2 semanas
+PL-02
+Completado
+100%
+PL-04
+UX/UI
+Dise├▒o identidad CUN, cat├ílogo, roadmap, hero y lecciones
+Mockups / UI implementada en frontend
+01/09/2026
+30/09/2026
+4 semanas
+PL-03
+En curso
+75%
+PL-05
+Arquitectura
+Monorepo, esquema PostgreSQL, RLS, GCS y Cloud Run
+Diagrama C4 + 11 migraciones SQL
+Haider Yessid Bello Melo
+15/08/2026
+30/09/2026
+6 semanas
+PL-02
+Completado
+100%
+PL-06
+Desarrollo
+Implementaci├│n Server Actions, paneles por rol y consumo estudiante
+C├│digo en main: auth, cursos, roadmap, evaluaciones
+Haider Yessid Bello Melo
+01/10/2026
+15/11/2026
+6 semanas
+PL-05
+En curso
+70%
+PL-07
+Integraci├│n
+GCS, SendGrid, Google Drive, Adobe Publish Online (piloto)
+Integraciones operativas en local y prod
+01/11/2026
+30/11/2026
+4 semanas
+PL-06
+En curso
+60%
+PL-08
+QA
+Pruebas funcionales por rol y regresi├│n pre-UAT
+Plan de pruebas + evidencias de ejecuci├│n
+Johan Sebasti├ín Daza Sarmiento
+01/12/2026
+15/12/2026
+2 semanas
+PL-07
+Pendiente
+0%
+PL-09
+UAT
+Validaci├│n con usuarios de Operaciones y F├íbrica de Contenido
+Acta UAT firmada
+Iron Alexander Fuentes Rodr├¡guez
+16/12/2026
+31/12/2026
+2 semanas
+PL-08
+Pendiente
+0%
+PL-10
+Release
+Despliegue release R1 en Cloud Run y comunicaci├│n go-live
+Release 1.0 en producci├│n
+Haider Yessid Bello Melo
+01/01/2027
+10/01/2027
+1 semana
+PL-09
+Pendiente
+0%
+PL-11
+Hypercare
+Soporte post-lanzamiento y correcci├│n de incidencias cr├¡ticas
+Informe hypercare (2 semanas)
+Johan Sebasti├ín Daza Sarmiento
+11/01/2027
+24/01/2027
+2 semanas
+PL-10
+Pendiente
+0%
+PL-12
+Cierre
+Lecciones aprendidas, cierre PMO y handover operativo
+Documento de cierre y backlog Fase 2
+Johan Sebasti├ín Daza Sarmiento
+25/01/2027
+31/01/2027
+1 semana
+PL-11
+Pendiente
+0%
+Fases sugeridas
+1. Discovery   ┬À   2. Levantamiento   ┬À   3. An├ílisis   ┬À   4. UX/UI   ┬À   5. Arquitectura   ┬À   6. Desarrollo   ┬À   7. Integraci├│n   ┬À   8. QA   ┬À   9. UAT   ┬À   10. Release   ┬À   11. Hypercare   ┬À   12. Cierre
+23. CRONOGRAMA E HITOS
+  OBLIGATORIO  
+Hito
+Fecha base
+Fecha actual
+Responsable
+Criterio
+Estado
+H1 ÔÇö Kickoff y alcance MVP aprobado
+15/08/2026
+15/08/2026
+Iron Alexander Fuentes Rodr├¡guez
+Acta de kickoff, objetivo MVP y stakeholders definidos (F├íbrica de Contenido / Operaciones)
+Completado
+H2 ÔÇö Documento de requerimientos v1
+31/08/2026
+31/08/2026
+Johan Sebasti├ín Daza Sarmiento
+RF/RNF priorizados, matriz maestra y reglas de negocio documentadas
+Completado
+H3 ÔÇö Arquitectura y esquema de datos base
+30/09/2026
+30/09/2026
+Haider Yessid Bello Melo
+Monorepo, PostgreSQL 16, RLS multiempresa y migraciones iniciales aplicadas
+Completado
+H4 ÔÇö Etapa 2: Auth, multiempresa y autor├¡a (RF-001 a RF-003)
+31/10/2026
+31/10/2026
+Haider Yessid Bello Melo
+Login JWT, paneles por rol, CRUD cursos/m├│dulos/lecciones/evaluaciones operativo
+Completado
+H5 ÔÇö Etapa 3: Consumo estudiante, roadmap y reportes (RF-004, RF-005)
+30/11/2026
+25/08/2026
+Haider Yessid Bello Melo
+Cat├ílogo, inscripci├│n, roadmap gamificado, lecciones, evaluaciones y reportes b├ísicos
+En curso
+H6 ÔÇö Integraciones GCS, SendGrid y contenidos (Drive/Adobe piloto)
+15/12/2026
+25/08/2026
+Haider Yessid Bello Melo
+Portadas Drive, recursos GCS, correo transaccional y embed Adobe InDesign en prueba
+En curso
+H7 ÔÇö Cierre funcional MVP (sin certificados ni pagos)
+15/12/2026
+ÔÇö
+Iron Alexander Fuentes Rodr├¡guez
+RF-001 a RF-005 implementados; BP asignaciones forzadas en UI definida
+Planificado
+H8 ÔÇö QA funcional y regresi├│n pre-UAT
+15/12/2026
+ÔÇö
+Johan Sebasti├ín Daza Sarmiento
+Plan de pruebas ejecutado por rol con evidencias
+Planificado
+H9 ÔÇö UAT con Operaciones y F├íbrica de Contenido
+31/12/2026
+ÔÇö
+Iron Alexander Fuentes Rodr├¡guez
+Acta UAT firmada; incidencias cr├¡ticas resueltas
+Planificado
+H10 ÔÇö Release R1 en producci├│n (Cloud Run)
+10/01/2027
+ÔÇö
+Haider Yessid Bello Melo
+Deploy R1 exitoso, health check OK, secretos y URL oficial configurados
+Planificado
+H11 ÔÇö Hypercare post go-live (2 semanas)
+24/01/2027
+ÔÇö
+Johan Sebasti├ín Daza Sarmiento
+Incidencias P1/P2 atendidas; informe de hypercare entregado
+Planificado
+H12 ÔÇö Cierre PMO y backlog Fase 2
+31/01/2027
+ÔÇö
+Johan Sebasti├ín Daza Sarmiento
+Documento de cierre, lecciones aprendidas y backlog certificados/pagos
+Planificado
+H1 ÔÇö Kickoff y alcance MVP aprobado
+15/08/2026
+15/08/2026
+Iron Alexander Fuentes Rodr├¡guez
+Acta de kickoff, objetivo MVP y stakeholders definidos (F├íbrica de Contenido / Operaciones)
+Completado
+H2 ÔÇö Documento de requerimientos v1
+31/08/2026
+31/08/2026
+Johan Sebasti├ín Daza Sarmiento
+RF/RNF priorizados, matriz maestra y reglas de negocio documentadas
+Completado
+ÔÜá Indicador de desviaci├│n = Fecha actual ÔÇô Fecha base. Toda desviaci├│n mayor a la tolerancia definida por el PMO debe reportarse en el Status Report (cap├¡tulo 53).
+24. ROADMAP
+  CONDICIONAL  
+Por horizonte de tiempo
+ÔÇó  Corto plazo ÔÇö Completar Etapa 3: asignaciones forzadas, dashboards admin/empresa y cierre funcional MVP.
+ÔÇó  Mediano plazo ÔÇö Certificados, pagos e integraciones acad├®micas adicionales.
+ÔÇó  Largo plazo ÔÇö Marketplace, anal├¡tica avanzada y expansi├│n comercial B2B.
+Por fase de entrega
+ÔÇó  MVP ÔÇö Auth, multiempresa, CRUD cursos, consumo estudiante, evaluaciones, reportes b├ísicos, deploy GCP.
+ÔÇó  Fase 2 ÔÇö Certificados, pagos, asignaciones avanzadas y UAT formal.
+ÔÇó  Fase 3 ÔÇö Integraciones externas, anal├¡tica y optimizaci├│n operativa.
+25. DEPENDENCIAS
+  OBLIGATORIO  
+ID
+Dependencia
+Tipo
+Proyecto/├ürea
+Responsable
+Fecha requerida
+Impacto
+Estado
+DEP-01
+Provisi├│n proyecto GCP (Cloud Run, Cloud SQL, GCS, Artifact Registry)
+Infraestructura
+TI / Cloud CUN
+Haider Yessid Bello Melo
+30/09/2026
+Alto
+Cumplida
+DEP-02
+Cuenta SendGrid y dominio verificado para correo transaccional
+Proveedor
+Operaciones / TI
+Haider Yessid Bello Melo
+15/10/2026
+Alto
+En seguimiento
+DEP-03
+Secretos en GitHub Actions (DATABASE_URL, JWT_SECRET, GCS, SendGrid)
+Infraestructura
+DevOps / TI
+Haider Yessid Bello Melo
+31/10/2026
+Alto
+Cumplida
+DEP-04
+Contenido acad├®mico (diplomados, lecciones, evaluaciones) cargado en BD
+Datos
+F├íbrica de Contenido
+Iron Alexander Fuentes Rodr├¡guez
+30/11/2026
+Alto
+En curso
+DEP-05
+Portadas e im├ígenes en Google Drive con acceso al proxy de la plataforma
+T├®cnica
+F├íbrica de Contenido / TI
+Haider Yessid Bello Melo
+30/11/2026
+Medio
+En curso
+DEP-06
+Definici├│n alcance certificados PDF (RF-007) ÔÇö Fase 2
+Funcional
+Direcci├│n / Operaciones
+Iron Alexander Fuentes Rodr├¡guez
+31/12/2026
+Alto
+Pendiente
+DEP-07
+Definici├│n pasarela de pagos (fuera de MVP)
+Funcional
+Direcci├│n / Finanzas
+Iron Alexander Fuentes Rodr├¡guez
+31/01/2027
+Alto
+Pendiente
+DEP-08
+Asignaci├│n c├│digo documental PMO
+Organizacional
+PMO / F├íbrica de Contenido
+Johan Sebasti├ín Daza Sarmiento
+15/12/2026
+Bajo
+Pendiente
+DEP-09
+URL oficial de producci├│n y DNS
+Infraestructura
+TI / Operaciones
+Haider Yessid Bello Melo
+05/01/2027
+Alto
+Pendiente
+DEP-10
+Usuarios piloto UAT (superadmin, admin empresa, instructor, colaborador)
+Organizacional
+F├íbrica de Contenido / empresas aliadas
+Johan Sebasti├ín Daza Sarmiento
+10/12/2026
+Medio
+Pendiente
+DEP-11
+Licencias/contenidos Adobe Publish Online para embeds interactivos
+Proveedor
+F├íbrica de Contenido
+Iron Alexander Fuentes Rodr├¡guez
+30/11/2026
+Medio
+En curso
+DEP-12
+PostgreSQL local Docker y migraciones (desarrollo)
+T├®cnica
+Equipo de desarrollo
+Haider Yessid Bello Melo
+15/08/2026
+Medio
+Cumplida
+Tipos de dependencia
+T├®cnica   ┬À   Funcional   ┬À   Organizacional   ┬À   Datos   ┬À   Proveedor   ┬À   Legal   ┬À   Infraestructura   ┬À   Otro proyecto
+26. RAID LOG
+  OBLIGATORIO  
+ID
+Tipo
+Descripci├│n
+Probabilidad
+Impacto
+Severidad
+Owner
+Acci├│n
+Fecha
+Estado
+RAID-01
+Risk
+Indisponibilidad de Cloud SQL, GCS o SendGrid afecta login, archivos o correos
+Media
+Alto
+Alta
+Haider Yessid Bello Melo
+Monitoreo Cloud Run; health checks; plan de rollback documentado; credenciales en secretos
+31/12/2026
+Abierto
+RAID-02
+Risk
+Retraso en certificados PDF y pagos (Fase 2) desplaza expectativas comerciales
+Media
+Medio
+Media
+Iron Alexander Fuentes Rodr├¡guez
+Mantener fuera de MVP R1; decisi├│n de alcance registrada en PMO; backlog Fase 2
+31/01/2027
+Abierto
+RAID-03
+Risk
+Funcionalidades pendientes (asignaciones forzadas UI, paneles admin/empresa) impiden UAT completo
+Media
+Alto
+Alta
+Johan Sebasti├ín Daza Sarmiento
+Priorizar Etapa 3 en sprint actual; actualizar matriz RF y status report semanal
+30/11/2026
+Abierto
+RAID-04
+Assumption
+Usuarios son creados por administradores (sin auto-registro p├║blico)
+Alta
+Medio
+Media
+Iron Alexander Fuentes Rodr├¡guez
+Validar en capacitaci├│n a admins de empresa; documentar en manual operativo
+31/12/2026
+Vigente
+RAID-05
+Assumption
+Empresas aliadas proveen listado inicial de colaboradores para piloto
+Alta
+Medio
+Media
+Johan Sebasti├ín Daza Sarmiento
+Coordinar con Operaciones antes de UAT; carga masiva v├¡a panel admin
+10/12/2026
+Vigente
+RAID-06
+Assumption
+Contenido acad├®mico estar├í disponible en formato compatible (texto, Drive, GIFT, Adobe)
+Media
+Alto
+Alta
+Iron Alexander Fuentes Rodr├¡guez
+Piloto embed Adobe en 1 lecci├│n; checklist de carga por diplomado
+30/11/2026
+Vigente
+RAID-07
+Issue
+Estados de inscripci├│n pueden quedar inconsistentes si evaluaciones quedan incompletas
+Baja
+Medio
+Media
+Haider Yessid Bello Melo
+Revisar l├│gica progreso/evaluaciones; casos de prueba en QA
+15/12/2026
+En tratamiento
+RAID-08
+Issue
+C├│digo documental PMO a├║n pendiente de asignaci├│n
+Baja
+Bajo
+Baja
+Johan Sebasti├ín Daza Sarmiento
+Solicitar asignaci├│n a PMO; actualizar portada del documento
+15/12/2026
+Abierto
+RAID-09
+Dependency
+Dependencia cr├¡tica de infraestructura GCP para producci├│n
+Alta
+Alto
+Alta
+Haider Yessid Bello Melo
+Ver DEP-01, DEP-03, DEP-09; validar CI/CD en cada push a main
+10/01/2027
+En seguimiento
+RAID-10
+Dependency
+Dependencia de SendGrid para recuperaci├│n de contrase├▒a e invitaciones
+Media
+Alto
+Alta
+Haider Yessid Bello Melo
+Fallback: enlace manual de restablecimiento si SendGrid falla (ya contemplado)
+31/12/2026
+En seguimiento
+RAID-11
+Risk
+Desviaci├│n de cronograma por alcance no acotado (certificados, pagos, Moodle)
+Media
+Alto
+Alta
+Iron Alexander Fuentes Rodr├¡guez
+Congelar alcance MVP R1; mover BP-01, BP-02, BP-04 a Fase 2/3
+31/12/2026
+Abierto
+RAID-12
+Issue
+Revisi├│n formal de accesibilidad WCAG pendiente
+Baja
+Medio
+Baja
+Iron Alexander Fuentes Rodr├¡guez
+Auditor├¡a UX post-MVP; shadcn/ui como base accesible
+31/01/2027
+Abierto
+Tipos
+Risk   ┬À   Assumption   ┬À   Issue   ┬À   Dependency
+27. REGISTRO DE RIESGOS
+  CONDICIONAL  
+Ficha detallada de riesgos cr├¡ticos, complementaria al RAID Log.
+Funcionalidades Etapa 3 pendientes bloquean UAT
+Causa
+Etapa 3 en curso: paneles admin empresa, asignaciones forzadas (RF-006), contenido acad├®mico y flujos operativos a├║n no cerrados al 100%.
+Evento
+UAT programado (31/12/2026) sin RF cr├¡ticos operativos para todos los roles (superadmin, admin empresa, instructor, colaborador).
+Consecuencia
+UAT fallido o incompleto; incidencias cr├¡ticas en piloto; retraso de Release R1; baja confianza de F├íbrica de Contenido y empresas aliadas.
+Probabilidad
+Media
+Impacto
+Alto
+Exposici├│n
+Alta
+Responsable
+Johan Sebasti├ín Daza Sarmiento
+Estrategia
+Mitigar
+Acci├│n preventiva
+Priorizar cierre RF-004, RF-005 y UI asignaciones forzadas; plan de pruebas por rol; usuarios piloto identificados (DEP-10); seguimiento semanal de matriz RF en Status Report.
+Contingencia
+Reducir alcance UAT a flujo colaborador + instructor; posponer escenarios admin empresa a UAT fase 2; extender ventana QA 1ÔÇô2 semanas con replanificaci├│n de H8ÔÇôH9.
+Trigger
+&lt;80% RF MVP en estado "Implementado/Probado" a 15/12/2026; bloqueadores abiertos sin owner asignado &gt;3 d├¡as h├íbiles.
+Fecha revisi├│n
+15/12/2026
+Contenido acad├®mico e integraciones multimedia no listos para piloto
+Causa
+Dependencia de F├íbrica de Contenido para carga de diplomados, portadas Drive, evaluaciones GIFT y embeds Adobe Publish Online.
+Evento
+Contenido incompleto, enlaces rotos o formatos incompatibles al iniciar UAT con diplomado piloto (Construcci├│n de Paz).
+Consecuencia
+Experiencia de usuario deficiente en piloto; UAT no representativo; retrabajo de contenidos; percepci├│n negativa del MVP.
+Probabilidad
+Media
+Impacto
+Medio
+Exposici├│n
+Media
+Responsable
+Estrategia
+Mitigar
+Acci├│n preventiva
+Checklist de carga por diplomado; piloto embed Adobe en lecci├│n de prueba; validaci├│n proxy Google Drive; al menos 1 diplomado completo (m├│dulos, lecciones, evaluaciones) antes de UAT.
+Contingencia
+UAT con subset de m├│dulos acordado; sustituir embeds Adobe por PDF/enlace temporal; cargar contenido m├¡nimo viable documentado en acta UAT.
+Trigger
+Falta de al menos 1 diplomado con 100% lecciones y evaluaciones cargadas a 10/12/2026; &gt;10% recursos con error en revisi├│n previa.
+Fecha revisi├│n
+30/11/2026
+Indisponibilidad de servicios GCP / SendGrid
+Causa
+Arquitectura centralizada en Google Cloud (Cloud Run, Cloud SQL, GCS) y SendGrid para correos transaccionales; sin proveedor alternativo configurado en MVP.
+Evento
+Ca├¡da, latencia extrema o indisponibilidad de Cloud SQL, GCS, Cloud Run o SendGrid durante operaci├│n o go-live.
+Consecuencia
+Usuarios no pueden autenticarse, consumir lecciones, cargar/descargar recursos ni recibir invitaciones o recuperaci├│n de contrase├▒a; posible rollback de release R1.
+Probabilidad
+Media
+Impacto
+Alto
+Exposici├│n
+Alta
+Responsable
+Haider Yessid Bello Melo
+Estrategia
+Mitigar
+Acci├│n preventiva
+Health checks en Cloud Run; secretos y credenciales en GitHub Actions; monitoreo de instancia Cloud SQL; pruebas de integraci├│n GCS/SendGrid en CI; documentar procedimiento de rollback (revisi├│n Cloud Run + migraciones).
+Contingencia
+Activar rollback a revisi├│n estable; escalar a TI/GCP; comunicar ventana de indisponibilidad a Operaciones; habilitar restablecimiento manual de contrase├▒a v├¡a admin si SendGrid falla.
+Trigger
+&gt;15 min de indisponibilidad en login o health check fallido en 2 ciclos consecutivos; tasa de error &gt;5% en operaciones de archivos o correo en producci├│n.
+Fecha revisi├│n
+15/12/2026
+Retraso por alcance no acotado (certificados, pagos, integraciones)
+Causa
+Expectativas de negocio sobre certificados PDF (RF-007), pagos y posibles integraciones (Moodle) no cerradas formalmente; backlog Fase 2 a├║n en definici├│n.
+Evento
+Stakeholders exigen certificados, pagos o funcionalidades fuera del MVP R1 antes del UAT o go-live de diciembre 2026.
+Consecuencia
+Desviaci├│n de cronograma (&gt; tolerancia PMO); UAT pospuesto; Release R1 desplazado a Q1 2027; sobrecarga del equipo de desarrollo.
+Probabilidad
+Media
+Impacto
+Alto
+Exposi├│n
+Alta
+Responsable
+Iron Alexander Fuentes Rodr├¡guez
+Estrategia
+Evitar
+Acci├│n preventiva
+Congelar alcance MVP R1 (RF-001 a RF-005); registrar BP-01, BP-02 y BP-04 en Fase 2/3; acta de alcance firmada por PO y PMO; comunicar en Status Report y dashboard ejecutivo.
+Contingencia
+Replanificar hitos H7ÔÇôH10; negociar UAT parcial sobre MVP acordado; priorizar solo requerimientos P0 bloqueantes para go-live.
+Trigger
+Solicitud formal de certificados/pagos en Release R1 sin acta de cambio aprobada; desviaci├│n de hito &gt;5 d├¡as h├íbiles respecto a fecha base.
+Fecha revisi├│n
+31/12/2026
+28. CONTROL DE BLOQUEOS
+  OBLIGATORIO  
+ID
+Bloqueo
+Fecha identificaci├│n
+Responsable
+Impacto
+Acci├│n
+Fecha compromiso
+Aging
+Estado
+BL-001
+Fecha UAT no calendarizada┬áÔÇö no se puede ejecutar QA-013 ni acta EV-010
+11/08/2026
+Johan Sebasti├ín Daza Sarmiento (PM)
+Medio┬áÔÇö bloquea aceptaci├│n formal PO
+Acordar fecha UAT con Iron (PO) al cierre Sprint 3; convocar usuarios piloto
+Por definir┬áÔÇö meta Q4 2026
+16 d├¡as
+Abierto
+BL-002
+Backup Cloud SQL sin confirmar┬áÔÇö sin procedimiento de restore documentado
+26/08/2026
+Haider Yessid Bello Melo (Tech Lead)
+Medio┬áÔÇö bloquea ├¡tem backup del checklist go-live (Secc. 40)
+Verificar backups autom├íticos en GCP; documentar procedimiento b├ísico de restore
+Por definir┬áÔÇö pre go-live
+1 d├¡a
+Abierto
+BL-003
+Plan comunicaci├│n go-live pendiente┬áÔÇö empresas piloto sin instrucciones de acceso
+26/08/2026
+Johan Sebasti├ín Daza Sarmiento (PM) / Iron Alexander Fuentes Rodr├¡guez (PO)
+Medio┬áÔÇö bloquea lanzamiento R1
+Definir mensaje, canal, URL plataforma y soporte inicial (Secc. 44)
+Por definir┬áÔÇö pre go-live
+1 d├¡a
+Abierto
+29. CONTROL DE CAMBIOS
+  OBLIGATORIO  
+CR-001 Experiencia interactiva UX/UI (roadmap y curso)
+Fecha
+25/08/2026
+Solicitante
+Iron Alexander Fuentes Rodr├¡guez
+Requerimiento afectado
+RF-004 (Consumo autoguiado del colaborador); RNF-03 (Experiencia de usuario); dise├▒o de ruta de aprendizaje
+Versi├│n actual
+1.0 ÔÇö Roadmap funcional con navegaci├│n b├ísica; CTA de continuidad en componente de ruta; experiencia visual est├índar sin gamificaci├│n profunda
+Descripci├│n actual
+El colaborador accede al curso y avanza por una ruta de aprendizaje con nodos de m├│dulos/lecciones. La interacci├│n es principalmente clic y scroll; el CTA ÔÇ£ContinuarÔÇØ estaba integrado en el roadmap y la experiencia no enfatizaba progreso ni engagement visual.
+Cambio solicitado
+Elevar la experiencia UX/UI del curso para hacerla m├ís interactiva y orientada al colaborador: (1) hero del curso con CTA principal de continuidad (m├│dulo/lecci├│n siguiente); (2) roadmap gamificado con estados visuales claros e interactivos(completado, en curso, bloqueado); (3) microinteracciones y jerarqu├¡a visual que refuercen el avance; (4) coherencia visual entre portada, roadmap y lecciones.
+Justificaci├│n
+Aumentar engagement y retenci├│n en formaci├│n autoguiada; diferenciar la plataforma CUN frente a LMS tradicionales; alinear la experiencia con expectativas de usuarios corporativos acostumbrados a interfaces modernas.
+Impacto funcional
+El colaborador identifica m├ís r├ípido d├│nde continuar; reduce fricci├│n en el flujo curso ÔåÆ lecci├│n ÔåÆ evaluaci├│n; mejora percepci├│n de calidad del producto en UAT y piloto comercial.
+Impacto t├®cnico
+Refactor de componentes frontend (hero-curso, ruta-aprendizaje, l├│gica compartida siguiente-nodo); ajustes CSS/Tailwind; sin cambios en modelo de datos ni reglas de negocio de progreso.
+Impacto cronograma
++1ÔÇô2 semanas dentro de Etapa 3; no afecta hitos H7ÔÇôH9 si se mantiene alcance acotado a UI/UX sin nuevas reglas de desbloqueo.
+Impacto recursos
+~40ÔÇô60 h estimadas (PO/UX + frontend); absorbidas en sprint Etapa 3 actual.
+Impacto riesgos
+Bajo riesgo t├®cnico; riesgo medio de scope creep si se agregan mec├ínicas gamificadas complejas (puntos, rankings) ÔÇö excluidas de este CR.
+Recomendaci├│n PM
+Aprobar con alcance acotado a mejoras visuales e interacci├│n de navegaci├│n; diferir gamificaci├│n avanzada a backlog Fase 2.
+Recomendaci├│n t├®cnica
+Aprobar. Implementaci├│n incremental en componentes existentes; reutilizar l├│gica `obtenerSiguienteNodoRoadmap()` para evitar duplicaci├│n.
+Decisi├│n
+Aprobado
+CR-002 Backend completo y login con credenciales
+Fecha
+19/08/2026
+Solicitante
+Iron Alexander Fuentes Rodr├¡guez
+Requerimiento afectado
+RF-001 (Autenticaci├│n y gesti├│n de sesi├│n por rol); arquitectura monorepo; RNF-01 (Seguridad)
+Versi├│n actual
+0.x ÔÇö Prototipo inicial con dependencia de servicios externos; sin backend propio unificado ni autenticaci├│n corporativa bajo control de la CUN
+Descripci├│n actual
+La soluci├│n no contaba con backend propio desplegable en infraestructura CUN, ni flujo de login con credenciales (usuario/contrase├▒a) gestionado internamente, ni aislamiento multiempresa robusto para clientes B2B.
+Cambio solicitado
+Implementar sistema de backend completo en repo (`@plataforma/backend`) con: (1) login con credenciales (email/contrase├▒a); (2) JWT en cookie httpOnly y middleware por rol; (3) recuperaci├│n y restablecimiento de contrase├▒a (SendGrid); (4) PostgreSQL 16 con RLS multiempresa; (5) Server Actions para toda la l├│gica de negocio; (6) despliegue en Cloud Run con CI/CD.
+Justificaci├│n
+Soberan├¡a tecnol├│gica CUN; cumplir requisitos de seguridad y multi-tenant B2B; eliminar dependencia de plataforma externa; habilitar escalabilidad y operaci├│n en GCP institucional.
+Impacto funcional
+Usuarios acceden con credenciales propias; roles (superadmin, admin empresa, instructor, colaborador) con paneles segregados; empresas clientes con datos aislados por tenant.
+Impacto t├®cnico
+Migraci├│n arquitect├│nica mayor: Drizzle ORM, 11+ migraciones SQL, GCS, GitHub Actions ; curva de aprendizaje del equipo.
+Impacto cronograma
++6ÔÇô8 semanas (Etapa 1ÔÇô2); ya ejecutado en gran parte ÔÇö Etapa 2 completada al 31/10/2026.
+Impacto recursos
+~280ÔÇô320 h estimadas (backend + auth + infra); recurso principal:  apoyo frontend.
+Impacto riesgos
+Alto durante migraci├│n (R-01 dependencia GCP); mitigado con CI/CD activo y entorno local Docker Compose.
+Recomendaci├│n PM
+Aprobar ÔÇö cambio estructural necesario para viabilidad del producto; considerar cerrado al completar Etapa 2.
+Recomendaci├│n t├®cnica
+Aprobar e implementar. Backend operativo; pendiente pulir paneles admin/empresa y casos borde de sesi├│n.
+Decisi├│n
+Aprobado ÔÇö Implementado (Etapa 2)
+CR-003 Pulir UI de visualizaci├│n de contenidos de lecci├│n
+Fecha
+25/08/2026
+Solicitante
+Iron Alexander Fuentes Rodr├¡guez
+Requerimiento afectado
+RF-004 (Consumo de lecciones); RF-003 (Autor├¡a de recursos); tipos de recurso: video, PDF, audio, imagen/infograf├¡a, embeds (YouTube, Drive, Adobe)
+Versi├│n actual
+1.0 ÔÇö Renderizado funcional de recursos por tipo; layouts gen├®ricos; embed Adobe InDesign en piloto (1 lecci├│n); experiencia visual heterog├®nea entre tipos de contenido
+Descripci├│n actual
+El colaborador puede ver videos, documentos PDF, infograf├¡as e embeds, pero la presentaci├│n var├¡a en calidad visual, responsividad y consistencia. Algunos contenidos no aprovechan el viewport; falta un contenedor unificado que unifique la experiencia de lectura/visualizaci├│n.
+Cambio solicitado
+Refinar la interfaz de consumo de lecci├│n para cada tipo de contenido: (1) reproductor/contenedor responsive para video (16:9, controles nativos); (2) visor PDF integrado con zoom y scroll fluido; (3) galer├¡a/lightbox para infograf├¡as e im├ígenes; (4) iframe Adobe Publish Online optimizado (ratio, altura m├íxima viewport); (5) tipograf├¡a, espaciado y navegaci├│n entre recursos coherentes con el design system shadcn/ui.
+Justificaci├│n
+La calidad percibida del contenido acad├®mico depende de la presentaci├│n; F├íbrica de Contenido produce materiales ricos (Drive, Adobe, video) que requieren visualizaci├│n profesional; reduce abandono en lecciones largas.
+Impacto funcional
+Mejor legibilidad y accesibilidad de materiales; experiencia uniforme independiente del tipo de recurso; soporte a piloto con diplomado Construcci├│n de Paz.
+Impacto t├®cnico
+Componentes React dedicados por tipo de recurso; ajustes en `embed-adobe-indesign.tsx`, renderizadores de lecci├│n y CSS global; validar CSP/iframe para dominios Adobe y Google; sin cambios en esquema BD.
+Impacto cronograma
++2ÔÇô3 semanas en Etapa 3; paralelizable con CR-002; no bloquea UAT si se entrega iterativamente por tipo de recurso.
+Impacto recursos
+~50ÔÇô70 h estimadas (frontend + revisi├│n PO con muestras de contenido real).
+Impacto riesgos
+Riesgo bajo; posible restricci├│n de embeds por pol├¡ticas CSP o licencias Adobe ÔÇö mitigar con lista blanca de dominios y piloto documentado.
+Recomendaci├│n PM
+Aprobar priorizando video, PDF e infograf├¡a; Adobe embed como piloto hasta validar licencias en producci├│n.
+Recomendaci├│n t├®cnica
+Aprobar. Entregar por incrementos (video/PDF primero, luego infograf├¡a/embeds); reutilizar proxy Google Drive existente para portadas e im├ígenes.
+Decisi├│n
+Aprobado ÔÇö En implementaci├│n
+CR-004 Pantalla de certificaci├│n al completar curso
+Fecha
+25/08/2026
+Solicitante
+Iron Alexander Fuentes Rodr├¡guez
+Requerimiento afectado
+RF-007 (Certificados de diplomado ; flujo de finalizaci├│n de inscripci├│n
+Versi├│n actual
+1.0 ÔÇö Al completar m├│dulos y evaluaciones la inscripci├│n cambia de estado; no existe pantalla dedicada de celebraci├│n/certificaci├│n ni descarga de certificado PDF (diferido en CR-001 a Fase 2)
+Descripci├│n actual
+El colaborador que finaliza un curso no recibe una experiencia de cierre clara: no hay pantalla de logro, mensaje de felicitaci├│n ni acceso visual al certificado. La funcionalidad de generaci├│n PDF est├í fuera del MVP R1 seg├║n CR-001.
+Cambio solicitado
+Implementar pantalla de certificaci├│n al completar un curso/diplomado: (1) detecci├│n de finalizaci├│n (100% progreso + evaluaciones aprobadas); (2) pantalla full-page con mensaje de logro, nombre del colaborador, curso y fecha; (3) placeholder o bot├│n ÔÇ£Descargar certificadoÔÇØ deshabilitado/informativo hasta Fase 2 (PDF); (4) opci├│n de compartir enlace interno o volver al cat├ílogo; (5) preparar hook/API para integraci├│n PDF en Release R2.
+Justificaci├│n
+Cerrar el ciclo emocional y funcional del aprendizaje autoguiado; reforzar valor percibido del diplomado para empresas clientes; permitir UAT del flujo de finalizaci├│n aunque el PDF se entregue en Fase 2.
+Impacto funcional
+El colaborador ve confirmaci├│n expl├¡cita de finalizaci├│n; Operaciones puede demo comercial del flujo completo; certificado PDF real queda para Fase 2 (CR-001).
+Impacto t├®cnico
+Nueva ruta/p├ígina frontend (`/mis-cursos/[cursoId]/certificado` o modal); trigger al actualizar estado inscripci├│n a `completada`; modelo de datos puede reservar campos `certificado_emitido_at`, `certificado_url` sin implementar generaci├│n a├║n.
+Impacto cronograma
++1ÔÇô2 semanas; UI en Etapa 3 / pre-UAT; generaci├│n PDF (+2ÔÇô3 semanas) permanece en Fase 2.
+Impacto recursos
+~24ÔÇô40 h (pantalla UI + l├│gica de finalizaci├│n); ~80ÔÇô120 h adicionales en Fase 2 para PDF (BP-01).
+Impacto riesgos
+Riesgo medio de expectativa de certificado descargable inmediato ÔÇö mitigar con copy claro ÔÇ£Certificado disponible pr├│ximamenteÔÇØ y alinear con CR-001; riesgo bajo t├®cnico en pantalla sola.
+Recomendaci├│n PM
+Aprobar pantalla de certificaci├│n (UI) para R1; mantener generaci├│n PDF en Fase 2 seg├║n CR-001; comunicar a stakeholders antes de UAT.
+Recomendaci├│n t├®cnica
+Aprobar fase 1 (pantalla + detecci├│n); dise├▒ar contrato de datos para Fase 2 (plantilla PDF, GCS, firma); no bloquear R1 por integraci├│n pasarela o firma digital.
+Decisi├│n
+Pendiente an├ílisis
+Estados posibles
+Aprobado   ┬À   Rechazado   ┬À   Diferido   ┬À   Pendiente an├ílisis
+30. HIST├ôRICO DE CAMBIOS DEL REQUERIMIENTO
+  OBLIGATORIO  
+Versi├│n
+Fecha
+ID requerimiento
+Cambio
+Solicitante
+Aprobador
+Impacto
+1.0
+19/08/2026
+SOL-DIP-2026-001 / RF-001 a RF-007
+Versi├│n inicial del documento de requerimientos: plataforma SaaS multiempresa, MVP con auth, multiempresa, autor├¡a, consumo estudiante, evaluaciones y reportes; certificados y pagos en roadmap sin fecha cerrada
+Iron Alexander Fuentes Rodr├¡guez
+Johan Sebasti├ín Daza Sarmiento
+L├¡nea base de alcance, estimaci├│n (~1.060 h) y cronograma Q4 2026
+1.1
+22/08/2026
+RF-007 / BP-01 / BP-02 (CR-001)
+Exclusi├│n propuesta de certificados PDF y pasarela de pagos del Release R1; replanificaci├│n en Fase 2 (Release R2) ÔÇö Pendiente de an├ílisis
+Iron Alexander Fuentes Rodr├¡guez
+Pendiente (Johan Sebasti├ín Daza Sarmiento, PM)
+Sin impacto ejecutado hasta cierre de CR-001; UAT y alcance R1 siguen sin congelar formalmente
+1.2
+19/08/2026
+RF-001 / RNF-01 (CR-003)
+Migraci├│n a backend propio en GCP: login con credenciales, JWT, PostgreSQL 16 + RLS, Server Actions, Cloud Run y CI/CD
+Iron Alexander Fuentes Rodr├¡guez
+Johan Sebasti├ín Daza Sarmiento
+Arquitectura definitiva; Etapa 2 completada; elimina dependencia Supabase como backend principal
+1.3
+25/08/2026
+RF-004 / RNF-03 (CR-002)
+Mejora UX/UI interactiva: hero del curso con CTA de continuidad, roadmap gamificado con estados visuales, coherencia visual cursoÔÇôlecci├│n
+Iron Alexander Fuentes Rodr├¡guez
+Johan Sebasti├ín Daza Sarmiento
++40ÔÇô60 h en Etapa 3; en implementaci├│n parcial (hero + roadmap); mejor engagement colaborador
+1.4
+25/08/2026
+RF-004 / RF-003 (CR-004)
+Pulido de UI para visualizaci├│n de contenidos de lecci├│n: video, PDF, infograf├¡a/imagen y embeds (YouTube, Drive, Adobe piloto)
+Iron Alexander Fuentes Rodr├¡guez
+Johan Sebasti├ín Daza Sarmiento
++50ÔÇô70 h en Etapa 3; en implementaci├│n parcial (piloto Adobe 1 lecci├│n); mejora calidad percibida del contenido
+1.5
+25/08/2026
+RF-007 / BP-01 (CR-005)
+Pantalla de certificaci├│n al completar curso (UI de logro); generaci├│n/descarga PDF diferida a Fase 2 ÔÇö Aprobado, no implementado a├║n
+Iron Alexander Fuentes Rodr├¡guez
+Johan Sebasti├ín Daza Sarmiento
++24ÔÇô40 h estimadas; backlog Etapa 3/pre-UAT; cierra flujo de finalizaci├│n cuando se desarrolle; PDF real permanece Fase 2
+31. DECISION LOG
+  OBLIGATORIO  
+ID
+Fecha
+Decisi├│n
+Contexto
+Opciones evaluadas
+Responsable
+Impacto
+DEC-01
+15/08/2026
+Adoptar backend propio en Google Cloud Platform (Cloud Run + Cloud SQL + GCS) con monorepo Next.js 15 y Server Actions
+Proyecto inici├│ con prototipo; se requiere soberan├¡a tecnol├│gica CUN, multiempresa B2B y operaci├│n institucional en GCP
+A) Mantener Supabase como BaaS; B) Backend propio en GCP; C) LMS externo (Moodle) como n├║cleo
+Iron Alexander Fuentes Rodr├¡guez / Haider Yessid Bello Melo
+Arquitectura base del producto; habilita RLS, CI/CD y despliegue R1; Etapa 2 completada
+DEC-02
+22/08/2026
+Diferir certificados PDF y pagos a Fase 2 (Release R2) ÔÇö CR-001 pendiente de an├ílisis
+Meta go-live Q4 2026; proveedor de pagos y plantilla certificado sin definir; riesgo de desviaci├│n de cronograma
+A) Incluir certificados y pagos en R1; B) Diferir ambos a Fase 2; C) Solo certificados en R1
+Iron Alexander Fuentes Rodr├¡guez
+Sin decisi├│n formal cerrada; propuesta reduce riesgo 4ÔÇô6 semanas si se aprueba; requiere acta de alcance
+DEC-03
+20/08/2026
+No implementar API REST separada; toda la l├│gica de negocio v├¡a Server Actions en monorepo npm workspaces
+Necesidad de simplicidad operativa, un solo servicio en Cloud Run y alineaci├│n Next.js 15 App Router
+A) API REST (Express/Fastify) + frontend; B) Server Actions ├║nicamente; C) GraphQL
+Haider Yessid Bello Melo
+Menor complejidad de despliegue y mantenimiento; un solo artefacto en Cloud Run
+DEC-04
+25/08/2026
+Trasladar CTA principal ÔÇ£ContinuarÔÇØ del roadmap al hero del curso; roadmap solo navegaci├│n y progreso visual
+Retroalimentaci├│n UX: el colaborador no identificaba r├ípido el siguiente paso; CTA en roadmap generaba fricci├│n
+A) CTA sticky en roadmap; B) CTA en hero del curso; C) Ambos (hero + roadmap)
+Iron Alexander Fuentes Rodr├¡guez
+Mejora flujo curso ÔåÆ lecci├│n; implementado en c├│digo; refactor hero-curso y ruta-aprendizaje
+DEC-05
+25/08/2026
+Implementar pantalla de certificaci├│n (UI) en R1; PDF descargable en Fase 2 ÔÇö Aprobado, desarrollo no iniciado
+CR-005 alineado con expectativa de negocio; CR-001 a├║n no cierra alcance PDF/pagos; se busca cierre visual del flujo sin bloquear R1
+A) Sin pantalla hasta PDF completo; B) Pantalla UI ahora + PDF Fase 2; C) PDF completo en R1
+Iron Alexander Fuentes Rodr├¡guez
+Backlog aprobado (+24ÔÇô40 h); sin c├│digo a├║n; requiere alinear con cierre formal de CR-001
+DEC-06
+25/08/2026
+Piloto embed Adobe Publish Online en 1 lecci├│n (Construcci├│n de Paz); no escalar hasta validar licencias
+F├íbrica de Contenido produce contenidos InDesign interactivos; validar viabilidad t├®cnica y legal antes de cat├ílogo completo
+A) Solo PDF/enlaces; B) Piloto 1 lecci├│n Adobe; C) Adobe en todo el cat├ílogo desde R1
+Iron Alexander Fuentes Rodr├¡guez / Haider Yessid Bello Melo
+Piloto implementado en c├│digo; extensi├│n condicionada a UAT y licencias
+DEC-07
+10/09/2026
+Usuarios creados por administradores; sin auto-registro p├║blico en MVP
+Modelo B2B: empresas clientes cargan colaboradores; no hay flujo self-service de compra/registro en R1
+A) Auto-registro p├║blico; B) Solo invitaci├│n/admin; C) H├¡brido post-pagos Fase 2
+Iron Alexander Fuentes Rodr├¡guez
+Simplifica auth R1; alinea con RF-001; auto-registro queda para Fase 2
+32. BACKLOG
+  OBLIGATORIO  
+ID
+Epic/HU/Tarea
+Requerimiento relacionado
+Prioridad
+Story Points
+Sprint
+Responsable
+Estado
+ID
+Epic/HU/Tarea
+Requerimiento relacionado
+Prioridad
+Story Points
+Sprint
+Responsable
+Estado
+EP-01
+Epic ÔÇö Cimientos t├®cnicos y arquitectura monorepo
+RNF-02 / RNF-07
+P1
+21
+Sprint 1 (Etapa 1)
+Haider Yessid Bello Melo
+Completado
+T-01
+Tarea ÔÇö Monorepo npm workspaces (frontend + backend)
+RNF-02
+P1
+5
+Sprint 1 (Etapa 1)
+Haider Yessid Bello Melo
+Completado
+T-02
+Tarea ÔÇö PostgreSQL 16, migraciones Drizzle y rol app_user
+RNF-01 / RNF-04
+P1
+8
+Sprint 1 (Etapa 1)
+Haider Yessid Bello Melo
+Completado
+T-03
+Tarea ÔÇö CI/CD GitHub Actions + deploy Cloud Run
+RNF-02
+P1
+5
+Sprint 1 (Etapa 1)
+Haider Yessid Bello Melo
+Completado
+EP-02
+Epic ÔÇö Autenticaci├│n y multiempresa
+RF-001 / RNF-01
+P0
+21
+Sprint 2 (Etapa 2)
+Haider Yessid Bello Melo
+Completado
+HU-01
+HU ÔÇö Login con credenciales y sesi├│n JWT por rol
+RF-001
+P0
+8
+Sprint 2 (Etapa 2)
+Haider Yessid Bello Melo
+Completado
+HU-02
+HU ÔÇö Recuperaci├│n y restablecimiento de contrase├▒a (SendGrid)
+RF-001
+P1
+5
+Sprint 2 (Etapa 2)
+Haider Yessid Bello Melo
+Completado
+HU-03
+HU ÔÇö Aislamiento multiempresa con RLS PostgreSQL
+RF-001 / RNF-01
+P0
+8
+Sprint 2 (Etapa 2)
+Haider Yessid Bello Melo
+Completado
+EP-03
+Epic ÔÇö Gesti├│n empresas, usuarios y autor├¡a
+RF-002 / RF-003
+P1
+21
+Sprint 2ÔÇô3 (Etapa 2ÔÇô3)
+Haider Yessid Bello Melo
+Completado
+HU-04
+HU ÔÇö CRUD empresas y usuarios por rol (superadmin / admin empresa)
+RF-002
+P1
+8
+Sprint 2 (Etapa 2)
+Haider Yessid Bello Melo
+Completado
+HU-05
+HU ÔÇö Autor├¡a cursos, m├│dulos, lecciones, recursos y evaluaciones GIFT
+RF-003
+P1
+13
+Sprint 2ÔÇô3 (Etapa 2ÔÇô3)
+Haider Yessid Bello Melo
+Completado
+EP-04
+Epic ÔÇö Consumo estudiante e inscripci├│n
+RF-004
+P0
+21
+Sprint 3 (Etapa 3)
+Haider Yessid Bello Melo
+En curso
+HU-06
+HU ÔÇö Cat├ílogo de cursos e inscripci├│n libre del colaborador
+RF-004
+P0
+8
+Sprint 3 (Etapa 3)
+Haider Yessid Bello Melo
+Completado
+HU-07
+HU ÔÇö Roadmap gamificado con progreso por m├│dulo/lecci├│n
+RF-004 / CR-002
+P1
+8
+Sprint 3 (Etapa 3)
+Iron Alexander Fuentes Rodr├¡guez / Haider Y. Bello Melo
+En curso
+HU-08
+HU ÔÇö Hero del curso con CTA ÔÇ£ContinuarÔÇØ (siguiente m├│dulo/lecci├│n)
+RF-004 / CR-002 / DEC-04
+P1
+5
+Sprint 3 (Etapa 3)
+Haider Yessid Bello Melo
+Completado
+HU-09
+HU ÔÇö Consumo de lecciones: video, PDF, audio, imagen/infograf├¡a
+RF-004 / CR-004
+P1
+8
+Sprint 3 (Etapa 3)
+Haider Yessid Bello Melo
+En curso
+T-04
+Tarea ÔÇö Piloto embed Adobe Publish Online (1 lecci├│n Construcci├│n de Paz)
+RF-003 / CR-004 / DEC-06
+P2
+5
+Sprint 3 (Etapa 3)
+Haider Yessid Bello Melo
+Completado
+T-05
+Tarea ÔÇö Pulir visores responsive (video 16:9, PDF, lightbox infograf├¡as)
+RF-004 / CR-004
+P1
+8
+Sprint 3 (Etapa 3)
+Haider Yessid Bello Melo
+Por hacer
+HU-10
+HU ÔÇö Evaluaciones con reintentos y calificaci├│n en servidor
+RF-004 / RN-06
+P1
+8
+Sprint 3 (Etapa 3)
+Haider Yessid Bello Melo
+Completado
+EP-05
+Epic ÔÇö Reportes y paneles operativos
+RF-005 / RF-002
+P1
+13
+Sprint 3 (Etapa 3)
+Haider Yessid Bello Melo
+En curso
+HU-11
+HU ÔÇö Reportes superadmin y admin empresa (progreso, inscripciones)
+RF-005
+P2
+5
+Sprint 3 (Etapa 3)
+Haider Yessid Bello Melo
+Completado
+HU-12
+HU ÔÇö Paneles ra├¡z admin (/admin) y empresa (/empresa) operativos
+RF-002
+P1
+8
+Sprint 3 (Etapa 3)
+Haider Yessid Bello Melo
+En curso
+HU-13
+HU ÔÇö Asignaciones forzadas de curso a colaborador (UI admin empresa)
+RF-006 / BP-03
+P1
+8
+Sprint 3 (Etapa 3)
+Haider Yessid Bello Melo
+Por hacer
+EP-06
+Epic ÔÇö Certificaci├│n y cierre de curso
+RF-007 / CR-005 / DEC-05
+P1
+13
+Backlog R1 (pre-UAT)
+Haider Yessid Bello Melo
+Por hacer
+HU-14
+HU ÔÇö Pantalla de certificaci├│n al completar curso (UI de logro, sin PDF)
+RF-007 / CR-005
+P1
+5
+Sprint 4 (Etapa 3)
+Haider Yessid Bello Melo
+Por hacer
+HU-15
+HU ÔÇö Detecci├│n autom├ítica de finalizaci├│n (100% progreso + evaluaciones)
+RF-007 / RN-05
+P1
+5
+Sprint 4 (Etapa 3)
+Haider Yessid Bello Melo
+Por hacer
+EP-07
+Epic ÔÇö Contenido acad├®mico y piloto UAT
+RF-003 / RF-004
+P1
+13
+Sprint 4 (pre-UAT)
+Iron Alexander Fuentes Rodr├¡guez
+En curso
+T-06
+Tarea ÔÇö Carga completa diplomado piloto Construcci├│n de Paz (contenido + evaluaciones)
+RF-003
+P1
+8
+Sprint 4 (pre-UAT)
+Iron Alexander Fuentes Rodr├¡guez
+En curso
+T-07
+Tarea ÔÇö Usuarios piloto UAT por rol (superadmin, admin, instructor, colaborador)
+RF-001
+P1
+3
+Sprint 4 (pre-UAT)
+Johan Sebasti├ín Daza Sarmiento
+Por hacer
+EP-08
+Epic ÔÇö QA, UAT y go-live Release R1
+RNF-05 / Plan release R1
+P0
+21
+Sprint 5 (UAT / Go-live)
+Johan Sebasti├ín Daza Sarmiento
+Por hacer
+T-08
+Tarea ÔÇö Plan de pruebas funcionales por rol y ejecuci├│n regresi├│n
+QA / RNF-05
+P0
+8
+Sprint 5 (UAT / Go-live)
+Johan Sebasti├ín Daza Sarmiento
+Por hacer
+T-09
+Tarea ÔÇö UAT con F├íbrica de Contenido y Operaciones
+QA
+P0
+5
+Sprint 5 (UAT / Go-live)
+Johan Sebasti├ín Daza Sarmiento
+Por hacer
+T-10
+Tarea ÔÇö Go-live R1 Cloud Run + hypercare 2 semanas
+RNF-02 / Release R1
+P0
+8
+Sprint 5 (UAT / Go-live)
+Haider Yessid Bello Melo
+Por hacer
+EP-09
+Epic ÔÇö Fase 2: certificados PDF y pagos (Release R2)
+RF-007 / BP-01 / BP-02 / CR-001
+P1
+34
+Backlog Fase 2
+Por definir
+Backlog
+HU-16
+HU ÔÇö Generaci├│n y descarga certificado PDF al completar diplomado
+RF-007 / BP-01
+P1
+13
+Backlog Fase 2
+Por definir
+Backlog
+HU-17
+HU ÔÇö Integraci├│n pasarela de pagos
+BP-02
+P1
+21
+Backlog Fase 2
+Por definir
+Backlog
+T-11
+Tarea ÔÇö Integraci├│n Moodle operativa (m├ís all├í de import GIFT)
+BP-04
+P2
+13
+Backlog Fase 3
+Por definir
+Backlog
+EP-10
+Epic ÔÇö Integraciones e infraestructura producci├│n
+RNF-02 / DEP-02
+P1
+8
+Sprint 4ÔÇô5
+Haider Yessid Bello Melo
+En curso
+T-12
+Tarea ÔÇö Verificaci├│n dominio SendGrid y prueba correos transaccionales
+DEP-02 / DEP-03
+P1
+3
+Sprint 4
+Haider Yessid Bello Melo
+En curso
+T-13
+Tarea ÔÇö URL oficial producci├│n y DNS (Cloud Run)
+DEP-09
+P1
+3
+Sprint 5
+Haider Yessid Bello Melo
+Por hacer
+33. DEFINITION OF READY
+  OBLIGATORIO 
+Estado general del proyecto┬áSOL-DIP-2026-001┬áantes de continuar desarrollo hacia UAT.
+Ôÿæ Problema definido ÔÇö No existe plataforma digital propia CUN para diplomados B2B multiempresa (Secc. 4ÔÇô5 del documento).
+Ôÿæ Objetivo definido ÔÇö Implementar plataforma SaaS autoguiada con aislamiento por empresa, meta Q4 2026 (Secc. 6).
+Ôÿæ Requerimiento documentado ÔÇö RF-001 a RF-007, RNF-01 a RNF-07 en matriz maestra (Secc. 16); CR-002 a CR-004 aprobados.
+Ôÿæ Reglas de negocio identificadas ÔÇö RN-01 a RN-07 documentadas (Secc. 17).
+Ôÿæ Criterios de aceptaci├│n definidos ÔÇö Por RF en matriz y reglas de negocio; UAT formal pendiente Sprint 5.
+Ôÿæ Dependencias identificadas ÔÇö DEP-01 a DEP-12 registradas (Secc. 25); GCP, SendGrid, contenido F├íbrica de Contenido.
+Ôÿæ Dise├▒o disponible cuando aplica ÔÇö Identidad CUN, roadmap gamificado, hero con CTA, wireframes en c├│digo (CR-002/CR-004).
+Ôÿæ An├ílisis t├®cnico realizado ÔÇö Arquitectura monorepo, Cloud Run, RLS, estimaci├│n ~1.060 h (Secc. 18ÔÇô20).
+Ôÿæ Prioridad aprobada ÔÇö P1/P2 definidas en matriz; PO Iron Fuentes + PM Johan Daza.
+Ôÿæ Estimaci├│n realizada ÔÇö Story points en backlog (Secc. 32); horas por disciplina en Secc. 20.
+Veredicto DoR MVP R1:┬áÔ£à┬áLISTO┬ápara Sprint 3ÔÇô4 (├¡tems ya en backlog con prioridad y estimaci├│n).
+DoR por cambio pendiente o no implementado
+CR-001 ÔÇö Exclusi├│n certificados/pagos de R1
+Ôÿæ Problema definido
+Ôÿæ Objetivo definido
+ÔÿÉ Requerimiento documentado ÔÇö CR abierto, sin acta de alcance firmada
+Ôÿæ Reglas de negocio identificadas
+ÔÿÉ Criterios de aceptaci├│n definidos ÔÇö Pendiente definir qu├® incluye UAT R1 sin certificados/pagos
+Ôÿæ Dependencias identificadas
+ÔÿÉ Dise├▒o disponible cuando aplica ÔÇö N/A Fase 2
+ÔÿÉ An├ílisis t├®cnico realizado ÔÇö Pendiente de an├ílisis (impacto comercial y cronograma)
+ÔÿÉ Prioridad aprobada ÔÇö Pendiente cierre formal PM
+ÔÿÉ Estimaci├│n realizada ÔÇö Fase 2 sin re-estimar
+Veredicto:┬áÔØî┬áNO LISTO┬áÔÇö completar an├ílisis y decisi├│n antes de congelar alcance R1.
+CR-005 ÔÇö Pantalla certificaci├│n al completar curso
+Ôÿæ Problema definido ÔÇö Sin cierre visual al terminar el curso
+Ôÿæ Objetivo definido ÔÇö UI de logro; PDF en Fase 2
+Ôÿæ Requerimiento documentado ÔÇö CR-005 aprobado por Johan Daza
+Ôÿæ Reglas de negocio identificadas ÔÇö RN-05 progreso; finalizaci├│n = 100% + evaluaciones
+ÔÿÉ Criterios de aceptaci├│n definidos ÔÇö Falta redactar CA (copy, campos, navegaci├│n post-logro)
+Ôÿæ Dependencias identificadas ÔÇö Depende cierre CR-001 para mensaje PDF; l├│gica inscripci├│n existente
+ÔÿÉ Dise├▒o disponible cuando aplica ÔÇö Mockup pantalla certificaci├│n pendiente (PO/UX)
+Ôÿæ An├ílisis t├®cnico realizado ÔÇö Ruta frontend + trigger estado completada (~24ÔÇô40 h)
+Ôÿæ Prioridad aprobada ÔÇö P1, Sprint 4
+Ôÿæ Estimaci├│n realizada ÔÇö 5 SP (HU-14) + 5 SP (HU-15) en backlog
+Veredicto:┬áÔÜá´©Å┬áCASI LISTO┬áÔÇö faltan criterios de aceptaci├│n y mockup UX para entrar a sprint.
+HU-13 ÔÇö Asignaciones forzadas (RF-006)
+Ôÿæ Problema definido
+Ôÿæ Objetivo definido
+Ôÿæ Requerimiento documentado ÔÇö RF-006 / BP-03
+Ôÿæ Reglas de negocio identificadas ÔÇö RN-03 (excepci├│n asignaci├│n forzada)
+ÔÿÉ Criterios de aceptaci├│n definidos ÔÇö Flujo admin empresa por documentar
+Ôÿæ Dependencias identificadas ÔÇö RLS listo; UI placeholder
+ÔÿÉ Dise├▒o disponible cuando aplica ÔÇö UI panel asignaciones pendiente
+Ôÿæ An├ílisis t├®cnico realizado ÔÇö Backend/RLS preparado
+Ôÿæ Prioridad aprobada ÔÇö P1
+Ôÿæ Estimaci├│n realizada ÔÇö 8 SP, Sprint 3
+Veredicto:┬áÔÜá´©Å┬áCASI LISTO┬áÔÇö completar CA y dise├▒o UI antes de iniciar desarrollo.
+34. SPRINT / ITERACI├ôN
+  CONDICIONAL  
+Sprint
+Sprint 3 ÔÇö Etapa 3 (Cierre MVP funcional R1)
+Objetivo
+Cerrar los flujos operativos del MVP Release R1: consumo del colaborador (RF-004), reportes y paneles admin/empresa (RF-005, RF-002), mejoras UX interactivas (CR-002, CR-004) y avance de asignaciones forzadas (RF-006); dejar listo el pre-UAT de diciembre 2026.
+Fecha inicio
+11/08/2026
+Fecha fin
+05/09/2026
+Capacidad
+~120 h equivalentes (~34 SP) ÔÇö 1 l├¡der de desarrollo full-time + apoyo PO/PM; contenido acad├®mico validado por F├íbrica de Contenido.
+Responsable
+Johan Sebasti├ín Daza Sarmiento (PM) ÔÇö seguimiento diario con Haider Yessid Bello Melo (l├¡der t├®cnico) e Iron Alexander Fuentes Rodr├¡guez (PO).
+ID
+Tarea
+Responsable
+Estimaci├│n
+Estado
+Bloqueo
+T-S3-01
+Hero del curso + roadmap gamificado con CTA de continuidad (CR-002 / DEC-04 / RF-004)
+Haider Yessid Bello Melo
+8 SP
+En curso
+Ninguno
+T-S3-02
+Pulido UI de lecciones: video, PDF, infograf├¡a e embeds (CR-004 / RF-003ÔÇô004)
+Haider Yessid Bello Melo
+8 SP
+En curso
+Piloto Adobe InDesign solo en 1 lecci├│n
+T-S3-03
+Reportes de avance superadmin y admin empresa (RF-005)
+Haider Yessid Bello Melo
+5 SP
+En curso
+Ninguno
+T-S3-04
+Panel operativo admin empresa: colaboradores y seguimiento del tenant (RF-002 / RF-005)
+Haider Yessid Bello Melo
+8 SP
+En curso
+Ninguno
+T-S3-05
+Asignaciones forzadas de cursos a colaboradores (RF-006 / BP-03)
+Haider Yessid Bello Melo
+8 SP
+Por hacer
+DoR incompleto: faltan criterios de aceptaci├│n y mockup UX
+T-S3-06
+Pantalla de certificaci├│n al completar curso ÔÇö solo UI (CR-005 / HU-14; PDF en Fase 2)
+Haider Yessid Bello Melo
+5 SP
+Por hacer
+Generaci├│n PDF excluida de R1 (CR-001 / DEC-02)
+T-S3-07
+Regresi├│n flujo colaborador: inscripci├│n, roadmap, lecciones y evaluaciones (RF-004)
+Haider Yessid Bello Melo
+5 SP
+Completado
+Ninguno
+T-S3-08
+Validaci├│n funcional PO de flujos instructor y colaborador pre-UAT
+Iron Alexander Fuentes Rodr├¡guez
+3 SP
+En curso
+Ninguno
+35. DEFINITION OF DONE
+  OBLIGATORIO  
+Criterio de cierre aplicable a historias/tareas del MVP Release R1 (SOL-DIP-2026-001):
+├ìtem
+Estado
+Criterio espec├¡fico ÔÇö Plataforma Diplomados CUN
+Ôÿæ C├│digo completado
+Aplica
+Funcionalidad implementada en monorepo (frontend/┬á+┬ábackend/), merge a rama┬ámain┬ásin errores de compilaci├│n.
+Ôÿæ Code review
+Aplica
+Revisi├│n por Haider Yessid Bello Melo (o par designado) antes de merge; sin comentarios bloqueantes abiertos.
+ÔÿÉ Pruebas unitarias
+Parcial
+CI en verde:┬álint,┬átypecheck┬áy┬ábuild┬á(GitHub Actions). Suite de pruebas unitarias automatizadas: pendiente formalizaci├│n; casos cr├¡ticos validados por QA manual (Secc. 36).
+Ôÿæ Integraci├│n
+Aplica
+Integraci├│n verificada con PostgreSQL (RLS), GCS, SendGrid y proxy Google Drive seg├║n aplique al requerimiento.
+Ôÿæ QA
+Aplica
+Caso de prueba ejecutado y registrado en Plan de QA (Secc. 36); evidencia (captura/log) adjunta. Validaci├│n en┬álocalhost┬áy, tras deploy, en┬áCloud Run.
+Ôÿæ Seguridad
+Aplica
+Validaci├│n de rol/tenant (middleware + Server Actions + RLS); JWT en cookie httpOnly; datos sensibles solo en secretos GCP/GitHub.
+Ôÿæ Criterios de aceptaci├│n
+Aplica
+CA del RF/HU/CR cumplidos; si aplica, escenario Gherkin del RF verificado.
+Ôÿæ Documentaci├│n
+Aplica
+README actualizado si hay cambio de setup/deploy; RF o CR referenciado en commit/PR cuando corresponda.
+Ôÿæ Evidencias
+Aplica
+Captura, video corto o registro en repositorio de evidencias del proyecto (Secc. 49).
+Ôÿæ Despliegue
+Aplica
+Deploy exitoso a Cloud Run v├¡a pipeline (deploy.yml); smoke test post-deploy sin errores cr├¡ticos.
+36. PLAN DE QA
+  OBLIGATORIO  
+ID Caso
+Requerimiento
+Tipo prueba
+Escenario
+Resultado esperado
+Resultado obtenido
+Evidencia
+Estado
+QA-001
+RF-001
+Funcional
+Login con usuario v├ílido de cada rol (superadmin, admin_empresa, instructor, colaborador) en┬álocalhost
+Redirecci├│n correcta por rol; sesi├│n JWT en cookie httpOnly
+Aprobado en localhost
+Captura por rol
+Aprobado
+QA-002
+RF-001 / RNF-01
+Seguridad
+Colaborador Empresa A intenta acceder a datos de Empresa B (local + Cloud Run)
+Acceso denegado; RLS y middleware bloquean
+Aprobado en escenarios probados
+Captura error + validaci├│n BD
+Aprobado
+QA-003
+RF-004 / RP-001
+Funcional
+Colaborador se inscribe en curso publicado de su tenant (localhost)
+Inscripci├│n creada; curso visible en┬á/mis-cursos; sin duplicado (RN-03)
+Aprobado
+Captura cat├ílogo + BD
+Aprobado
+QA-004
+RF-004 / RP-001
+Funcional
+Colaborador completa lecci├│n en ruta de aprendizaje
+Progreso persistido; roadmap actualiza estado
+Aprobado en localhost
+Captura roadmap antes/despu├®s
+Aprobado
+QA-005
+RF-004 / RN-06
+Funcional
+Colaborador presenta evaluaci├│n respetando┬ámax_intentos
+Calificaci├│n en servidor; intentos bloqueados al l├¡mite
+Aprobado flujo principal
+Captura evaluaci├│n + BD
+Aprobado
+QA-006
+RF-003
+Funcional
+Instructor crea curso, m├│dulo, lecci├│n y publica con recurso GCS
+Curso publicado; recurso accesible con URL firmada
+Parcial ÔÇö tipos video/PDF/embed en revisi├│n (CR-004)
+Captura panel instructor
+En curso
+QA-007
+RF-005
+Funcional
+Admin empresa consulta reporte de avance de su tenant
+Solo datos de su empresa; m├®tricas coherentes
+En ejecuci├│n Sprint 3
+Pendiente captura final
+En curso
+QA-008
+RF-006 / BP-03
+Funcional
+Admin empresa asigna curso obligatorio a colaborador
+Asignaci├│n creada; colaborador ve curso en su panel
+No ejecutado ÔÇö desarrollo pendiente
+N/A
+Pendiente
+QA-009
+RNF-02
+Integraci├│n
+Push a┬ámain┬áÔåÆ CI (lint,┬átypecheck,┬ábuild) ÔåÆ deploy Cloud Run
+Pipeline en verde; servicio responde post-deploy
+CI operativo; deploy autom├ítico activo
+GitHub Actions run ID
+Aprobado
+QA-010
+RNF-02
+Integraci├│n
+Smoke test en┬áCloud Run┬átras deploy: login + navegaci├│n b├ísica por rol
+Mismo comportamiento funcional que en localhost; sin errores 5xx
+Validado con observaciones menores documentadas
+Captura Cloud Run + nota observaciones
+En curso
+QA-011
+RNF-03 / CR-002
+Usabilidad
+Colaborador navega cat├ílogo ÔåÆ curso ÔåÆ lecci├│n (hero + roadmap) en desktop y m├│vil
+Navegaci├│n fluida; CTA visible; responsive sin errores cr├¡ticos
+Parcial ÔÇö pulido UI en curso
+Captura localhost + Cloud Run
+En curso
+QA-012
+RF-001 a RF-005
+Regresi├│n
+Smoke test pre-UAT: flujos P0 end-to-end en localhost y Cloud Run
+Flujos cr├¡ticos operativos; discrepancias local/prod registradas
+Programado Sprint 4
+Plan backlog T-08
+Pendiente
+QA-013
+RF-001 a RF-005
+UAT
+Validaci├│n con PO (Iron Alexander Fuentes Rodr├¡guez) y usuarios piloto
+Acta UAT: Aprobado / Aprobado con observaciones / Rechazado
+Fecha UAT por definir┬á(Sprint 5, meta Q4 2026)
+Acta UAT pendiente
+Pendiente
+Tipos de prueba
+Funcional   ┬À   Regresi├│n   ┬À   Integraci├│n   ┬À   Seguridad   ┬À   Performance   ┬À   Usabilidad   ┬À   UAT
+37. MATRIZ DE TRAZABILIDAD
+  OBLIGATORIO  
+Solicitud
+Requerimiento
+HU
+Dise├▒o
+Desarrollo
+Caso QA
+Evidencia
+Release
+Estado
+SOL-DIP-2026-001
+RF-001┬áAutenticaci├│n y sesi├│n por rol
+HU-001
+Secc. 15 UX ÔÇö pantalla┬á/login; Secc. 14 C4 Context
+middleware.ts, Server Actions auth, JWT httpOnly, redirecci├│n por rol
+QA-001, QA-002, QA-009, QA-010
+Capturas login por rol; GitHub Actions CI
+R1
+Implementado / QA aprobado
+SOL-DIP-2026-001
+RF-002┬áGesti├│n de empresas y usuarios
+HU-002
+Secc. 15 UX ÔÇö paneles┬á/admin,┬á/empresa; wireframes shadcn/ui
+CRUD empresas/usuarios, invitaciones SendGrid, RLS por tenant
+QA-002
+Capturas panel admin/empresa; registro BD
+R1
+Implementado / QA aprobado
+SOL-DIP-2026-001
+RF-003┬áAutor├¡a de cursos y evaluaciones
+HU-003
+Secc. 15 UX ÔÇö flujo instructor; CR-004 contenido multimedia
+Panel┬á/instructor/cursos, m├│dulos/lecciones/recursos GCS, evaluaciones GIFT
+QA-006
+Capturas autor├¡a; URL firmada GCS
+R1
+Implementado / QA en curso
+SOL-DIP-2026-001
+RF-004┬áConsumo estudiante e inscripci├│n
+HU-004
+Secc. 15 UX ÔÇö cat├ílogo, hero, roadmap gamificado (CR-002)
+/mis-cursos, inscripci├│n,┬áregistrar_progreso_leccion, evaluaciones
+QA-003, QA-004, QA-005, QA-011
+Capturas roadmap/progreso; BD inscripciones
+R1
+Implementado / QA aprobado (P0)
+SOL-DIP-2026-001
+RF-005┬áReportes superadmin/empresa
+HU-005
+Secc. 15 UX ÔÇö dashboards reportes; Recharts
+Reportes por tenant, m├®tricas de avance
+QA-007, QA-011
+Capturas reportes (pendiente final)
+R1
+Implementado / QA en curso
+SOL-DIP-2026-001
+RF-006┬áAsignaciones forzadas
+HU-006
+Secc. 15 UX ÔÇö placeholder asignaciones (BP-03)
+RLS backend listo; UI admin empresa pendiente
+QA-008
+N/A ÔÇö no ejecutado
+R2
+Pendiente desarrollo
+SOL-DIP-2026-001
+RNF-01┬áSeguridad multiempresa (RLS)
+ÔÇö
+Secc. 14 Arquitectura; Secc. 12 RN-01ÔÇô04
+11 migraciones SQL, pol├¡ticas RLS,┬áapp_user
+QA-002
+Query audit RLS; captura acceso denegado
+R1
+Implementado / QA aprobado
+SOL-DIP-2026-001
+RNF-02┬áCI/CD y despliegue
+ÔÇö
+Secc. 14 DevOps; diagrama deploy pendiente
+.github/workflows/ci.yml,┬ádeploy.yml, Docker, Cloud Run
+QA-009, QA-010
+GitHub Actions run ID; smoke Cloud Run
+R1
+Implementado / QA en curso
+SOL-DIP-2026-001
+RNF-03┬áUsabilidad y responsive
+ÔÇö
+Secc. 15 UX/UI; CR-002 UI interactiva
+Tailwind responsive, shadcn/ui, hero y roadmap
+QA-011
+Capturas desktop/m├│vil localhost + Cloud Run
+R1
+Parcial / QA en curso
+SOL-DIP-2026-001
+RNF-04┬áDisponibilidad Cloud Run
+ÔÇö
+Secc. 14 Arquitectura GCP
+Health check post-deploy, logs Cloud Run
+QA-010
+Log Cloud Run; health check OK
+R1
+Implementado / observaciones menores
+SOL-DIP-2026-001
+BP-01┬áCertificados PDF
+ÔÇö
+No dise├▒ado
+No iniciado
+ÔÇö
+N/A
+R2 / Fase 2
+Sin desarrollo / sin QA / sin deploy
+SOL-DIP-2026-001
+BP-02┬áPasarela de pagos
+ÔÇö
+No dise├▒ado
+No iniciado
+ÔÇö
+N/A
+R2 / Fase 2
+Sin desarrollo / sin QA / sin deploy
+Control de trazabilidad (auditor├¡a)
+Verificaci├│n
+Resultado al 26/08/2026
+Acci├│n
+Requerimientos sin desarrollo
+RF-006, BP-01, BP-02
+Sprint 3ÔÇô4 / Fase 2 seg├║n roadmap
+Requerimientos sin prueba
+RF-006 (QA-008 pendiente), BP-01/02/04
+Ejecutar QA al cerrar desarrollo
+Requerimientos sin evidencia
+RF-005, RNF-03 (capturas finales pendientes)
+Juan Andr├®s Hermida Vargas ÔÇö cierre Sprint 3
+Requerimientos no desplegados
+BP-01, BP-02, RF-006
+Fuera de alcance R1
+Cambios sin trazabilidad
+CR-002, CR-004 vinculados a RF-003/RF-004 en matriz
+OK ÔÇö trazados v├¡a columna Dise├▒o
+Responsable trazabilidad:┬áJohan Sebasti├ín Daza Sarmiento (PM) ÔÇö actualizaci├│n: Juan Andr├®s Hermida Vargas (QA)
+38. UAT ÔÇö VALIDACI├ôN DEL USUARIO
+  CONDICIONAL  
+Responsable
+Validaci├│n funcional (PO):┬áIron Alexander Fuentes Rodr├¡guez
+Apoyo QA:┬áJuan Andr├®s Hermida Vargas
+Coordinaci├│n:┬áJohan Sebasti├ín Daza Sarmiento (PM)
+Fecha
+Por definir┬áÔÇö programado Sprint 5, meta Q4 2026 (post-cierre Etapa 3 y smoke test QA-012)
+Ambiente
+Preparaci├│n:┬álocalhost (http://localhost:3000, BD┬álocalhost:5433)
+Validaci├│n usuario final:┬áCloud Run (producci├│n) ÔÇö misma URL usada en pruebas post-deploy
+Requerimientos evaluados
+Alcance UAT R1: RF-001, RF-002, RF-003, RF-004, RF-005
+Excluidos UAT R1: RF-006 (asignaciones), BP-01 (certificados), BP-02 (pagos), BP-04 (Moodle)
+Resultado
+ Pendiente ÔÇö UAT no iniciado
+Observaciones
+El equipo t├®cnico valida en localhost y Cloud Run (QA-010, QA-011). El UAT formal con PO y usuarios piloto (Operaciones / F├íbrica de Contenido) se ejecutar├í cuando RF-005 y mejoras UX (CR-002, CR-004) est├®n cerradas sin defectos bloqueantes. Fecha exacta se acordar├í entre PM y PO. Criterio de aceptaci├│n UAT: acta firmada con resultado Aprobado o Aprobado con observaciones (sin observaciones bloqueantes abiertas).
+Evidencia
+Acta UAT pendiente ÔÇö registrar en Secc. 49 (Evidencias): acta firmada, capturas por rol, checklist QA-013
+Resultado
+Aprobado   ┬À   Aprobado con observaciones   ┬À   Rechazado
+39. PLAN DE RELEASE
+  OBLIGATORIO  
+Release ID
+R1
+Versi├│n
+1.0
+Fecha
+Q4 2026 ÔÇö ventana exacta por definir (post-UAT, meta 31/12/2026 seg├║n solicitud)
+Ambiente
+Producci├│n ÔÇö Google Cloud Run (servicio diplomados, regi├│n us-central1, proyecto GCP gen-lang-client-0049269139)
+Componentes
+Monorepo Next.js 15 (frontend App Router + Server Actions backend). Una sola imagen Docker desplegada en Cloud Run ÔÇö no hay deploy separado frontend/backend.
+Requerimientos incluidos
+RF-001 a RF-005, RNF-01 a RNF-04
+Responsable
+Haider Yessid Bello Melo (t├®cnico)
+Riesgo
+Medio ÔÇö dependencia GCP (Cloud SQL, GCS, Cloud Run) y SendGrid; alcance pendiente certificados/pagos; UAT no ejecutado
+Ventana despliegue
+Post-UAT aprobado; ventana acordada con Operaciones / PM
+Pipeline
+Push a main ÔåÆ .github/workflows/deploy.yml (build Docker ÔåÆ Artifact Registry ÔåÆ Cloud Run + tr├ífico a ├║ltima revisi├│n)
+Rollback aplicaci├│n
+Revertir tr├ífico Cloud Run a revisi├│n anterior (gcloud run services update-traffic --to-revisions)
+Rollback
+Migraciones transaccionales en migrate.ts; no hay runbook formal de rollback por release en el repositorio
+40. CHECKLIST DE GO-LIVE
+  OBLIGATORIO  
+Antes
+├ìtem
+Estado
+Evidencia / nota
+QA aprobado
+ÔÿÉ
+Secc. 36: casos P0 aprobados; P1 y regresi├│n┬áen curso. Sin acta de cierre QA R1.
+UAT aprobado
+ÔÿÉ
+Secc. 38:┬ápendiente; fecha UAT┬ápor definir.
+Backup
+ÔÿÉ
+Datos en┬áCloud SQL┬á(producci├│n).┬áNo confirmado┬ási hay backups autom├íticos en GCP.┬áNo existe┬áprocedimiento de restore documentado.
+Migraciones verificadas
+ÔÿÉ
+En el repo hay┬á11 archivos SQL┬áversionados (backend/db/migrations/001ÔÇô011), aplicados con┬ánpm run db:migrate. En producci├│n se confirm├│┬áal menos una migraci├│n ejecutada hace ~1 mes;┬áno est├í verificado┬áque las 11 est├®n aplicadas en Cloud SQL prod.
+Secretos configurados
+Ôÿæ
+Verificado en┬ádeploy.yml: Secret Manager (database-url,┬ájwt-secret) +┬áGCP_SA_KEY┬áen GitHub Actions.
+Variables de entorno
+Ôÿæ
+Verificado en┬ádeploy.yml:┬áGCS_BUCKET,┬áNEXT_PUBLIC_SITE_URL,┬áINSTANCE_CONNECTION_NAME.
+Rollback preparado
+ÔÿÉ
+Rollback de revisi├│n Cloud Run es t├®cnicamente posible, pero┬ánunca se ha probado┬áen producci├│n. Sin runbook documentado.
+Durante
+├ìtem
+Estado
+Evidencia / nota
+Deploy backend
+Ôÿæ*
+*Deploy continuo activo: imagen monol├¡tica Next.js ÔåÆ Cloud Run en cada push a┬ámain.
+Deploy frontend
+Ôÿæ*
+*Mismo artefacto Docker; no hay deploy independiente.
+Migraciones
+ÔÿÉ
+Manual┬á(npm run db:migrate); no automatizado en pipeline. ├Ültima ejecuci├│n confirmada en prod:┬á~1 mes atr├ís┬á(cantidad total aplicada en prod:┬ápor verificar).
+Health check
+ÔÿÉ
+No hay paso automatizado en┬ádeploy.yml; validaci├│n manual post-deploy.
+Logs
+Ôÿæ
+Logs de Cloud Run disponibles en GCP Console.
+Despu├®s
+├ìtem
+Estado
+Evidencia / nota
+Smoke tests
+ÔÿÉ
+QA-010 en curso: pruebas manuales localhost + Cloud Run; observaciones pendientes documentadas.
+Integraciones
+ÔÿÉ
+GCS y SendGrid en uso; validaci├│n formal end-to-end┬áparcial.
+Validaci├│n funcional
+ÔÿÉ
+Depende de cierre QA + UAT (Secc. 38).
+Monitoreo
+ÔÿÉ
+Logs Cloud Run s├¡; sin alertas ni dashboard documentado en repo.
+Comunicaci├│n
+ÔÿÉ
+Pendiente┬áÔÇö no hay plan de comunicaci├│n a empresas/usuarios piloto para go-live.
+41. VALIDACI├ôN POSTPRODUCCI├ôN
+  OBLIGATORIO  
+Alcance: validaciones ejecutadas tras deploys a Cloud Run (producci├│n). No es el cierre formal del go-live R1 (Secc. 40: a├║n no listo).
+Responsable QA: Juan Andr├®s Hermida Vargas
+Fecha de registro: 26/08/2026
+Entornos: localhost (desarrollo/QA) + Cloud Run (post-deploy)
+Validaci├│n
+Resultado
+Responsable
+Evidencia
+Disponibilidad
+OK con observaciones┬áÔÇö el servicio responde tras deploy autom├ítico a Cloud Run (deploy.yml). No hay health check automatizado en el pipeline; la verificaci├│n es manual post-deploy.
+Juan Andr├®s Hermida Vargas
+QA-009 (CI/deploy en verde); QA-010 smoke Cloud Run; logs Cloud Run GCP Console
+Login
+OK┬áÔÇö login por rol operativo en localhost (QA-001). En Cloud Run validado en smoke tests; sin defectos bloqueantes reportados en autenticaci├│n.
+Juan Andr├®s Hermida Vargas
+QA-001, QA-002; capturas┬á/login┬áy redirecci├│n por rol
+Funcionalidad
+En curso┬áÔÇö flujos P0 (inscripci├│n, progreso, evaluaciones) OK en localhost. En Cloud Run se detectan┬áobservaciones/cambios pendientes┬ávs local en algunos flujos (QA-010, QA-006, QA-007).
+Juan Andr├®s Hermida Vargas
+QA-003 a QA-005 (localhost); QA-010, QA-006, QA-007 (Cloud Run ÔÇö capturas pendientes de cierre)
+Datos
+OK con observaciones┬áÔÇö datos persistidos en Cloud SQL producci├│n. Aislamiento multiempresa (RLS) validado (QA-002). Estado completo de migraciones en prod┬áno verificado┬á(Secc. 40).
+Juan Andr├®s Hermida Vargas
+QA-002; confirmaci├│n datos en Cloud SQL; tabla┬á_migrations┬ápor contrastar
+Integraciones
+En curso┬áÔÇö GCS (recursos/URLs firmadas) y SendGrid (invitaciones) en uso. Validaci├│n end-to-end formal┬áparcial; tipos de contenido multimedia en revisi├│n (CR-004).
+Juan Andr├®s Hermida Vargas
+QA-006, QA-009; capturas recursos GCS; prueba invitaci├│n SendGrid
+Logs
+OK┬áÔÇö logs de Cloud Run accesibles en GCP Console; sin errores cr├¡ticos 5xx reportados en smoke tests recientes. Sin alertas/monitoreo proactivo configurado.
+Juan Andr├®s Hermida Vargas
+GCP Console ÔåÆ Cloud Run ÔåÆ Logs; registro QA-010
+Performance
+Pendiente┬áÔÇö no hay pruebas formales de performance ni umbrales definidos para R1. Respuesta percibida aceptable en smoke manual; sin evidencia cuantitativa.
+Juan Andr├®s Hermida Vargas
+N/A ÔÇö programar en Sprint 4 pre-UAT si aplica
+42. HYPERCARE
+  CONDICIONAL  
+Fecha inicio
+Por definir┬áÔÇö d├¡a del go-live R1 (meta Q4 2026, post-UAT aprobado)
+Fecha fin
+Por definir┬áÔÇö acordar con PM al calendarizar go-live┬á(duraci├│n no definida a├║n)
+Responsable
+Coordinaci├│n:┬áJohan Sebasti├ín Daza Sarmiento (PM)
+Soporte t├®cnico:┬áHaider Yessid Bello Melo (Tech Lead / DevOps)
+Validaci├│n funcional:┬áJuan Andr├®s Hermida Vargas (QA)
+Escalamiento funcional:┬áIron Alexander Fuentes Rodr├¡guez (PO)
+Incidentes
+N/A┬áÔÇö hypercare no iniciado. Soporte actual: correcciones en sprints + smoke tests post-deploy Cloud Run.
+Defectos
+Pre-hypercare (en curso):┬áobservaciones Cloud Run vs localhost (Secc. 41, QA-010); RF-005/RF-006 y UX CR-002/CR-004 pendientes de cierre.
+Correcciones
+En curso┬áv├¡a desarrollo normal (Sprint 3 / Etapa 3), no bajo r├®gimen hypercare.
+Resultado
+Pendiente ÔÇö se completa al cerrar el periodo hypercare
+43. RACI
+  OBLIGATORIO  
+Actividad
+Negocio
+PM
+PO
+Tech Lead
+UX
+Dev
+QA
+DevOps
+Gesti├│n del proyecto y cronograma
+I
+A/R
+C
+C
+I
+I
+I
+I
+Definici├│n y aprobaci├│n de requerimientos
+C
+C
+A/R
+C
+C
+I
+I
+I
+Dise├▒o UX/UI y criterios de experiencia
+C
+I
+A
+C
+R
+I
+C
+I
+Desarrollo e implementaci├│n t├®cnica
+I
+I
+C
+A
+I
+R
+I
+C
+QA, pruebas y validaci├│n post-deploy
+I
+I
+C
+C
+I
+C
+A/R
+I
+UAT y aceptaci├│n funcional
+C
+C
+A/R
+I
+C
+I
+C
+I
+Deploy, release y migraciones BD
+I
+I
+I
+A
+I
+C
+I
+R
+Hypercare post go-live
+C
+A/R
+C
+R
+I
+R
+R
+R
+R = Responsible   ┬À   A = Accountable   ┬À   C = Consulted   ┬À   I = Informed
+44. PLAN DE COMUNICACIONES
+  CONDICIONAL  
+Comunicaci├│n
+Audiencia
+Responsable
+Frecuencia
+Canal
+Contenido
+Status report ejecutivo
+Direcci├│n de Operaciones, F├íbrica de Contenido, PMO
+Johan Sebasti├ín Daza Sarmiento (PM)
+Por sprint o hito┬á(sin periodicidad fija documentada)
+Documento PMO (Secc. 46) + correo interno CUN
+Estado ­ƒƒí/­ƒƒó/­ƒö┤, logros, riesgos, bloqueos, pr├│ximo hito, decisiones requeridas
+Seguimiento de avance MVP / sprint
+PO, Tech Lead, QA, stakeholders t├®cnicos
+Johan Sebasti├ín Daza Sarmiento (PM)
+Por sprint┬á(Sprint 3 en curso ÔÇö Secc. 34)
+Reuni├│n interna + documento de requerimientos
+Avance RF-001 a RF-006, tareas T-S3-XX, dependencias, cambios de alcance (CR)
+Resultados QA y validaci├│n post-deploy
+PM, PO, Tech Lead
+Juan Andr├®s Hermida Vargas (QA)
+Tras ciclo de pruebas o deploy relevante a Cloud Run
+Registro en Secc. 36/41 + correo interno a PM/PO
+Casos QA aprobados/en curso, observaciones localhost vs Cloud Run, bloqueantes pre-UAT
+Lanzamiento / go-live R1 a usuarios
+Empresas piloto, colaboradores, instructores, admin empresa
+Iron Alexander Fuentes Rodr├¡guez (PO) + Johan Sebasti├ín Daza Sarmiento (PM)
+├Ünica ÔÇö post go-live┬á(fecha por definir)
+Por definir┬á(pendiente ÔÇö Secc. 40)
+URL plataforma, credenciales/acceso, soporte inicial, ventana hypercare (Secc. 42)
+45. CADENCIA DE GOBIERNO
+  OBLIGATORIO  
+Daily / Seguimiento operativo
+Objetivo
+Alinear avance diario, bloqueos t├®cnicos y prioridades del sprint MVP R1.
+Participantes
+Haider Yessid Bello Melo; Juan Andr├®s Hermida Vargas (seg├║n pruebas activas); Johan Sebasti├ín Daza Sarmiento (si aplica).
+Frecuencia
+No formalizado┬áÔÇö seguimiento ad hoc.┬áPor acordar con PM┬ási se institucionaliza daily.
+Entradas
+Tareas Sprint 3 (Secc. 34), bloqueos, resultados QA (Secc. 36/41).
+Decisiones
+Re-priorizar tareas del d├¡a; escalar bloqueos a PM/PO.
+Salidas
+Lista de pendientes del d├¡a; bloqueos registrados para seguimiento PM.
+Seguimiento semanal PM
+Objetivo
+Revisar avance del proyecto, estado de la plataforma Diplomados y bloqueos antes de la revisi├│n de jefes.
+Participantes
+Johan Sebasti├ín Daza Sarmiento (PM); Iron Alexander Fuentes Rodr├¡guez (PO); Haider Yessid Bello Melo (Tech Lead); Juan Andr├®s Hermida Vargas (QA ÔÇö cuando hay resultados de pruebas).┬áRevisi├│n de jefes:┬áOperaciones / F├íbrica de Contenido┬á(revisan estado de las apps).
+Frecuencia
+Semanal, con seguimiento del equipo┬ádespu├®s de mi├®rcoles/jueves, cuando los jefes revisan el estado de las aplicaciones.
+Entradas
+Status report (Secc. 46); avance Sprint 3 (Secc. 34); resultados QA localhost/Cloud Run (Secc. 36/41); deploys recientes a Cloud Run.
+Decisiones
+Prioridades de la semana; escalamiento de bloqueos; ajustes de alcance o fechas si los reportan los jefes.
+Salidas
+Status report actualizado; plan de acci├│n semanal; riesgos y decisiones documentadas para la siguiente revisi├│n de jefes.
+Sprint Planning
+Objetivo
+Definir objetivo, alcance y tareas del sprint (Etapa 3 / cierre MVP R1).
+Participantes
+Johan Sebasti├ín Daza Sarmiento (PM); Iron Alexander Fuentes Rodr├¡guez (PO); Haider Yessid Bello Melo (Tech Lead); Juan Andr├®s Hermida Vargas (QA ÔÇö consultado).
+Frecuencia
+Al inicio de cada sprint┬áÔÇö referencia Sprint 3 (~3ÔÇô4 semanas: 11/08ÔÇô05/09/2026).
+Entradas
+Backlog (Secc. 32), RF/CR prioritarios, capacidad (~120 h QA; 1 dev full-time ÔÇö Secc. 34).
+Decisiones
+Tareas incluidas/excluidas del sprint; prioridad RF-005, RF-006, CR-002, CR-004.
+Salidas
+Sprint planificado (Secc. 34): objetivo, fechas, tareas T-S3-XX, responsables.
+Sprint Review
+Objetivo
+Demostrar incremento funcional del sprint y validar avance con PO.
+Participantes
+Iron Alexander Fuentes Rodr├¡guez (PO); Johan Sebasti├ín Daza Sarmiento (PM); Haider Yessid Bello Melo (Tech Lead); Juan Andr├®s Hermida Vargas (QA).
+Frecuencia
+Al cierre de cada sprint┬á(misma cadencia que Planning).
+Entradas
+Incremento en localhost y/o Cloud Run; casos QA ejecutados (Secc. 36); DoD (Secc. 35).
+Decisiones
+Aceptar/rechazar incremento; registrar observaciones para siguiente sprint.
+Salidas
+Acta breve o notas de review; backlog actualizado; evidencias en Secc. 49.
+Retrospectiva
+Objetivo
+Identificar mejoras de proceso (desarrollo, QA, deploy, comunicaci├│n).
+Participantes
+Johan Sebasti├ín Daza Sarmiento (PM); Haider Yessid Bello Melo (Tech Lead); Juan Andr├®s Hermida Vargas (QA); Iron Alexander Fuentes Rodr├¡guez (PO ÔÇö opcional).
+Frecuencia
+Por acordar con PM┬áÔÇö no hay evidencia de retrospectivas formales ejecutadas.
+Entradas
+Resultados del sprint, incidentes QA, observaciones Cloud Run vs localhost.
+Decisiones
+Mejoras de proceso para siguiente sprint (ej. migraciones, smoke test, comunicaci├│n go-live).
+Salidas
+Lista de acciones de mejora; responsables y fechas┬á(si se adopta la ceremonia).
+Comit├® de proyecto
+Objetivo
+Revisi├│n integrada de avance, riesgos y decisiones que afectan alcance o fechas.
+Participantes
+Johan Sebasti├ín Daza Sarmiento (PM); Iron Alexander Fuentes Rodr├¡guez (PO); Haider Yessid Bello Melo (Tech Lead); representantes F├íbrica de Contenido / Operaciones.
+Frecuencia
+Por hito o convocatoria del PM┬áÔÇö no calendarizado fijo. Sugerido: cierre de etapa, pre-UAT, pre-go-live.
+Entradas
+Status report (Secc. 46), factibilidad (Secc. 19), checklist go-live (Secc. 40), plan release R1 (Secc. 39).
+Decisiones
+Alcance MVP R1; fecha UAT; comunicaci├│n go-live (Secc. 44 ÔÇö pendiente); certificados/pagos Fase 2.
+Salidas
+Acta de comit├®; decisiones registradas en documento PMO; plan de acci├│n.
+Steering Committee
+Objetivo
+Validaci├│n ejecutiva de continuidad, inversi├│n y hitos cr├¡ticos (UAT, go-live Q4 2026).
+Participantes
+Por definir con PM┬áÔÇö PM y PO confirmados; nivel direcci├│n Operaciones / F├íbrica de Contenido┬áno documentado┬áen el repo.
+Frecuencia
+Por definir┬áÔÇö sugerido en hitos cr├¡ticos: UAT, go-live R1, cierre hypercare.
+Entradas
+Dashboard ejecutivo (Secc. 48), KPIs (Secc. 47), status ­ƒƒí Amarillo, riesgos principales.
+Decisiones
+Go/no-go UAT; go/no-go go-live; priorizaci├│n Fase 2 (certificados, pagos).
+Salidas
+Decisi├│n ejecutiva documentada; comunicaci├│n a stakeholders (Secc. 44).
+46. STATUS REPORT
+  OBLIGATORIO  
+Estado general
+­ƒƒí Amarillo ÔÇö MVP R1 en cierre funcional; Etapa 3 en curso; go-live y UAT a├║n no listos.
+Logros del per├¡odo
+Cimientos t├®cnicos completos; migraci├│n a GCP (Cloud Run + Cloud SQL); flujo estudiante/instructor operativo; CI/CD activo (lint, typecheck, build + deploy autom├ítico); RF-001 a RF-005 implementados; casos QA P0 aprobados en localhost; smoke tests post-deploy Cloud Run iniciados..
+Trabajo en curso
+Sprint 3: paneles admin/empresa (RF-002/RF-005), asignaciones forzadas (RF-006), mejoras UX CR-002/CR-004; QA P1 en curso (Juan Andr├®s Hermida Vargas); observaciones Cloud Run vs localhost; certificados y pagos en definici├│n (Fase 2).
+Pr├│ximos pasos
+Cerrar tareas Sprint 3; completar QA-006, QA-007, QA-010, QA-011; smoke test regresi├│n pre-UAT; ejecutar UAT (fecha por definir); preparar go-live Q4 2026..
+Riesgos
+1) Dependencia Cloud SQL, GCS y SendGrid. 2) Retraso certificados/pagos (Fase 2). 3) Backup Cloud SQL sin confirmar; rollback Cloud Run nunca ensayado. 4) UAT y comunicaci├│n go-live sin fecha.
+Bloqueos
+Ninguno cr├¡tico reportado. Pendiente: definici├│n certificados/pagos, fecha UAT, duraci├│n hypercare, plan comunicaci├│n go-live.
+Decisiones requeridas
+Alcance final certificados/pagos; fecha UAT; URL oficial producci├│n; c├│digo documental PMO; confirmar backups Cloud SQL.
+47. INDICADORES DEL PROYECTO
+  OBLIGATORIO  
+KPI
+F├│rmula
+Meta
+Resultado
+Tendencia
+% avance
+(RF MVP completados / Total RF MVP) ├ù 100
+ÔëÑ 85% al cierre MVP
+~70%┬áÔÇö RF-001 a RF-005 implementados; RF-006 y cierre QA/UAT pendientes
+Ôåæ
+Cumplimiento de hitos
+Hitos cumplidos / Hitos planificados
+ÔëÑ 90%
+75%┬áÔÇö Etapa 2 cerrada; Etapa 3 en curso; UAT y go-live pendientes
+ÔåÆ
+Lead Time
+Fecha fin ÔêÆ Fecha inicio por HU
+Ôëñ 10 d├¡as HU promedio
+En medici├│n┬áÔÇö sin registro formal por HU
+ÔåÆ
+Cycle Time
+Tiempo en desarrollo activo
+Ôëñ 7 d├¡as
+En medici├│n┬áÔÇö sin registro formal
+ÔåÆ
+Throughput
+HU completadas por sprint
+ÔëÑ 8 por sprint
+En medici├│n┬áÔÇö Sprint 3 en curso (cierre 05/09/2026)
+ÔåÆ
+Aging
+D├¡as en estado Bloqueado
+Ôëñ 3 d├¡as
+0┬áÔÇö sin requerimientos en estado Bloqueado
+ÔåÆ
+Requerimientos bloqueados
+Req. con estado Bloqueado
+0 al cierre sprint
+0
+ÔåÆ
+Requerimientos reabiertos
+Req. reabiertos / Total
+Ôëñ 5%
+0%
+ÔåÆ
+Defectos
+Defectos abiertos P0+P1 / Total identificados
+0 P0; Ôëñ 3 P1 al cierre sprint
+Sin tool formal┬áÔÇö observaciones menores Cloud Run (QA-010); casos QA-006/007 en curso;┬á0 P0 bloqueantes┬áreportados
+ÔåÆ
+Defectos postproducci├│n
+Defectos detectados post-deploy / Deploys a Cloud Run
+0 P0 post-deploy
+OK con observaciones┬áÔÇö smoke manual post-deploy; discrepancias menores local vs Cloud Run documentadas en Secc. 41;┬á0 P0
+ÔåÆ
+Cumplimiento sprint
+Tareas completadas / Tareas planificadas (Sprint 3)
+ÔëÑ 85% al cierre
+En medici├│n┬áÔÇö Sprint 3 activo; cierre programado 05/09/2026
+ÔåÆ
+Cambios de alcance
+CR trazados en matriz / Total cambios
+100% trazados
+100%┬áÔÇö CR-002, CR-004 en curso; BP-01/02/04 fuera MVP documentados en matriz (Secc. 37)
+ÔåÆ
+48. DASHBOARD EJECUTIVO
+  OBLIGATORIO  
+KPIs
+Indicador
+Valor
+% avance
+~70%┬áÔÇö RF-001 a RF-005 implementados; cierre QA/UAT y go-live pendientes
+Requerimientos totales
+9┬áÔÇö 5 RF + 4 RNF (alcance MVP R1)
+Completados
+9┬áÔÇö RF-001 a RF-005 y RNF-01 a RNF-04 en estado┬áImplementado┬á(matriz Secc. 16)
+En desarrollo
+1┬áÔÇö RF-006 (asignaciones forzadas ÔÇö UI pendiente, Sprint 3)
+Bloqueados
+0
+Vencidos
+0┬áÔÇö meta proyecto 31/12/2026; sin hitos vencidos al corte
+Riesgos cr├¡ticos
+2┬áÔÇö (1) Dependencia Cloud SQL, GCS y SendGrid; (2) Retraso/definici├│n certificados y pagos (Fase 2)
+Cambios pendientes
+2 en curso┬áÔÇö CR-002 (UX interactiva), CR-004 (contenido multimedia);┬á3 fuera MVP┬áÔÇö BP-01, BP-02, BP-04
+% avance   ┬À   Requerimientos totales   ┬À   Completados   ┬À   En desarrollo   ┬À   Bloqueados   ┬À   Vencidos   ┬À   Riesgos cr├¡ticos   ┬À   Cambios pendientes
+Estado
+­ƒƒí┬áAmarillo┬áÔÇö MVP funcional en cierre (Etapa 3 / Sprint 3); producci├│n operativa en Cloud Run con QA en curso; go-live R1 y UAT┬áno listos┬á(Secc. 40).
+Top riesgos
+Dependencia Cloud SQL, GCS y SendGrid ÔÇö plataforma y correos transaccionales dependen de servicios GCP/SendGrid.
+Retraso en certificados y pagos ÔÇö fuera de alcance MVP R1; definici├│n Fase 2 pendiente.
+(Operativo) Backup Cloud SQL sin confirmar; rollback Cloud Run nunca ensayado.
+Pr├│ximos hitos
+Completar Etapa 3 y ejecutar UAT ÔÇö meta Q4 2026.
+Hito
+Meta
+Cierre Sprint 3 (Etapa 3)
+05/09/2026
+Smoke test regresi├│n pre-UAT (QA-011)
+Post Sprint 3
+UAT con PO
+Fecha por definir┬áÔÇö meta Q4 2026
+Go-live Release R1
+Q4 2026 (post-UAT)
+Decisiones pendientes
+Alcance MVP vs Fase 2; URL producci├│n; c├│digo documental PMO
+#
+Decisi├│n
+Responsable
+1
+Alcance final certificados y pagos (MVP vs Fase 2)
+PO + PM
+2
+Fecha UAT y convocatoria usuarios piloto
+PM + PO
+3
+URL oficial de producci├│n
+PM + Tech Lead
+4
+Confirmar backups Cloud SQL y procedimiento restore
+Tech Lead
+5
+Plan comunicaci├│n go-live a empresas piloto
+PO + PM
+6
+C├│digo documental PMO
+PMO
+49. EVIDENCIAS
+  OBLIGATORIO  
+ID Evidencia
+Tipo
+Relacionado con
+Fecha
+Responsable
+Ubicaci├│n
+EV-001
+Arquitectura
+Secc. 14 ÔÇö Diagrama C4 Context
+26/08/2026
+Haider Yessid Bello Melo
+scripts/diagrams/c4-context-transparent.png
+EV-002
+Arquitectura
+Secc. 14 ÔÇö Diagrama C4 Container
+26/08/2026
+Haider Yessid Bello Melo
+scripts/diagrams/c4-container.png
+EV-003
+Documento
+Secc. 14 / DevOps ÔÇö CI pre-merge
+26/08/2026
+Haider Yessid Bello Melo
+.github/workflows/ci.yml┬á+ ejecuciones en GitHub Actions (repo)
+EV-004
+Documento
+Secc. 39 / RNF-02 ÔÇö Deploy Cloud Run
+26/08/2026
+Haider Yessid Bello Melo
+.github/workflows/deploy.yml┬á+ GitHub Actions ÔåÆ environment┬áproduction
+EV-005
+Documento
+Setup t├®cnico y despliegue
+26/08/2026
+Haider Yessid Bello Melo
+README.md┬á(ra├¡z del monorepo)
+EV-006
+Query
+Secc. 40 / Migraciones BD
+~07/2026┬á(~1 mes atr├ís ÔÇö confirmado por equipo)
+Haider Yessid Bello Melo
+backend/db/migrations/┬á(001ÔÇô011) + tabla┬ápublic._migrations┬áen Cloud SQL
+EV-007
+QA
+Secc. 36 ÔÇö QA-001 a QA-005 (P0 localhost)
+26/08/2026
+Juan Andr├®s Hermida Vargas
+Por registrar┬áÔÇö capturas login, inscripci├│n, progreso, evaluaci├│n┬á(carpeta evidencias pendiente)
+EV-008
+Log
+Secc. 41 ÔÇö Validaci├│n postproducci├│n / smoke Cloud Run
+26/08/2026
+Juan Andr├®s Hermida Vargas
+GCP Console ÔåÆ Cloud Run ÔåÆ servicio┬ádiplomados┬áÔåÆ Logs
+EV-009
+Captura
+Secc. 36 ÔÇö QA-010 observaciones local vs Cloud Run
+En curso
+Juan Andr├®s Hermida Vargas
+Por registrar┬áÔÇö capturas comparativas localhost / Cloud Run
+EV-010
+UAT
+Secc. 38 ÔÇö Acta UAT Release R1
+Pendiente
+Iron Alexander Fuentes Rodr├¡guez
+Por generar┬áÔÇö acta UAT post-ejecuci├│n┬á(fecha UAT por definir)
+Tipos
+Captura   ┬À   Video   ┬À   Acta   ┬À   Documento   ┬À   Query   ┬À   Log   ┬À   QA   ┬À   UAT   ┬À   Arquitectura   ┬À   Dise├▒o
+50. CIERRE DEL REQUERIMIENTO
+  OBLIGATORIO  
+ÔÿÉ Desarrollo terminado
+Parcial
+RF-001 a RF-005 implementados;┬áRF-006 pendiente┬á(UI asignaciones).
+ÔÿÉ QA aprobado
+Parcial
+Casos P0 aprobados (Secc. 36); P1 y regresi├│n┬áen curso┬á(Juan Andr├®s Hermida Vargas).
+ÔÿÉ UAT aprobado
+Pendiente
+Secc. 38 ÔÇö┬áfecha por definir; acta EV-010 no generada.
+Ôÿæ Release identificado
+OK
+Release R1 v1.0┬áÔÇö Q4 2026 (Secc. 39).
+ÔÿÉ Evidencias almacenadas
+Parcial
+EV-001 a EV-006 en repo; capturas QA y acta UAT┬ápor registrar┬á(Secc. 49).
+Ôÿæ Documentaci├│n actualizada
+Parcial
+README.md, documento PMO, diagramas C4; capturas UX Figma┬ápendientes.
+ÔÿÉ Solicitante informado
+Parcial
+Seguimiento semanal post mi├®rcoles/jueves (Secc. 45);┬ácomunicaci├│n go-live pendiente.
+Ôÿæ Riesgos residuales documentados
+OK
+Secc. 46, 48 y 40 (backup, rollback, certificados/pagos).
+ÔÿÉ Requerimiento cerrado
+No
+Bloqueantes: cierre QA R1, UAT, go-live (Secc. 40).
+Responsable del cierre
+Funcional: Iron Alexander Fuentes Rodr├¡guez (PO) ┬À PMO: Johan Sebasti├ín Daza Sarmiento (PM) ┬À T├®cnico: Haider Yessid Bello Melo
+Fecha
+Por definir┬áÔÇö post go-live R1 y hypercare (Secc. 42)
+Aprobaci├│n
+Pendiente ÔÇö requiere acta UAT aprobada + checklist go-live (Secc. 40) completo
+51. CIERRE DEL PROYECTO / FASE
+  OPCIONAL  
+Objetivos logrados
+Plataforma SaaS multiempresa operativa en GCP; auth por rol; CRUD acad├®mico; consumo estudiante; evaluaciones; reportes b├ísicos; CI/CD activo.┬áPendiente:┬ácierre MVP R1, UAT y go-live.
+Alcance entregado
+Entregado:┬áRF-001 a RF-005, RNF-01 a RNF-04, deploy Cloud Run, 11 migraciones SQL versionadas.┬áFuera de alcance R1 (Fase 2):┬áRF-006 UI, certificados (BP-01), pagos (BP-02), Moodle operativo (BP-04).
+Pendientes
+RF-006 asignaciones; QA P1 (QA-006, QA-007, QA-010, QA-011); UAT (fecha por definir); go-live; backup/restore Cloud SQL; rollback ensayado; comunicaci├│n a empresas piloto; hypercare (duraci├│n por definir).
+Deuda t├®cnica
+Pruebas unitarias automatizadas no formalizadas; health check no automatizado en deploy; migraciones manuales (no en pipeline); observaciones Cloud Run vs localhost; herramienta formal de defectos ausente.
+Riesgos residuales
+Dependencia Cloud SQL, GCS y SendGrid; certificados/pagos sin definir (Fase 2); backup Cloud SQL sin confirmar; rollback Cloud Run nunca probado; UAT y comunicaci├│n go-live sin fecha.
+Entregables
+Monorepo Next.js 15 (frontend/┬á+┬ábackend/); Cloud Run producci├│n; Cloud SQL; GCS; GitHub Actions CI/CD; documento PMO; diagramas C4; Plan QA (Secc. 36); matriz trazabilidad (Secc. 37).
+Estado final
+­ƒƒí┬áEn curso┬áÔÇö Etapa 3 / Sprint 3 (cierre 05/09/2026).┬áNo es cierre final del proyecto.
+Aceptaci├│n
+Pendiente┬áÔÇö aceptaci├│n formal del PO tras UAT y go-live R1. Acta y firma┬ápor generar.
+52. LECCIONES APRENDIDAS
+  OPCIONAL  
+Categor├¡a
+Situaci├│n
+Aprendizaje
+Recomendaci├│n
+Responsable
+Datos
+Correcci├│n y migraci├│n de bases de datos con procesos manuales lecci├│n a lecci├│n en un m├│dulo.
+Automatizar la migraci├│n: pasar de modo manual a┬ámodo masivo┬ápara cargar/actualizar┬ávarias lecciones de un m├│dulo┬áen una sola ejecuci├│n.
+Documentar el script o procedimiento masivo; ejecutarlo en ventana controlada; verificar en┬ápublic._migrations┬áantes y despu├®s.
+Juan Andr├®s Hermida Vargas
+UX
+Roadmap y p├íginas del colaborador con experiencia visual inicial limitada.
+Mejora visual del┬ároadmap gamificado, implementaci├│n de nuevos elementos UI y┬ámejor dise├▒o general┬áde la p├ígina web.
+Validar cambios en desktop y m├│vil (localhost + Cloud Run); alinear con identidad CUN antes de cerrar Sprint 3.
+Juan Andr├®s Hermida Vargas
+Datos
+Plataforma multiempresa con varios perfiles (superadmin, admin empresa, instructor, colaborador) y datos acad├®micos en PostgreSQL.
+Aprendizaje en┬ámanejo de SQL┬á(consultas, correcciones, migraciones) para una plataforma de varios perfiles, desde rol de┬ádesarrollador.
+Probar siempre con usuario de cada rol; respetar RLS por tenant; no ejecutar cambios directos en prod sin respaldo.
+Juan Andr├®s Hermida Vargas
+Desarrollo
+Recursos de contenido alojados en Google Drive que deb├¡an consumirse dentro de la plataforma.
+Implementaci├│n de┬áarchivos Drive visualizables en el proyecto┬áusando el┬álink directo┬á(embed/preview) integrado en lecciones.
+Estandarizar formato de enlaces Drive al crear lecciones; probar visualizaci├│n en Cloud Run, no solo en localhost.
+Juan Andr├®s Hermida Vargas
+Datos
+Correcci├│n y migraci├│n de bases de datos con procesos manuales lecci├│n a lecci├│n en un m├│dulo.
+Automatizar la migraci├│n: pasar de modo manual a┬ámodo masivo┬ápara cargar/actualizar┬ávarias lecciones de un m├│dulo┬áen una sola ejecuci├│n.
+Documentar el script o procedimiento masivo; ejecutarlo en ventana controlada; verificar en┬ápublic._migrations┬áantes y despu├®s.
+Juan Andr├®s Hermida Vargas
+DevOps
+Deploy autom├ítico a Cloud Run sin health check en pipeline; diferencias entre localhost y producci├│n tras deploy.
+El workflow puede terminar en verde sin garantizar paridad funcional local/prod; hace falta┬ásmoke test manual┬ápost-deploy.
+Agregar health check al pipeline o checklist obligatorio QA-010 tras cada deploy; documentar observaciones Cloud Run.
+Juan Andr├®s Hermida Vargas / Haider Yessid Bello Melo
+QA
+Validaci├│n por rol (superadmin, admin, instructor, colaborador) sin suite automatizada en CI.
+CI valida┬álint,┬átypecheck┬áy┬ábuild, pero┬áno sustituye┬ápruebas funcionales manuales por rol y tenant.
+Mantener Plan QA (Secc. 36) actualizado; priorizar casos P0 en localhost y Cloud Run antes de UAT.
+Juan Andr├®s Hermida Vargas
+Gesti├│n
+UAT, comunicaci├│n go-live e hypercare┬ásin fecha definida┬ámientras el MVP avanza t├®cnicamente.
+El avance de desarrollo puede adelantarse a la┬áformalizaci├│n de aceptaci├│n┬á(UAT, acta, comunicaci├│n a usuarios).
+Calendarizar UAT con PO y PM al cierre Sprint 3; no declarar go-live sin checklist Secc. 40 completo.
+Johan Sebasti├ín Daza Sarmiento
+Arquitectura
+Evoluci├│n desde enfoque inicial (Supabase) hacia┬áGCP┬ácon PostgreSQL, RLS y rol┬áapp_user.
+Separar conexi├│n privilegiada (npm run db:migrate) del runtime sujeto a RLS mejora seguridad multiempresa.
+Contrastar las 11 migraciones del repo con Cloud SQL prod; documentar restore y rollback antes de go-live.
+Haider Yessid Bello Melo
+Categor├¡as
+Gesti├│n   ┬À   Desarrollo   ┬À   Arquitectura   ┬À   QA   ┬À   UX   ┬À   Stakeholders   ┬À   Datos   ┬À   DevOps
+53. PENDIENTES / BACKLOG POSTERIOR
+  OPCIONAL  
+Bloque A ÔÇö Cierre MVP R1 (prioridad alta)
+ID
+Pendiente
+Motivo
+Prioridad
+Responsable
+Fecha futura
+BP-001
+Cierre QA P1 (QA-006, QA-007, QA-010, QA-011)
+Validaci├│n incompleta pre-UAT
+P1
+Juan Andr├®s Hermida Vargas
+Post Sprint 3 (09/2026)
+BP-002
+RF-006 ÔÇö UI asignaciones forzadas
+Backend/RLS listo; UI pendiente (Sprint 3)
+P1
+Haider Yessid Bello Melo
+05/09/2026
+BP-003
+UAT formal con PO (QA-013 / EV-010)
+Aceptaci├│n funcional requerida antes go-live
+P1
+Iron Alexander Fuentes Rodr├¡guez
+Por definir ÔÇö meta Q4 2026
+BP-004
+Checklist go-live Secc. 40
+QA, UAT, backup, rollback y comunicaci├│n pendientes
+P1
+Johan Sebasti├ín Daza Sarmiento
+Q4 2026
+Bloque B ÔÇö Mejoras t├®cnicas (de lecciones aprendidas)
+ID
+Pendiente
+Motivo
+Prioridad
+Responsable
+Fecha futura
+BP-005
+Script migraci├│n masiva lecciones por m├│dulo
+Evitar correcciones manuales lecci├│n a lecci├│n
+P2
+Juan Andr├®s Hermida Vargas
+Sprint 4
+BP-006
+Health check post-deploy en pipeline
+Deploy en verde sin garant├¡a funcional prod
+P2
+Haider Yessid Bello Melo
+Sprint 4
+BP-007
+Verificar migraciones en Cloud SQL prod
+Solo confirmada ~1 migraci├│n hace 1 mes
+P1
+Haider Yessid Bello Melo
+09/2026
+BP-008
+Confirmar backups Cloud SQL + procedimiento restore
+Riesgo operativo documentado Secc. 40
+P1
+Haider Yessid Bello Melo
+Pre go-live
+BP-009
+Ensayo rollback revisi├│n Cloud Run
+Nunca probado en producci├│n
+P2
+Haider Yessid Bello Melo
+Pre go-live
+Bloque C ÔÇö UX, evidencias y comunicaci├│n
+ID
+Pendiente
+Motivo
+Prioridad
+Responsable
+Fecha futura
+BP-010
+Pulido visual roadmap y p├íginas colaborador (CR-002)
+Mejora UX en curso
+P2
+Juan Andr├®s Hermida Vargas / Iron Alexander Fuentes Rodr├¡guez
+Sprint 3ÔÇô4
+BP-011
+Contenido multimedia lecciones (CR-004)
+Tipos video/PDF/embed en revisi├│n
+P2
+Haider Yessid Bello Melo
+Sprint 3ÔÇô4
+BP-012
+Carpeta evidencias QA (EV-007, EV-009)
+Capturas sin ubicaci├│n formal
+P2
+Juan Andr├®s Hermida Vargas
+09/2026
+BP-013
+Plan comunicaci├│n go-live empresas piloto
+Pendiente confirmado Secc. 40/44
+P1
+Johan Sebasti├ín Daza Sarmiento / Iron Alexander Fuentes Rodr├¡guez
+Pre go-live
+BP-014
+Definir duraci├│n hypercare
+No acordada con PM
+P2
+Johan Sebasti├ín Daza Sarmiento
+Pre go-live
+Bloque D ÔÇö Fase 2 (fuera MVP R1)
+ID
+Pendiente
+Motivo
+Prioridad
+Responsable
+Fecha futura
+BP-015
+Certificados PDF (BP-01)
+Fuera alcance R1
+P1
+Por definir con PO
+Fase 2
+BP-016
+Pasarela de pagos (BP-02)
+Fuera alcance R1
+P1
+Por definir con PO
+Fase 2
+BP-017
+Integraci├│n Moodle operativa (BP-04)
+Solo import GIFT hoy
+P2
+Por definir
+Fase 3
+BP-018
+Suite pruebas automatizadas en CI
+Deuda t├®cnica Secc. 51
+P2
+Haider Y. Bello / Juan Andr├®s Hermida
+Post R1
+54. ANEXOS
+  OPCIONAL  
+Espacio para adjuntar o referenciar material complementario:
+ÔÇó  Mockups
+Roadmap gamificado (c├│digo)
+https://github.com/haiderbellocun/diplomados/tree/main/frontend/src/components
+ÔÇó  Dise├▒os
+ÔÇó  Actas
+Acta UAT R1 ÔÇö EV-010
+Pendiente ÔÇö docs/actas/uat-r1.pdf en GitHub post-UAT
+Acta cierre requerimiento (Secc. 50)
+Pendiente ÔÇö post go-live
+ÔÇó  APIs
+Server Actions (auth, cursos, usuarios, etc.)
+https://github.com/haiderbellocun/diplomados/tree/main/backend/src/server/actions
+Proxy Google Drive
+https://github.com/haiderbellocun/diplomados/blob/main/frontend/src/app/api/imagenes/google-drive/route.ts
+Integraci├│n embed Drive
+https://github.com/haiderbellocun/diplomados/blob/main/frontend/src/lib/images/google-drive.ts
+ÔÇó  Arquitectura
+README ÔÇö stack, arquitectura, deploy ÔÇö EV-005
+https://github.com/haiderbellocun/diplomados/blob/main/README.md
+CI pipeline ÔÇö EV-003
+https://github.com/haiderbellocun/diplomados/blob/main/.github/workflows/ci.yml
+Deploy Cloud Run ÔÇö EV-004
+https://github.com/haiderbellocun/diplomados/blob/main/.github/workflows/deploy.yml
+Dockerfile
+https://github.com/haiderbellocun/diplomados/blob/main/Dockerfile
+Ejecuciones CI/CD (Actions)
+https://github.com/haiderbellocun/diplomados/actions
+ÔÇó  SQL/Modelo de datos
+Migraciones SQL (001ÔÇô011) ÔÇö EV-006
+https://github.com/haiderbellocun/diplomados/tree/main/backend/db/migrations
+Esquema Drizzle
+https://github.com/haiderbellocun/diplomados/blob/main/backend/src/lib/db/schema.ts
+Runner migraciones
+https://github.com/haiderbellocun/diplomados/blob/main/backend/src/lib/db/migrate.ts
+ÔÇó  Evidencias
+CI en verde ÔÇö EV-003
+https://github.com/haiderbellocun/diplomados/actions/workflows/ci.yml
+Deploy producci├│n ÔÇö EV-004
+https://github.com/haiderbellocun/diplomados/actions/workflows/deploy.yml
+Capturas QA localhost ÔÇö EV-007
+Pendiente ÔÇö carpeta p├║blica sugerida: docs/evidencias/qa/ en el repo
+Logs Cloud Run ÔÇö EV-008
+GCP Console (privado ÔÇö no publicar en doc p├║blico)
+Comparativa local vs Cloud Run ÔÇö EV-009
+Pendiente ÔÇö docs/evidencias/qa/cloud-run/ en GitHub
+ÔÇó  Documentos relacionados
+Documento PMO completo
+Pendiente subir ÔÇö sugerido: https://github.com/haiderbellocun/diplomados/blob/main/docs/Diplomados_Requerimientos_v2.docx
+Solicitud SOL-DIP-2026-001
+Referenciada en Secc. 1ÔÇô2 del documento PMO
+55. GU├ìA DE DILIGENCIAMIENTO
+Esta gu├¡a orienta a cualquier Project Manager, analista o l├¡der de frente sobre c├│mo operar la plantilla a lo largo del ciclo de vida del proyecto.
+1. Qui├®n diligencia cada secci├│n
+Bloque
+Responsable principal
+Identificaci├│n de la solicitud / Resumen ejecutivo
+PM / Business Analyst
+Origen, justificaci├│n, objetivos, alcance
+Business Analyst con el solicitante
+AS IS / TO BE, reglas de negocio
+Business Analyst
+Requerimientos funcionales y no funcionales
+Business Analyst + Product Owner
+Requerimientos t├®cnicos y arquitectura
+L├¡der t├®cnico / Arquitectura
+UX/UI
+Dise├▒ador UX/UI
+Priorizaci├│n, factibilidad, estimaci├│n
+PM + l├¡deres de frente
+Plan de trabajo, cronograma, roadmap
+PM
+RAID, riesgos, bloqueos, dependencias
+PM
+Control de cambios, decision log
+PM (con aprobaci├│n de Steering Committee cuando aplique)
+Backlog, sprints, DoR/DoD
+Product Owner + equipo de desarrollo
+QA, matriz de trazabilidad
+QA Lead
+UAT
+Responsable funcional / usuario clave
+Release, go-live, hypercare
+DevOps + L├¡der t├®cnico
+RACI, comunicaciones, gobierno, status report
+PM
+Cierre, lecciones aprendidas, pendientes
+PM con todo el equipo
+2. En qu├® momento del proyecto
+Las secciones siguen el orden natural del ciclo: Necesidad ÔåÆ Solicitud ÔåÆ An├ílisis ÔåÆ Requerimiento ÔåÆ Priorizaci├│n ÔåÆ Planificaci├│n ÔåÆ Desarrollo ÔåÆ QA ÔåÆ Validaci├│n ÔåÆ Release ÔåÆ Cierre ÔåÆ Hist├│rico. No se debe avanzar a Planificaci├│n sin cerrar An├ílisis, ni a Desarrollo sin Requerimientos aprobados.
+3. Cu├índo debe actualizarse
+ÔÇó  Ante cualquier cambio de alcance, prioridad, fecha o responsable, aprobado mediante control de cambios (cap├¡tulo 36).
+ÔÇó  Al cierre de cada sprint o iteraci├│n, para reflejar el estado real del backlog y del plan de trabajo.
+ÔÇó  Al finalizar QA, UAT y cada release, para mantener la matriz de trazabilidad al d├¡a.
+ÔÇó  Semanalmente para el Status Report y los indicadores del proyecto.
+4. Qu├® secciones requieren aprobaci├│n
+ÔÇó  Identificaci├│n de la solicitud y alcance ÔÇö aprobaci├│n del solicitante y del PM.
+ÔÇó  Requerimientos funcionales y no funcionales ÔÇö aprobaci├│n del Product Owner / responsable funcional.
+ÔÇó  Control de cambios (CR) ÔÇö aprobaci├│n seg├║n el nivel definido en el RACI (PM, Steering Committee o comit├® de cambios).
+ÔÇó  UAT ÔÇö aprobaci├│n del responsable funcional o usuario clave.
+ÔÇó  Cierre del requerimiento y del proyecto ÔÇö aprobaci├│n formal documentada con firma o registro equivalente.
+5. Qu├® secciones alimentan la trazabilidad
+ÔÇó  Identificaci├│n de la solicitud, Requerimientos funcionales, Backlog, Plan de QA y Plan de Release son la columna vertebral de la Matriz de Trazabilidad (cap├¡tulo 44).
+ÔÇó  Todo cambio debe reflejarse en el Hist├│rico de cambios del requerimiento (cap├¡tulo 37) y, si corresponde, en el Decision Log (cap├¡tulo 38).
+6. Elementos que deben mantenerse durante todo el ciclo de vida
+ÔÇó  Control documental e Historial de versiones.
+ÔÇó  RAID Log, Registro de riesgos y Control de bloqueos.
+ÔÇó  Matriz maestra de requerimientos y Matriz de trazabilidad.
+ÔÇó  Decision Log.
+7. Elementos que se completan ├║nicamente al cierre
+ÔÇó  Cierre del requerimiento (cap├¡tulo 57).
+ÔÇó  Cierre del proyecto / fase (cap├¡tulo 58).
+ÔÇó  Lecciones aprendidas (cap├¡tulo 59).
+ÔÇó  Pendientes / backlog posterior (cap├¡tulo 60).
+ÔÜá Esta plantilla es un est├índar corporativo CUN de PMO, Gesti├│n de Requerimientos, Agile Delivery, QA y Gobierno T├®cnico. Dupl├¡quela para cada nuevo proyecto y elimine ├║nicamente las secciones marcadas como OPCIONAL o CONDICIONAL que, seg├║n la Matriz de Aplicabilidad, no correspondan.

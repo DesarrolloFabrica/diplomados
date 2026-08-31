@@ -1,5 +1,5 @@
-import { GraduationCap } from "lucide-react";
 import { TituloMarcaTypewriter } from "@/components/layout/titulo-marca-typewriter";
+import { LogoMarcaFormacion } from "@/components/layout/logo-marca-formacion";
 
 // Panel lateral de las pantallas de acceso. El elemento distintivo es la
 // "ruta": nodos conectados que representan módulo → unidad → lección, la
@@ -19,9 +19,7 @@ export function PanelMarca() {
   return (
     <aside className="bg-cun-auth-panel relative flex flex-col justify-between overflow-hidden px-5 py-8 text-white md:px-8 md:py-10 lg:px-12 lg:py-12">
       <div className="flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-lime-400/100">
-          <GraduationCap className="h-5 w-5 text-slate-900" aria-hidden />
-        </span>
+        <LogoMarcaFormacion />
         <span className="font-display text-lg font-semibold tracking-tight text-white">
           Formación
         </span>

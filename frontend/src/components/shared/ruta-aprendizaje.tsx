@@ -2,18 +2,32 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useRouter } from "next/navigation";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import {
   BookOpen,
   Check,
   ClipboardCheck,
+  Clock3,
+  Compass,
   FileText,
+  Gauge,
+  Layers3,
   Lock,
   Play,
   ArrowRight,
+  UserRound,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
+import { obtenerFondoModuloInmersivo } from "@/config/roadmap-inmersivo";
 import { obtenerSiguienteNodoRoadmap } from "@/lib/roadmap/siguiente-nodo";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +46,36 @@ export interface GrupoRuta {
   nodos: NodoRuta[];
 }
 
+/**
+ * Datos del curso/diplomado para fusionar el hero dentro del fondo del
+ * roadmap inmersivo (en vez de mostrarlo como una sección aparte arriba).
+ */
+export interface HeroInmersivoRoadmap {
+  titulo: string;
+  descripcion?: string | null;
+  duracionEstimadaMin: number | null;
+  nivelDificultad: "basico" | "intermedio" | "avanzado";
+  cantidadModulos: number;
+  porcentajeAvance: number;
+  cursoCompletado?: boolean;
+  nombreUsuario?: string | null;
+}
+
+const ETIQUETA_DIFICULTAD_HERO_INMERSIVO = {
+  basico: "Básico",
+  intermedio: "Intermedio",
+  avanzado: "Avanzado",
+} as const;
+
+function formatearDuracionHeroInmersivo(minutos: number | null): string {
+  if (minutos == null || minutos <= 0) return "Duración no definida";
+  const horas = Math.floor(minutos / 60);
+  const resto = minutos % 60;
+  if (horas === 0) return `${resto} min`;
+  if (resto === 0) return `${horas} ${horas === 1 ? "hora" : "horas"}`;
+  return `${horas} h ${resto} min`;
+}
+
 const NODO = 64;
 const ANILLO = 84;
 const RADIO_ANILLO = 36;
@@ -47,6 +91,165 @@ const ROADMAP_ASSETS = {
   quiz: "/images/roadmap_asset/r_quiz.png",
   avatar: "/images/roadmap_asset/Avatar.png",
 } as const;
+
+type WorldAnchorId =
+  | "startPlatform"
+  | "flowerPlatform"
+  | "officePlatform"
+  | "upperMonument"
+  | "finalMonument";
+
+type WorldFocus = "overview" | WorldAnchorId;
+type PlacementMundo = "left" | "right" | "top" | "bottom";
+
+interface WorldAnchor {
+  id: WorldAnchorId;
+  x: number;
+  y: number;
+  placement: PlacementMundo;
+  label: string;
+}
+
+interface WorldZoneDefinition {
+  id: WorldAnchorId;
+  anchor: WorldAnchor;
+  focus: {
+    scale: number;
+    translateX: string;
+    translateY: string;
+  };
+}
+
+const WORLD_ANCHORS: Record<WorldAnchorId, WorldAnchor> = {
+  startPlatform: {
+    id: "startPlatform",
+    x: 20,
+    y: 72,
+    placement: "right",
+    label: "Plataforma inicial",
+  },
+  flowerPlatform: {
+    id: "flowerPlatform",
+    x: 45,
+    y: 57,
+    placement: "right",
+    label: "Plataforma central",
+  },
+  officePlatform: {
+    id: "officePlatform",
+    x: 50,
+    y: 27,
+    placement: "right",
+    label: "Oficina superior",
+  },
+  upperMonument: {
+    id: "upperMonument",
+    x: 73,
+    y: 30,
+    placement: "left",
+    label: "Monumento superior",
+  },
+  finalMonument: {
+    id: "finalMonument",
+    x: 77,
+    y: 61,
+    placement: "left",
+    label: "Cierre del modulo",
+  },
+};
+
+const WORLD_ANCHOR_ORDER: WorldAnchorId[] = [
+  "startPlatform",
+  "flowerPlatform",
+  "officePlatform",
+  "upperMonument",
+  "finalMonument",
+];
+
+const WORLD_ZONES: Record<WorldAnchorId, WorldZoneDefinition> = {
+  startPlatform: {
+    id: "startPlatform",
+    anchor: WORLD_ANCHORS.startPlatform,
+    focus: { scale: 1.28, translateX: "13%", translateY: "-4%" },
+  },
+  flowerPlatform: {
+    id: "flowerPlatform",
+    anchor: WORLD_ANCHORS.flowerPlatform,
+    focus: { scale: 1.3, translateX: "3%", translateY: "-1%" },
+  },
+  officePlatform: {
+    id: "officePlatform",
+    anchor: WORLD_ANCHORS.officePlatform,
+    focus: { scale: 1.28, translateX: "-1%", translateY: "14%" },
+  },
+  upperMonument: {
+    id: "upperMonument",
+    anchor: WORLD_ANCHORS.upperMonument,
+    focus: { scale: 1.26, translateX: "-12%", translateY: "12%" },
+  },
+  finalMonument: {
+    id: "finalMonument",
+    anchor: WORLD_ANCHORS.finalMonument,
+    focus: { scale: 1.26, translateX: "-14%", translateY: "-5%" },
+  },
+};
+
+const WORLD_CLUSTER_OFFSETS = [
+  { x: 0, y: 0 },
+  { x: 4.2, y: -3.8 },
+  { x: -4.5, y: 4.4 },
+  { x: 6.2, y: 4.6 },
+  { x: -5.8, y: -4.2 },
+  { x: 0.8, y: 6.6 },
+] as const;
+
+const WORLD_OBJECTS = [
+  {
+    id: "start-platform",
+    label: "Inicio del recorrido",
+    x: 20,
+    y: 72,
+    width: 19,
+    height: 15,
+    effect: "blue",
+  },
+  {
+    id: "central-flower",
+    label: "Flor central",
+    x: 45,
+    y: 56,
+    width: 15,
+    height: 17,
+    effect: "flower",
+  },
+  {
+    id: "upper-office",
+    label: "Explorar espacio",
+    x: 50,
+    y: 27,
+    width: 20,
+    height: 18,
+    effect: "cyan",
+  },
+  {
+    id: "upper-monument",
+    label: "Monumento",
+    x: 73,
+    y: 30,
+    width: 14,
+    height: 14,
+    effect: "warm",
+  },
+  {
+    id: "water-path",
+    label: "Sendero",
+    x: 59,
+    y: 50,
+    width: 28,
+    height: 42,
+    effect: "water",
+  },
+] as const;
 
 /** Secuencia fija por módulo: intro → práctica → lectura → actividad. */
 const ICONOS_LECCION: LucideIcon[] = [BookOpen, Play, FileText, Wrench];
@@ -285,7 +488,7 @@ function elementoNodoRoadmap(nodoId: string): HTMLElement | null {
       : (value: string) => value.replace(/"/g, '\\"');
   const elementos = Array.from(
     document.querySelectorAll<HTMLElement>(
-      `[data-roadmap-node="${escapeCss(nodoId)}"],[data-roadmap-node-id="${escapeCss(nodoId)}"]`,
+      `[data-roadmap-station="${escapeCss(nodoId)}"],[data-roadmap-node="${escapeCss(nodoId)}"],[data-roadmap-node-id="${escapeCss(nodoId)}"]`,
     ),
   );
 
@@ -353,6 +556,29 @@ function puntoCentroElemento(elemento: HTMLElement): PuntoAvatarRoadmap {
   };
 }
 
+function elementoSuficientementeVisible(elemento: HTMLElement): boolean {
+  const rect = elemento.getBoundingClientRect();
+  const altoViewport = window.innerHeight || document.documentElement.clientHeight;
+  const margen = Math.min(120, altoViewport * 0.16);
+
+  return rect.top < altoViewport - margen && rect.bottom > margen;
+}
+
+async function centrarContenedorRoadmap(
+  elemento: HTMLElement | null,
+  reducido: boolean,
+): Promise<void> {
+  if (!elemento || elementoSuficientementeVisible(elemento)) return;
+
+  elemento.scrollIntoView({
+    behavior: reducido ? "auto" : "smooth",
+    block: "center",
+    inline: "nearest",
+  });
+
+  await esperarFinScroll(elemento, reducido, reducido ? 0 : 650);
+}
+
 function limpiarParametrosRoadmap(parametros: string[]): void {
   if (typeof window === "undefined") return;
 
@@ -407,6 +633,40 @@ function cantidadLecciones(nodos: NodoRuta[]): number {
 
 function indicePrimeraEvaluacion(nodos: NodoRuta[]): number {
   return nodos.findIndex((nodo) => nodo.tipo === "evaluacion");
+}
+
+/**
+ * Distribuye los nodos del módulo en las 5 zonas del mundo según su
+ * posición global dentro del módulo (no según su tipo). Antes todas las
+ * evaluaciones caían en el mismo monumento final y las lecciones se
+ * repartían solo entre 3 zonas, lo que amontonaba las estaciones en
+ * cuanto un módulo tenía varias evaluaciones. Ahora el avance 0→1 a lo
+ * largo del módulo completo se reparte parejo entre las 5 zonas.
+ */
+function anchorIdParaNodoMundo(
+  nodo: NodoRuta,
+  indice: number,
+  nodos: NodoRuta[],
+): WorldAnchorId {
+  if (indice === 0) return "startPlatform";
+  if (indice === nodos.length - 1) return "finalMonument";
+
+  const ultimoIndice = Math.max(nodos.length - 1, 1);
+  const avance = indice / ultimoIndice;
+
+  if (avance <= 0.28) return "flowerPlatform";
+  if (avance <= 0.56) return "officePlatform";
+  if (avance <= 0.82) return "upperMonument";
+  return "finalMonument";
+}
+
+function anchorIdDeNodoPlano(
+  grupos: GrupoRuta[],
+  nodoPlano: NodoPlanoRoadmap | null | undefined,
+): WorldAnchorId | null {
+  if (!nodoPlano) return null;
+  const nodosGrupo = grupos[nodoPlano.indiceGrupo]?.nodos ?? [];
+  return anchorIdParaNodoMundo(nodoPlano.nodo, nodoPlano.indiceNodo, nodosGrupo);
 }
 
 function assetParaNodo(nodos: NodoRuta[], indice: number): {
@@ -819,7 +1079,7 @@ function AvatarRoadmap({ variant }: { variant: VarianteRoadmap }) {
       width={72}
       height={72}
       className={cn(
-        "pointer-events-none absolute z-40 object-contain drop-shadow-[0_14px_22px_rgba(6,17,32,0.22)]",
+        "roadmap-station-avatar pointer-events-none absolute z-40 object-contain drop-shadow-[0_14px_22px_rgba(6,17,32,0.22)]",
         variant === "mobile" ? "-right-8 -top-9 size-14" : "-right-12 -top-9 size-16",
       )}
     />
@@ -1193,6 +1453,1076 @@ function CierreModulo({
   );
 }
 
+interface LayoutNodoMundo {
+  nodo: NodoRuta;
+  indice: number;
+  indiceLeccion: number;
+  anchorId: WorldAnchorId;
+  x: number;
+  y: number;
+  placement: PlacementMundo;
+  zoneLabel: string;
+}
+
+interface WorldZone {
+  id: WorldAnchorId;
+  anchor: WorldAnchor;
+  nodeIds: string[];
+}
+
+function crearZonasMundo(nodos: NodoRuta[]): WorldZone[] {
+  const zonas = new Map<WorldAnchorId, string[]>(
+    WORLD_ANCHOR_ORDER.map((anchorId) => [anchorId, []]),
+  );
+
+  nodos.forEach((nodo, indice) => {
+    const anchorId = anchorIdParaNodoMundo(nodo, indice, nodos);
+    zonas.get(anchorId)?.push(nodo.id);
+  });
+
+  return WORLD_ANCHOR_ORDER.map((anchorId) => ({
+    id: anchorId,
+    anchor: WORLD_ANCHORS[anchorId],
+    nodeIds: zonas.get(anchorId) ?? [],
+  }));
+}
+
+function layoutNodosMundo(nodos: NodoRuta[]): LayoutNodoMundo[] {
+  const zonas = crearZonasMundo(nodos);
+  const contadorPorZona = new Map<WorldAnchorId, number>();
+
+  return nodos.map((nodo, indice) => {
+    const anchorId = anchorIdParaNodoMundo(nodo, indice, nodos);
+    const anchor = WORLD_ANCHORS[anchorId];
+    const indiceZona = contadorPorZona.get(anchorId) ?? 0;
+    const totalZona =
+      zonas.find((zona) => zona.id === anchorId)?.nodeIds.length ?? 1;
+    const offset =
+      totalZona <= 1
+        ? WORLD_CLUSTER_OFFSETS[0]!
+        : WORLD_CLUSTER_OFFSETS[indiceZona % WORLD_CLUSTER_OFFSETS.length]!;
+
+    contadorPorZona.set(anchorId, indiceZona + 1);
+
+    return {
+      nodo,
+      indice,
+      indiceLeccion: indiceLeccionEnNodo(nodos, indice),
+      anchorId,
+      x: anchor.x + offset.x,
+      y: anchor.y + offset.y,
+      placement: anchor.placement,
+      zoneLabel: anchor.label,
+    };
+  });
+}
+
+function CaminoRoadmapMundo({
+  layouts,
+  indiceModulo,
+  nodoActivoId,
+}: {
+  layouts: LayoutNodoMundo[];
+  indiceModulo: number;
+  nodoActivoId: string | null;
+}) {
+  if (layouts.length < 2) return null;
+
+  const colorModulo = colorModuloPorIndice(indiceModulo);
+  const points = layouts.map((layout) => `${layout.x},${layout.y}`).join(" ");
+  const indiceActivo = nodoActivoId
+    ? layouts.findIndex((layout) => layout.nodo.id === nodoActivoId)
+    : -1;
+  const segmentoActivo =
+    indiceActivo > 0
+      ? `${layouts[indiceActivo - 1]!.x},${layouts[indiceActivo - 1]!.y} ${layouts[indiceActivo]!.x},${layouts[indiceActivo]!.y}`
+      : null;
+  const gradId = `roadmap-world-track-${indiceModulo}`;
+
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-20 overflow-visible"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#2FB9A5" />
+          <stop offset="54%" stopColor={colorModulo.final} />
+          <stop offset="100%" stopColor="#0454BD" />
+        </linearGradient>
+      </defs>
+      <polyline className="roadmap-world-track-shadow" points={points} />
+      <polyline className="roadmap-world-track-board" points={points} />
+      <polyline className="roadmap-world-track-dashes" points={points} />
+      <polyline className="roadmap-world-track-core" points={points} stroke={`url(#${gradId})`} />
+      {segmentoActivo && (
+        <polyline className="roadmap-world-track-active" points={segmentoActivo} />
+      )}
+    </svg>
+  );
+}
+
+function WorldBackground({ src }: { src: string }) {
+  const esVideo = src.endsWith(".mp4");
+
+  return (
+    <>
+      <div className="roadmap-world-bg-layer absolute inset-0 z-0">
+        {esVideo ? (
+          <video
+            src={src}
+            autoPlay
+            loop
+            muted
+            playsInline
+            aria-hidden="true"
+            className="roadmap-world-bg size-full object-cover object-center"
+          />
+        ) : (
+          <Image
+            src={src}
+            alt=""
+            fill
+            priority
+            quality={90}
+            sizes="100vw"
+            className="roadmap-world-bg object-cover object-center"
+          />
+        )}
+      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-[46%] bg-[linear-gradient(90deg,rgba(245,248,248,0.72),rgba(245,248,248,0.24)_58%,transparent)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-36 bg-[linear-gradient(180deg,rgba(245,248,248,0.58),transparent)]"
+      />
+    </>
+  );
+}
+
+function WorldInteractionLayer({
+  activeObjectId,
+  exploreMode,
+  onObjectActivate,
+}: {
+  activeObjectId: string | null;
+  exploreMode: boolean;
+  onObjectActivate: (objectId: string) => void;
+}) {
+  return (
+    <>
+      <span aria-hidden="true" className="roadmap-world-drift roadmap-world-drift-1" />
+      <span aria-hidden="true" className="roadmap-world-drift roadmap-world-drift-2" />
+      <span aria-hidden="true" className="roadmap-world-drift roadmap-world-drift-3" />
+      {WORLD_OBJECTS.map((object) => (
+        <button
+          key={object.id}
+          type="button"
+          data-world-object={object.id}
+          aria-label={object.label}
+          onClick={() => onObjectActivate(object.id)}
+          className={cn(
+            "roadmap-world-object-hotspot absolute z-20 cursor-pointer rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+            `roadmap-world-object-${object.effect}`,
+            activeObjectId === object.id && "roadmap-world-object-active",
+            exploreMode && "roadmap-world-object-explore",
+          )}
+          style={{
+            left: `${object.x}%`,
+            top: `${object.y}%`,
+            width: `${object.width}%`,
+            height: `${object.height}%`,
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <span className="roadmap-world-object-label pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/80 bg-white/86 px-3 py-1 text-[11px] font-semibold text-slate-800 opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-200">
+            {object.label}
+          </span>
+          {activeObjectId === object.id && (
+            <span aria-hidden="true" className="roadmap-world-object-effect" />
+          )}
+        </button>
+      ))}
+    </>
+  );
+}
+
+function WorldCamera2D({
+  worldFocus,
+  children,
+}: {
+  worldFocus: WorldFocus;
+  children: React.ReactNode;
+}) {
+  const zona = worldFocus === "overview" ? null : WORLD_ZONES[worldFocus];
+
+  return (
+    <div
+      className="world-camera absolute inset-0"
+      data-world-focus={worldFocus}
+      style={
+        {
+          "--world-x": zona?.focus.translateX ?? "0%",
+          "--world-y": zona?.focus.translateY ?? "0%",
+          "--world-scale": zona?.focus.scale ?? 1,
+          "--world-origin-x": zona ? `${zona.anchor.x}%` : "50%",
+          "--world-origin-y": zona ? `${zona.anchor.y}%` : "50%",
+        } as CSSProperties
+      }
+    >
+      {children}
+    </div>
+  );
+}
+
+function estadoZonaMundo(
+  zona: WorldZone,
+  grupo: GrupoRuta,
+  nodoActivoGlobalId: string | null,
+): EstadoEstacion {
+  const nodosZona = zona.nodeIds
+    .map((nodeId) => grupo.nodos.find((nodo) => nodo.id === nodeId))
+    .filter((nodo): nodo is NodoRuta => Boolean(nodo));
+
+  if (nodosZona.length === 0) return "bloqueado";
+  if (nodosZona.every((nodo) => nodo.completado)) return "completado";
+  if (nodoActivoGlobalId && nodosZona.some((nodo) => nodo.id === nodoActivoGlobalId)) {
+    return "activo";
+  }
+  if (nodosZona.every((nodo) => nodo.bloqueado)) return "bloqueado";
+  return "pendiente";
+}
+
+function WorldZoneLayer({
+  zonas,
+  grupo,
+  worldFocus,
+  nodoActivoGlobalId,
+  onFocusZone,
+}: {
+  zonas: WorldZone[];
+  grupo: GrupoRuta;
+  worldFocus: WorldFocus;
+  nodoActivoGlobalId: string | null;
+  onFocusZone: (focus: WorldFocus) => void;
+}) {
+  return (
+    <div className="absolute inset-x-0 bottom-20 top-24 z-30 sm:bottom-16 sm:top-24">
+      {zonas.map((zona, indiceZona) => {
+        if (zona.nodeIds.length === 0) return null;
+
+        const estado = estadoZonaMundo(zona, grupo, nodoActivoGlobalId);
+        const completados = zona.nodeIds.filter((nodeId) =>
+          grupo.nodos.find((nodo) => nodo.id === nodeId && nodo.completado),
+        ).length;
+        const focoActual = worldFocus === zona.id;
+        const atenuada = worldFocus !== "overview" && !focoActual;
+        const zonaBloqueada = estado === "bloqueado";
+
+        return (
+          <button
+            key={zona.id}
+            type="button"
+            disabled={zonaBloqueada}
+            data-world-zone={zona.id}
+            data-world-object={`zone-${zona.id}`}
+            aria-label={`${WORLD_ZONES[zona.id].anchor.label}: ${completados}/${zona.nodeIds.length} contenidos`}
+            onClick={() => onFocusZone(zona.id)}
+            className={cn(
+              "roadmap-world-zone absolute z-30 flex flex-col items-center gap-1 rounded-full transition-[filter,opacity,transform] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-4 focus-visible:ring-offset-white",
+              !zonaBloqueada && "cursor-pointer hover:-translate-y-0.5 hover:scale-[1.02]",
+              atenuada && "opacity-35",
+              focoActual && "roadmap-world-zone-focused",
+              estado === "activo" && "roadmap-world-zone-active",
+              zonaBloqueada && "cursor-not-allowed opacity-45",
+            )}
+            style={{
+              left: `${zona.anchor.x}%`,
+              top: `${zona.anchor.y}%`,
+              transform: "translate(-50%, -50%)",
+              animationDelay: `${indiceZona * 70}ms`,
+            }}
+          >
+            <span
+              className={cn(
+                "relative grid size-14 place-items-center rounded-full border bg-white/80 text-sm font-bold text-slate-700 shadow-[0_12px_28px_rgba(6,17,32,0.13)] backdrop-blur-sm transition-[background-color,border-color,box-shadow,color] duration-300",
+                estado === "completado" && "border-emerald-300 bg-emerald-500 text-white",
+                estado === "activo" && "border-[#22D3EE] bg-[#071B30] text-white shadow-[0_0_22px_rgba(34,211,238,0.42)]",
+                estado === "bloqueado" && "border-slate-200 bg-slate-100 text-slate-400",
+              )}
+            >
+              {estado === "completado" ? (
+                <Check className="size-5" aria-hidden="true" />
+              ) : estado === "bloqueado" ? (
+                <Lock className="size-5" aria-hidden="true" />
+              ) : (
+                `${completados}/${zona.nodeIds.length}`
+              )}
+            </span>
+            <span className="roadmap-world-zone-label rounded-full border border-white/80 bg-white/84 px-3 py-1 text-[11px] font-bold text-slate-800 shadow-sm backdrop-blur-sm">
+              {WORLD_ZONES[zona.id].anchor.label}
+            </span>
+            {estado === "activo" && worldFocus === "overview" && (
+              <span className="mt-0.5 rounded-full bg-[#071B30]/88 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-sm">
+                Estas aqui
+              </span>
+            )}
+            {estado === "activo" && worldFocus === "overview" && <AvatarRoadmap variant="desktop" />}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function NavegacionModulosMundo({
+  grupos,
+  indicesDisponibles,
+  indiceModuloVisible,
+  onSeleccionarModulo,
+}: {
+  grupos: GrupoRuta[];
+  indicesDisponibles: number[];
+  indiceModuloVisible: number;
+  onSeleccionarModulo: (indiceModulo: number) => void;
+}) {
+  if (indicesDisponibles.length <= 1) return null;
+
+  return (
+    <nav
+      aria-label="Navegacion de modulos"
+      className="roadmap-world-hud absolute bottom-20 right-4 z-40 max-w-[calc(100%-2rem)] rounded-2xl border border-white/70 bg-white/78 p-3 shadow-[0_18px_45px_rgba(6,17,32,0.12)] backdrop-blur-md dark:border-white/10 dark:bg-[#071B30]/72 sm:bottom-24 sm:right-6"
+    >
+      <div className="mb-2 flex items-center justify-between gap-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
+        <span>Modulos</span>
+        <span>{indiceModuloVisible + 1}/{grupos.length}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        {indicesDisponibles.map((indiceModulo) => {
+          const grupo = grupos[indiceModulo]!;
+          const progreso = calcularProgresoModulo(grupo.nodos);
+          const visible = indiceModulo === indiceModuloVisible;
+          const colorModulo = colorModuloPorIndice(indiceModulo);
+
+          return (
+            <button
+              key={grupo.moduloId}
+              type="button"
+              aria-current={visible ? "step" : undefined}
+              aria-label={`Ver modulo ${indiceModulo + 1}`}
+              onClick={() => onSeleccionarModulo(indiceModulo)}
+              className={cn(
+                "grid size-9 place-items-center rounded-full border text-xs font-bold transition-[background-color,border-color,box-shadow,transform] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                visible
+                  ? "scale-105 border-[#22D3EE] bg-[#071B30] text-white shadow-[0_0_18px_rgba(34,211,238,0.36)]"
+                  : "border-slate-200 bg-white text-slate-500 shadow-sm hover:scale-105 dark:border-white/15 dark:bg-white/10 dark:text-white",
+              )}
+              style={
+                !visible && progreso.completo
+                  ? {
+                      borderColor: `${colorModulo.final}cc`,
+                      background: `linear-gradient(135deg, ${colorModulo.inicio}, ${colorModulo.final})`,
+                      color: "#fff",
+                    }
+                  : undefined
+              }
+            >
+              {progreso.completo ? <Check className="size-4" aria-hidden="true" /> : indiceModulo + 1}
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
+function claseCardMundo(placement: PlacementMundo): string {
+  if (placement === "left") return "right-[calc(100%+20px)] top-1/2 -translate-y-1/2";
+  if (placement === "top") return "bottom-[calc(100%+18px)] left-1/2 -translate-x-1/2";
+  if (placement === "bottom") return "left-1/2 top-[calc(100%+18px)] -translate-x-1/2";
+  return "left-[calc(100%+20px)] top-1/2 -translate-y-1/2";
+}
+
+function etiquetaEstadoEstacion(estado: EstadoEstacion): string {
+  if (estado === "completado") return "Completada";
+  if (estado === "activo") return "Activa";
+  if (estado === "bloqueado") return "Bloqueada";
+  return "Disponible";
+}
+
+function EstacionMundo({
+  layout,
+  grupo,
+  indiceModulo,
+  nodoActivoGlobalId,
+  nodoTransicionId,
+  nodoDestinoId,
+  faseTransicion,
+  selectedStationId,
+  onSelectStation,
+}: {
+  layout: LayoutNodoMundo;
+  grupo: GrupoRuta;
+  indiceModulo: number;
+  nodoActivoGlobalId: string | null;
+  nodoTransicionId: string | null;
+  nodoDestinoId: string | null;
+  faseTransicion: FaseTransicionRoadmap;
+  selectedStationId: string | null;
+  onSelectStation: (stationId: string | null) => void;
+}) {
+  const router = useRouter();
+  const estadoForzado = estadoVisualTransicion(
+    layout.nodo.id,
+    nodoTransicionId,
+    nodoDestinoId,
+    faseTransicion,
+  );
+  const animandoCompletado =
+    layout.nodo.id === nodoTransicionId && faseTransicion === "completing";
+  const sosteniendoCompletado =
+    layout.nodo.id === nodoTransicionId && faseTransicion === "holding";
+  const llegandoDestino = layout.nodo.id === nodoDestinoId && faseTransicion === "arrived";
+  const transicionActiva = faseTransicion !== "idle";
+  const esNodoActivoVisual =
+    (!transicionActiva && layout.nodo.id === nodoActivoGlobalId) || estadoForzado === "activo";
+  const mostrarAvatar =
+    (!transicionActiva && layout.nodo.id === nodoActivoGlobalId) ||
+    (faseTransicion === "arrived" && layout.nodo.id === nodoDestinoId);
+  const nodoEtiqueta = nodoParaFaseVisual(layout.nodo, estadoForzado);
+  const estado = estadoForzado ?? estadoEstacion(nodoEtiqueta, esNodoActivoVisual);
+  const selected = selectedStationId === layout.nodo.id;
+  const mostrarCard = selected;
+  const mostrarEtiquetaActiva = esNodoActivoVisual && !selected;
+
+  function seleccionarEstacion() {
+    if (selected && !layout.nodo.bloqueado) {
+      router.push(layout.nodo.href);
+      return;
+    }
+
+    onSelectStation(layout.nodo.id);
+  }
+
+  return (
+    <div
+      id={`roadmap-world-node-${layout.nodo.id}`}
+      data-roadmap-node-id={layout.nodo.id}
+      data-roadmap-node={layout.nodo.id}
+      data-roadmap-station={layout.nodo.id}
+      data-world-object={
+        layout.indice === 0
+          ? "station-room"
+          : layout.indice === Math.floor((grupo.nodos.length - 1) / 2)
+            ? "station-disc-platform"
+            : layout.indice === grupo.nodos.length - 1
+              ? "station-final-platform"
+              : "station-platform"
+      }
+      className={cn(
+        "roadmap-world-station group absolute z-40 overflow-visible",
+        animandoCompletado && "roadmap-node-just-completed",
+        sosteniendoCompletado && "roadmap-node-completed-hold",
+        llegandoDestino && "roadmap-node-next-highlight",
+        selected && "z-[60]",
+      )}
+      style={{
+        left: `${layout.x}%`,
+        top: `${layout.y}%`,
+        width: ANILLO,
+        height: ANILLO,
+        transform: "translate(-50%, -50%)",
+        animationDelay: `${layout.indice * 60}ms`,
+      }}
+    >
+      <button
+        type="button"
+        aria-pressed={selected}
+        aria-label={`${etiquetaEstadoEstacion(estado)}: ${layout.nodo.titulo}`}
+        onClick={seleccionarEstacion}
+        onFocus={() => onSelectStation(layout.nodo.id)}
+        className={cn(
+          "relative z-30 block rounded-full transition-[filter,transform] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-4 focus-visible:ring-offset-white",
+          layout.nodo.bloqueado ? "cursor-not-allowed opacity-[0.82]" : "cursor-pointer",
+          "hover:scale-105 hover:drop-shadow-[0_0_18px_rgba(45,212,191,0.34)]",
+        )}
+      >
+        <NucleoEstacion
+          nodo={layout.nodo}
+          variant="desktop"
+          indiceLeccion={layout.indiceLeccion}
+          indiceEnModulo={layout.indice}
+          totalModulo={grupo.nodos.length}
+          indiceModulo={indiceModulo}
+          esActivo={esNodoActivoVisual}
+          estadoVisualForzado={estadoForzado}
+        />
+      </button>
+      {mostrarAvatar && <AvatarRoadmap variant="desktop" />}
+
+      {mostrarEtiquetaActiva && (
+        <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.3rem)] z-50 w-max max-w-[190px] -translate-x-1/2 rounded-full border border-[#22D3EE]/35 bg-[#071B30]/86 px-3 py-1.5 text-center text-[11px] font-bold leading-tight text-white shadow-[0_10px_26px_rgba(6,17,32,0.16)] backdrop-blur-sm">
+          Estas aqui
+        </span>
+      )}
+
+      <span
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute left-1/2 top-[calc(100%+0.45rem)] z-40 hidden w-max max-w-[180px] -translate-x-1/2 rounded-full border border-white/80 bg-white/86 px-3 py-1.5 text-center text-[11px] font-semibold leading-tight text-slate-800 opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 lg:block",
+          mostrarEtiquetaActiva && "hidden",
+        )}
+      >
+        {layout.zoneLabel}
+      </span>
+
+      {mostrarCard && (
+        <div
+          className={cn(
+            "roadmap-world-card absolute z-[70] w-[min(260px,76vw)] rounded-2xl border border-white/80 bg-white/90 p-4 text-left shadow-[0_18px_45px_rgba(6,17,32,0.16)] backdrop-blur-md dark:border-white/10 dark:bg-[#071B30]/86",
+            claseCardMundo(layout.placement),
+          )}
+        >
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <span className="grid size-7 place-items-center rounded-full bg-[#e9f8f5] text-xs font-bold text-[#087c72]">
+              {layout.indice + 1}
+            </span>
+            <span
+              className={cn(
+                "rounded-full px-2 py-1 text-[11px] font-semibold",
+                estado === "completado" && "bg-emerald-50 text-emerald-700",
+                estado === "activo" && "bg-cyan-50 text-[#087c72]",
+                estado === "pendiente" && "bg-slate-100 text-slate-600",
+                estado === "bloqueado" && "bg-slate-100 text-slate-500",
+              )}
+            >
+              {etiquetaEstadoEstacion(estado)}
+            </span>
+          </div>
+          <h3 className="text-sm font-bold leading-snug text-slate-950 dark:text-white">
+            {layout.nodo.titulo}
+          </h3>
+          <p className="mt-2 text-xs font-medium text-slate-500 dark:text-slate-300">
+            {layout.zoneLabel}
+          </p>
+          {layout.nodo.bloqueado ? (
+            <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500">
+              <Lock className="size-3.5" aria-hidden="true" />
+              Bloqueada
+            </span>
+          ) : (
+            <Link
+              href={layout.nodo.href}
+              className="mt-4 inline-flex w-full items-center justify-between rounded-full bg-[#071B30] px-4 py-2.5 text-sm font-bold text-white transition-[background-color,transform] duration-300 hover:-translate-y-0.5 hover:bg-[#0E3A5A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            >
+              Explorar
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function WorldStationsLayer({
+  layouts,
+  grupo,
+  indiceModulo,
+  nodoActivoGlobalId,
+  nodoTransicionId,
+  nodoDestinoId,
+  faseTransicion,
+  selectedStationId,
+  onSelectStation,
+}: {
+  layouts: LayoutNodoMundo[];
+  grupo: GrupoRuta;
+  indiceModulo: number;
+  nodoActivoGlobalId: string | null;
+  nodoTransicionId: string | null;
+  nodoDestinoId: string | null;
+  faseTransicion: FaseTransicionRoadmap;
+  selectedStationId: string | null;
+  onSelectStation: (stationId: string | null) => void;
+}) {
+  const nodoActivoSegmentoId =
+    faseTransicion === "arrived"
+      ? nodoDestinoId
+      : faseTransicion === "idle"
+        ? nodoActivoGlobalId
+        : null;
+
+  return (
+    <div className="absolute inset-x-0 bottom-20 top-24 z-30 sm:bottom-16 sm:top-24">
+      <CaminoRoadmapMundo
+        layouts={layouts}
+        indiceModulo={indiceModulo}
+        nodoActivoId={nodoActivoSegmentoId}
+      />
+      {layouts.map((layout) => (
+        <EstacionMundo
+          key={layout.nodo.id}
+          layout={layout}
+          grupo={grupo}
+          indiceModulo={indiceModulo}
+          nodoActivoGlobalId={nodoActivoGlobalId}
+          nodoTransicionId={nodoTransicionId}
+          nodoDestinoId={nodoDestinoId}
+          faseTransicion={faseTransicion}
+          selectedStationId={selectedStationId}
+          onSelectStation={onSelectStation}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ChipHeroInmersivo({ icono: Icono, valor }: { icono: LucideIcon; valor: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:border-white/15 dark:bg-white/10 dark:text-slate-200">
+      <Icono className="size-3.5 shrink-0" aria-hidden="true" />
+      {valor}
+    </span>
+  );
+}
+
+/**
+ * Panel fusionado del hero del curso + contexto del módulo actual. Vive
+ * flotando sobre el fondo del mundo inmersivo en vez de la sección de hero
+ * aparte, para que el fondo ocupe toda la pantalla.
+ */
+function PanelCursoInmersivo({
+  hero,
+  grupo,
+  indiceModulo,
+  progresoModulo,
+  exploreMode,
+  onToggleExplore,
+}: {
+  hero?: HeroInmersivoRoadmap;
+  grupo: GrupoRuta;
+  indiceModulo: number;
+  progresoModulo: ProgresoModulo;
+  exploreMode: boolean;
+  onToggleExplore: () => void;
+}) {
+  const colorModulo = colorModuloPorIndice(indiceModulo);
+  const tituloModulo = grupo.titulo.includes(":")
+    ? grupo.titulo.split(":").slice(1).join(":").trim()
+    : grupo.titulo;
+  const modulosTexto =
+    hero && hero.cantidadModulos > 0
+      ? `${hero.cantidadModulos} ${hero.cantidadModulos === 1 ? "módulo" : "módulos"}`
+      : null;
+
+  return (
+    <div
+      className={cn(
+        "roadmap-world-hud absolute left-4 top-4 z-50 w-[min(340px,calc(100%-2rem))] rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_18px_45px_rgba(6,17,32,0.12)] backdrop-blur-md transition-[opacity,transform] duration-300 dark:border-white/10 dark:bg-[#071B30]/72 sm:left-6 sm:top-6 sm:p-5",
+        exploreMode && "scale-[0.94] opacity-[0.58]",
+      )}
+    >
+      {hero ? (
+        <>
+          <span className="inline-flex rounded-full bg-[#071B30] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white dark:bg-[#91DC00] dark:text-[#071B30]">
+            Diplomado
+          </span>
+          <h1 className="mt-2 text-lg font-bold leading-tight text-slate-950 dark:text-white sm:text-xl">
+            {hero.titulo}
+          </h1>
+          {hero.descripcion && (
+            <p className="mt-1.5 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">
+              {hero.descripcion}
+            </p>
+          )}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            <ChipHeroInmersivo
+              icono={Clock3}
+              valor={formatearDuracionHeroInmersivo(hero.duracionEstimadaMin)}
+            />
+            <ChipHeroInmersivo
+              icono={Gauge}
+              valor={ETIQUETA_DIFICULTAD_HERO_INMERSIVO[hero.nivelDificultad]}
+            />
+            {modulosTexto && <ChipHeroInmersivo icono={Layers3} valor={modulosTexto} />}
+          </div>
+          <div className="mt-3">
+            <div
+              aria-hidden="true"
+              className="h-1.5 overflow-hidden rounded-full bg-slate-200/70 shadow-inner dark:bg-white/10"
+            >
+              <div
+                className="h-full rounded-full bg-[linear-gradient(90deg,#2FB9A5,#4FC9B3,#91DC00)] transition-[width] duration-500"
+                style={{ width: `${Math.round(hero.porcentajeAvance)}%` }}
+              />
+            </div>
+            <p className="mt-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+              {Math.round(hero.porcentajeAvance)}% completado en el diplomado
+            </p>
+          </div>
+          <div className="mt-4 border-t border-slate-200/70 pt-3 dark:border-white/10">
+            <div className="flex items-start justify-between gap-4">
+              <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72] dark:text-[#67E8F9]">
+                Módulo {indiceModulo + 1} · {tituloModulo}
+              </p>
+              <span className="shrink-0 rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-bold text-slate-700 shadow-sm dark:bg-white/10 dark:text-white">
+                {progresoModulo.completados}/{progresoModulo.total}
+              </span>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72] dark:text-[#67E8F9]">
+              Modulo {indiceModulo + 1}
+            </p>
+            <h2 className="mt-1 text-base font-bold leading-tight text-slate-950 dark:text-white">
+              {tituloModulo}
+            </h2>
+          </div>
+          <span className="shrink-0 rounded-full bg-white/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm dark:bg-white/10 dark:text-white">
+            {progresoModulo.completados}/{progresoModulo.total}
+          </span>
+        </div>
+      )}
+
+      {!hero && (
+        <div
+          aria-hidden="true"
+          className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200/70 shadow-inner dark:bg-white/10"
+        >
+          <div
+            className="h-full rounded-full transition-[width] duration-500"
+            style={{
+              width: `${progresoModulo.porcentaje}%`,
+              background: progresoModulo.completo
+                ? `linear-gradient(90deg, ${colorModulo.inicio}, ${colorModulo.final})`
+                : "linear-gradient(90deg,#2FB9A5,#4FC9B3,#91DC00)",
+            }}
+          />
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={onToggleExplore}
+        className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#22D3EE]/24 bg-white/76 px-3 py-2 text-xs font-bold text-[#071B30] transition-[background-color,transform] duration-300 hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-white/10 dark:text-white"
+      >
+        <Compass className="size-3.5" aria-hidden="true" />
+        {exploreMode ? "Salir de explorar" : "Explorar mundo"}
+      </button>
+    </div>
+  );
+}
+
+function AvatarUsuarioInmersivo({
+  nombre,
+  exploreMode,
+}: {
+  nombre?: string | null;
+  exploreMode: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "roadmap-world-hud absolute right-4 top-4 z-50 flex items-center gap-2.5 rounded-full border border-white/70 bg-white/82 py-1.5 pl-2 pr-4 shadow-[0_12px_30px_rgba(6,17,32,0.10)] backdrop-blur-md transition-[opacity,transform] duration-300 dark:border-white/10 dark:bg-[#071B30]/72 sm:right-6 sm:top-6",
+        exploreMode && "translate-y-2 opacity-0 pointer-events-none",
+      )}
+    >
+      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#071B30] text-white dark:bg-[#91DC00] dark:text-[#071B30]">
+        <UserRound className="size-4" aria-hidden="true" />
+      </span>
+      <span className="min-w-0 leading-tight">
+        <span className="block max-w-[9rem] truncate text-sm font-bold text-slate-950 dark:text-white">
+          {nombre ?? "Estudiante"}
+        </span>
+        <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-300">
+          Estudiante
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function PistaExploracionInmersiva({ exploreMode }: { exploreMode: boolean }) {
+  return (
+    <div
+      className={cn(
+        "roadmap-world-hud pointer-events-none absolute bottom-4 left-4 z-40 hidden max-w-[230px] rounded-2xl border border-white/70 bg-white/78 px-4 py-3 text-xs font-medium text-slate-600 shadow-[0_12px_30px_rgba(6,17,32,0.08)] backdrop-blur-md dark:border-white/10 dark:bg-[#071B30]/68 dark:text-slate-300 sm:block sm:bottom-6 sm:left-6",
+        exploreMode && "opacity-0",
+      )}
+    >
+      <span className="mb-0.5 block font-bold text-slate-900 dark:text-white">
+        Explora cada estación
+      </span>
+      Pasa el cursor sobre cada punto del mapa para ver más detalles.
+    </div>
+  );
+}
+
+function WorldHudLayer({
+  hero,
+  grupos,
+  grupo,
+  indiceModulo,
+  indicesDisponibles,
+  progresoModulo,
+  siguienteNodo,
+  exploreMode,
+  onToggleExplore,
+  onSeleccionarModulo,
+}: {
+  hero?: HeroInmersivoRoadmap;
+  grupos: GrupoRuta[];
+  grupo: GrupoRuta;
+  indiceModulo: number;
+  indicesDisponibles: number[];
+  progresoModulo: ProgresoModulo;
+  siguienteNodo: { nodo: Pick<NodoRuta, "titulo" | "href">; indiceModulo: number } | null;
+  exploreMode: boolean;
+  onToggleExplore: () => void;
+  onSeleccionarModulo: (indiceModulo: number) => void;
+}) {
+  const cursoCompletadoSinSiguiente = !siguienteNodo && hero?.cursoCompletado;
+
+  return (
+    <>
+      <PanelCursoInmersivo
+        hero={hero}
+        grupo={grupo}
+        indiceModulo={indiceModulo}
+        progresoModulo={progresoModulo}
+        exploreMode={exploreMode}
+        onToggleExplore={onToggleExplore}
+      />
+
+      <AvatarUsuarioInmersivo nombre={hero?.nombreUsuario} exploreMode={exploreMode} />
+
+      <PistaExploracionInmersiva exploreMode={exploreMode} />
+
+      {siguienteNodo && (
+        <Link
+          href={siguienteNodo.nodo.href}
+          className={cn(
+            "roadmap-world-hud group absolute right-4 top-16 z-50 hidden w-[min(310px,calc(100%-2rem))] rounded-2xl border border-white/70 bg-white/78 p-4 shadow-[0_18px_45px_rgba(6,17,32,0.10)] backdrop-blur-md transition-[background-color,opacity,transform] duration-300 hover:-translate-y-0.5 hover:bg-white/90 dark:border-white/10 dark:bg-[#071B30]/68 md:block sm:right-6 sm:top-20",
+            exploreMode && "translate-y-2 opacity-0 pointer-events-none",
+          )}
+        >
+          <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72] dark:text-[#67E8F9]">
+            Continuar
+          </span>
+          <span className="mt-2 flex items-center justify-between gap-3 text-sm font-bold leading-snug text-slate-950 dark:text-white">
+            <span>{siguienteNodo.nodo.titulo}</span>
+            <ArrowRight className="size-4 shrink-0 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+          </span>
+        </Link>
+      )}
+
+      {cursoCompletadoSinSiguiente && (
+        <div
+          className={cn(
+            "roadmap-world-hud absolute right-4 top-16 z-50 hidden w-[min(280px,calc(100%-2rem))] items-center gap-3 rounded-2xl border border-emerald-300/50 bg-white/86 p-4 shadow-[0_18px_45px_rgba(6,17,32,0.10)] backdrop-blur-md dark:border-emerald-300/25 dark:bg-[#071B30]/72 md:flex sm:right-6 sm:top-20",
+            exploreMode && "translate-y-2 opacity-0 pointer-events-none",
+          )}
+        >
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-emerald-500 text-white">
+            <Check className="size-4" aria-hidden="true" />
+          </span>
+          <span className="text-sm font-bold text-slate-950 dark:text-white">
+            Diplomado completado
+          </span>
+        </div>
+      )}
+
+      <NavegacionModulosMundo
+        grupos={grupos}
+        indicesDisponibles={indicesDisponibles}
+        indiceModuloVisible={indiceModulo}
+        onSeleccionarModulo={onSeleccionarModulo}
+      />
+    </>
+  );
+}
+
+function RoadmapInmersivoExperimental({
+  hero,
+  grupos,
+  grupo,
+  cursoTitulo,
+  indiceModulo,
+  indicesDisponibles,
+  progresoModulo,
+  esUltimoModulo,
+  indiceModuloDestino,
+  nodoActivoGlobalId,
+  nodoTransicionId,
+  nodoDestinoId,
+  faseTransicion,
+  moduloEnCambio,
+  onSeleccionarModulo,
+}: {
+  hero?: HeroInmersivoRoadmap;
+  grupos: GrupoRuta[];
+  grupo: GrupoRuta;
+  cursoTitulo?: string;
+  indiceModulo: number;
+  indicesDisponibles: number[];
+  progresoModulo: ProgresoModulo;
+  esUltimoModulo: boolean;
+  indiceModuloDestino: number | null;
+  nodoActivoGlobalId: string | null;
+  nodoTransicionId: string | null;
+  nodoDestinoId: string | null;
+  faseTransicion: FaseTransicionRoadmap;
+  moduloEnCambio: boolean;
+  onSeleccionarModulo: (indiceModulo: number) => void;
+}) {
+  const layouts = layoutNodosMundo(grupo.nodos);
+  const fondoModulo = obtenerFondoModuloInmersivo(indiceModulo, esUltimoModulo);
+  const siguienteNodo = obtenerSiguienteNodoRoadmap(grupos);
+  const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
+  const [exploreMode, setExploreMode] = useState(false);
+  const [activeObjectId, setActiveObjectId] = useState<string | null>(null);
+  const [parallax, setParallax] = useState({ x: 0, y: 0 });
+  const [movimientoReducido, setMovimientoReducido] = useState(false);
+  const parallaxFrameRef = useRef<number | null>(null);
+  const parallaxTargetRef = useRef({ x: 0, y: 0 });
+  const activeObjectTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setMovimientoReducido(prefiereMovimientoReducido());
+  }, []);
+
+  useEffect(() => {
+    const nodosModulo = new Set(grupo.nodos.map((nodo) => nodo.id));
+    setSelectedStationId((actual) => (actual && nodosModulo.has(actual) ? actual : null));
+    setActiveObjectId(null);
+  }, [grupo.moduloId, grupo.nodos]);
+
+  useEffect(() => {
+    return () => {
+      if (parallaxFrameRef.current !== null) {
+        window.cancelAnimationFrame(parallaxFrameRef.current);
+      }
+      if (activeObjectTimeoutRef.current !== null) {
+        window.clearTimeout(activeObjectTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  function aplicarParallax(x: number, y: number) {
+    parallaxTargetRef.current = { x, y };
+
+    if (parallaxFrameRef.current !== null) return;
+
+    parallaxFrameRef.current = window.requestAnimationFrame(() => {
+      parallaxFrameRef.current = null;
+      setParallax(parallaxTargetRef.current);
+    });
+  }
+
+  function actualizarParallax(event: ReactPointerEvent<HTMLDivElement>) {
+    if (movimientoReducido || event.pointerType !== "mouse") return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 16;
+    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 12;
+    aplicarParallax(x, y);
+  }
+
+  function resetearParallax() {
+    aplicarParallax(0, 0);
+  }
+
+  function activarObjetoMundo(objectId: string) {
+    setActiveObjectId(objectId);
+
+    if (activeObjectTimeoutRef.current !== null) {
+      window.clearTimeout(activeObjectTimeoutRef.current);
+    }
+
+    activeObjectTimeoutRef.current = window.setTimeout(() => {
+      setActiveObjectId((actual) => (actual === objectId ? null : actual));
+      activeObjectTimeoutRef.current = null;
+    }, 950);
+  }
+
+  function limpiarSeleccion(event: ReactPointerEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+    if (target.closest("[data-roadmap-station], [data-world-object], a, button")) return;
+    setSelectedStationId(null);
+  }
+
+  return (
+    <div
+      key={grupo.moduloId}
+      aria-label={`${cursoTitulo ?? "Curso"} - roadmap inmersivo`}
+      className={cn(
+        "roadmap-world relative -mx-5 -mt-5 min-h-dvh w-auto min-w-0 overflow-hidden bg-[#f5fbfd] transition-[opacity,transform] duration-300 dark:bg-[#071B30] sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 xl:-mx-10 xl:-mt-10",
+        exploreMode && "roadmap-world-explore",
+        moduloEnCambio && "translate-y-3 opacity-0",
+      )}
+      onPointerMove={actualizarParallax}
+      onPointerLeave={resetearParallax}
+      onPointerDown={limpiarSeleccion}
+      style={
+        {
+          "--world-parallax-x": `${parallax.x}px`,
+          "--world-parallax-y": `${parallax.y}px`,
+        } as CSSProperties
+      }
+    >
+      <WorldBackground src={fondoModulo} />
+      <WorldInteractionLayer
+        activeObjectId={activeObjectId}
+        exploreMode={exploreMode}
+        onObjectActivate={activarObjetoMundo}
+      />
+      <WorldStationsLayer
+        layouts={layouts}
+        grupo={grupo}
+        indiceModulo={indiceModulo}
+        nodoActivoGlobalId={nodoActivoGlobalId}
+        nodoTransicionId={nodoTransicionId}
+        nodoDestinoId={nodoDestinoId}
+        faseTransicion={faseTransicion}
+        selectedStationId={selectedStationId}
+        onSelectStation={setSelectedStationId}
+      />
+      <WorldHudLayer
+        hero={hero}
+        grupos={grupos}
+        grupo={grupo}
+        indiceModulo={indiceModulo}
+        indicesDisponibles={indicesDisponibles}
+        progresoModulo={progresoModulo}
+        siguienteNodo={siguienteNodo}
+        exploreMode={exploreMode}
+        onToggleExplore={() => setExploreMode((actual) => !actual)}
+        onSeleccionarModulo={onSeleccionarModulo}
+      />
+
+      {progresoModulo.completo && (
+        <div className="absolute bottom-5 left-1/2 z-50 w-[min(390px,calc(100%-2rem))] -translate-x-1/2">
+          <CierreModulo
+            indiceModulo={indiceModulo}
+            esUltimoModulo={esUltimoModulo}
+            indiceModuloDestino={indiceModuloDestino}
+            onContinuarModulo={onSeleccionarModulo}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function FigurasRoadmapDecorativas() {
   return (
     <>
@@ -1293,11 +2623,17 @@ export function RutaAprendizaje({
   grupos,
   focoNodoId,
   transicionNodoId,
+  modoInmersivo = false,
+  cursoTitulo,
+  heroInmersivo,
   legacy = false,
 }: {
   grupos: GrupoRuta[];
   focoNodoId?: string;
   transicionNodoId?: string;
+  modoInmersivo?: boolean;
+  cursoTitulo?: string;
+  heroInmersivo?: HeroInmersivoRoadmap;
   legacy?: boolean;
 }) {
   const nodosPlanos = useMemo(() => aplanarNodosRoadmap(grupos), [grupos]);
@@ -1618,6 +2954,36 @@ export function RutaAprendizaje({
     const progresoModulo = calcularProgresoModulo(grupoVisible.nodos);
     const esUltimoModulo = indiceSeguro === grupos.length - 1;
     const indiceModuloDestino = siguienteIndiceModuloDisponible(grupos, indiceSeguro);
+
+    if (modoInmersivo) {
+      return (
+        <>
+          <AvatarRoadmapEnMovimiento movimiento={movimientoAvatar} />
+          <div
+            ref={inicioModuloRef}
+            className="relative z-10 w-full scroll-mt-20 overflow-x-clip lg:overflow-x-visible"
+          >
+            <RoadmapInmersivoExperimental
+              hero={heroInmersivo}
+              grupos={grupos}
+              grupo={grupoVisible}
+              cursoTitulo={cursoTitulo}
+              indiceModulo={indiceSeguro}
+              indicesDisponibles={indicesDisponibles}
+              progresoModulo={progresoModulo}
+              esUltimoModulo={esUltimoModulo}
+              indiceModuloDestino={indiceModuloDestino}
+              nodoActivoGlobalId={nodoActivoGlobalId}
+              nodoTransicionId={nodoTransicionId}
+              nodoDestinoId={nodoDestinoId}
+              faseTransicion={faseTransicion}
+              moduloEnCambio={moduloEnCambio}
+              onSeleccionarModulo={seleccionarModulo}
+            />
+          </div>
+        </>
+      );
+    }
 
     return (
       <>

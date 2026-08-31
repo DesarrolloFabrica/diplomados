@@ -1,0 +1,21 @@
+C4Container
+    title Diagrama C4 Contenedores - Plataforma Diplomados CUN
+
+    Person(usuario, "Usuario autenticado", "Colaborador, instructor, admin empresa o superadmin.")
+
+    Container_Boundary(c1, "Plataforma Diplomados CUN") {
+        Container(app, "Aplicacion Web Next.js 15", "React 19, TypeScript, Tailwind, shadcn/ui", "UI por rol, middleware JWT, Server Actions y route handlers.")
+        ContainerDb(db, "PostgreSQL 16", "Cloud SQL - esquema plataforma_formacion", "RLS multiempresa, migraciones SQL, Drizzle ORM.")
+    }
+
+    System_Ext(gcs, "Google Cloud Storage", "Bucket privado de videos, PDFs, audios y recursos.")
+    System_Ext(sendgrid, "SendGrid", "Correo transaccional e invitaciones.")
+    System_Ext(gdrive, "Google Drive", "Imagenes de portada de cursos.")
+    System_Ext(cicd, "GitHub Actions", "Pipeline CI/CD hacia Cloud Run.")
+
+    Rel(usuario, app, "Navega y opera", "HTTPS")
+    Rel(app, db, "Lee y escribe datos", "SQL TLS con sesion RLS")
+    Rel(app, gcs, "Sube y descarga archivos", "URLs firmadas v4")
+    Rel(app, sendgrid, "Envia correo", "API REST")
+    Rel(app, gdrive, "Resuelve portadas", "GET /api/imagenes/google-drive")
+    Rel(cicd, app, "Build Docker y deploy", "Artifact Registry y Cloud Run")

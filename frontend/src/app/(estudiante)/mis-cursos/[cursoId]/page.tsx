@@ -15,6 +15,7 @@ import {
   cursoRoadmapCompletado,
   obtenerSiguienteNodoRoadmap,
 } from "@/lib/roadmap/siguiente-nodo";
+import { usarRoadmapInmersivoExperimental } from "@/config/roadmap-inmersivo";
 
 interface CursoColaboradorPageProps {
   params: Promise<{ cursoId: string }>;
@@ -119,6 +120,43 @@ export default async function CursoColaboradorPage({
   const porcentajeAvance = Number(inscripcion.porcentajeAvance);
   const siguienteNodo = obtenerSiguienteNodoRoadmap(grupos);
   const cursoCompletado = cursoRoadmapCompletado(grupos);
+  const roadmapInmersivo = usarRoadmapInmersivoExperimental({
+    cursoId: curso.id,
+    titulo: curso.titulo,
+  });
+
+  // Vista de prueba: cuando el roadmap inmersivo está activo, el hero se
+  // fusiona con el fondo del mundo (VistaRoadmap ya no envuelve nada acá:
+  // ese contenedor solo aporta el fondo decorativo del roadmap "estándar").
+  if (roadmapInmersivo) {
+    return (
+      <div className="min-w-0">
+        {hayContenido ? (
+          <RutaAprendizaje
+            grupos={grupos}
+            focoNodoId={roadmapFocus}
+            transicionNodoId={roadmapTransition}
+            modoInmersivo
+            cursoTitulo={curso.titulo}
+            heroInmersivo={{
+              titulo: curso.titulo,
+              descripcion: curso.descripcion,
+              duracionEstimadaMin: curso.duracionEstimadaMin,
+              nivelDificultad: curso.nivelDificultad,
+              cantidadModulos: modulos.length,
+              porcentajeAvance,
+              cursoCompletado,
+              nombreUsuario: sesion.nombreCompleto,
+            }}
+          />
+        ) : (
+          <p className="px-6 py-10 text-center text-muted-foreground">
+            Este curso todavía no tiene contenido.
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-w-0">
@@ -150,6 +188,8 @@ export default async function CursoColaboradorPage({
               grupos={grupos}
               focoNodoId={roadmapFocus}
               transicionNodoId={roadmapTransition}
+              modoInmersivo={false}
+              cursoTitulo={curso.titulo}
             />
           </VistaRoadmap>
         ) : (

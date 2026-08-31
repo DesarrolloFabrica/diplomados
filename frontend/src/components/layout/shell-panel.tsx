@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, Menu, UserRound, X } from "lucide-react";
+import { Menu, UserRound, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LogoMarcaFormacion } from "@/components/layout/logo-marca-formacion";
 import { NAVEGACION_POR_ROL } from "@/config/navegacion";
 import { ETIQUETA_ROL } from "@backend/config/roles";
 import { CerrarSesion } from "@/components/layout/cerrar-sesion";
@@ -32,9 +33,7 @@ export function ShellPanel({ rol, nombre, children }: ShellPanelProps) {
   const contenidoNav = (
     <>
       <div className="flex items-center gap-2.5 px-2 py-1">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <GraduationCap className="h-5 w-5" />
-        </span>
+        <LogoMarcaFormacion className="size-8 p-1" />
         <div className="leading-tight">
           <p className="font-display text-sm font-semibold">Formación</p>
           <p className="text-xs text-muted-foreground">{ETIQUETA_ROL[rol]}</p>
@@ -100,9 +99,7 @@ export function ShellPanel({ rol, nombre, children }: ShellPanelProps) {
       {/* Cabecera móvil */}
       <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden">
         <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <GraduationCap className="h-4 w-4" />
-          </span>
+          <LogoMarcaFormacion />
           <span className="font-display text-sm font-semibold">Formación</span>
         </div>
         <button
