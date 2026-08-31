@@ -99,7 +99,6 @@ type WorldAnchorId =
   | "upperMonument"
   | "finalMonument";
 
-type WorldFocus = "overview" | WorldAnchorId;
 type PlacementMundo = "left" | "right" | "top" | "bottom";
 
 interface WorldAnchor {
@@ -108,16 +107,6 @@ interface WorldAnchor {
   y: number;
   placement: PlacementMundo;
   label: string;
-}
-
-interface WorldZoneDefinition {
-  id: WorldAnchorId;
-  anchor: WorldAnchor;
-  focus: {
-    scale: number;
-    translateX: string;
-    translateY: string;
-  };
 }
 
 const WORLD_ANCHORS: Record<WorldAnchorId, WorldAnchor> = {
@@ -165,34 +154,6 @@ const WORLD_ANCHOR_ORDER: WorldAnchorId[] = [
   "upperMonument",
   "finalMonument",
 ];
-
-const WORLD_ZONES: Record<WorldAnchorId, WorldZoneDefinition> = {
-  startPlatform: {
-    id: "startPlatform",
-    anchor: WORLD_ANCHORS.startPlatform,
-    focus: { scale: 1.28, translateX: "13%", translateY: "-4%" },
-  },
-  flowerPlatform: {
-    id: "flowerPlatform",
-    anchor: WORLD_ANCHORS.flowerPlatform,
-    focus: { scale: 1.3, translateX: "3%", translateY: "-1%" },
-  },
-  officePlatform: {
-    id: "officePlatform",
-    anchor: WORLD_ANCHORS.officePlatform,
-    focus: { scale: 1.28, translateX: "-1%", translateY: "14%" },
-  },
-  upperMonument: {
-    id: "upperMonument",
-    anchor: WORLD_ANCHORS.upperMonument,
-    focus: { scale: 1.26, translateX: "-12%", translateY: "12%" },
-  },
-  finalMonument: {
-    id: "finalMonument",
-    anchor: WORLD_ANCHORS.finalMonument,
-    focus: { scale: 1.26, translateX: "-14%", translateY: "-5%" },
-  },
-};
 
 const WORLD_CLUSTER_OFFSETS = [
   { x: 0, y: 0 },
@@ -556,29 +517,6 @@ function puntoCentroElemento(elemento: HTMLElement): PuntoAvatarRoadmap {
   };
 }
 
-function elementoSuficientementeVisible(elemento: HTMLElement): boolean {
-  const rect = elemento.getBoundingClientRect();
-  const altoViewport = window.innerHeight || document.documentElement.clientHeight;
-  const margen = Math.min(120, altoViewport * 0.16);
-
-  return rect.top < altoViewport - margen && rect.bottom > margen;
-}
-
-async function centrarContenedorRoadmap(
-  elemento: HTMLElement | null,
-  reducido: boolean,
-): Promise<void> {
-  if (!elemento || elementoSuficientementeVisible(elemento)) return;
-
-  elemento.scrollIntoView({
-    behavior: reducido ? "auto" : "smooth",
-    block: "center",
-    inline: "nearest",
-  });
-
-  await esperarFinScroll(elemento, reducido, reducido ? 0 : 650);
-}
-
 function limpiarParametrosRoadmap(parametros: string[]): void {
   if (typeof window === "undefined") return;
 
@@ -644,7 +582,7 @@ function indicePrimeraEvaluacion(nodos: NodoRuta[]): number {
  * largo del módulo completo se reparte parejo entre las 5 zonas.
  */
 function anchorIdParaNodoMundo(
-  nodo: NodoRuta,
+  _nodo: NodoRuta,
   indice: number,
   nodos: NodoRuta[],
 ): WorldAnchorId {
@@ -658,15 +596,6 @@ function anchorIdParaNodoMundo(
   if (avance <= 0.56) return "officePlatform";
   if (avance <= 0.82) return "upperMonument";
   return "finalMonument";
-}
-
-function anchorIdDeNodoPlano(
-  grupos: GrupoRuta[],
-  nodoPlano: NodoPlanoRoadmap | null | undefined,
-): WorldAnchorId | null {
-  if (!nodoPlano) return null;
-  const nodosGrupo = grupos[nodoPlano.indiceGrupo]?.nodos ?? [];
-  return anchorIdParaNodoMundo(nodoPlano.nodo, nodoPlano.indiceNodo, nodosGrupo);
 }
 
 function assetParaNodo(nodos: NodoRuta[], indice: number): {
@@ -1648,134 +1577,6 @@ function WorldInteractionLayer({
         </button>
       ))}
     </>
-  );
-}
-
-function WorldCamera2D({
-  worldFocus,
-  children,
-}: {
-  worldFocus: WorldFocus;
-  children: React.ReactNode;
-}) {
-  const zona = worldFocus === "overview" ? null : WORLD_ZONES[worldFocus];
-
-  return (
-    <div
-      className="world-camera absolute inset-0"
-      data-world-focus={worldFocus}
-      style={
-        {
-          "--world-x": zona?.focus.translateX ?? "0%",
-          "--world-y": zona?.focus.translateY ?? "0%",
-          "--world-scale": zona?.focus.scale ?? 1,
-          "--world-origin-x": zona ? `${zona.anchor.x}%` : "50%",
-          "--world-origin-y": zona ? `${zona.anchor.y}%` : "50%",
-        } as CSSProperties
-      }
-    >
-      {children}
-    </div>
-  );
-}
-
-function estadoZonaMundo(
-  zona: WorldZone,
-  grupo: GrupoRuta,
-  nodoActivoGlobalId: string | null,
-): EstadoEstacion {
-  const nodosZona = zona.nodeIds
-    .map((nodeId) => grupo.nodos.find((nodo) => nodo.id === nodeId))
-    .filter((nodo): nodo is NodoRuta => Boolean(nodo));
-
-  if (nodosZona.length === 0) return "bloqueado";
-  if (nodosZona.every((nodo) => nodo.completado)) return "completado";
-  if (nodoActivoGlobalId && nodosZona.some((nodo) => nodo.id === nodoActivoGlobalId)) {
-    return "activo";
-  }
-  if (nodosZona.every((nodo) => nodo.bloqueado)) return "bloqueado";
-  return "pendiente";
-}
-
-function WorldZoneLayer({
-  zonas,
-  grupo,
-  worldFocus,
-  nodoActivoGlobalId,
-  onFocusZone,
-}: {
-  zonas: WorldZone[];
-  grupo: GrupoRuta;
-  worldFocus: WorldFocus;
-  nodoActivoGlobalId: string | null;
-  onFocusZone: (focus: WorldFocus) => void;
-}) {
-  return (
-    <div className="absolute inset-x-0 bottom-20 top-24 z-30 sm:bottom-16 sm:top-24">
-      {zonas.map((zona, indiceZona) => {
-        if (zona.nodeIds.length === 0) return null;
-
-        const estado = estadoZonaMundo(zona, grupo, nodoActivoGlobalId);
-        const completados = zona.nodeIds.filter((nodeId) =>
-          grupo.nodos.find((nodo) => nodo.id === nodeId && nodo.completado),
-        ).length;
-        const focoActual = worldFocus === zona.id;
-        const atenuada = worldFocus !== "overview" && !focoActual;
-        const zonaBloqueada = estado === "bloqueado";
-
-        return (
-          <button
-            key={zona.id}
-            type="button"
-            disabled={zonaBloqueada}
-            data-world-zone={zona.id}
-            data-world-object={`zone-${zona.id}`}
-            aria-label={`${WORLD_ZONES[zona.id].anchor.label}: ${completados}/${zona.nodeIds.length} contenidos`}
-            onClick={() => onFocusZone(zona.id)}
-            className={cn(
-              "roadmap-world-zone absolute z-30 flex flex-col items-center gap-1 rounded-full transition-[filter,opacity,transform] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-4 focus-visible:ring-offset-white",
-              !zonaBloqueada && "cursor-pointer hover:-translate-y-0.5 hover:scale-[1.02]",
-              atenuada && "opacity-35",
-              focoActual && "roadmap-world-zone-focused",
-              estado === "activo" && "roadmap-world-zone-active",
-              zonaBloqueada && "cursor-not-allowed opacity-45",
-            )}
-            style={{
-              left: `${zona.anchor.x}%`,
-              top: `${zona.anchor.y}%`,
-              transform: "translate(-50%, -50%)",
-              animationDelay: `${indiceZona * 70}ms`,
-            }}
-          >
-            <span
-              className={cn(
-                "relative grid size-14 place-items-center rounded-full border bg-white/80 text-sm font-bold text-slate-700 shadow-[0_12px_28px_rgba(6,17,32,0.13)] backdrop-blur-sm transition-[background-color,border-color,box-shadow,color] duration-300",
-                estado === "completado" && "border-emerald-300 bg-emerald-500 text-white",
-                estado === "activo" && "border-[#22D3EE] bg-[#071B30] text-white shadow-[0_0_22px_rgba(34,211,238,0.42)]",
-                estado === "bloqueado" && "border-slate-200 bg-slate-100 text-slate-400",
-              )}
-            >
-              {estado === "completado" ? (
-                <Check className="size-5" aria-hidden="true" />
-              ) : estado === "bloqueado" ? (
-                <Lock className="size-5" aria-hidden="true" />
-              ) : (
-                `${completados}/${zona.nodeIds.length}`
-              )}
-            </span>
-            <span className="roadmap-world-zone-label rounded-full border border-white/80 bg-white/84 px-3 py-1 text-[11px] font-bold text-slate-800 shadow-sm backdrop-blur-sm">
-              {WORLD_ZONES[zona.id].anchor.label}
-            </span>
-            {estado === "activo" && worldFocus === "overview" && (
-              <span className="mt-0.5 rounded-full bg-[#071B30]/88 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-sm">
-                Estas aqui
-              </span>
-            )}
-            {estado === "activo" && worldFocus === "overview" && <AvatarRoadmap variant="desktop" />}
-          </button>
-        );
-      })}
-    </div>
   );
 }
 
