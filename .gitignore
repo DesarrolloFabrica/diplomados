@@ -11,4 +11,3 @@ next-env.d.ts
 .claude
 tsconfig.tsbuildinfo
 *.dump
-*.docx
