@@ -5,18 +5,22 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  ArrowRight,
   Bell,
-  Bookmark,
   BookOpen,
+  Bookmark,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Flame,
   GraduationCap,
   Loader2,
+  MoreHorizontal,
   Play,
   Search,
 } from "lucide-react";
 import { PortadaCurso } from "@/components/shared/portada-curso";
+import { AnilloProgreso } from "@/components/shared/anillo-progreso";
 import { cn } from "@/lib/utils";
 import { inscribirme } from "@backend/server/actions/inscripciones";
 import type { CursoCatalogoFila } from "@backend/server/queries/mis-cursos";
@@ -24,100 +28,105 @@ import type { CursoCatalogoFila } from "@backend/server/queries/mis-cursos";
 interface CatalogoCursosProps {
   misCursos: CursoCatalogoFila[];
   disponibles: CursoCatalogoFila[];
-  nombreUsuario?: string | null;
+  nombre: string | null;
 }
-
-const DASHBOARD_BACKGROUND = "/images/roadmap_asset/ambiente-modulo.jpeg";
 
 const CATEGORIAS = ["Curso", "Educacion", "Creatividad", "Pensamiento", "Cortos"];
 
-export function CatalogoCursos({
-  misCursos,
-  disponibles,
-  nombreUsuario,
-}: CatalogoCursosProps) {
+/** Oculta temporalmente buscador, categorías y perfil del catálogo. */
+const MOSTRAR_BARRA_SUPERIOR_CATALOGO = false;
+
+const CLASE_PANEL_GLASS =
+  "border border-white/45 bg-white/22 shadow-[0_8px_32px_rgba(6,17,32,0.16),inset_0_1px_0_rgba(255,255,255,0.42)] backdrop-blur-xl";
+
+const CLASE_HERO_PANEL =
+  "border border-white/45 bg-white/18 shadow-[0_8px_32px_rgba(6,17,32,0.18),inset_0_1px_0_rgba(255,255,255,0.35)] backdrop-blur-xl";
+
+const CLASE_TARJETA_GLASS = cn(
+  "group relative flex aspect-[4/5] min-h-[300px] flex-col overflow-hidden rounded-[24px] text-left outline-none transition-[transform,box-shadow,border-color] duration-300",
+  CLASE_PANEL_GLASS,
+  "hover:-translate-y-1 hover:border-white/65 hover:shadow-[0_18px_48px_rgba(6,17,32,0.24),inset_0_1px_0_rgba(255,255,255,0.5)]",
+  "focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]",
+);
+
+export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCursosProps) {
   const enProgreso = misCursos.find(
     (c) => c.estadoInscripcion !== "finalizado" && c.estadoInscripcion !== "aprobado",
   );
-  const destacado = enProgreso ?? disponibles[0] ?? misCursos[0] ?? null;
-  const cursosSugeridos = [...disponibles, ...misCursos.filter((curso) => curso.id !== destacado?.id)];
-  const cursosProgreso = misCursos.filter((curso) => curso.id !== destacado?.id);
+  const cursoDestacado = enProgreso ?? disponibles[0] ?? misCursos[0] ?? null;
+  const cursosSugeridos = [
+    ...misCursos,
+    ...disponibles.filter((curso) => curso.id !== cursoDestacado?.id),
+  ];
 
   return (
-    <div className="relative -m-5 min-h-[calc(100dvh-2.5rem)] overflow-hidden bg-[#061120] px-4 py-5 text-white sm:-m-6 sm:min-h-[calc(100dvh-3rem)] sm:px-6 lg:-m-8 lg:min-h-[calc(100dvh-4rem)] lg:px-8 xl:-m-10 xl:min-h-[calc(100dvh-5rem)] xl:px-10">
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${DASHBOARD_BACKGROUND})` }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-[linear-gradient(90deg,rgba(6,17,32,0.44),rgba(6,17,32,0.12)_42%,rgba(6,17,32,0.50)),linear-gradient(180deg,rgba(6,17,32,0.24),rgba(6,17,32,0.66))]"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-52 bg-[linear-gradient(180deg,transparent,rgba(6,17,32,0.58))]"
-      />
+    <div className="flex w-full max-w-[1500px] flex-col items-start gap-5">
+      {MOSTRAR_BARRA_SUPERIOR_CATALOGO && <BarraSuperior nombre={nombre} />}
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1480px] flex-col gap-6">
-        <DashboardTopbar nombreUsuario={nombreUsuario} />
+      {cursoDestacado && (
+        <HeroDestacado curso={cursoDestacado} inscrito={Boolean(cursoDestacado.inscripcionId)} />
+      )}
 
-        {destacado ? (
-          <HeroDashboard curso={destacado} />
+      <section className="w-full space-y-5">
+        <div className="flex items-end justify-between gap-4">
+          <h2 className="font-display text-2xl font-bold tracking-tight text-white drop-shadow-sm">
+            Te puede interesar
+          </h2>
+          {disponibles.length > 0 && (
+            <button
+              type="button"
+              className="hidden rounded-full border border-white/35 bg-white/18 px-4 py-2 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-xl transition-colors hover:bg-white/28 sm:inline-flex"
+            >
+              Ver todos
+            </button>
+          )}
+        </div>
+
+        {cursosSugeridos.length === 0 ? (
+          <p className={cn("rounded-[24px] px-6 py-8 text-center text-sm font-medium text-white", CLASE_PANEL_GLASS)}>
+            Todavia no hay cursos asignados o disponibles.
+          </p>
         ) : (
-          <EstadoVacioGlass titulo="Mis cursos" texto="No hay cursos disponibles por ahora." />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4 2xl:grid-cols-5">
+            {cursosSugeridos.map((curso) =>
+              curso.inscripcionId ? (
+                <TarjetaCursoProgreso key={curso.id} curso={curso} />
+              ) : (
+                <NodoDisponible key={curso.id} curso={curso} />
+              ),
+            )}
+          </div>
         )}
-
-        <section className="space-y-4">
-          <EncabezadoSeccion titulo="Te puede interesar" accion="Ver todos" />
-          {cursosSugeridos.length === 0 ? (
-            <EstadoVacioGlass texto="No hay mas cursos disponibles por ahora." />
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5">
-              {cursosSugeridos.slice(0, 5).map((curso) => (
-                <TarjetaCursoDashboard key={curso.id} curso={curso} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="space-y-4 pb-4">
-          <EncabezadoSeccion titulo="Tu progreso" />
-          {misCursos.length === 0 ? (
-            <EstadoVacioGlass texto="Todavia no te has inscrito en ningun curso." />
-          ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {(cursosProgreso.length > 0 ? cursosProgreso : misCursos).slice(0, 6).map((curso) => (
-                <TarjetaProgresoCompacta key={curso.id} curso={curso} />
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+      </section>
     </div>
   );
 }
 
-function DashboardTopbar({ nombreUsuario }: { nombreUsuario?: string | null }) {
+function BarraSuperior({ nombre }: { nombre: string | null }) {
+  const primerNombre = nombre?.trim().split(/\s+/)[0] ?? "Usuario";
+
   return (
-    <header className="grid gap-3 lg:grid-cols-[minmax(260px,420px)_1fr_auto] lg:items-center">
-      <label className="flex min-w-0 items-center gap-3 rounded-full border border-white/30 bg-white/28 px-5 py-3 text-sm text-white shadow-[0_14px_38px_rgba(6,17,32,0.14)] backdrop-blur-xl">
-        <Search className="size-5 shrink-0 text-[#071B30]/80" aria-hidden="true" />
+    <div className="flex w-full flex-col items-start gap-4 xl:flex-row xl:flex-wrap xl:items-center xl:justify-start">
+      <label className={cn("flex min-h-12 w-full items-center gap-3 rounded-full px-5 xl:max-w-md", CLASE_PANEL_GLASS)}>
+        <Search className="size-5 shrink-0" aria-hidden="true" />
+        <span className="sr-only">Buscar cursos, temas o habilidades</span>
         <input
           type="search"
           placeholder="Buscar cursos, temas o habilidades"
-          className="min-w-0 flex-1 bg-transparent font-medium text-[#071B30] placeholder:text-[#071B30]/65 outline-none"
+          className="min-w-0 flex-1 bg-transparent text-sm font-medium placeholder:text-[#061120]/60 focus:outline-none"
         />
       </label>
 
-      <nav aria-label="Categorias" className="flex min-w-0 gap-2 overflow-x-auto pb-1 lg:justify-center lg:pb-0">
-        {CATEGORIAS.map((categoria, indice) => (
+      <nav aria-label="Categorias de cursos" className="flex gap-2 overflow-x-auto pb-1 xl:pb-0">
+        {CATEGORIAS.map((categoria, index) => (
           <button
             key={categoria}
             type="button"
             className={cn(
-              "shrink-0 rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white/90 shadow-sm backdrop-blur-xl transition-[background-color,color,transform] duration-300 hover:-translate-y-0.5 hover:bg-white/32",
-              indice === 0 ? "bg-white/86 text-[#071B30]" : "bg-white/16",
+              "min-h-11 whitespace-nowrap rounded-full border px-6 text-sm font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-xl transition-colors",
+              index === 0
+                ? "border-white/70 bg-white/82 text-[#061120]"
+                : "border-white/30 bg-white/18 text-white hover:bg-white/28",
             )}
           >
             {categoria}
@@ -125,127 +134,197 @@ function DashboardTopbar({ nombreUsuario }: { nombreUsuario?: string | null }) {
         ))}
       </nav>
 
-      <div className="flex items-center gap-3 lg:justify-end">
+      <div className="flex w-full items-center justify-start gap-3 xl:ml-auto xl:w-auto">
         <button
           type="button"
           aria-label="Notificaciones"
-          className="grid size-12 place-items-center rounded-full border border-white/22 bg-white/24 text-[#071B30] shadow-sm backdrop-blur-xl transition-transform hover:-translate-y-0.5"
+          className={cn("relative flex size-12 shrink-0 items-center justify-center rounded-full text-[#061120]", CLASE_PANEL_GLASS)}
         >
           <Bell className="size-5" aria-hidden="true" />
+          <span className="absolute right-2.5 top-2.5 size-2.5 rounded-full bg-[#91DC00]" />
         </button>
         <Link
           href="/mis-cursos/perfil"
-          className="flex min-w-0 items-center gap-3 rounded-full border border-white/24 bg-white/30 px-3 py-2 pr-4 text-[#071B30] shadow-sm backdrop-blur-xl transition-transform hover:-translate-y-0.5"
+          className={cn("flex min-h-12 items-center gap-3 rounded-full px-3 py-2 text-[#061120] transition-colors hover:bg-white/32", CLASE_PANEL_GLASS)}
         >
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#071B30] font-display text-sm font-bold text-white">
-            {inicialesUsuario(nombreUsuario)}
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#061120] text-sm font-bold text-white">
+            {primerNombre.charAt(0).toUpperCase()}
           </span>
-          <span className="hidden min-w-0 sm:block">
-            <span className="block truncate text-sm font-bold">{nombreUsuario || "Mi perfil"}</span>
-            <span className="block text-xs font-medium text-[#071B30]/70">Colaborador</span>
+          <span className="hidden min-w-0 leading-tight sm:block">
+            <span className="block truncate text-sm font-bold">{nombre ?? "Usuario"}</span>
+            <span className="block text-xs font-medium text-[#061120]/65">Estudiante</span>
           </span>
-          <ChevronDown className="hidden size-4 shrink-0 sm:block" aria-hidden="true" />
+          <ChevronDown className="size-4 shrink-0" aria-hidden="true" />
         </Link>
       </div>
-    </header>
+    </div>
   );
 }
 
-function HeroDashboard({ curso }: { curso: CursoCatalogoFila }) {
-  const descripcion =
-    curso.descripcion?.trim() || "Continua tu ruta de aprendizaje y desbloquea nuevas capacidades.";
+function HeroDestacado({
+  curso,
+  inscrito,
+}: {
+  curso: CursoCatalogoFila;
+  inscrito: boolean;
+}) {
+  const router = useRouter();
+  const [enviando, iniciar] = useTransition();
   const porcentaje = porcentajeCurso(curso);
+  const descripcion =
+    curso.descripcion?.trim() || "Continua tu ruta de aprendizaje con una nueva mision.";
   const completado = cursoCompletado(curso, porcentaje);
+  const textoAccion = enviando
+    ? "Inscribiendo..."
+    : inscrito
+      ? completado
+        ? "Revisar curso"
+        : "Continuar"
+      : "Comenzar";
 
-  return (
-    <section className="relative min-h-[390px] overflow-hidden rounded-[28px] border border-white/34 bg-white/24 shadow-[0_28px_70px_rgba(6,17,32,0.20)] backdrop-blur-xl">
-      <PortadaCurso
-        cursoId={curso.id}
-        imagenPortadaUrl={curso.imagenPortadaUrl}
-        esDiplomado={curso.esDiplomado}
-        titulo={curso.titulo}
-        fallback="abstract"
-        className="absolute inset-0 rounded-none opacity-70 mix-blend-luminosity"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-[linear-gradient(90deg,rgba(245,251,253,0.86),rgba(245,251,253,0.58)_38%,rgba(245,251,253,0.12)),linear-gradient(180deg,rgba(255,255,255,0.08),rgba(6,17,32,0.20))]"
-      />
-      <div className="relative z-10 flex min-h-[390px] flex-col justify-end gap-8 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between lg:p-10">
-        <div className="max-w-xl">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/72 px-4 py-2 text-sm font-bold text-[#071B30] shadow-sm backdrop-blur-md">
-            <span className="size-2 rounded-full bg-[#91DC00] shadow-[0_0_12px_rgba(145,220,0,0.6)]" />
-            Curso destacado
+  function activarCurso() {
+    if (enviando || inscrito) return;
+
+    iniciar(async () => {
+      const res = await inscribirme(curso.id);
+      if (!res.ok) {
+        toast.error(res.mensaje ?? "No se pudo inscribir");
+        return;
+      }
+      toast.success("Inscripcion exitosa");
+      router.push(`/mis-cursos/${curso.id}`);
+      router.refresh();
+    });
+  }
+
+  function activarConTeclado(evento: KeyboardEvent<HTMLElement>) {
+    if (evento.key !== "Enter" && evento.key !== " ") return;
+    evento.preventDefault();
+    activarCurso();
+  }
+
+  const contenido = (
+    <div className="relative flex min-h-[220px] flex-col justify-between gap-5 p-5 text-white sm:min-h-[240px] sm:p-6 lg:p-7">
+      <div className="flex items-start justify-between gap-3">
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/20 px-3 py-1.5 text-[11px] font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-md">
+          <Flame className="size-3.5 text-orange-300" aria-hidden="true" />
+          Tendencia
+        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="flex size-9 items-center justify-center rounded-full border border-white/35 bg-white/20 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-md">
+            <Bookmark className="size-4" aria-hidden="true" />
           </span>
-          <div className="mt-16 flex flex-wrap gap-2 sm:mt-20">
-            <TagCurso>{curso.esDiplomado ? "Diplomado" : "Curso"}</TagCurso>
-            <TagCurso>{nivelLegible(curso.nivelDificultad)}</TagCurso>
-            {completado && <TagCurso>Completado</TagCurso>}
-          </div>
-          <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-[0.98] text-[#061120] drop-shadow-sm sm:text-5xl">
-            {curso.titulo}
-          </h1>
-          <p className="mt-4 max-w-lg text-sm font-medium leading-relaxed text-[#071B30]/78 sm:text-base">
-            {descripcion}
-          </p>
-
-          <div className="mt-7 flex flex-wrap items-center gap-3">
-            <AccionCurso curso={curso} principal />
-            <Link
-              href={`/mis-cursos/${curso.id}`}
-              className="inline-flex items-center gap-2 rounded-full border border-white/45 bg-white/30 px-5 py-3 text-sm font-bold text-[#071B30] shadow-sm backdrop-blur-xl transition-[background-color,transform] duration-300 hover:-translate-y-0.5 hover:bg-white/46"
-            >
-              <BookOpen className="size-4" aria-hidden="true" />
-              Guia del curso
-            </Link>
-            <button
-              type="button"
-              aria-label="Guardar curso"
-              className="grid size-12 place-items-center rounded-full border border-white/45 bg-white/28 text-[#071B30] shadow-sm backdrop-blur-xl transition-transform hover:-translate-y-0.5"
-            >
-              <Bookmark className="size-5" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-
-        <div className="w-full max-w-xs rounded-3xl border border-white/40 bg-white/30 p-4 text-[#071B30] shadow-[0_18px_45px_rgba(6,17,32,0.13)] backdrop-blur-xl lg:w-72">
-          <div className="mb-2 flex items-center justify-between text-sm font-bold">
-            <span>Progreso</span>
-            <span>{porcentaje}%</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-[#071B30]/16">
-            <div
-              className="h-full rounded-full bg-[linear-gradient(90deg,#2FB9A5,#4FC9B3,#91DC00)] transition-[width] duration-500"
-              style={{ width: `${porcentaje}%` }}
-            />
-          </div>
-          <p className="mt-3 text-xs font-medium text-[#071B30]/68">
-            {curso.inscripcionId ? "Tu avance se actualiza automaticamente." : "Inscribete para iniciar esta ruta."}
-          </p>
+          {inscrito && (
+            <div className="relative flex size-14 items-center justify-center">
+              <AnilloProgreso porcentaje={porcentaje} tamano={56} grosor={5} className="absolute inset-0" />
+              <span className="font-display text-xs font-bold text-white">{porcentaje}%</span>
+            </div>
+          )}
         </div>
       </div>
-    </section>
-  );
-}
 
-function TarjetaCursoDashboard({ curso }: { curso: CursoCatalogoFila }) {
-  if (curso.inscripcionId) {
+      <div className="max-w-2xl text-left">
+        <div className="mb-3 flex flex-wrap gap-2">
+          <span className="rounded-full border border-white/30 bg-white/18 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md">
+            {curso.esDiplomado ? "Diplomado" : "Curso"}
+          </span>
+          <span className="rounded-full border border-white/25 bg-white/14 px-2.5 py-1 text-[11px] font-semibold text-white/90 backdrop-blur-md">
+            Mejora personal
+          </span>
+        </div>
+        <h1 className="font-display text-2xl font-extrabold leading-tight text-white drop-shadow-sm sm:text-[1.75rem]">
+          {curso.titulo}
+        </h1>
+        <p className="mt-2 line-clamp-2 max-w-xl text-sm font-medium leading-6 text-white/88">
+          {descripcion}
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-2.5">
+          <span className="inline-flex min-h-10 items-center gap-2.5 rounded-full bg-white px-5 text-sm font-bold text-[#061120] shadow-[0_8px_20px_rgba(6,17,32,0.18)] transition-transform duration-300 group-hover:scale-[1.02]">
+            {enviando ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Play className="size-4 fill-[#061120]" aria-hidden="true" />
+            )}
+            {textoAccion}
+          </span>
+          <span className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/45 bg-white/16 px-4 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md">
+            <BookOpen className="size-4" aria-hidden="true" />
+            Guia del curso
+          </span>
+        </div>
+      </div>
+
+      <div className="hidden items-center justify-end gap-2 lg:flex">
+        <span className="flex size-9 items-center justify-center rounded-full border border-white/35 bg-white/20 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-md">
+          <ChevronLeft className="size-4" aria-hidden="true" />
+        </span>
+        <span className="flex size-9 items-center justify-center rounded-full border border-white/35 bg-white/20 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-md">
+          <ChevronRight className="size-4" aria-hidden="true" />
+        </span>
+      </div>
+    </div>
+  );
+
+  const claseHero = cn(
+    "group relative block w-full max-w-5xl overflow-hidden rounded-[28px] outline-none",
+    CLASE_HERO_PANEL,
+    "focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]",
+  );
+
+  if (inscrito) {
     return (
-      <Link
-        href={`/mis-cursos/${curso.id}`}
-        className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]"
-      >
-        <ContenidoCardVisual curso={curso} />
+      <Link href={`/mis-cursos/${curso.id}`} className={claseHero}>
+        {contenido}
       </Link>
     );
   }
 
-  return <TarjetaDisponible curso={curso} />;
+  return (
+    <article
+      role="button"
+      tabIndex={enviando ? -1 : 0}
+      aria-disabled={enviando}
+      onClick={activarCurso}
+      onKeyDown={activarConTeclado}
+      className={cn(claseHero, "cursor-pointer text-left aria-disabled:pointer-events-none aria-disabled:opacity-70")}
+    >
+      {contenido}
+    </article>
+  );
 }
 
-function TarjetaDisponible({ curso }: { curso: CursoCatalogoFila }) {
+function TarjetaCursoProgreso({ curso }: { curso: CursoCatalogoFila }) {
+  const porcentaje = porcentajeCurso(curso);
+  const completado = cursoCompletado(curso, porcentaje);
+
+  return (
+    <Link
+      href={`/mis-cursos/${curso.id}`}
+      aria-label={`${completado ? "Revisar" : "Continuar"} ${curso.titulo}`}
+      className={CLASE_TARJETA_GLASS}
+    >
+      <ContenidoTarjetaCurso
+        curso={curso}
+        porcentaje={porcentaje}
+        completado={completado}
+        textoAccion={completado ? "Revisar" : "Continuar"}
+      />
+    </Link>
+  );
+}
+
+function NodoDisponible({ curso }: { curso: CursoCatalogoFila }) {
   const router = useRouter();
   const [enviando, iniciar] = useTransition();
+  const porcentaje = porcentajeCurso(curso);
+  const completado = cursoCompletado(curso, porcentaje);
+  const textoAccion = enviando
+    ? "Inscribiendo..."
+    : completado
+      ? "Revisar curso"
+      : porcentaje > 0
+        ? "Continuar"
+        : "Comenzar curso";
 
   function inscribir() {
     if (enviando) return;
@@ -275,225 +354,104 @@ function TarjetaDisponible({ curso }: { curso: CursoCatalogoFila }) {
       aria-disabled={enviando}
       onClick={inscribir}
       onKeyDown={activarConTeclado}
-      className="group outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120] aria-disabled:pointer-events-none aria-disabled:opacity-60"
+      className={cn(CLASE_TARJETA_GLASS, "cursor-pointer aria-disabled:pointer-events-none aria-disabled:opacity-60")}
     >
-      <ContenidoCardVisual curso={curso} enviando={enviando} />
+      <ContenidoTarjetaCurso
+        curso={curso}
+        porcentaje={porcentaje}
+        completado={completado}
+        textoAccion={textoAccion}
+        enviando={enviando}
+      />
     </article>
   );
 }
 
-function ContenidoCardVisual({
+function ContenidoTarjetaCurso({
   curso,
+  porcentaje,
+  completado,
+  textoAccion,
   enviando = false,
 }: {
   curso: CursoCatalogoFila;
+  porcentaje: number;
+  completado: boolean;
+  textoAccion: string;
   enviando?: boolean;
 }) {
-  const porcentaje = porcentajeCurso(curso);
   const descripcion =
-    curso.descripcion?.trim() || "Aprende a tu ritmo con una experiencia guiada.";
+    curso.descripcion?.trim() || "Continua desarrollando tus conocimientos con este curso.";
+  const categoria = curso.esDiplomado ? "Diplomado" : "Curso";
 
   return (
-    <div className="relative aspect-[4/5] min-h-[300px] overflow-hidden rounded-[24px] border border-white/34 bg-white/20 text-white shadow-[0_18px_44px_rgba(6,17,32,0.18)] backdrop-blur-lg transition-[border-color,box-shadow,transform] duration-300 group-hover:-translate-y-1.5 group-hover:border-white/58 group-hover:shadow-[0_24px_60px_rgba(6,17,32,0.28)]">
-      <PortadaCurso
-        cursoId={curso.id}
-        imagenPortadaUrl={curso.imagenPortadaUrl}
-        esDiplomado={curso.esDiplomado}
-        titulo={curso.titulo}
-        fallback="abstract"
-        className="absolute inset-0 rounded-none transition-transform duration-500 group-hover:scale-105"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,17,32,0.06),rgba(6,17,32,0.36)_45%,rgba(6,17,32,0.88))]"
-      />
-      <button
-        type="button"
-        aria-label="Opciones del curso"
-        className="absolute right-3 top-3 z-20 grid size-9 place-items-center rounded-full bg-white/28 text-white backdrop-blur-xl"
-        onClick={(evento) => evento.preventDefault()}
-      >
-        <span className="-mt-1 text-xl leading-none">...</span>
-      </button>
-      <div className="absolute inset-x-0 bottom-0 z-10 p-4">
-        <TagCurso className="mb-3 w-max bg-white/28 text-white">{curso.esDiplomado ? "Diplomado" : "Curso"}</TagCurso>
-        <h3 className="line-clamp-2 font-display text-xl font-bold leading-tight drop-shadow-sm">
-          {curso.titulo}
-        </h3>
-        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-white/82">
-          {descripcion}
-        </p>
-        <div className="mt-4 flex items-end justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="mb-1 flex justify-between text-xs font-semibold text-white/76">
-              <span>{curso.inscripcionId ? "Progreso" : "Listo para iniciar"}</span>
-              <span>{porcentaje}%</span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-white/24">
-              <div
-                className="h-full rounded-full bg-[linear-gradient(90deg,#2FB9A5,#4FC9B3,#91DC00)] transition-[width] duration-500"
-                style={{ width: `${porcentaje}%` }}
-              />
-            </div>
-          </div>
-          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-white text-[#061120] shadow-lg transition-[background-color,transform] duration-300 group-hover:scale-110 group-hover:bg-[#91DC00]">
-            {enviando ? (
-              <Loader2 className="size-5 animate-spin" aria-hidden="true" />
-            ) : (
-              <Play className="ml-0.5 size-5 fill-current" aria-hidden="true" />
-            )}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TarjetaProgresoCompacta({ curso }: { curso: CursoCatalogoFila }) {
-  const porcentaje = porcentajeCurso(curso);
-
-  return (
-    <Link
-      href={`/mis-cursos/${curso.id}`}
-      className="group flex min-w-0 items-center gap-4 rounded-3xl border border-white/28 bg-white/22 p-3 text-white shadow-[0_14px_36px_rgba(6,17,32,0.12)] backdrop-blur-xl transition-[background-color,transform] duration-300 hover:-translate-y-1 hover:bg-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]"
-    >
-      <div className="relative size-16 shrink-0 overflow-hidden rounded-2xl">
+    <>
+      <div className="relative h-[46%] min-h-[130px] shrink-0 overflow-hidden">
         <PortadaCurso
           cursoId={curso.id}
           imagenPortadaUrl={curso.imagenPortadaUrl}
           esDiplomado={curso.esDiplomado}
           titulo={curso.titulo}
           fallback="abstract"
-          className="absolute inset-0 rounded-none"
+          className="absolute inset-0 rounded-none transition-transform duration-500 group-hover:scale-105"
         />
-      </div>
-      <div className="min-w-0 flex-1">
-        <h3 className="truncate text-sm font-bold">{curso.titulo}</h3>
-        <p className="mt-0.5 text-xs font-medium text-white/68">En progreso {porcentaje}%</p>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/20">
-          <div
-            className="h-full rounded-full bg-[linear-gradient(90deg,#2FB9A5,#4FC9B3,#91DC00)]"
-            style={{ width: `${porcentaje}%` }}
-          />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_55%,rgba(255,255,255,0.18)_100%)]"
+        />
+
+        <div className="absolute right-3 top-3 z-20">
+          <span className="flex size-8 items-center justify-center rounded-full border border-white/45 bg-white/35 text-[#061120] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-md">
+            <MoreHorizontal className="size-4" aria-hidden="true" />
+          </span>
         </div>
       </div>
-      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/24 text-white transition-transform group-hover:scale-110">
-        <ArrowRight className="size-4" aria-hidden="true" />
-      </span>
-    </Link>
+
+      <div className="relative flex flex-1 flex-col border-t border-white/25 bg-[#061120]/48 p-4 text-white backdrop-blur-md">
+        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/35 bg-white/16 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+            {curso.esDiplomado && <GraduationCap className="size-3 text-white" aria-hidden="true" />}
+            {categoria}
+          </span>
+          {completado && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/45 bg-emerald-500/30 px-2.5 py-1 text-[10px] font-semibold text-white">
+              <CheckCircle2 className="size-3 text-white" aria-hidden="true" />
+              Completado
+            </span>
+          )}
+        </div>
+
+        <h3 className="line-clamp-2 font-display text-base font-bold leading-snug text-white">
+          {curso.titulo}
+        </h3>
+        <p className="mt-1.5 line-clamp-2 flex-1 text-xs leading-relaxed text-white">
+          {descripcion}
+        </p>
+
+        <div className="mt-3 pr-12">
+          <div className="mb-1 flex items-center justify-between gap-3 text-[10px] font-semibold text-white">
+            <span>Progreso</span>
+            <span>{porcentaje}%</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-white/22">
+            <div
+              className="h-full rounded-full bg-[linear-gradient(90deg,#2FB9A5,#4FC9B3,#91DC00)] transition-[width] duration-500"
+              style={{ width: `${porcentaje}%` }}
+            />
+          </div>
+        </div>
+
+        <span className="absolute bottom-4 right-4 z-30 flex size-10 items-center justify-center rounded-full border border-white/70 bg-white text-[#061120] shadow-[0_8px_18px_rgba(6,17,32,0.16),inset_0_1px_0_rgba(255,255,255,0.85)] transition-[transform,background-color,box-shadow] duration-300 group-hover:scale-110 group-hover:bg-[#91DC00] group-hover:shadow-[0_12px_24px_rgba(145,220,0,0.28)]">
+          {enviando ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Play className="size-4 fill-[#061120]" aria-hidden="true" />
+          )}
+          <span className="sr-only">{textoAccion}</span>
+        </span>
+      </div>
+    </>
   );
-}
-
-function AccionCurso({ curso, principal = false }: { curso: CursoCatalogoFila; principal?: boolean }) {
-  const router = useRouter();
-  const [enviando, iniciar] = useTransition();
-
-  if (curso.inscripcionId) {
-    return (
-      <Link
-        href={`/mis-cursos/${curso.id}`}
-        className={cn(
-          "inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-bold text-[#061120] shadow-[0_14px_30px_rgba(6,17,32,0.16)] transition-[background-color,transform] duration-300 hover:-translate-y-0.5 hover:bg-[#91DC00]",
-          principal && "px-7",
-        )}
-      >
-        <Play className="size-4 fill-current" aria-hidden="true" />
-        Continuar
-      </Link>
-    );
-  }
-
-  function inscribir() {
-    if (enviando) return;
-
-    iniciar(async () => {
-      const res = await inscribirme(curso.id);
-      if (!res.ok) {
-        toast.error(res.mensaje ?? "No se pudo inscribir");
-        return;
-      }
-      toast.success("Inscripcion exitosa");
-      router.push(`/mis-cursos/${curso.id}`);
-      router.refresh();
-    });
-  }
-
-  return (
-    <button
-      type="button"
-      disabled={enviando}
-      onClick={inscribir}
-      className="inline-flex items-center gap-3 rounded-full bg-white px-7 py-3 text-sm font-bold text-[#061120] shadow-[0_14px_30px_rgba(6,17,32,0.16)] transition-[background-color,transform] duration-300 hover:-translate-y-0.5 hover:bg-[#91DC00] disabled:pointer-events-none disabled:opacity-70"
-    >
-      {enviando ? (
-        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-      ) : (
-        <Play className="size-4 fill-current" aria-hidden="true" />
-      )}
-      Comenzar
-    </button>
-  );
-}
-
-function EncabezadoSeccion({ titulo, accion }: { titulo: string; accion?: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <h2 className="font-display text-xl font-bold text-white drop-shadow-sm">{titulo}</h2>
-      {accion && (
-        <button type="button" className="text-sm font-bold text-white/82 transition-colors hover:text-white">
-          {accion}
-        </button>
-      )}
-    </div>
-  );
-}
-
-function EstadoVacioGlass({ titulo, texto }: { titulo?: string; texto: string }) {
-  return (
-    <div className="rounded-3xl border border-white/28 bg-white/22 px-6 py-8 text-center text-white shadow-sm backdrop-blur-xl">
-      {titulo && <h2 className="font-display text-xl font-bold">{titulo}</h2>}
-      <p className={cn("text-sm font-medium text-white/75", titulo && "mt-2")}>{texto}</p>
-    </div>
-  );
-}
-
-function TagCurso({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full bg-white/62 px-3 py-1.5 text-xs font-bold text-[#071B30] shadow-sm backdrop-blur-md",
-        className,
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
-function inicialesUsuario(nombre?: string | null): string {
-  if (!nombre) return "U";
-
-  const partes = nombre
-    .split(/\s+/)
-    .map((parte) => parte.trim())
-    .filter(Boolean);
-
-  return partes
-    .slice(0, 2)
-    .map((parte) => parte[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
-function nivelLegible(nivel: CursoCatalogoFila["nivelDificultad"]): string {
-  if (nivel === "basico") return "Basico";
-  if (nivel === "avanzado") return "Avanzado";
-  return "Intermedio";
 }
 
 function porcentajeCurso(curso: CursoCatalogoFila): number {
@@ -503,9 +461,5 @@ function porcentajeCurso(curso: CursoCatalogoFila): number {
 }
 
 function cursoCompletado(curso: CursoCatalogoFila, porcentaje: number): boolean {
-  return (
-    porcentaje >= 100 ||
-    curso.estadoInscripcion === "finalizado" ||
-    curso.estadoInscripcion === "aprobado"
-  );
+  return porcentaje >= 100 || curso.estadoInscripcion === "finalizado" || curso.estadoInscripcion === "aprobado";
 }
