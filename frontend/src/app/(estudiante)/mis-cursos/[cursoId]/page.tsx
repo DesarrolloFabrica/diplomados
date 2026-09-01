@@ -1,21 +1,15 @@
 import { notFound } from "next/navigation";
 import { requerirSesion } from "@backend/lib/auth/sesion";
 import { cargarVistaCursoColaborador } from "@backend/server/queries/mis-cursos";
-import { HeroCurso } from "@/components/shared/hero-curso";
 import { PortadaCurso } from "@/components/shared/portada-curso";
 import { EstadisticasCurso } from "@/components/shared/estadisticas-curso";
 import {
   RutaAprendizaje,
-  VistaRoadmap,
   type GrupoRuta,
   type NodoRuta,
 } from "@/components/shared/ruta-aprendizaje";
 import { BotonInscribirme } from "./boton-inscribirme";
-import {
-  cursoRoadmapCompletado,
-  obtenerSiguienteNodoRoadmap,
-} from "@/lib/roadmap/siguiente-nodo";
-import { usarRoadmapInmersivoExperimental } from "@/config/roadmap-inmersivo";
+import { cursoRoadmapCompletado } from "@/lib/roadmap/siguiente-nodo";
 
 interface CursoColaboradorPageProps {
   params: Promise<{ cursoId: string }>;
@@ -118,86 +112,32 @@ export default async function CursoColaboradorPage({
 
   const hayContenido = grupos.some((g) => g.nodos.length > 0);
   const porcentajeAvance = Number(inscripcion.porcentajeAvance);
-  const siguienteNodo = obtenerSiguienteNodoRoadmap(grupos);
   const cursoCompletado = cursoRoadmapCompletado(grupos);
-  const roadmapInmersivo = usarRoadmapInmersivoExperimental({
-    cursoId: curso.id,
-    titulo: curso.titulo,
-  });
-
-  // Vista de prueba: cuando el roadmap inmersivo está activo, el hero se
-  // fusiona con el fondo del mundo (VistaRoadmap ya no envuelve nada acá:
-  // ese contenedor solo aporta el fondo decorativo del roadmap "estándar").
-  if (roadmapInmersivo) {
-    return (
-      <div className="min-w-0">
-        {hayContenido ? (
-          <RutaAprendizaje
-            grupos={grupos}
-            focoNodoId={roadmapFocus}
-            transicionNodoId={roadmapTransition}
-            modoInmersivo
-            cursoTitulo={curso.titulo}
-            heroInmersivo={{
-              titulo: curso.titulo,
-              descripcion: curso.descripcion,
-              duracionEstimadaMin: curso.duracionEstimadaMin,
-              nivelDificultad: curso.nivelDificultad,
-              cantidadModulos: modulos.length,
-              porcentajeAvance,
-              cursoCompletado,
-              nombreUsuario: sesion.nombreCompleto,
-            }}
-          />
-        ) : (
-          <p className="px-6 py-10 text-center text-muted-foreground">
-            Este curso todavía no tiene contenido.
-          </p>
-        )}
-      </div>
-    );
-  }
 
   return (
     <div className="min-w-0">
-      <div className="-mx-5 -mt-5 w-auto min-w-0 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 xl:-mx-10 xl:-mt-10">
-        <HeroCurso
-          cursoId={curso.id}
-          titulo={curso.titulo}
-          imagenPortadaUrl={curso.imagenPortadaUrl}
-          esDiplomado={curso.esDiplomado}
-          duracionEstimadaMin={curso.duracionEstimadaMin}
-          nivelDificultad={curso.nivelDificultad}
-          cantidadModulos={modulos.length}
-          porcentajeAvance={porcentajeAvance}
-          siguienteContenido={
-            siguienteNodo
-              ? {
-                  titulo: siguienteNodo.nodo.titulo,
-                  href: siguienteNodo.nodo.href,
-                  moduloTitulo: grupos[siguienteNodo.indiceModulo]?.titulo ?? "",
-                }
-              : null
-          }
-          cursoCompletado={cursoCompletado}
+      {hayContenido ? (
+        <RutaAprendizaje
+          grupos={grupos}
+          focoNodoId={roadmapFocus}
+          transicionNodoId={roadmapTransition}
+          cursoTitulo={curso.titulo}
+          heroInmersivo={{
+            titulo: curso.titulo,
+            descripcion: curso.descripcion,
+            duracionEstimadaMin: curso.duracionEstimadaMin,
+            nivelDificultad: curso.nivelDificultad,
+            cantidadModulos: modulos.length,
+            porcentajeAvance,
+            cursoCompletado,
+            nombreUsuario: sesion.nombreCompleto,
+          }}
         />
-
-        {hayContenido ? (
-          <VistaRoadmap>
-            <RutaAprendizaje
-              grupos={grupos}
-              focoNodoId={roadmapFocus}
-              transicionNodoId={roadmapTransition}
-              modoInmersivo={false}
-              cursoTitulo={curso.titulo}
-            />
-          </VistaRoadmap>
-        ) : (
-          <p className="px-6 py-10 text-center text-muted-foreground">
-            Este curso todavía no tiene contenido.
-          </p>
-        )}
-      </div>
+      ) : (
+        <p className="px-6 py-10 text-center text-muted-foreground">
+          Este curso todavía no tiene contenido.
+        </p>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -48,7 +48,7 @@ export interface GrupoRuta {
 
 /**
  * Datos del curso/diplomado para fusionar el hero dentro del fondo del
- * roadmap inmersivo (en vez de mostrarlo como una sección aparte arriba).
+ * roadmap inmersivo (en vez de mostrarlo como una secci├│n aparte arriba).
  */
 export interface HeroInmersivoRoadmap {
   titulo: string;
@@ -62,13 +62,13 @@ export interface HeroInmersivoRoadmap {
 }
 
 const ETIQUETA_DIFICULTAD_HERO_INMERSIVO = {
-  basico: "Básico",
+  basico: "B├ísico",
   intermedio: "Intermedio",
   avanzado: "Avanzado",
 } as const;
 
 function formatearDuracionHeroInmersivo(minutos: number | null): string {
-  if (minutos == null || minutos <= 0) return "Duración no definida";
+  if (minutos == null || minutos <= 0) return "Duraci├│n no definida";
   const horas = Math.floor(minutos / 60);
   const resto = minutos % 60;
   if (horas === 0) return `${resto} min`;
@@ -99,7 +99,6 @@ type WorldAnchorId =
   | "upperMonument"
   | "finalMonument";
 
-type WorldFocus = "overview" | WorldAnchorId;
 type PlacementMundo = "left" | "right" | "top" | "bottom";
 
 interface WorldAnchor {
@@ -108,16 +107,6 @@ interface WorldAnchor {
   y: number;
   placement: PlacementMundo;
   label: string;
-}
-
-interface WorldZoneDefinition {
-  id: WorldAnchorId;
-  anchor: WorldAnchor;
-  focus: {
-    scale: number;
-    translateX: string;
-    translateY: string;
-  };
 }
 
 const WORLD_ANCHORS: Record<WorldAnchorId, WorldAnchor> = {
@@ -165,34 +154,6 @@ const WORLD_ANCHOR_ORDER: WorldAnchorId[] = [
   "upperMonument",
   "finalMonument",
 ];
-
-const WORLD_ZONES: Record<WorldAnchorId, WorldZoneDefinition> = {
-  startPlatform: {
-    id: "startPlatform",
-    anchor: WORLD_ANCHORS.startPlatform,
-    focus: { scale: 1.28, translateX: "13%", translateY: "-4%" },
-  },
-  flowerPlatform: {
-    id: "flowerPlatform",
-    anchor: WORLD_ANCHORS.flowerPlatform,
-    focus: { scale: 1.3, translateX: "3%", translateY: "-1%" },
-  },
-  officePlatform: {
-    id: "officePlatform",
-    anchor: WORLD_ANCHORS.officePlatform,
-    focus: { scale: 1.28, translateX: "-1%", translateY: "14%" },
-  },
-  upperMonument: {
-    id: "upperMonument",
-    anchor: WORLD_ANCHORS.upperMonument,
-    focus: { scale: 1.26, translateX: "-12%", translateY: "12%" },
-  },
-  finalMonument: {
-    id: "finalMonument",
-    anchor: WORLD_ANCHORS.finalMonument,
-    focus: { scale: 1.26, translateX: "-14%", translateY: "-5%" },
-  },
-};
 
 const WORLD_CLUSTER_OFFSETS = [
   { x: 0, y: 0 },
@@ -251,7 +212,7 @@ const WORLD_OBJECTS = [
   },
 ] as const;
 
-/** Secuencia fija por módulo: intro → práctica → lectura → actividad. */
+/** Secuencia fija por m├│dulo: intro ÔåÆ pr├íctica ÔåÆ lectura ÔåÆ actividad. */
 const ICONOS_LECCION: LucideIcon[] = [BookOpen, Play, FileText, Wrench];
 
 type EstadoEstacion = "completado" | "activo" | "pendiente" | "bloqueado";
@@ -556,29 +517,6 @@ function puntoCentroElemento(elemento: HTMLElement): PuntoAvatarRoadmap {
   };
 }
 
-function elementoSuficientementeVisible(elemento: HTMLElement): boolean {
-  const rect = elemento.getBoundingClientRect();
-  const altoViewport = window.innerHeight || document.documentElement.clientHeight;
-  const margen = Math.min(120, altoViewport * 0.16);
-
-  return rect.top < altoViewport - margen && rect.bottom > margen;
-}
-
-async function centrarContenedorRoadmap(
-  elemento: HTMLElement | null,
-  reducido: boolean,
-): Promise<void> {
-  if (!elemento || elementoSuficientementeVisible(elemento)) return;
-
-  elemento.scrollIntoView({
-    behavior: reducido ? "auto" : "smooth",
-    block: "center",
-    inline: "nearest",
-  });
-
-  await esperarFinScroll(elemento, reducido, reducido ? 0 : 650);
-}
-
 function limpiarParametrosRoadmap(parametros: string[]): void {
   if (typeof window === "undefined") return;
 
@@ -636,15 +574,15 @@ function indicePrimeraEvaluacion(nodos: NodoRuta[]): number {
 }
 
 /**
- * Distribuye los nodos del módulo en las 5 zonas del mundo según su
- * posición global dentro del módulo (no según su tipo). Antes todas las
- * evaluaciones caían en el mismo monumento final y las lecciones se
- * repartían solo entre 3 zonas, lo que amontonaba las estaciones en
- * cuanto un módulo tenía varias evaluaciones. Ahora el avance 0→1 a lo
- * largo del módulo completo se reparte parejo entre las 5 zonas.
+ * Distribuye los nodos del m├│dulo en las 5 zonas del mundo seg├║n su
+ * posici├│n global dentro del m├│dulo (no seg├║n su tipo). Antes todas las
+ * evaluaciones ca├¡an en el mismo monumento final y las lecciones se
+ * repart├¡an solo entre 3 zonas, lo que amontonaba las estaciones en
+ * cuanto un m├│dulo ten├¡a varias evaluaciones. Ahora el avance 0ÔåÆ1 a lo
+ * largo del m├│dulo completo se reparte parejo entre las 5 zonas.
  */
 function anchorIdParaNodoMundo(
-  nodo: NodoRuta,
+  _nodo: NodoRuta,
   indice: number,
   nodos: NodoRuta[],
 ): WorldAnchorId {
@@ -658,15 +596,6 @@ function anchorIdParaNodoMundo(
   if (avance <= 0.56) return "officePlatform";
   if (avance <= 0.82) return "upperMonument";
   return "finalMonument";
-}
-
-function anchorIdDeNodoPlano(
-  grupos: GrupoRuta[],
-  nodoPlano: NodoPlanoRoadmap | null | undefined,
-): WorldAnchorId | null {
-  if (!nodoPlano) return null;
-  const nodosGrupo = grupos[nodoPlano.indiceGrupo]?.nodos ?? [];
-  return anchorIdParaNodoMundo(nodoPlano.nodo, nodoPlano.indiceNodo, nodosGrupo);
 }
 
 function assetParaNodo(nodos: NodoRuta[], indice: number): {
@@ -876,7 +805,7 @@ function OndasEstacionActiva() {
   );
 }
 
-/** Hexágono plano para estaciones de quiz. */
+/** Hex├ígono plano para estaciones de quiz. */
 function NucleoHexagonal({
   nodo,
   variant,
@@ -1310,9 +1239,9 @@ function IndicadorProgresoModulo({
         )}
       >
         {progreso.completo && <Check className="size-4 shrink-0" aria-hidden="true" />}
-        <span className="font-semibold">Módulo {indiceModulo + 1}</span>
+        <span className="font-semibold">M├│dulo {indiceModulo + 1}</span>
         <span className={cn("text-muted-foreground", progreso.completo && "text-emerald-700 dark:text-emerald-200")}>
-          · {progreso.completados}/{progreso.total} completadas
+          ┬À {progreso.completados}/{progreso.total} completadas
         </span>
       </div>
 
@@ -1375,7 +1304,7 @@ function NavegacionModulosRoadmap({
                 type="button"
                 aria-current={visible ? "step" : undefined}
                 aria-label={ariaLabel}
-                title={`${label} · ${grupo.titulo}`}
+                title={`${label} ┬À ${grupo.titulo}`}
                 onClick={() => onSeleccionarModulo(indiceModulo)}
                 className={cn(
                   "group flex min-w-10 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-xs font-semibold text-slate-500 transition-[color,transform] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:text-slate-300",
@@ -1426,10 +1355,10 @@ function CierreModulo({
   indiceModuloDestino: number | null;
   onContinuarModulo: (indiceModulo: number) => void;
 }) {
-  const titulo = esUltimoModulo ? "Último módulo completado" : "Módulo completado";
+  const titulo = esUltimoModulo ? "├Ültimo m├│dulo completado" : "M├│dulo completado";
   const descripcion = esUltimoModulo
-    ? "Has finalizado todos los módulos del programa."
-    : "Has completado todas las lecciones y evaluaciones de este módulo.";
+    ? "Has finalizado todos los m├│dulos del programa."
+    : "Has completado todas las lecciones y evaluaciones de este m├│dulo.";
 
   return (
     <div className="relative z-30 mx-auto mt-10 w-full max-w-md rounded-2xl border border-emerald-400/25 bg-white/70 px-5 py-4 text-center shadow-sm backdrop-blur-sm dark:bg-white/5">
@@ -1445,7 +1374,7 @@ function CierreModulo({
           onClick={() => onContinuarModulo(indiceModuloDestino)}
           className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#061120] px-4 py-3 text-sm font-semibold text-white transition-[background-color,transform] duration-300 hover:bg-[#123A32] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto dark:bg-[#91DC00] dark:text-[#061120]"
         >
-          Continuar al Módulo {indiceModulo + 2}
+          Continuar al M├│dulo {indiceModulo + 2}
           <ArrowRight className="size-4" aria-hidden="true" />
         </button>
       )}
@@ -1648,134 +1577,6 @@ function WorldInteractionLayer({
         </button>
       ))}
     </>
-  );
-}
-
-function WorldCamera2D({
-  worldFocus,
-  children,
-}: {
-  worldFocus: WorldFocus;
-  children: React.ReactNode;
-}) {
-  const zona = worldFocus === "overview" ? null : WORLD_ZONES[worldFocus];
-
-  return (
-    <div
-      className="world-camera absolute inset-0"
-      data-world-focus={worldFocus}
-      style={
-        {
-          "--world-x": zona?.focus.translateX ?? "0%",
-          "--world-y": zona?.focus.translateY ?? "0%",
-          "--world-scale": zona?.focus.scale ?? 1,
-          "--world-origin-x": zona ? `${zona.anchor.x}%` : "50%",
-          "--world-origin-y": zona ? `${zona.anchor.y}%` : "50%",
-        } as CSSProperties
-      }
-    >
-      {children}
-    </div>
-  );
-}
-
-function estadoZonaMundo(
-  zona: WorldZone,
-  grupo: GrupoRuta,
-  nodoActivoGlobalId: string | null,
-): EstadoEstacion {
-  const nodosZona = zona.nodeIds
-    .map((nodeId) => grupo.nodos.find((nodo) => nodo.id === nodeId))
-    .filter((nodo): nodo is NodoRuta => Boolean(nodo));
-
-  if (nodosZona.length === 0) return "bloqueado";
-  if (nodosZona.every((nodo) => nodo.completado)) return "completado";
-  if (nodoActivoGlobalId && nodosZona.some((nodo) => nodo.id === nodoActivoGlobalId)) {
-    return "activo";
-  }
-  if (nodosZona.every((nodo) => nodo.bloqueado)) return "bloqueado";
-  return "pendiente";
-}
-
-function WorldZoneLayer({
-  zonas,
-  grupo,
-  worldFocus,
-  nodoActivoGlobalId,
-  onFocusZone,
-}: {
-  zonas: WorldZone[];
-  grupo: GrupoRuta;
-  worldFocus: WorldFocus;
-  nodoActivoGlobalId: string | null;
-  onFocusZone: (focus: WorldFocus) => void;
-}) {
-  return (
-    <div className="absolute inset-x-0 bottom-20 top-24 z-30 sm:bottom-16 sm:top-24">
-      {zonas.map((zona, indiceZona) => {
-        if (zona.nodeIds.length === 0) return null;
-
-        const estado = estadoZonaMundo(zona, grupo, nodoActivoGlobalId);
-        const completados = zona.nodeIds.filter((nodeId) =>
-          grupo.nodos.find((nodo) => nodo.id === nodeId && nodo.completado),
-        ).length;
-        const focoActual = worldFocus === zona.id;
-        const atenuada = worldFocus !== "overview" && !focoActual;
-        const zonaBloqueada = estado === "bloqueado";
-
-        return (
-          <button
-            key={zona.id}
-            type="button"
-            disabled={zonaBloqueada}
-            data-world-zone={zona.id}
-            data-world-object={`zone-${zona.id}`}
-            aria-label={`${WORLD_ZONES[zona.id].anchor.label}: ${completados}/${zona.nodeIds.length} contenidos`}
-            onClick={() => onFocusZone(zona.id)}
-            className={cn(
-              "roadmap-world-zone absolute z-30 flex flex-col items-center gap-1 rounded-full transition-[filter,opacity,transform] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-4 focus-visible:ring-offset-white",
-              !zonaBloqueada && "cursor-pointer hover:-translate-y-0.5 hover:scale-[1.02]",
-              atenuada && "opacity-35",
-              focoActual && "roadmap-world-zone-focused",
-              estado === "activo" && "roadmap-world-zone-active",
-              zonaBloqueada && "cursor-not-allowed opacity-45",
-            )}
-            style={{
-              left: `${zona.anchor.x}%`,
-              top: `${zona.anchor.y}%`,
-              transform: "translate(-50%, -50%)",
-              animationDelay: `${indiceZona * 70}ms`,
-            }}
-          >
-            <span
-              className={cn(
-                "relative grid size-14 place-items-center rounded-full border bg-white/80 text-sm font-bold text-slate-700 shadow-[0_12px_28px_rgba(6,17,32,0.13)] backdrop-blur-sm transition-[background-color,border-color,box-shadow,color] duration-300",
-                estado === "completado" && "border-emerald-300 bg-emerald-500 text-white",
-                estado === "activo" && "border-[#22D3EE] bg-[#071B30] text-white shadow-[0_0_22px_rgba(34,211,238,0.42)]",
-                estado === "bloqueado" && "border-slate-200 bg-slate-100 text-slate-400",
-              )}
-            >
-              {estado === "completado" ? (
-                <Check className="size-5" aria-hidden="true" />
-              ) : estado === "bloqueado" ? (
-                <Lock className="size-5" aria-hidden="true" />
-              ) : (
-                `${completados}/${zona.nodeIds.length}`
-              )}
-            </span>
-            <span className="roadmap-world-zone-label rounded-full border border-white/80 bg-white/84 px-3 py-1 text-[11px] font-bold text-slate-800 shadow-sm backdrop-blur-sm">
-              {WORLD_ZONES[zona.id].anchor.label}
-            </span>
-            {estado === "activo" && worldFocus === "overview" && (
-              <span className="mt-0.5 rounded-full bg-[#071B30]/88 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-sm">
-                Estas aqui
-              </span>
-            )}
-            {estado === "activo" && worldFocus === "overview" && <AvatarRoadmap variant="desktop" />}
-          </button>
-        );
-      })}
-    </div>
   );
 }
 
@@ -2092,8 +1893,8 @@ function ChipHeroInmersivo({ icono: Icono, valor }: { icono: LucideIcon; valor: 
 }
 
 /**
- * Panel fusionado del hero del curso + contexto del módulo actual. Vive
- * flotando sobre el fondo del mundo inmersivo en vez de la sección de hero
+ * Panel fusionado del hero del curso + contexto del m├│dulo actual. Vive
+ * flotando sobre el fondo del mundo inmersivo en vez de la secci├│n de hero
  * aparte, para que el fondo ocupe toda la pantalla.
  */
 function PanelCursoInmersivo({
@@ -2117,7 +1918,7 @@ function PanelCursoInmersivo({
     : grupo.titulo;
   const modulosTexto =
     hero && hero.cantidadModulos > 0
-      ? `${hero.cantidadModulos} ${hero.cantidadModulos === 1 ? "módulo" : "módulos"}`
+      ? `${hero.cantidadModulos} ${hero.cantidadModulos === 1 ? "m├│dulo" : "m├│dulos"}`
       : null;
 
   return (
@@ -2168,7 +1969,7 @@ function PanelCursoInmersivo({
           <div className="mt-4 border-t border-slate-200/70 pt-3 dark:border-white/10">
             <div className="flex items-start justify-between gap-4">
               <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72] dark:text-[#67E8F9]">
-                Módulo {indiceModulo + 1} · {tituloModulo}
+                M├│dulo {indiceModulo + 1} ┬À {tituloModulo}
               </p>
               <span className="shrink-0 rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-bold text-slate-700 shadow-sm dark:bg-white/10 dark:text-white">
                 {progresoModulo.completados}/{progresoModulo.total}
@@ -2259,9 +2060,9 @@ function PistaExploracionInmersiva({ exploreMode }: { exploreMode: boolean }) {
       )}
     >
       <span className="mb-0.5 block font-bold text-slate-900 dark:text-white">
-        Explora cada estación
+        Explora cada estaci├│n
       </span>
-      Pasa el cursor sobre cada punto del mapa para ver más detalles.
+      Pasa el cursor sobre cada punto del mapa para ver m├ís detalles.
     </div>
   );
 }
@@ -2590,7 +2391,7 @@ function FigurasRoadmapDecorativas() {
   );
 }
 
-/** Contenedor raíz: fondo decorativo a ancho completo del área principal + contenido centrado. */
+/** Contenedor ra├¡z: fondo decorativo a ancho completo del ├írea principal + contenido centrado. */
 export function VistaRoadmap({ children }: { children: React.ReactNode }) {
   return (
     <section className="roadmap-section relative isolate z-0 w-full min-w-0 overflow-x-clip lg:overflow-x-visible">
