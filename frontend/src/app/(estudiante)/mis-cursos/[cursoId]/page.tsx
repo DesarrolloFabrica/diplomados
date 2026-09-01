@@ -58,11 +58,6 @@ export default async function CursoColaboradorPage({
     );
   }
 
-  // La navegación "obligatoria" bloquea un nodo hasta completar todos los
-  // anteriores en la ruta (lecciones y evaluaciones, en orden). Con "libre"
-  // nada se bloquea.
-  // Sin moduloId en evaluaciones: se asignan de a 3 por módulo en orden de
-  // creación; el sobrante queda en el último módulo.
   const esObligatoria = curso.navegacion === "obligatoria";
   let previoCompletado = true;
   const EVALUACIONES_POR_MODULO = 3;
@@ -121,6 +116,7 @@ export default async function CursoColaboradorPage({
           grupos={grupos}
           focoNodoId={roadmapFocus}
           transicionNodoId={roadmapTransition}
+          modoInmersivo
           cursoTitulo={curso.titulo}
           heroInmersivo={{
             titulo: curso.titulo,
