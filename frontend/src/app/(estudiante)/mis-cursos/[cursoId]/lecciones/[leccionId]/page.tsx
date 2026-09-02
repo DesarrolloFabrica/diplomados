@@ -39,6 +39,8 @@ import { ProximosContenidos } from "@/components/shared/proximos-contenidos";
 import { ProgresoCursoLeccion } from "@/components/shared/progreso-curso-leccion";
 import { obtenerInfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
 import { BotonCompletar } from "./boton-completar";
+import { cn } from "@/lib/utils";
+import { CLASE_HERO_PANEL } from "@/config/paneles-glass";
 
 
 
@@ -265,7 +267,7 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
   return (
 
-    <div className="lesson-view -mx-5 -my-5 min-h-[calc(100vh-4rem)] bg-background sm:-mx-6 sm:-my-6 lg:-mx-8 lg:-my-8 xl:-mx-10 xl:-my-10">
+    <div className="lesson-view relative isolate -mx-5 -my-5 min-h-[calc(100vh-4rem)] sm:-mx-6 sm:-my-6 lg:-mx-8 lg:-my-8 xl:-mx-10 xl:-my-10">
 
       <LayoutVistaLeccion
 
@@ -277,28 +279,17 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
       >
 
-        <div className="mb-6">
-
+        <div className={cn("mb-6 rounded-[24px] p-5 sm:p-6", CLASE_HERO_PANEL)}>
           <Link
-
             href={`/mis-cursos/${cursoId}`}
-
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-white/80 transition-colors hover:text-white"
           >
-
             <ArrowLeft className="h-4 w-4" />
-
             Volver al curso
-
           </Link>
-
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground">
-
+          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-white drop-shadow-sm">
             {leccion.titulo}
-
           </h1>
-
         </div>
 
 

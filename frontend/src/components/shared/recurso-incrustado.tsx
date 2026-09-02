@@ -36,7 +36,7 @@ const ICONO_DESCARGA: Record<TipoRecurso, typeof FileText> = {
 export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps) {
   if (!url) {
     return (
-      <div className="rounded-xl border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+      <div className="rounded-xl border border-dashed border-white/35 bg-white/10 p-4 text-sm text-white/70">
         {nombre} — no disponible
       </div>
     );
@@ -51,7 +51,7 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
     const embedYoutube = obtenerEmbedYoutube(url);
     return (
       <div className="space-y-2">
-        <p className="text-sm font-medium text-foreground">{nombre}</p>
+        <p className="text-sm font-medium text-white/90">{nombre}</p>
         <div className="lesson-media aspect-video w-full overflow-hidden rounded-2xl border border-border/70 bg-black shadow-[0_8px_30px_rgba(6,17,32,0.08)] ring-1 ring-emerald-500/15">
           {embedYoutube ? (
             <iframe
@@ -77,8 +77,8 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
   if (tipo === "imagen") {
     return (
       <div className="space-y-2">
-        <p className="text-sm font-medium text-foreground">{nombre}</p>
-        <div className="overflow-hidden rounded-2xl border border-border/70 bg-card p-2 shadow-sm ring-1 ring-emerald-500/10">
+        <p className="text-sm font-medium text-white/90">{nombre}</p>
+        <div className="overflow-hidden rounded-2xl border border-white/30 bg-white/10 p-2 shadow-sm ring-1 ring-white/10">
           <ImagenRecurso url={url} nombre={nombre} />
         </div>
       </div>
@@ -89,21 +89,21 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
     const Icono = ICONO_DESCARGA.presentacion;
     return (
       <div className="space-y-2">
-        <div className="flex items-center gap-2 rounded-t-2xl border border-b-0 border-border/70 bg-muted/40 px-4 py-2.5">
-          <Icono className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
-          <span className="text-sm font-medium text-foreground">{nombre}</span>
+        <div className="flex items-center gap-2 rounded-t-2xl border border-b-0 border-white/30 bg-white/12 px-4 py-2.5">
+          <Icono className="h-4 w-4 text-emerald-300" />
+          <span className="text-sm font-medium text-white/90">{nombre}</span>
         </div>
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-between rounded-b-2xl border border-border/70 bg-card p-4 shadow-sm transition-colors hover:border-emerald-500/40 hover:bg-emerald-50/40 dark:hover:bg-emerald-500/5"
+          className="flex items-center justify-between rounded-b-2xl border border-white/30 bg-white/10 p-4 shadow-sm transition-colors hover:border-white/45 hover:bg-white/18"
         >
           <div className="flex items-center gap-2">
-            <Icono className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Abrir presentación</span>
+            <Icono className="h-4 w-4 text-white/60" />
+            <span className="text-sm text-white/75">Abrir presentación</span>
           </div>
-          <Download className="h-4 w-4 text-muted-foreground" />
+          <Download className="h-4 w-4 text-white/60" />
         </a>
       </div>
     );
@@ -112,21 +112,21 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
   const Icono = ICONO_DESCARGA[tipo];
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2 rounded-t-2xl border border-b-0 border-border/70 bg-muted/40 px-4 py-2.5">
-        <Icono className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
-        <span className="text-sm font-medium text-foreground">{nombre}</span>
+      <div className="flex items-center gap-2 rounded-t-2xl border border-b-0 border-white/30 bg-white/12 px-4 py-2.5">
+        <Icono className="h-4 w-4 text-emerald-300" />
+        <span className="text-sm font-medium text-white/90">{nombre}</span>
       </div>
       <a
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-between rounded-b-2xl border border-border/70 bg-card p-4 shadow-sm transition-colors hover:border-emerald-500/40 hover:bg-emerald-50/40 dark:hover:bg-emerald-500/5"
+        className="flex items-center justify-between rounded-b-2xl border border-white/30 bg-white/10 p-4 shadow-sm transition-colors hover:border-white/45 hover:bg-white/18"
       >
         <div className="flex items-center gap-2">
-          <Icono className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">Abrir documento</span>
+          <Icono className="h-4 w-4 text-white/60" />
+          <span className="text-sm text-white/75">Abrir documento</span>
         </div>
-        <Download className="h-4 w-4 text-muted-foreground" />
+        <Download className="h-4 w-4 text-white/60" />
       </a>
     </div>
   );

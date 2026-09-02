@@ -803,23 +803,145 @@
   display: none;
 }
 
-/* Vista de lección — acentos premium sutiles */
+.dashboard-particle {
+  position: absolute;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0;
+  box-shadow:
+    0 0 8px currentColor,
+    0 0 16px currentColor;
+  transform: translate3d(0, 0, 0) scale(0.82);
+  animation:
+    particle-glow var(--particle-duration) ease-in-out var(--particle-delay) infinite,
+    particle-float-a var(--particle-duration) ease-in-out var(--particle-delay) infinite;
+  will-change: transform, opacity;
+}
+
+.dashboard-particle-far {
+  opacity: 0.18;
+  box-shadow: 0 0 7px currentColor;
+}
+
+.dashboard-particle-mid {
+  opacity: 0.34;
+}
+
+.dashboard-particle-near {
+  opacity: 0.48;
+  box-shadow:
+    0 0 10px currentColor,
+    0 0 22px currentColor;
+}
+
+.dashboard-particle-motion-a {
+  animation-name: particle-glow, particle-float-a;
+}
+
+.dashboard-particle-motion-b {
+  animation-name: particle-glow, particle-float-b;
+}
+
+.dashboard-particle-motion-c {
+  animation-name: particle-glow, particle-float-c;
+}
+
+@keyframes particle-float-a {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.7);
+  }
+  20% {
+    opacity: 0.62;
+  }
+  68% {
+    opacity: 0.38;
+    transform: translate3d(var(--particle-drift-x), var(--particle-drift-y), 0) scale(1.06);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(var(--particle-drift-x) * 1.2), calc(var(--particle-drift-y) - 18px), 0) scale(0.84);
+  }
+}
+
+@keyframes particle-float-b {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.74);
+  }
+  24% {
+    opacity: 0.55;
+  }
+  72% {
+    opacity: 0.42;
+    transform: translate3d(calc(var(--particle-drift-x) * -0.72), var(--particle-drift-y), 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(var(--particle-drift-x) * -1.08), calc(var(--particle-drift-y) - 12px), 0) scale(0.78);
+  }
+}
+
+@keyframes particle-float-c {
+  0% {
+    opacity: 0.08;
+    transform: translate3d(0, 4px, 0) scale(0.88);
+  }
+  45% {
+    opacity: 0.46;
+    transform: translate3d(calc(var(--particle-drift-x) * 0.35), calc(var(--particle-drift-y) * 0.35), 0) scale(1.08);
+  }
+  100% {
+    opacity: 0.1;
+    transform: translate3d(calc(var(--particle-drift-x) * -0.15), calc(var(--particle-drift-y) * 0.2), 0) scale(0.9);
+  }
+}
+
+@keyframes particle-glow {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+  38% {
+    opacity: 0.68;
+  }
+  64% {
+    opacity: 0.34;
+  }
+}
+
+/* Vista de lección — fondo inmersivo con overlay y paneles glass */
 @layer components {
-  html.light .lesson-view {
-    background: #f7f9fb;
+  .lesson-view {
+    background-color: #061120;
+    background-image: url("/images/Fondo_reproductor.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
-  html.light .lesson-segmented {
-    background: #ffffff;
-    box-shadow: 0 1px 3px rgba(6, 17, 32, 0.06), 0 8px 24px rgba(6, 17, 32, 0.04);
+  .lesson-view::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: rgba(6, 17, 32, 0.42);
+    pointer-events: none;
   }
 
-  html.light .lesson-content-surface {
-    background: #ffffff;
+  .lesson-view::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    pointer-events: none;
   }
 
-  html.light .lesson-outline {
-    background: rgba(255, 255, 255, 0.72);
+  .lesson-view > * {
+    position: relative;
+    z-index: 2;
   }
 }
 
@@ -1158,6 +1280,12 @@
   .roadmap-world-track-active {
     animation: none;
     transition: none;
+  }
+
+  .dashboard-particle {
+    animation: none !important;
+    opacity: 0.18;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   .roadmap-world-bg-layer {

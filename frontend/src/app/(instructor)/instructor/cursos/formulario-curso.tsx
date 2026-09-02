@@ -18,6 +18,11 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import {
+  ESCUELA_VISUAL_DEFAULT,
+  ESCUELAS_VISUALES,
+  ETIQUETAS_ESCUELA_VISUAL,
+} from "@backend/config/escuelas";
 import { cursoSchema, type CursoInput } from "@backend/lib/validators/cursos";
 import { crearCurso, actualizarCurso } from "@backend/server/actions/cursos";
 import type { CursoDetalle } from "@backend/server/queries/cursos";
@@ -50,6 +55,7 @@ export function FormularioCurso({ curso, empresas, onExito }: FormularioCursoPro
       maxIntentos: curso?.maxIntentos ?? 3,
       navegacion: curso?.navegacion ?? "libre",
       esDiplomado: curso?.esDiplomado ?? false,
+      escuela: curso?.escuela ?? ESCUELA_VISUAL_DEFAULT,
       empresaId: curso?.empresaId ?? "",
     },
   });
@@ -68,6 +74,7 @@ export function FormularioCurso({ curso, empresas, onExito }: FormularioCursoPro
     datos.set("maxIntentos", String(values.maxIntentos));
     datos.set("navegacion", values.navegacion);
     datos.set("esDiplomado", values.esDiplomado ? "true" : "false");
+    datos.set("escuela", values.escuela);
     if (values.empresaId) datos.set("empresaId", values.empresaId);
 
     iniciar(async () => {
@@ -176,6 +183,28 @@ export function FormularioCurso({ curso, empresas, onExito }: FormularioCursoPro
           max={100}
           step="0.01"
           {...register("porcentajeAprobacion")}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Escuela</Label>
+        <Controller
+          control={control}
+          name="escuela"
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ESCUELAS_VISUALES.map((escuela) => (
+                  <SelectItem key={escuela} value={escuela}>
+                    {ETIQUETAS_ESCUELA_VISUAL[escuela]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         />
       </div>
 

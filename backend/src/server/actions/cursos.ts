@@ -42,6 +42,7 @@ function datosCursoDesdeFormData(formData: FormData) {
     maxIntentos: formData.get("maxIntentos"),
     navegacion: formData.get("navegacion"),
     esDiplomado: formData.get("esDiplomado"),
+    escuela: formData.get("escuela"),
     empresaId: formData.get("empresaId"),
   };
 }
@@ -77,6 +78,7 @@ export async function crearCurso(
     maxIntentos: parsed.data.maxIntentos,
     navegacion: parsed.data.navegacion,
     esDiplomado: parsed.data.esDiplomado,
+    escuela: parsed.data.escuela,
     empresaId: parsed.data.empresaId || null,
     autorId: sesion.id,
   };
@@ -129,6 +131,7 @@ export async function actualizarCurso(
         maxIntentos: parsed.data.maxIntentos,
         navegacion: parsed.data.navegacion,
         esDiplomado: parsed.data.esDiplomado,
+        escuela: parsed.data.escuela,
         empresaId: parsed.data.empresaId || null,
       })
       .where(eq(cursos.id, id))

@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CLASE_HERO_PANEL, CLASE_PANEL_GLASS } from "@/config/paneles-glass";
 import { RecursoIncrustado } from "@/components/shared/recurso-incrustado";
 import { EmbedAdobeIndesign } from "@/components/shared/embed-adobe-indesign";
 import type { TipoRecurso } from "@backend/lib/db/schema";
@@ -89,8 +90,8 @@ export function VistaContenidoLeccion({
           <div className="flex min-w-min justify-center sm:justify-start">
             <div
               className={cn(
-                "lesson-segmented inline-flex items-center gap-1 rounded-full border border-border/80",
-                "bg-white p-1.5 shadow-sm dark:bg-card",
+                "inline-flex items-center gap-1 rounded-full p-1.5",
+                CLASE_HERO_PANEL,
               )}
               role="tablist"
               aria-label="Tipo de contenido"
@@ -107,11 +108,11 @@ export function VistaContenidoLeccion({
                     onClick={() => setTabActiva(id)}
                     className={cn(
                       "inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-all",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]",
                       "sm:px-4",
                       activo
-                        ? "bg-gradient-to-r from-emerald-800 via-teal-700 to-emerald-600 text-white shadow-[0_0_18px_rgba(16,185,129,0.35)]"
-                        : "text-foreground/80 hover:bg-muted/80 hover:text-foreground",
+                        ? "bg-white text-[#061120] shadow-[0_4px_14px_rgba(6,17,32,0.18)]"
+                        : "text-white/85 hover:bg-white/18 hover:text-white",
                     )}
                   >
                     <Icono className="h-4 w-4 shrink-0" />
@@ -124,7 +125,7 @@ export function VistaContenidoLeccion({
         </div>
       )}
 
-      <div className="lesson-content-surface rounded-2xl border border-border/70 bg-card p-4 shadow-sm sm:p-6">
+      <div className={cn("rounded-[24px] p-4 sm:p-6", CLASE_PANEL_GLASS)}>
         {mostrarInfografiaInteractiva ? (
           <EmbedAdobeIndesign
             src={infografiaInteractiva.src}
@@ -133,7 +134,7 @@ export function VistaContenidoLeccion({
         ) : null}
 
         {mostrarTexto && (
-          <p className="mb-5 whitespace-pre-wrap text-base leading-relaxed text-muted-foreground">
+          <p className="mb-5 whitespace-pre-wrap text-base leading-relaxed text-white/88">
             {contenidoTexto}
           </p>
         )}
@@ -152,7 +153,7 @@ export function VistaContenidoLeccion({
         ) : (
           !mostrarTexto &&
           !mostrarInfografiaInteractiva && (
-            <div className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-10 text-center text-sm text-muted-foreground">
+            <div className="rounded-xl border border-dashed border-white/35 bg-white/10 px-4 py-10 text-center text-sm text-white/70">
               No hay contenido de este tipo en la lección.
             </div>
           )

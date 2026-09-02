@@ -122,15 +122,15 @@ function estadoQuiz(evaluacion: ItemEsquemaEvaluacion): EstadoQuiz {
 
 function IconoEstadoQuiz({ estado }: { estado: EstadoQuiz }) {
   if (estado === "completado") {
-    return <CircleCheck className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />;
+    return <CircleCheck className="h-4 w-4 shrink-0 text-emerald-400" />;
   }
   if (estado === "en-progreso") {
-    return <CircleDashed className="h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400" />;
+    return <CircleDashed className="h-4 w-4 shrink-0 text-teal-300" />;
   }
   if (estado === "bloqueado") {
-    return <LockKeyhole className="h-4 w-4 shrink-0 text-muted-foreground" />;
+    return <LockKeyhole className="h-4 w-4 shrink-0 text-white/45" />;
   }
-  return <ClipboardCheck className="h-4 w-4 shrink-0 text-muted-foreground" />;
+  return <ClipboardCheck className="h-4 w-4 shrink-0 text-white/45" />;
 }
 
 function IndicadorEstadoModulo({
@@ -142,7 +142,7 @@ function IndicadorEstadoModulo({
 }) {
   if (estado === "completado") {
     return (
-      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-emerald-300">
         <CircleCheck className="h-3.5 w-3.5" />
         Completado
       </span>
@@ -151,7 +151,7 @@ function IndicadorEstadoModulo({
 
   if (estado === "en-progreso") {
     return (
-      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-teal-700 dark:text-teal-400">
+      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-teal-200">
         <CircleDashed className="h-3.5 w-3.5" />
         {porcentaje}%
       </span>
@@ -159,7 +159,7 @@ function IndicadorEstadoModulo({
   }
 
   return (
-    <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+    <span className="inline-flex shrink-0 items-center gap-1 text-xs text-white/55">
       <Circle className="h-3.5 w-3.5" />
       No iniciado
     </span>
@@ -168,12 +168,12 @@ function IndicadorEstadoModulo({
 
 function IconoEstadoModulo({ estado }: { estado: EstadoModulo }) {
   if (estado === "completado") {
-    return <CircleCheck className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />;
+    return <CircleCheck className="h-4 w-4 shrink-0 text-emerald-400" />;
   }
   if (estado === "en-progreso") {
-    return <CircleDashed className="h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400" />;
+    return <CircleDashed className="h-4 w-4 shrink-0 text-teal-300" />;
   }
-  return <Circle className="h-4 w-4 shrink-0 text-muted-foreground" />;
+  return <Circle className="h-4 w-4 shrink-0 text-white/45" />;
 }
 
 export function EsquemaContenidos({
@@ -212,9 +212,9 @@ export function EsquemaContenidos({
   }
 
   return (
-    <aside className="lesson-outline flex h-full flex-col bg-card/50">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-5 py-4">
-        <h2 className="text-sm font-semibold tracking-wide text-foreground">
+    <aside className="flex h-full flex-col">
+      <div className="flex items-center justify-between gap-2 border-b border-white/25 px-5 py-4">
+        <h2 className="text-sm font-semibold tracking-wide text-white">
           Esquema de Contenidos
         </h2>
         {onCerrar && (
@@ -224,8 +224,8 @@ export function EsquemaContenidos({
             aria-label="Ocultar esquema de contenidos"
             className={cn(
               "inline-flex shrink-0 items-center justify-center rounded-md p-1.5",
-              "text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500",
+              "text-white/70 transition-colors hover:bg-white/15 hover:text-white",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00]",
             )}
           >
             <PanelRightClose className="h-4 w-4" />
@@ -245,16 +245,16 @@ export function EsquemaContenidos({
                 <button
                   type="button"
                   onClick={() => alternar(grupo.id)}
-                  className="flex w-full items-start gap-2 rounded-lg px-2 py-2 text-left transition-colors hover:bg-muted/70"
+                  className="flex w-full items-start gap-2 rounded-lg px-2 py-2 text-left transition-colors hover:bg-white/10"
                 >
                   <ChevronDown
                     className={cn(
-                      "mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                      "mt-0.5 h-4 w-4 shrink-0 text-white/55 transition-transform",
                       !abierto && "-rotate-90",
                     )}
                   />
                   <IconoEstadoModulo estado={estado} />
-                  <span className="min-w-0 flex-1 whitespace-normal break-words text-sm font-semibold text-foreground">
+                  <span className="min-w-0 flex-1 whitespace-normal break-words text-sm font-semibold text-white">
                     Módulo {indice + 1}: {grupo.titulo}
                   </span>
                   <IndicadorEstadoModulo estado={estado} porcentaje={porcentaje} />
@@ -266,7 +266,7 @@ export function EsquemaContenidos({
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={porcentaje}
-                  className="mx-2 h-1.5 overflow-hidden rounded-full bg-muted"
+                  className="mx-2 h-1.5 overflow-hidden rounded-full bg-white/20"
                 >
                   <div
                     className={cn(
@@ -283,8 +283,8 @@ export function EsquemaContenidos({
               </div>
 
               {abierto && (
-                <div className="mb-2 ml-2 mt-1 space-y-1 border-l border-border/80 pl-2">
-                  <p className="px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <div className="mb-2 ml-2 mt-1 space-y-1 border-l border-white/25 pl-2">
+                  <p className="px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
                     Lecciones
                   </p>
                   <ul className="space-y-0.5">
@@ -297,16 +297,16 @@ export function EsquemaContenidos({
                             className={cn(
                               "group flex items-start gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors",
                               activa
-                                ? "border-l-2 border-emerald-600 bg-emerald-50 font-medium text-emerald-800 dark:border-emerald-400 dark:bg-emerald-500/10 dark:text-emerald-300"
-                                : "border-l-2 border-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                                ? "border-l-2 border-[#91DC00] bg-white/22 font-medium text-white"
+                                : "border-l-2 border-transparent text-white/75 hover:bg-white/12 hover:text-white",
                             )}
                           >
                             <span
                               className={cn(
                                 "mt-0.5",
                                 activa
-                                  ? "text-emerald-700 dark:text-emerald-300"
-                                  : "text-muted-foreground group-hover:text-foreground",
+                                  ? "text-[#91DC00]"
+                                  : "text-white/55 group-hover:text-white/85",
                               )}
                             >
                               <IconoLeccion
@@ -324,7 +324,7 @@ export function EsquemaContenidos({
                                     {leccion.categoriasContenido.map((cat) => (
                                       <span
                                         key={cat}
-                                        className="inline-flex items-center rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium leading-none text-muted-foreground"
+                                        className="inline-flex items-center rounded bg-white/15 px-1.5 py-0.5 text-[10px] font-medium leading-none text-white/75"
                                       >
                                         {ETIQUETA_TAB[cat]}
                                       </span>
@@ -345,21 +345,21 @@ export function EsquemaContenidos({
                         onClick={() => alternarQuices(grupo.id)}
                         aria-expanded={quicesAbiertosModulo}
                         aria-controls={`quices-${grupo.id}`}
-                        className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-muted/60"
+                        className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm font-medium text-white transition-colors hover:bg-white/12"
                       >
                         <ChevronDown
                           className={cn(
-                            "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                            "h-4 w-4 shrink-0 text-white/55 transition-transform",
                             !quicesAbiertosModulo && "-rotate-90",
                           )}
                         />
-                        <ClipboardCheck className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <ClipboardCheck className="h-4 w-4 shrink-0 text-white/55" />
                         <span>Quices ({grupo.evaluaciones.length})</span>
                       </button>
 
                       {quicesAbiertosModulo && (
                         <div id={`quices-${grupo.id}`}>
-                          <ul className="ml-2 space-y-0.5 border-l border-border/60 pl-2">
+                          <ul className="ml-2 space-y-0.5 border-l border-white/20 pl-2">
                             {grupo.evaluaciones.map((evaluacion) => {
                               const activa = evaluacion.id === evaluacionActivaId;
                               const estadoQuizItem = estadoQuiz(evaluacion);
@@ -374,11 +374,11 @@ export function EsquemaContenidos({
                               const clases = cn(
                                 "group flex items-start gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors",
                                 activa
-                                  ? "border-l-2 border-emerald-600 bg-emerald-50 font-medium text-emerald-800 dark:border-emerald-400 dark:bg-emerald-500/10 dark:text-emerald-300"
-                                  : "border-l-2 border-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                                  ? "border-l-2 border-[#91DC00] bg-white/22 font-medium text-white"
+                                  : "border-l-2 border-transparent text-white/75 hover:bg-white/12 hover:text-white",
                                 evaluacion.completada &&
                                   !activa &&
-                                  "text-emerald-700/80 dark:text-emerald-400/90",
+                                  "text-emerald-300/90",
                                 estadoQuizItem === "bloqueado" && "cursor-not-allowed opacity-70",
                               );
 
@@ -409,7 +409,7 @@ export function EsquemaContenidos({
         })}
 
         {grupos.length === 0 && (
-          <p className="px-2 py-4 text-sm text-muted-foreground">
+          <p className="px-2 py-4 text-sm text-white/65">
             No hay contenidos disponibles.
           </p>
         )}

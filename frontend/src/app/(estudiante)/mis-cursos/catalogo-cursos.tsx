@@ -15,7 +15,6 @@ import {
   Flame,
   GraduationCap,
   Loader2,
-  MoreHorizontal,
   Play,
   Search,
 } from "lucide-react";
@@ -36,14 +35,10 @@ const CATEGORIAS = ["Curso", "Educacion", "Creatividad", "Pensamiento", "Cortos"
 /** Oculta temporalmente buscador, categorías y perfil del catálogo. */
 const MOSTRAR_BARRA_SUPERIOR_CATALOGO = false;
 
-const CLASE_PANEL_GLASS =
-  "border border-white/45 bg-white/22 shadow-[0_8px_32px_rgba(6,17,32,0.16),inset_0_1px_0_rgba(255,255,255,0.42)] backdrop-blur-xl";
-
-const CLASE_HERO_PANEL =
-  "border border-white/45 bg-white/18 shadow-[0_8px_32px_rgba(6,17,32,0.18),inset_0_1px_0_rgba(255,255,255,0.35)] backdrop-blur-xl";
+import { CLASE_HERO_PANEL, CLASE_PANEL_GLASS } from "@/config/paneles-glass";
 
 const CLASE_TARJETA_GLASS = cn(
-  "group relative flex aspect-[4/5] min-h-[300px] flex-col overflow-hidden rounded-[24px] text-left outline-none transition-[transform,box-shadow,border-color] duration-300",
+  "group relative flex aspect-[4/5] min-h-[300px] flex-col justify-end overflow-hidden rounded-[24px] text-left outline-none transition-[transform,box-shadow,border-color] duration-300",
   CLASE_PANEL_GLASS,
   "hover:-translate-y-1 hover:border-white/65 hover:shadow-[0_18px_48px_rgba(6,17,32,0.24),inset_0_1px_0_rgba(255,255,255,0.5)]",
   "focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]",
@@ -386,69 +381,68 @@ function ContenidoTarjetaCurso({
 
   return (
     <>
-      <div className="relative h-[46%] min-h-[130px] shrink-0 overflow-hidden">
-        <PortadaCurso
-          cursoId={curso.id}
-          imagenPortadaUrl={curso.imagenPortadaUrl}
-          esDiplomado={curso.esDiplomado}
-          titulo={curso.titulo}
-          fallback="abstract"
-          className="absolute inset-0 rounded-none transition-transform duration-500 group-hover:scale-105"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_55%,rgba(255,255,255,0.18)_100%)]"
-        />
+      <PortadaCurso
+        cursoId={curso.id}
+        imagenPortadaUrl={curso.imagenPortadaUrl}
+        esDiplomado={curso.esDiplomado}
+        titulo={curso.titulo}
+        fallback="abstract"
+        className="absolute inset-0 z-0 rounded-none transition-transform duration-500 group-hover:scale-105"
+      />
 
-        <div className="absolute right-3 top-3 z-20">
-          <span className="flex size-8 items-center justify-center rounded-full border border-white/45 bg-white/35 text-[#061120] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-md">
-            <MoreHorizontal className="size-4" aria-hidden="true" />
-          </span>
-        </div>
-      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(6,17,32,0.08)_0%,rgba(6,17,32,0.42)_42%,rgba(6,17,32,0.88)_100%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_50%_28%,rgba(255,255,255,0.12),transparent_42%)]"
+      />
 
-      <div className="relative flex flex-1 flex-col border-t border-white/25 bg-[#061120]/48 p-4 text-white backdrop-blur-md">
+      <div className="relative z-10 flex flex-col p-4 pb-5 text-white">
         <div className="mb-2 flex flex-wrap items-center gap-1.5">
-          <span className="inline-flex items-center gap-1 rounded-full border border-white/35 bg-white/16 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/35 bg-white/16 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
             {curso.esDiplomado && <GraduationCap className="size-3 text-white" aria-hidden="true" />}
             {categoria}
           </span>
           {completado && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/45 bg-emerald-500/30 px-2.5 py-1 text-[10px] font-semibold text-white">
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/45 bg-emerald-500/30 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
               <CheckCircle2 className="size-3 text-white" aria-hidden="true" />
               Completado
             </span>
           )}
         </div>
 
-        <h3 className="line-clamp-2 font-display text-base font-bold leading-snug text-white">
+        <h3 className="line-clamp-2 font-display text-base font-bold leading-snug text-white drop-shadow-sm">
           {curso.titulo}
         </h3>
-        <p className="mt-1.5 line-clamp-2 flex-1 text-xs leading-relaxed text-white">
+        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-white/92 drop-shadow-sm">
           {descripcion}
         </p>
 
-        <div className="mt-3 pr-12">
-          <div className="mb-1 flex items-center justify-between gap-3 text-[10px] font-semibold text-white">
-            <span>Progreso</span>
-            <span>{porcentaje}%</span>
+        <div className="mt-4 flex items-end gap-5">
+          <div className="min-w-0 flex-1 pb-1">
+            <div className="mb-1.5 flex items-center justify-between gap-3 text-[10px] font-semibold text-white">
+              <span>Progreso</span>
+              <span>{porcentaje}%</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-white/25">
+              <div
+                className="h-full rounded-full bg-[linear-gradient(90deg,#2FB9A5,#4FC9B3,#91DC00)] transition-[width] duration-500"
+                style={{ width: `${porcentaje}%` }}
+              />
+            </div>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-white/22">
-            <div
-              className="h-full rounded-full bg-[linear-gradient(90deg,#2FB9A5,#4FC9B3,#91DC00)] transition-[width] duration-500"
-              style={{ width: `${porcentaje}%` }}
-            />
-          </div>
-        </div>
 
-        <span className="absolute bottom-4 right-4 z-30 flex size-10 items-center justify-center rounded-full border border-white/70 bg-white text-[#061120] shadow-[0_8px_18px_rgba(6,17,32,0.16),inset_0_1px_0_rgba(255,255,255,0.85)] transition-[transform,background-color,box-shadow] duration-300 group-hover:scale-110 group-hover:bg-[#91DC00] group-hover:shadow-[0_12px_24px_rgba(145,220,0,0.28)]">
-          {enviando ? (
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-          ) : (
-            <Play className="size-4 fill-[#061120]" aria-hidden="true" />
-          )}
-          <span className="sr-only">{textoAccion}</span>
-        </span>
+          <span className="mb-0.5 flex size-10 shrink-0 items-center justify-center rounded-full border border-white/70 bg-white text-[#061120] shadow-[0_8px_18px_rgba(6,17,32,0.2),inset_0_1px_0_rgba(255,255,255,0.85)] transition-[transform,background-color,box-shadow] duration-300 group-hover:scale-110 group-hover:bg-[#91DC00] group-hover:shadow-[0_12px_24px_rgba(145,220,0,0.28)]">
+            {enviando ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Play className="size-4 fill-[#061120]" aria-hidden="true" />
+            )}
+            <span className="sr-only">{textoAccion}</span>
+          </span>
+        </div>
       </div>
     </>
   );

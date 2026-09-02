@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import { conSesion } from "@/lib/db";
+import type { EscuelaVisual } from "@/config/escuelas";
 import { cursos, modulos } from "@/lib/db/schema";
 
 export interface CursoFila {
@@ -10,6 +11,7 @@ export interface CursoFila {
   estado: "borrador" | "publicado" | "archivado";
   esDiplomado: boolean;
   nivelDificultad: "basico" | "intermedio" | "avanzado";
+  escuela: EscuelaVisual;
   imagenPortadaUrl: string | null;
   empresaId: string | null;
   autorId: string | null;
@@ -32,6 +34,7 @@ export async function listarCursos(usuarioId: string, soloPropios: boolean): Pro
         estado: cursos.estado,
         esDiplomado: cursos.esDiplomado,
         nivelDificultad: cursos.nivelDificultad,
+        escuela: cursos.escuela,
         imagenPortadaUrl: cursos.imagenPortadaUrl,
         empresaId: cursos.empresaId,
         autorId: cursos.autorId,

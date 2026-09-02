@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogoMarcaFormacion } from "@/components/layout/logo-marca-formacion";
+import { DashboardParticles } from "@/components/shared/dashboard-particles";
 import { NAVEGACION_POR_ROL } from "@/config/navegacion";
 import { cerrarSesion } from "@backend/server/actions/auth";
 
@@ -418,16 +419,27 @@ function ShellPanelLateral({
             "relative min-w-0 flex-1 overflow-x-clip",
             esDashboardColaborador
               ? [
-                  "min-h-dvh bg-[#061120]",
-                  "bg-[url('/images/fondo-cursos.png')] bg-cover bg-left bg-no-repeat",
+                  "isolate min-h-dvh bg-[#061120]",
                   "p-4 sm:p-5 lg:p-7 xl:p-8",
-                  "before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(90deg,rgba(6,17,32,0.78)_0%,rgba(6,17,32,0.42)_34%,rgba(6,17,32,0.08)_62%,rgba(6,17,32,0.22)_100%)]",
-                  "after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(180deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.02)_28%,rgba(6,17,32,0.28)_100%)]",
+                  "before:pointer-events-none before:absolute before:inset-0 before:z-20 before:bg-[linear-gradient(90deg,rgba(6,17,32,0.78)_0%,rgba(6,17,32,0.42)_34%,rgba(6,17,32,0.08)_62%,rgba(6,17,32,0.22)_100%)]",
+                  "after:pointer-events-none after:absolute after:inset-0 after:z-20 after:bg-[linear-gradient(180deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.02)_28%,rgba(6,17,32,0.28)_100%)]",
                 ]
               : "p-5 sm:p-6 lg:p-8 xl:p-10",
           )}
         >
-          <div className={cn(esDashboardColaborador && "relative z-10")}>{children}</div>
+          {esDashboardColaborador && (
+            <video
+              src="/images/Dashboard_fondo.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 z-0 size-full object-cover object-left"
+            />
+          )}
+          {esDashboardColaborador && <DashboardParticles preset="fireflies" accent="#74CFC4" />}
+          <div className={cn(esDashboardColaborador && "relative z-30")}>{children}</div>
         </main>
       </div>
     </div>

@@ -27,6 +27,14 @@ export const estadoEmpresa = pgEnum("estado_empresa", ["activa", "inactiva"]);
 export const estadoCurso = pgEnum("estado_curso", ["borrador", "publicado", "archivado"]);
 export const nivelDificultad = pgEnum("nivel_dificultad", ["basico", "intermedio", "avanzado"]);
 export const tipoNavegacion = pgEnum("tipo_navegacion", ["obligatoria", "libre"]);
+export const escuelaVisual = pgEnum("escuela_visual", [
+  "sociales",
+  "diseno",
+  "ingenieria",
+  "salud",
+  "empresarial",
+  "neutral",
+]);
 export const tipoLeccion = pgEnum("tipo_leccion", ["texto", "video", "archivo", "mixto"]);
 export const tipoMarcado = pgEnum("tipo_marcado", ["automatico", "manual"]);
 export const tipoRecurso = pgEnum("tipo_recurso", [
@@ -132,6 +140,7 @@ export const cursos = pgTable("cursos", {
   navegacion: tipoNavegacion("navegacion").notNull().default("libre"),
   esDiplomado: boolean("es_diplomado").notNull().default(false),
   empresaId: uuid("empresa_id").references(() => empresas.id),
+  escuela: escuelaVisual("escuela").notNull().default("neutral"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),

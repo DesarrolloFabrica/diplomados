@@ -12,6 +12,7 @@ import {
   intentosEvaluacion,
   modulos,
 } from "@/lib/db/schema";
+import type { EscuelaVisual } from "@/config/escuelas";
 import type { CursoDetalle, ModuloFila } from "@/server/queries/cursos";
 
 export interface CursoCatalogoFila {
@@ -21,6 +22,7 @@ export interface CursoCatalogoFila {
   imagenPortadaUrl: string | null;
   esDiplomado: boolean;
   nivelDificultad: "basico" | "intermedio" | "avanzado";
+  escuela: EscuelaVisual;
   inscripcionId: string | null;
   estadoInscripcion:
     | "no_iniciado"
@@ -48,6 +50,7 @@ export async function listarCursosParaColaborador(
         imagenPortadaUrl: cursos.imagenPortadaUrl,
         esDiplomado: cursos.esDiplomado,
         nivelDificultad: cursos.nivelDificultad,
+        escuela: cursos.escuela,
         inscripcionId: inscripciones.id,
         estadoInscripcion: inscripciones.estado,
         porcentajeAvance: inscripciones.porcentajeAvance,
