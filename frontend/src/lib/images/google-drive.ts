@@ -6,9 +6,15 @@ export interface DriveImagenMeta {
 }
 
 export type ModoPortadaDrive = "imagen" | "iframe";
+export type ModoRecursoDrive = "video" | "audio" | "imagen" | "iframe";
 
 export interface CandidatoPortadaDrive {
   modo: ModoPortadaDrive;
+  url: string;
+}
+
+export interface CandidatoRecursoDrive {
+  modo: ModoRecursoDrive;
   url: string;
 }
 
@@ -56,6 +62,25 @@ export function urlProxyDrive(meta: DriveImagenMeta): string {
   return `/api/imagenes/google-drive?${params.toString()}`;
 }
 
+export function urlProxyMediaDrive(meta: DriveImagenMeta): string {
+  const params = new URLSearchParams({ id: meta.id });
+  if (meta.resourceKey) {
+    params.set("resourcekey", meta.resourceKey);
+  }
+  return `/api/media/google-drive?${params.toString()}`;
+}
+
+export function urlVerDrive(meta: DriveImagenMeta): string {
+  const params = new URLSearchParams();
+  if (meta.resourceKey) {
+    params.set("resourcekey", meta.resourceKey);
+  }
+  const query = params.toString();
+  return query
+    ? `https://drive.google.com/file/d/${meta.id}/view?${query}`
+    : `https://drive.google.com/file/d/${meta.id}/view`;
+}
+
 export function urlMiniaturaDrive(meta: DriveImagenMeta, ancho = 1200): string {
   const params = new URLSearchParams({
     id: meta.id,
@@ -96,4 +121,69 @@ export function candidatosPortadaDrive(url: string | null | undefined): Candidat
     { modo: "imagen", url: urlMiniaturaDrive(meta) },
     { modo: "iframe", url: urlPreviewDrive(meta) },
   ];
+}
+
+type TipoRecursoDrive = "video" | "audio" | "imagen" | "pdf" | "presentacion" | "otro";
+
+function clasificarTipoDrive(tipo: string): TipoRecursoDrive {
+  switch (tipo) {
+    case "video":
+      return "video";
+    case "audio":
+      return "audio";
+    case "imagen":
+      return "imagen";
+    case "pdf":
+      return "pdf";
+    case "presentacion":
+      return "presentacion";
+    default:
+      return "otro";
+  }
+}
+
+/**
+ * Orden de intentos para recursos de lección en Drive:
+ * - Video: proxy same-origin (evita cookies de terceros) → iframe preview
+ * - Imagen/infografía: proxy → miniatura → iframe
+ * - PDF/presentación: iframe preview con resourcekey
+ */
+export function candidatosRecursoDrive(
+  url: string | null | undefined,
+  tipo: string,
+): CandidatoRecursoDrive[] {
+  const meta = extraerMetaGoogleDrive(url);
+  if (!meta) {
+    return [];
+  }
+
+  const preview = urlPreviewDrive(meta);
+  const clasificacion = clasificarTipoDrive(tipo);
+
+  switch (clasificacion) {
+    case "video":
+      return [
+        { modo: "video", url: urlProxyMediaDrive(meta) },
+        { modo: "iframe", url: preview },
+      ];
+    case "audio":
+      return [
+        { modo: "audio", url: urlProxyMediaDrive(meta) },
+        { modo: "iframe", url: preview },
+      ];
+    case "imagen":
+      return [
+        { modo: "imagen", url: urlProxyDrive(meta) },
+        { modo: "imagen", url: urlMiniaturaDrive(meta) },
+        { modo: "iframe", url: preview },
+      ];
+    case "pdf":
+    case "presentacion":
+    case "otro":
+      return [{ modo: "iframe", url: preview }];
+    default: {
+      const _exhaustivo: never = clasificacion;
+      return _exhaustivo;
+    }
+  }
 }

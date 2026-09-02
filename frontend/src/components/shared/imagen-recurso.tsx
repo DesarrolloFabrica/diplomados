@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { iconoTematico } from "@/components/shared/icono-tematico";
+import { normalizarUrlImagen } from "@/lib/images/normalizar-url-imagen";
 
 interface ImagenRecursoProps {
   url: string;
@@ -13,6 +14,7 @@ interface ImagenRecursoProps {
 // cuadro roto del navegador.
 export function ImagenRecurso({ url, nombre }: ImagenRecursoProps) {
   const [roto, setRoto] = useState(false);
+  const src = normalizarUrlImagen(url) || url;
 
   if (roto) {
     const Icono = iconoTematico(nombre);
@@ -27,7 +29,7 @@ export function ImagenRecurso({ url, nombre }: ImagenRecursoProps) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={url}
+      src={src}
       alt={nombre}
       onError={() => setRoto(true)}
       className="w-full rounded-lg border border-border"

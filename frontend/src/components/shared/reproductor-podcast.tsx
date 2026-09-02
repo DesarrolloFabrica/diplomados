@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 interface ReproductorPodcastProps {
   nombre: string;
   url: string;
+  onFallo?: () => void;
 }
 
 function formatearTiempo(segundos: number) {
@@ -21,7 +22,7 @@ const BARRAS = [
   52, 74, 36, 60, 44, 72, 48, 66, 38, 58, 42, 70, 50, 64,
 ];
 
-export function ReproductorPodcast({ nombre, url }: ReproductorPodcastProps) {
+export function ReproductorPodcast({ nombre, url, onFallo }: ReproductorPodcastProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [reproduciendo, setReproduciendo] = useState(false);
   const [actual, setActual] = useState(0);
@@ -128,7 +129,13 @@ export function ReproductorPodcast({ nombre, url }: ReproductorPodcastProps) {
         </div>
 
         {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-        <audio ref={audioRef} src={url} preload="metadata" className="hidden" />
+        <audio
+          ref={audioRef}
+          src={url}
+          preload="metadata"
+          className="hidden"
+          onError={() => onFallo?.()}
+        />
       </div>
     </div>
   );

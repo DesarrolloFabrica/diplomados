@@ -1,3 +1,5 @@
+import { extraerMetaGoogleDrive, urlPreviewDrive } from "@/lib/images/google-drive";
+
 // Detecta enlaces de YouTube para incrustarlos como <iframe>; cualquier
 // otro enlace externo se maneja como tarjeta con botón "Abrir".
 export function obtenerEmbedYoutube(url: string): string | null {
@@ -24,16 +26,10 @@ export function obtenerEmbedYoutube(url: string): string | null {
 // se puede incrustar y solo abriría una página de Google, no el archivo.
 // Sirve para video, PDF, imagen o presentación por igual.
 export function obtenerEmbedGoogleDrive(url: string): string | null {
-  try {
-    const u = new URL(url);
-    if (!u.hostname.includes("drive.google.com")) return null;
+  const meta = extraerMetaGoogleDrive(url);
+  return meta ? urlPreviewDrive(meta) : null;
+}
 
-    const enRuta = u.pathname.match(/\/file\/d\/([^/]+)/)?.[1];
-    const enQuery = u.searchParams.get("id");
-    const id = enRuta ?? enQuery;
-
-    return id ? `https://drive.google.com/file/d/${id}/preview` : null;
-  } catch {
-    return null;
-  }
+export function esEnlaceGoogleDrive(url: string): boolean {
+  return extraerMetaGoogleDrive(url) !== null;
 }

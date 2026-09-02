@@ -48,7 +48,7 @@ export interface GrupoRuta {
 
 /**
  * Datos del curso/diplomado para fusionar el hero dentro del fondo del
- * roadmap inmersivo (en vez de mostrarlo como una secci├│n aparte arriba).
+ * roadmap inmersivo (en vez de mostrarlo como una sección aparte arriba).
  */
 export interface HeroInmersivoRoadmap {
   titulo: string;
@@ -62,13 +62,13 @@ export interface HeroInmersivoRoadmap {
 }
 
 const ETIQUETA_DIFICULTAD_HERO_INMERSIVO = {
-  basico: "B├ísico",
+  basico: "Básico",
   intermedio: "Intermedio",
   avanzado: "Avanzado",
 } as const;
 
 function formatearDuracionHeroInmersivo(minutos: number | null): string {
-  if (minutos == null || minutos <= 0) return "Duraci├│n no definida";
+  if (minutos == null || minutos <= 0) return "Duración no definida";
   const horas = Math.floor(minutos / 60);
   const resto = minutos % 60;
   if (horas === 0) return `${resto} min`;
@@ -143,7 +143,7 @@ const WORLD_ANCHORS: Record<WorldAnchorId, WorldAnchor> = {
     x: 77,
     y: 61,
     placement: "left",
-    label: "Cierre del modulo",
+    label: "Cierre del módulo",
   },
 };
 
@@ -167,7 +167,7 @@ const WORLD_CLUSTER_OFFSETS = [
 const WORLD_OBJECTS = [
   {
     id: "start-platform",
-    label: "Inicio del recorrido",
+    label: "Plataforma inicial",
     x: 20,
     y: 72,
     width: 19,
@@ -176,7 +176,7 @@ const WORLD_OBJECTS = [
   },
   {
     id: "central-flower",
-    label: "Flor central",
+    label: "Plataforma central",
     x: 45,
     y: 56,
     width: 15,
@@ -185,7 +185,7 @@ const WORLD_OBJECTS = [
   },
   {
     id: "upper-office",
-    label: "Explorar espacio",
+    label: "Oficina superior",
     x: 50,
     y: 27,
     width: 20,
@@ -194,7 +194,7 @@ const WORLD_OBJECTS = [
   },
   {
     id: "upper-monument",
-    label: "Monumento",
+    label: "Monumento superior",
     x: 73,
     y: 30,
     width: 14,
@@ -212,7 +212,7 @@ const WORLD_OBJECTS = [
   },
 ] as const;
 
-/** Secuencia fija por m├│dulo: intro ÔåÆ pr├íctica ÔåÆ lectura ÔåÆ actividad. */
+/** Secuencia fija por módulo: intro → práctica → lectura → actividad. */
 const ICONOS_LECCION: LucideIcon[] = [BookOpen, Play, FileText, Wrench];
 
 type EstadoEstacion = "completado" | "activo" | "pendiente" | "bloqueado";
@@ -574,12 +574,12 @@ function indicePrimeraEvaluacion(nodos: NodoRuta[]): number {
 }
 
 /**
- * Distribuye los nodos del m├│dulo en las 5 zonas del mundo seg├║n su
- * posici├│n global dentro del m├│dulo (no seg├║n su tipo). Antes todas las
- * evaluaciones ca├¡an en el mismo monumento final y las lecciones se
- * repart├¡an solo entre 3 zonas, lo que amontonaba las estaciones en
- * cuanto un m├│dulo ten├¡a varias evaluaciones. Ahora el avance 0ÔåÆ1 a lo
- * largo del m├│dulo completo se reparte parejo entre las 5 zonas.
+ * Distribuye los nodos del módulo en las 5 zonas del mundo según su
+ * posición global dentro del módulo (no según su tipo). Antes todas las
+ * evaluaciones caían en el mismo monumento final y las lecciones se
+ * repartían solo entre 3 zonas, lo que amontonaba las estaciones en
+ * cuanto un módulo tenía varias evaluaciones. Ahora el avance 0→1 a lo
+ * largo del módulo completo se reparte parejo entre las 5 zonas.
  */
 function anchorIdParaNodoMundo(
   _nodo: NodoRuta,
@@ -805,7 +805,7 @@ function OndasEstacionActiva() {
   );
 }
 
-/** Hex├ígono plano para estaciones de quiz. */
+/** Hexágono plano para estaciones de quiz. */
 function NucleoHexagonal({
   nodo,
   variant,
@@ -1004,7 +1004,7 @@ function AvatarRoadmap({ variant }: { variant: VarianteRoadmap }) {
   return (
     <Image
       src={ROADMAP_ASSETS.avatar}
-      alt="Tu posicion actual"
+      alt="Tu posición actual"
       width={72}
       height={72}
       className={cn(
@@ -1028,7 +1028,7 @@ function AvatarRoadmapEnMovimiento({
   return (
     <Image
       src={ROADMAP_ASSETS.avatar}
-      alt="Avance hacia la siguiente estacion"
+      alt="Avance hacia la siguiente estación"
       width={76}
       height={76}
       className={cn(
@@ -1239,9 +1239,9 @@ function IndicadorProgresoModulo({
         )}
       >
         {progreso.completo && <Check className="size-4 shrink-0" aria-hidden="true" />}
-        <span className="font-semibold">M├│dulo {indiceModulo + 1}</span>
+        <span className="font-semibold">Módulo {indiceModulo + 1}</span>
         <span className={cn("text-muted-foreground", progreso.completo && "text-emerald-700 dark:text-emerald-200")}>
-          ┬À {progreso.completados}/{progreso.total} completadas
+          · {progreso.completados}/{progreso.total} completadas
         </span>
       </div>
 
@@ -1278,7 +1278,7 @@ function NavegacionModulosRoadmap({
 
   return (
     <nav
-      aria-label="Navegacion de modulos"
+      aria-label="Navegación de módulos"
       className="relative z-40 mb-8 w-full overflow-x-auto overscroll-x-contain pb-2"
     >
       <div className="mx-auto flex w-max max-w-full items-start justify-center gap-2 px-1 sm:gap-3">
@@ -1287,9 +1287,9 @@ function NavegacionModulosRoadmap({
           const progreso = calcularProgresoModulo(grupo.nodos);
           const colorModulo = colorModuloPorIndice(indiceModulo);
           const visible = indiceModulo === indiceModuloVisible;
-          const label = `Modulo ${indiceModulo + 1}`;
+          const label = `Módulo ${indiceModulo + 1}`;
           const ariaLabel = progreso.completo
-            ? `Ver ${label}. Modulo completado`
+            ? `Ver ${label}. Módulo completado`
             : `Ver ${label}`;
 
           return (
@@ -1304,7 +1304,7 @@ function NavegacionModulosRoadmap({
                 type="button"
                 aria-current={visible ? "step" : undefined}
                 aria-label={ariaLabel}
-                title={`${label} ┬À ${grupo.titulo}`}
+                title={`${label} · ${grupo.titulo}`}
                 onClick={() => onSeleccionarModulo(indiceModulo)}
                 className={cn(
                   "group flex min-w-10 flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-xs font-semibold text-slate-500 transition-[color,transform] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:text-slate-300",
@@ -1355,10 +1355,10 @@ function CierreModulo({
   indiceModuloDestino: number | null;
   onContinuarModulo: (indiceModulo: number) => void;
 }) {
-  const titulo = esUltimoModulo ? "├Ültimo m├│dulo completado" : "M├│dulo completado";
+  const titulo = esUltimoModulo ? "Último módulo completado" : "Módulo completado";
   const descripcion = esUltimoModulo
-    ? "Has finalizado todos los m├│dulos del programa."
-    : "Has completado todas las lecciones y evaluaciones de este m├│dulo.";
+    ? "Has finalizado todos los módulos del programa."
+    : "Has completado todas las lecciones y evaluaciones de este módulo.";
 
   return (
     <div className="relative z-30 mx-auto mt-10 w-full max-w-md rounded-2xl border border-emerald-400/25 bg-white/70 px-5 py-4 text-center shadow-sm backdrop-blur-sm dark:bg-white/5">
@@ -1374,7 +1374,7 @@ function CierreModulo({
           onClick={() => onContinuarModulo(indiceModuloDestino)}
           className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#061120] px-4 py-3 text-sm font-semibold text-white transition-[background-color,transform] duration-300 hover:bg-[#123A32] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto dark:bg-[#91DC00] dark:text-[#061120]"
         >
-          Continuar al M├│dulo {indiceModulo + 2}
+          Continuar al Módulo {indiceModulo + 2}
           <ArrowRight className="size-4" aria-hidden="true" />
         </button>
       )}
@@ -1444,53 +1444,6 @@ function layoutNodosMundo(nodos: NodoRuta[]): LayoutNodoMundo[] {
       zoneLabel: anchor.label,
     };
   });
-}
-
-function CaminoRoadmapMundo({
-  layouts,
-  indiceModulo,
-  nodoActivoId,
-}: {
-  layouts: LayoutNodoMundo[];
-  indiceModulo: number;
-  nodoActivoId: string | null;
-}) {
-  if (layouts.length < 2) return null;
-
-  const colorModulo = colorModuloPorIndice(indiceModulo);
-  const points = layouts.map((layout) => `${layout.x},${layout.y}`).join(" ");
-  const indiceActivo = nodoActivoId
-    ? layouts.findIndex((layout) => layout.nodo.id === nodoActivoId)
-    : -1;
-  const segmentoActivo =
-    indiceActivo > 0
-      ? `${layouts[indiceActivo - 1]!.x},${layouts[indiceActivo - 1]!.y} ${layouts[indiceActivo]!.x},${layouts[indiceActivo]!.y}`
-      : null;
-  const gradId = `roadmap-world-track-${indiceModulo}`;
-
-  return (
-    <svg
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-20 overflow-visible"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="none"
-    >
-      <defs>
-        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#2FB9A5" />
-          <stop offset="54%" stopColor={colorModulo.final} />
-          <stop offset="100%" stopColor="#0454BD" />
-        </linearGradient>
-      </defs>
-      <polyline className="roadmap-world-track-shadow" points={points} />
-      <polyline className="roadmap-world-track-board" points={points} />
-      <polyline className="roadmap-world-track-dashes" points={points} />
-      <polyline className="roadmap-world-track-core" points={points} stroke={`url(#${gradId})`} />
-      {segmentoActivo && (
-        <polyline className="roadmap-world-track-active" points={segmentoActivo} />
-      )}
-    </svg>
-  );
 }
 
 function WorldBackground({ src }: { src: string }) {
@@ -1568,9 +1521,6 @@ function WorldInteractionLayer({
             transform: "translate(-50%, -50%)",
           }}
         >
-          <span className="roadmap-world-object-label pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/80 bg-white/86 px-3 py-1 text-[11px] font-semibold text-slate-800 opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-200">
-            {object.label}
-          </span>
           {activeObjectId === object.id && (
             <span aria-hidden="true" className="roadmap-world-object-effect" />
           )}
@@ -1595,7 +1545,7 @@ function NavegacionModulosMundo({
 
   return (
     <nav
-      aria-label="Navegacion de modulos"
+      aria-label="Navegación de módulos"
       className="roadmap-world-hud absolute bottom-20 right-4 z-40 max-w-[calc(100%-2rem)] rounded-2xl border border-white/70 bg-white/78 p-3 shadow-[0_18px_45px_rgba(6,17,32,0.12)] backdrop-blur-md dark:border-white/10 dark:bg-[#071B30]/72 sm:bottom-24 sm:right-6"
     >
       <div className="mb-2 flex items-center justify-between gap-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
@@ -1614,7 +1564,7 @@ function NavegacionModulosMundo({
               key={grupo.moduloId}
               type="button"
               aria-current={visible ? "step" : undefined}
-              aria-label={`Ver modulo ${indiceModulo + 1}`}
+              aria-label={`Ver módulo ${indiceModulo + 1}`}
               onClick={() => onSeleccionarModulo(indiceModulo)}
               className={cn(
                 "grid size-9 place-items-center rounded-full border text-xs font-bold transition-[background-color,border-color,box-shadow,transform] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
@@ -1664,6 +1614,7 @@ function EstacionMundo({
   nodoDestinoId,
   faseTransicion,
   selectedStationId,
+  exploreMode,
   onSelectStation,
 }: {
   layout: LayoutNodoMundo;
@@ -1674,6 +1625,7 @@ function EstacionMundo({
   nodoDestinoId: string | null;
   faseTransicion: FaseTransicionRoadmap;
   selectedStationId: string | null;
+  exploreMode: boolean;
   onSelectStation: (stationId: string | null) => void;
 }) {
   const router = useRouter();
@@ -1698,7 +1650,6 @@ function EstacionMundo({
   const estado = estadoForzado ?? estadoEstacion(nodoEtiqueta, esNodoActivoVisual);
   const selected = selectedStationId === layout.nodo.id;
   const mostrarCard = selected;
-  const mostrarEtiquetaActiva = esNodoActivoVisual && !selected;
 
   function seleccionarEstacion() {
     if (selected && !layout.nodo.bloqueado) {
@@ -1765,17 +1716,13 @@ function EstacionMundo({
       </button>
       {mostrarAvatar && <AvatarRoadmap variant="desktop" />}
 
-      {mostrarEtiquetaActiva && (
-        <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.3rem)] z-50 w-max max-w-[190px] -translate-x-1/2 rounded-full border border-[#22D3EE]/35 bg-[#071B30]/86 px-3 py-1.5 text-center text-[11px] font-bold leading-tight text-white shadow-[0_10px_26px_rgba(6,17,32,0.16)] backdrop-blur-sm">
-          Estas aqui
-        </span>
-      )}
-
       <span
-        aria-hidden="true"
+        aria-hidden={mostrarCard}
         className={cn(
-          "pointer-events-none absolute left-1/2 top-[calc(100%+0.45rem)] z-40 hidden w-max max-w-[180px] -translate-x-1/2 rounded-full border border-white/80 bg-white/86 px-3 py-1.5 text-center text-[11px] font-semibold leading-tight text-slate-800 opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 lg:block",
-          mostrarEtiquetaActiva && "hidden",
+          "pointer-events-none absolute left-1/2 top-[calc(100%+0.45rem)] z-40 w-max max-w-[180px] -translate-x-1/2 rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-center text-[11px] font-semibold leading-tight text-slate-800 opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-200",
+          !mostrarCard && "group-hover:opacity-100 group-focus-within:opacity-100",
+          exploreMode && !mostrarCard && "opacity-100",
+          mostrarCard && "hidden",
         )}
       >
         {layout.zoneLabel}
@@ -1839,6 +1786,7 @@ function WorldStationsLayer({
   nodoDestinoId,
   faseTransicion,
   selectedStationId,
+  exploreMode,
   onSelectStation,
 }: {
   layouts: LayoutNodoMundo[];
@@ -1849,22 +1797,11 @@ function WorldStationsLayer({
   nodoDestinoId: string | null;
   faseTransicion: FaseTransicionRoadmap;
   selectedStationId: string | null;
+  exploreMode: boolean;
   onSelectStation: (stationId: string | null) => void;
 }) {
-  const nodoActivoSegmentoId =
-    faseTransicion === "arrived"
-      ? nodoDestinoId
-      : faseTransicion === "idle"
-        ? nodoActivoGlobalId
-        : null;
-
   return (
     <div className="absolute inset-x-0 bottom-20 top-24 z-30 sm:bottom-16 sm:top-24">
-      <CaminoRoadmapMundo
-        layouts={layouts}
-        indiceModulo={indiceModulo}
-        nodoActivoId={nodoActivoSegmentoId}
-      />
       {layouts.map((layout) => (
         <EstacionMundo
           key={layout.nodo.id}
@@ -1876,6 +1813,7 @@ function WorldStationsLayer({
           nodoDestinoId={nodoDestinoId}
           faseTransicion={faseTransicion}
           selectedStationId={selectedStationId}
+          exploreMode={exploreMode}
           onSelectStation={onSelectStation}
         />
       ))}
@@ -1893,8 +1831,8 @@ function ChipHeroInmersivo({ icono: Icono, valor }: { icono: LucideIcon; valor: 
 }
 
 /**
- * Panel fusionado del hero del curso + contexto del m├│dulo actual. Vive
- * flotando sobre el fondo del mundo inmersivo en vez de la secci├│n de hero
+ * Panel fusionado del hero del curso + contexto del módulo actual. Vive
+ * flotando sobre el fondo del mundo inmersivo en vez de la sección de hero
  * aparte, para que el fondo ocupe toda la pantalla.
  */
 function PanelCursoInmersivo({
@@ -1918,7 +1856,7 @@ function PanelCursoInmersivo({
     : grupo.titulo;
   const modulosTexto =
     hero && hero.cantidadModulos > 0
-      ? `${hero.cantidadModulos} ${hero.cantidadModulos === 1 ? "m├│dulo" : "m├│dulos"}`
+      ? `${hero.cantidadModulos} ${hero.cantidadModulos === 1 ? "módulo" : "módulos"}`
       : null;
 
   return (
@@ -1969,7 +1907,7 @@ function PanelCursoInmersivo({
           <div className="mt-4 border-t border-slate-200/70 pt-3 dark:border-white/10">
             <div className="flex items-start justify-between gap-4">
               <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72] dark:text-[#67E8F9]">
-                M├│dulo {indiceModulo + 1} ┬À {tituloModulo}
+                Módulo {indiceModulo + 1} · {tituloModulo}
               </p>
               <span className="shrink-0 rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-bold text-slate-700 shadow-sm dark:bg-white/10 dark:text-white">
                 {progresoModulo.completados}/{progresoModulo.total}
@@ -1981,7 +1919,7 @@ function PanelCursoInmersivo({
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72] dark:text-[#67E8F9]">
-              Modulo {indiceModulo + 1}
+              Módulo {indiceModulo + 1}
             </p>
             <h2 className="mt-1 text-base font-bold leading-tight text-slate-950 dark:text-white">
               {tituloModulo}
@@ -2060,9 +1998,9 @@ function PistaExploracionInmersiva({ exploreMode }: { exploreMode: boolean }) {
       )}
     >
       <span className="mb-0.5 block font-bold text-slate-900 dark:text-white">
-        Explora cada estaci├│n
+        Explora cada estación
       </span>
-      Pasa el cursor sobre cada punto del mapa para ver m├ís detalles.
+      Pasa el cursor sobre cada punto del mapa para ver más detalles.
     </div>
   );
 }
@@ -2295,6 +2233,7 @@ function RoadmapInmersivoExperimental({
         nodoDestinoId={nodoDestinoId}
         faseTransicion={faseTransicion}
         selectedStationId={selectedStationId}
+        exploreMode={exploreMode}
         onSelectStation={setSelectedStationId}
       />
       <WorldHudLayer
@@ -2391,7 +2330,7 @@ function FigurasRoadmapDecorativas() {
   );
 }
 
-/** Contenedor ra├¡z: fondo decorativo a ancho completo del ├írea principal + contenido centrado. */
+/** Contenedor raíz: fondo decorativo a ancho completo del área principal + contenido centrado. */
 export function VistaRoadmap({ children }: { children: React.ReactNode }) {
   return (
     <section className="roadmap-section relative isolate z-0 w-full min-w-0 overflow-x-clip lg:overflow-x-visible">

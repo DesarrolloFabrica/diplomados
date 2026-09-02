@@ -8,7 +8,8 @@ import {
   Presentation,
   Video,
 } from "lucide-react";
-import { obtenerEmbedYoutube, obtenerEmbedGoogleDrive } from "@/lib/media";
+import { obtenerEmbedYoutube, esEnlaceGoogleDrive } from "@/lib/media";
+import { DriveRecursoEmbed } from "@/components/shared/drive-recurso-embed";
 import { ImagenRecurso } from "@/components/shared/imagen-recurso";
 import { ReproductorPodcast } from "@/components/shared/reproductor-podcast";
 import type { TipoRecurso } from "@backend/lib/db/schema";
@@ -41,24 +42,9 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
     );
   }
 
-  // El material subido a Google Drive (video, PDF, imagen o presentación)
-  // se incrusta igual sin importar el tipo elegido: el link normal de
-  // "compartir" de Drive no reproduce nada dentro de la página, solo el
-  // formato /preview lo permite.
-  const embedDrive = obtenerEmbedGoogleDrive(url);
-  if (embedDrive) {
-    return (
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-foreground">{nombre}</p>
-        <div
-          className={`lesson-media w-full overflow-hidden rounded-2xl border border-border/70 bg-muted shadow-[0_8px_30px_rgba(6,17,32,0.06)] ring-1 ring-emerald-500/10 ${
-            tipo === "video" ? "aspect-video" : "h-[70vh] max-h-[640px]"
-          }`}
-        >
-          <iframe src={embedDrive} title={nombre} className="h-full w-full" allow="autoplay" />
-        </div>
-      </div>
-    );
+  // Google Drive: proxy same-origin + cadena de fallback (resourcekey, cookies).
+  if (esEnlaceGoogleDrive(url)) {
+    return <DriveRecursoEmbed nombre={nombre} tipo={tipo} url={url} />;
   }
 
   if (tipo === "video") {
