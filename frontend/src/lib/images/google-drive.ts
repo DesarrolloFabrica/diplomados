@@ -103,6 +103,18 @@ export function urlPreviewDrive(meta: DriveImagenMeta): string {
     : `https://drive.google.com/file/d/${meta.id}/preview`;
 }
 
+/** Descarga directa en el navegador (usa cookies Google del usuario si las hay). */
+export function urlDescargaDirectaDrive(meta: DriveImagenMeta): string {
+  const url = new URL("https://drive.google.com/uc");
+  url.searchParams.set("export", "download");
+  url.searchParams.set("id", meta.id);
+  url.searchParams.set("confirm", "t");
+  if (meta.resourceKey) {
+    url.searchParams.set("resourcekey", meta.resourceKey);
+  }
+  return url.toString();
+}
+
 /**
  * Orden de intentos para portadas en Drive:
  * 1) proxy interno (público / descarga confirmada)
@@ -144,9 +156,7 @@ function clasificarTipoDrive(tipo: string): TipoRecursoDrive {
 
 /**
  * Orden de intentos para recursos de lección en Drive:
- * - Video/audio: solo proxy same-origin (reproductor nativo). El iframe de
- *   Drive preview falla con frecuencia en portátiles modestos, sin cookies
- *   de terceros o con bloqueos corporativos (500/401 en el visor de Google).
+ * - Video/audio: proxy same-origin → descarga directa (cookies del navegador) → iframe preview
  * - Imagen/infografía: proxy → miniatura → iframe
  * - PDF/presentación: iframe preview con resourcekey
  */
@@ -164,9 +174,17 @@ export function candidatosRecursoDrive(
 
   switch (clasificacion) {
     case "video":
-      return [{ modo: "video", url: urlProxyMediaDrive(meta) }];
+      return [
+        { modo: "video", url: urlProxyMediaDrive(meta) },
+        { modo: "video", url: urlDescargaDirectaDrive(meta) },
+        { modo: "iframe", url: preview },
+      ];
     case "audio":
-      return [{ modo: "audio", url: urlProxyMediaDrive(meta) }];
+      return [
+        { modo: "audio", url: urlProxyMediaDrive(meta) },
+        { modo: "audio", url: urlDescargaDirectaDrive(meta) },
+        { modo: "iframe", url: preview },
+      ];
     case "imagen":
       return [
         { modo: "imagen", url: urlProxyDrive(meta) },

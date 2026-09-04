@@ -82,7 +82,7 @@ function DriveImagen({
   );
 }
 
-const TIMEOUT_CARGA_MEDIA_MS = 18_000;
+const TIMEOUT_CARGA_MEDIA_MS = 45_000;
 
 function DriveVideo({
   src,
@@ -94,6 +94,11 @@ function DriveVideo({
   onFallo: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    setCargando(true);
+  }, [src]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -103,37 +108,57 @@ function DriveVideo({
     const marcarFallo = () => {
       if (resuelto) return;
       resuelto = true;
+      setCargando(false);
       onFallo();
     };
 
-    const timeout = window.setTimeout(marcarFallo, TIMEOUT_CARGA_MEDIA_MS);
-    const onListo = () => {
+    const marcarListo = () => {
+      if (resuelto) return;
       resuelto = true;
       window.clearTimeout(timeout);
+      setCargando(false);
     };
 
-    video.addEventListener("loadeddata", onListo);
-    video.addEventListener("canplay", onListo);
+    const timeout = window.setTimeout(() => {
+      if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        marcarListo();
+        return;
+      }
+      marcarFallo();
+    }, TIMEOUT_CARGA_MEDIA_MS);
+
+    video.addEventListener("loadeddata", marcarListo);
+    video.addEventListener("canplay", marcarListo);
 
     return () => {
       window.clearTimeout(timeout);
-      video.removeEventListener("loadeddata", onListo);
-      video.removeEventListener("canplay", onListo);
+      video.removeEventListener("loadeddata", marcarListo);
+      video.removeEventListener("canplay", marcarListo);
     };
   }, [src, onFallo]);
 
   return (
-    // eslint-disable-next-line jsx-a11y/media-has-caption
-    <video
-      ref={videoRef}
-      controls
-      playsInline
-      preload="metadata"
-      src={src}
-      title={titulo}
-      className="absolute inset-0 h-full w-full bg-black"
-      onError={onFallo}
-    />
+    <>
+      {cargando ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/80 text-sm text-white/80">
+          Cargando video…
+        </div>
+      ) : null}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <video
+        ref={videoRef}
+        controls
+        playsInline
+        preload="metadata"
+        src={src}
+        title={titulo}
+        className="absolute inset-0 h-full w-full bg-black"
+        onError={() => {
+          setCargando(false);
+          onFallo();
+        }}
+      />
+    </>
   );
 }
 
@@ -146,15 +171,24 @@ export function DriveRecursoEmbed({ nombre, tipo, url, className }: DriveRecurso
 
   const [indiceCandidato, setIndiceCandidato] = useState(0);
   const [agotado, setAgotado] = useState(false);
+  const avanzandoRef = useRef(false);
 
   useEffect(() => {
     setIndiceCandidato(0);
     setAgotado(false);
+    avanzandoRef.current = false;
   }, [url, tipo]);
+
+  useEffect(() => {
+    avanzandoRef.current = false;
+  }, [indiceCandidato]);
 
   const candidatoActual: CandidatoRecursoDrive | undefined = candidatos[indiceCandidato];
 
   function avanzarCandidato() {
+    if (avanzandoRef.current) return;
+    avanzandoRef.current = true;
+
     setIndiceCandidato((actual) => {
       const siguiente = actual + 1;
       if (siguiente >= candidatos.length) {
@@ -175,7 +209,7 @@ export function DriveRecursoEmbed({ nombre, tipo, url, className }: DriveRecurso
         <div className="flex h-full min-h-[280px] flex-col items-center justify-center gap-3 p-6 text-center">
           <p className="text-sm text-muted-foreground">
             {esVideoOAudio
-              ? "No se pudo cargar el video en este dispositivo. Suele ocurrir en equipos con poca memoria, navegadores con cookies de terceros bloqueadas o formatos no soportados. Ábrelo en Google Drive para verlo allí."
+              ? "No se pudo reproducir el video aquí. Puedes verlo directamente en Google Drive."
               : "No se pudo reproducir el contenido embebido. Ábrelo directamente en Google Drive."}
           </p>
           <a
