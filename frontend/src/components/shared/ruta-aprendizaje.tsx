@@ -1541,11 +1541,11 @@ function WorldBackground({ src }: { src: string }) {
       </div>
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-[46%] bg-[linear-gradient(90deg,rgba(245,248,248,0.72),rgba(245,248,248,0.24)_58%,transparent)]"
+        className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-[46%] bg-[linear-gradient(90deg,rgba(6,17,32,0.55),rgba(6,17,32,0.18)_58%,transparent)]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-36 bg-[linear-gradient(180deg,rgba(245,248,248,0.58),transparent)]"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-36 bg-[linear-gradient(180deg,rgba(6,17,32,0.45),transparent)]"
       />
     </>
   );
@@ -1612,7 +1612,7 @@ function NavegacionModulosMundo({
     <nav
       aria-label="Navegación de módulos"
       className={cn(
-        "roadmap-world-hud absolute bottom-20 right-4 z-40 max-w-[calc(100%-2rem)] rounded-2xl p-3 sm:bottom-24 sm:right-6",
+        "roadmap-world-hud absolute bottom-14 right-4 z-40 max-w-[calc(100%-2rem)] rounded-2xl p-3 sm:bottom-16 sm:right-6",
         CLASE_TARJETA_GLASS_LEGIBLE,
       )}
     >
@@ -1867,7 +1867,7 @@ function WorldStationsLayer({
   onSelectStation: (stationId: string | null) => void;
 }) {
   return (
-    <div className="absolute inset-x-0 bottom-20 top-24 z-30 sm:bottom-16 sm:top-24">
+    <div className="absolute inset-x-0 bottom-14 top-20 z-30 sm:bottom-12 sm:top-20">
       {layouts.map((layout) => (
         <EstacionMundo
           key={layout.nodo.id}
@@ -2289,7 +2289,7 @@ function RoadmapInmersivoExperimental({
       key={grupo.moduloId}
       aria-label={`${cursoTitulo ?? "Curso"} - roadmap inmersivo`}
       className={cn(
-        "roadmap-world relative -mx-5 -mt-5 min-h-dvh w-auto min-w-0 overflow-hidden bg-[#f5fbfd] transition-[opacity,transform] duration-300 dark:bg-[#071B30] sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 xl:-mx-10 xl:-mt-10",
+        "roadmap-world relative -mx-5 -mt-5 -mb-14 min-h-dvh w-auto min-w-0 overflow-hidden bg-[#071B30] pb-14 transition-[opacity,transform] duration-300 sm:-mx-6 sm:-mt-6 sm:-mb-14 lg:-mx-8 lg:-mt-8 lg:-mb-14 xl:-mx-10 xl:-mt-10 xl:-mb-14",
         exploreMode && "roadmap-world-explore",
         moduloEnCambio && "translate-y-3 opacity-0",
       )}

@@ -213,7 +213,7 @@ export function EsquemaContenidos({
 
   return (
     <aside className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-2 border-b border-white/25 px-5 py-4">
+      <div className="flex items-center justify-between gap-2 border-b border-white/25 px-3 py-3">
         <h2 className="text-sm font-semibold tracking-wide text-white">
           Esquema de Contenidos
         </h2>
@@ -233,7 +233,7 @@ export function EsquemaContenidos({
         )}
       </div>
 
-      <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-3">
+      <nav className="flex-1 space-y-2 overflow-y-auto px-2 py-2">
         {grupos.map((grupo, indice) => {
           const abierto = abiertos[grupo.id] ?? false;
           const quicesAbiertosModulo = quicesAbiertos[grupo.id] ?? false;

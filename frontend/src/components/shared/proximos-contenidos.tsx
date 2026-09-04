@@ -138,7 +138,7 @@ export function ProximosContenidos({
 
   if (cursoCompletado) {
     return (
-      <section className="mt-10 border-t border-white/20 pt-8">
+      <section className="mt-6 border-t border-slate-200/50 pt-5">
         <div className={cn("rounded-[24px] px-5 py-6", CLASE_PANEL_GLASS_LEGIBLE)}>
           <div className="flex items-start gap-3">
             <PartyPopper className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
@@ -157,7 +157,7 @@ export function ProximosContenidos({
   if (!principal) return null;
 
   return (
-    <section className="mt-10 border-t border-white/20 pt-8">
+    <section className="mt-6 border-t border-slate-200/50 pt-5">
       <div className="mb-4 flex items-center justify-between">
         <div>
           {etiqueta && (
@@ -169,7 +169,7 @@ export function ProximosContenidos({
         </div>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-4">
         <TarjetaPrincipal item={principal} portadaCursoUrl={portadaCursoUrl} />
 
         {secundarios.length > 0 && (

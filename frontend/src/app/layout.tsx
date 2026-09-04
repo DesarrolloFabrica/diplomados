@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ThemeScript } from "@/components/providers/theme-script";
-import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -38,7 +37,6 @@ export default function RootLayout({
       >
         <ThemeProvider>
           {children}
-          <ThemeSwitcher />
           <Toaster position="top-center" richColors />
         </ThemeProvider>
       </body>

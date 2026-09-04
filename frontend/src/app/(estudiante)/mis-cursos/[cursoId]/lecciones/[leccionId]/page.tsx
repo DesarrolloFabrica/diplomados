@@ -267,7 +267,7 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
   return (
 
-    <div className="lesson-view relative isolate -mx-5 -my-5 min-h-[calc(100vh-4rem)] sm:-mx-6 sm:-my-6 lg:-mx-8 lg:-my-8 xl:-mx-10 xl:-my-10">
+    <div className="lesson-view relative isolate -mx-5 -mt-5 -mb-14 min-h-dvh pb-14 sm:-mx-6 sm:-mt-6 sm:-mb-14 lg:-mx-8 lg:-mt-8 lg:-mb-14 xl:-mx-10 xl:-mt-10 xl:-mb-14">
 
       <LayoutVistaLeccion
 
@@ -332,7 +332,7 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
 
 
-        <div className="mt-8">
+        <div className="mt-5">
 
           <BotonCompletar
 

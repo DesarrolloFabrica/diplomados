@@ -478,8 +478,8 @@ function ShellPanelLateral({
   useEffect(() => () => cancelarOcultamientoDock(), [cancelarOcultamientoDock]);
 
   return (
-    <div className="flex min-h-dvh w-full">
-      <aside className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center overflow-visible px-3 pb-3 sm:px-4">
+    <div className="flex min-h-dvh w-full bg-[#061120]">
+      <aside className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center overflow-visible px-3 pb-2 sm:px-4">
         <div
           ref={capsulaRef}
           onMouseEnter={mantenerDockActivo}
@@ -491,7 +491,7 @@ function ShellPanelLateral({
             "pointer-events-auto flex flex-col items-center transition-[opacity,transform] duration-300 ease-out motion-reduce:duration-0",
             dockOpen
               ? "translate-y-0 opacity-100"
-              : "translate-y-[calc(100%-1.75rem)] opacity-95 lg:translate-y-[65%] lg:opacity-90",
+              : "translate-y-[calc(100%-1.75rem)] opacity-95",
           )}
         >
           <button
@@ -500,9 +500,9 @@ function ShellPanelLateral({
             aria-expanded={dockOpen}
             onClick={mantenerDockActivo}
             className={cn(
-              "-mb-1 flex h-6 min-w-12 items-center justify-center rounded-full border border-white/45 bg-[#eef7f6]/80 px-3 text-[#123238] shadow-[0_6px_20px_rgba(0,28,34,0.10),inset_0_1px_0_rgba(255,255,255,0.55)] backdrop-blur-[18px]",
-              "transition-[background-color,color,transform] duration-200 hover:-translate-y-0.5 hover:bg-white/90 hover:text-[#006F5A]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00896F]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef7f6]",
+              "-mb-1 flex h-6 min-w-12 items-center justify-center rounded-full px-3 text-white/85",
+              "transition-[color,transform] duration-200 hover:-translate-y-0.5 hover:text-white",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
               dockOpen && "pointer-events-none opacity-0",
             )}
           >
@@ -570,15 +570,15 @@ function ShellPanelLateral({
 
         <main
           className={cn(
-            "relative min-w-0 flex-1 overflow-x-clip",
+            "relative min-w-0 flex-1 overflow-x-clip bg-[#061120]",
             esDashboardColaborador
               ? [
-                  "isolate min-h-dvh bg-[#061120]",
-                  "p-4 sm:p-5 lg:p-7 lg:pb-28 xl:p-8 xl:pb-28",
+                  "isolate min-h-dvh",
+                  "p-4 sm:p-5 lg:p-7 lg:pb-14 xl:p-8 xl:pb-14",
                   "before:pointer-events-none before:absolute before:inset-0 before:z-20 before:bg-[linear-gradient(90deg,rgba(6,17,32,0.78)_0%,rgba(6,17,32,0.42)_34%,rgba(6,17,32,0.08)_62%,rgba(6,17,32,0.22)_100%)]",
                   "after:pointer-events-none after:absolute after:inset-0 after:z-20 after:bg-[linear-gradient(180deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.02)_28%,rgba(6,17,32,0.28)_100%)]",
                 ]
-              : "p-5 pb-24 sm:p-6 sm:pb-24 lg:p-8 lg:pb-28 xl:p-10 xl:pb-28",
+              : "p-5 pb-14 sm:p-6 lg:p-8 xl:p-10",
           )}
         >
           {esDashboardColaborador && (

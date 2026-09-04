@@ -37,7 +37,7 @@ export function LayoutVistaLeccion({
         esquemaVisible && "xl:grid-cols-[minmax(0,1fr)_320px]",
       )}
     >
-      <section className="relative min-w-0 px-5 py-6 sm:px-6 lg:px-10 lg:py-8">
+      <section className="relative min-w-0 px-4 py-5 sm:px-5 lg:px-8 lg:py-6">
         {!esquemaVisible && (
           <button
             type="button"
@@ -63,7 +63,7 @@ export function LayoutVistaLeccion({
         <aside
           id="esquema-contenidos-panel"
           className={cn(
-            "min-w-0 rounded-none border-t border-white/25 xl:sticky xl:top-0 xl:h-[calc(100vh-4rem)] xl:self-start xl:border-l xl:border-t-0",
+            "min-w-0 rounded-none border-t border-white/25 xl:sticky xl:top-0 xl:h-full xl:max-h-dvh xl:self-start xl:border-l xl:border-t-0",
             CLASE_PANEL_GLASS,
             "bg-white/16 shadow-none xl:rounded-l-none",
           )}
