@@ -556,6 +556,19 @@ function estadoVisualTransicion(
   return undefined;
 }
 
+function debeMostrarAvatarEnEstacion(
+  nodoId: string,
+  nodoActivoGlobalId: string | null,
+  nodoDestinoId: string | null,
+  faseTransicion: FaseTransicionRoadmap,
+): boolean {
+  const transicionActiva = faseTransicion !== "idle";
+  return (
+    (!transicionActiva && nodoId === nodoActivoGlobalId) ||
+    (faseTransicion === "arrived" && nodoId === nodoDestinoId)
+  );
+}
+
 function indiceLeccionEnNodo(nodos: NodoRuta[], indice: number): number {
   if (nodos[indice]?.tipo !== "leccion") return 0;
   let contador = 0;
@@ -1005,13 +1018,55 @@ function AvatarRoadmap({ variant }: { variant: VarianteRoadmap }) {
     <Image
       src={ROADMAP_ASSETS.avatar}
       alt="Tu posición actual"
-      width={72}
-      height={72}
+      width={64}
+      height={64}
       className={cn(
-        "roadmap-station-avatar pointer-events-none absolute z-40 object-contain drop-shadow-[0_14px_22px_rgba(6,17,32,0.22)]",
-        variant === "mobile" ? "-right-8 -top-9 size-14" : "-right-12 -top-9 size-16",
+        "roadmap-station-avatar pointer-events-none absolute left-1/2 top-1/2 z-[68] -translate-x-1/2 object-contain drop-shadow-[0_16px_26px_rgba(6,17,32,0.34)]",
+        variant === "mobile" ? "size-12 -translate-y-[128%]" : "size-16 -translate-y-[132%]",
       )}
     />
+  );
+}
+
+function CapaAvataresEstaciones({
+  layouts,
+  nodoActivoGlobalId,
+  nodoDestinoId,
+  faseTransicion,
+  posicionar,
+}: {
+  layouts: Array<{ nodo: { id: string }; x: number; y: number }>;
+  nodoActivoGlobalId: string | null;
+  nodoDestinoId: string | null;
+  faseTransicion: FaseTransicionRoadmap;
+  posicionar: (layout: { x: number; y: number }) => CSSProperties;
+}) {
+  return (
+    <>
+      {layouts.map((layout) => {
+        if (
+          !debeMostrarAvatarEnEstacion(
+            layout.nodo.id,
+            nodoActivoGlobalId,
+            nodoDestinoId,
+            faseTransicion,
+          )
+        ) {
+          return null;
+        }
+
+        return (
+          <div
+            key={`avatar-${layout.nodo.id}`}
+            aria-hidden="true"
+            className="pointer-events-none absolute z-[68] overflow-visible"
+            style={posicionar(layout)}
+          >
+            <AvatarRoadmap variant="desktop" />
+          </div>
+        );
+      })}
+    </>
   );
 }
 
@@ -1029,10 +1084,10 @@ function AvatarRoadmapEnMovimiento({
     <Image
       src={ROADMAP_ASSETS.avatar}
       alt="Avance hacia la siguiente estación"
-      width={76}
-      height={76}
+      width={61}
+      height={61}
       className={cn(
-        "roadmap-transition-avatar pointer-events-none fixed z-[80] size-[76px] object-contain",
+        "roadmap-transition-avatar pointer-events-none fixed z-[80] size-[61px] object-contain",
         movimiento.activo && "roadmap-transition-avatar-moving",
       )}
       style={
@@ -1148,9 +1203,6 @@ function ModuloRoadmapDesktop({
         const esNodoActivoVisual =
           (!transicionActiva && layout.nodo.id === nodoActivoGlobalId) ||
           estadoForzado === "activo";
-        const mostrarAvatar =
-          (!transicionActiva && layout.nodo.id === nodoActivoGlobalId) ||
-          (faseTransicion === "arrived" && layout.nodo.id === nodoDestinoId);
         const nodoEtiqueta = nodoParaFaseVisual(layout.nodo, estadoForzado);
         const gapNodoTexto = 26;
 
@@ -1184,7 +1236,6 @@ function ModuloRoadmapDesktop({
                 estadoVisualForzado={estadoForzado}
                 soloIcono
               />
-              {mostrarAvatar && <AvatarRoadmap variant="desktop" />}
             </div>
 
             <div
@@ -1215,6 +1266,19 @@ function ModuloRoadmapDesktop({
           </div>
         );
       })}
+
+      <CapaAvataresEstaciones
+        layouts={layouts}
+        nodoActivoGlobalId={nodoActivoGlobalId}
+        nodoDestinoId={nodoDestinoId}
+        faseTransicion={faseTransicion}
+        posicionar={(layout) => ({
+          left: layout.x - ANILLO / 2,
+          top: layout.y - ANILLO / 2,
+          width: ANILLO,
+          height: ANILLO,
+        })}
+      />
     </div>
   );
 }
@@ -1643,9 +1707,6 @@ function EstacionMundo({
   const transicionActiva = faseTransicion !== "idle";
   const esNodoActivoVisual =
     (!transicionActiva && layout.nodo.id === nodoActivoGlobalId) || estadoForzado === "activo";
-  const mostrarAvatar =
-    (!transicionActiva && layout.nodo.id === nodoActivoGlobalId) ||
-    (faseTransicion === "arrived" && layout.nodo.id === nodoDestinoId);
   const nodoEtiqueta = nodoParaFaseVisual(layout.nodo, estadoForzado);
   const estado = estadoForzado ?? estadoEstacion(nodoEtiqueta, esNodoActivoVisual);
   const selected = selectedStationId === layout.nodo.id;
@@ -1714,7 +1775,6 @@ function EstacionMundo({
           estadoVisualForzado={estadoForzado}
         />
       </button>
-      {mostrarAvatar && <AvatarRoadmap variant="desktop" />}
 
       <span
         aria-hidden={mostrarCard}
@@ -1817,6 +1877,20 @@ function WorldStationsLayer({
           onSelectStation={onSelectStation}
         />
       ))}
+
+      <CapaAvataresEstaciones
+        layouts={layouts}
+        nodoActivoGlobalId={nodoActivoGlobalId}
+        nodoDestinoId={nodoDestinoId}
+        faseTransicion={faseTransicion}
+        posicionar={(layout) => ({
+          left: `${layout.x}%`,
+          top: `${layout.y}%`,
+          width: ANILLO,
+          height: ANILLO,
+          transform: "translate(-50%, -50%)",
+        })}
+      />
     </div>
   );
 }
@@ -2759,7 +2833,6 @@ export function RutaAprendizaje({
               <div className="relative z-20 mx-auto flex w-full max-w-md flex-col items-center px-5 lg:hidden">
                 {grupoVisible.nodos.map((nodo, indiceEnModulo) => {
                   const idx = indiceLeccionEnNodo(grupoVisible.nodos, indiceEnModulo);
-                  const esAvatarActual = nodo.id === nodoActivoGlobalId;
                   const layout = layoutsMobile[indiceEnModulo]!;
                   const estadoForzado = estadoVisualTransicion(
                     nodo.id,
@@ -2780,9 +2853,12 @@ export function RutaAprendizaje({
                     estadoForzado === "activo";
                   const segmentoMovilActivo =
                     grupoVisible.nodos[indiceEnModulo + 1]?.id === nodoActivoSegmentoId;
-                  const mostrarAvatar =
-                    (!transicionActiva && esAvatarActual) ||
-                    (faseTransicion === "arrived" && nodo.id === nodoDestinoId);
+                  const mostrarAvatar = debeMostrarAvatarEnEstacion(
+                    nodo.id,
+                    nodoActivoGlobalId,
+                    nodoDestinoId,
+                    faseTransicion,
+                  );
 
                   return (
                     <div key={`${nodo.id}-mobile`} className="relative flex w-full flex-col items-center">
@@ -2792,7 +2868,8 @@ export function RutaAprendizaje({
                         data-roadmap-node-id={nodo.id}
                         data-roadmap-node={nodo.id}
                         className={cn(
-                          "relative",
+                          "relative overflow-visible",
+                          mostrarAvatar && "z-[68]",
                           animandoCompletado && "roadmap-node-just-completed",
                           sosteniendoCompletado && "roadmap-node-completed-hold",
                           llegandoDestino && "roadmap-node-next-highlight",

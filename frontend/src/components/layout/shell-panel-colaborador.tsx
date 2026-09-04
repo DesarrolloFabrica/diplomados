@@ -42,31 +42,31 @@ interface ShellPanelLateralProps {
 const TEMAS_SIDEBAR = {
   colaborador: {
     clasesSidebar:
-      "collaborator-sidebar bg-[linear-gradient(180deg,#071019_0%,#0b1f22_30%,#0f2d2b_65%,#123a32_100%)] text-slate-100",
+      "collaborator-sidebar border border-white/40 bg-[rgba(238,247,246,0.72)] text-[#123238] shadow-[0_12px_40px_rgba(0,28,34,0.12),inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-[18px] backdrop-saturate-[1.2]",
     clasesEnlaceActivo:
-      "border-emerald-400/45 bg-[#0f2424]/90 text-white shadow-[0_0_16px_rgba(47,185,165,0.28),inset_0_1px_0_rgba(255,255,255,0.06)]",
+      "border-[#00896F]/30 bg-[#00896F]/10 text-[#006F5A] shadow-[0_0_0_1px_rgba(0,145,108,0.03),0_4px_14px_rgba(0,110,90,0.08)]",
     clasesEnlaceInactivo:
-      "border-transparent text-slate-300 hover:border-emerald-400/20 hover:bg-emerald-500/10 hover:text-white hover:shadow-[0_0_12px_rgba(47,185,165,0.14)]",
+      "border-transparent text-[#39575B] hover:-translate-y-px hover:border-[#095348]/10 hover:bg-[#095348]/[0.06] hover:text-[#123238]",
     clasesBotonSecundario:
-      "text-slate-300 hover:border-emerald-400/20 hover:bg-emerald-500/10 hover:text-white",
+      "bg-white/30 text-[#17343A] hover:border-[#095348]/10 hover:bg-[#095348]/[0.06] hover:text-[#006F5A]",
     clasesBotonLogout:
-      "text-slate-400 hover:border-emerald-400/20 hover:bg-emerald-500/10 hover:text-white",
-    clasesTooltip: "border-emerald-400/25 bg-[#0a1818]",
-    focusRing: "focus-visible:ring-emerald-400/60 focus-visible:ring-offset-[#0b1f22]",
+      "text-[#39575B] hover:border-[#00896F]/15 hover:bg-[#00896F]/[0.06] hover:text-[#006F5A]",
+    clasesTooltip: "border-white/45 bg-[#eef7f6]/90 text-[#123238] backdrop-blur-md",
+    focusRing: "focus-visible:ring-[#00896F]/50 focus-visible:ring-offset-[#eef7f6]",
   },
   superadmin: {
     clasesSidebar:
-      "admin-sidebar bg-[linear-gradient(180deg,#040810_0%,#0a1628_35%,#102a52_70%,#14325f_100%)] text-slate-100",
+      "admin-sidebar border border-white/40 bg-[rgba(231,241,243,0.72)] text-[#123238] shadow-[0_12px_40px_rgba(0,28,34,0.12),inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-[18px] backdrop-saturate-[1.2]",
     clasesEnlaceActivo:
-      "border-sky-400/50 bg-[#0f1f38]/95 text-white shadow-[0_0_16px_rgba(56,189,248,0.24),inset_0_1px_0_rgba(255,255,255,0.06)]",
+      "border-[#00896F]/30 bg-[#00896F]/10 text-[#006F5A] shadow-[0_0_0_1px_rgba(0,145,108,0.03),0_4px_14px_rgba(0,110,90,0.08)]",
     clasesEnlaceInactivo:
-      "border-transparent text-slate-200 hover:border-sky-400/25 hover:bg-sky-500/10 hover:text-white hover:shadow-[0_0_12px_rgba(56,189,248,0.14)]",
+      "border-transparent text-[#39575B] hover:-translate-y-px hover:border-[#095348]/10 hover:bg-[#095348]/[0.06] hover:text-[#123238]",
     clasesBotonSecundario:
-      "text-slate-200 hover:border-sky-400/25 hover:bg-sky-500/10 hover:text-white",
+      "bg-white/30 text-[#17343A] hover:border-[#095348]/10 hover:bg-[#095348]/[0.06] hover:text-[#006F5A]",
     clasesBotonLogout:
-      "text-slate-300 hover:border-sky-400/25 hover:bg-sky-500/10 hover:text-white",
-    clasesTooltip: "border-sky-400/30 bg-[#0a1424]",
-    focusRing: "focus-visible:ring-sky-400/60 focus-visible:ring-offset-[#0a1628]",
+      "text-[#39575B] hover:border-[#00896F]/15 hover:bg-[#00896F]/[0.06] hover:text-[#006F5A]",
+    clasesTooltip: "border-white/45 bg-[#eef7f6]/90 text-[#123238] backdrop-blur-md",
+    focusRing: "focus-visible:ring-[#00896F]/50 focus-visible:ring-offset-[#eef7f6]",
   },
 } as const satisfies Record<
   TemaSidebar,
@@ -136,7 +136,7 @@ function TooltipEtiqueta({
         "pointer-events-none absolute left-full top-1/2 z-50 ml-3 -translate-y-1/2",
         "whitespace-nowrap rounded-md border px-3 py-1.5",
         clasesTooltip,
-        "text-xs font-medium text-white opacity-0 shadow-[0_8px_24px_rgba(0,0,0,0.45)]",
+        "text-xs font-medium text-current opacity-0 shadow-[0_8px_24px_rgba(0,28,34,0.12)]",
         "transition-opacity duration-150",
         "group-hover:opacity-100 group-focus-within:opacity-100",
       )}
@@ -178,10 +178,10 @@ function EnlaceNav({
         onClick={onNavigate}
         className={cn(
           "relative flex items-center rounded-xl border",
-          "transition-[background-color,border-color,color,box-shadow] duration-200",
+          "transition-[background-color,border-color,color,box-shadow,transform] duration-200",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           config.focusRing,
-          isExpanded ? "w-full gap-3 px-3 py-2.5" : "mx-auto size-11 justify-center",
+          isExpanded ? "w-full gap-3 px-3 py-2.5" : "mx-auto size-11 justify-center rounded-[13px]",
           clasesEnlace(activo, tema),
         )}
       >
@@ -216,11 +216,11 @@ function BotonCerrarSesion({
         disabled={saliendo}
         onClick={() => iniciar(async () => void (await cerrarSesion()))}
         className={cn(
-          "flex items-center rounded-xl border border-transparent transition-colors",
+          "flex items-center rounded-xl border border-transparent transition-[background-color,border-color,color,transform] duration-200",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           config.focusRing,
           config.clasesBotonLogout,
-          isExpanded ? "w-full gap-3 px-3 py-2.5 text-sm" : "mx-auto size-11 justify-center",
+          isExpanded ? "w-full gap-3 px-3 py-2.5 text-sm" : "mx-auto size-11 justify-center rounded-[13px]",
         )}
       >
         {saliendo ? (
@@ -270,7 +270,7 @@ function BarraLateral({
             aria-expanded={isExpanded}
             aria-label={isExpanded ? "Contraer menú" : "Expandir menú"}
             className={cn(
-              "flex size-11 shrink-0 items-center justify-center rounded-xl border border-transparent transition-colors",
+              "flex size-11 shrink-0 items-center justify-center rounded-[13px] border border-transparent transition-[background-color,border-color,color,transform] duration-200 hover:-translate-y-px",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
               config.focusRing,
               config.clasesBotonSecundario,
@@ -294,8 +294,8 @@ function BarraLateral({
           <LogoMarcaFormacion className={isExpanded ? "size-8 p-1" : undefined} />
           {isExpanded && (
             <div className="min-w-0 leading-tight">
-              <p className="truncate font-display text-sm font-semibold text-white">Formación</p>
-              <p className="truncate text-xs text-slate-300">{subtitulo}</p>
+              <p className="truncate font-display text-sm font-semibold text-[#123238]">Formación</p>
+              <p className="truncate text-xs text-[#39575B]">{subtitulo}</p>
             </div>
           )}
         </div>
@@ -303,7 +303,7 @@ function BarraLateral({
 
       <nav
         className={cn(
-          "flex min-h-0 flex-1 flex-col gap-1.5",
+          "flex min-h-0 flex-1 flex-col gap-2",
           isExpanded ? "sidebar-scrollbar overflow-y-auto" : "sidebar-scrollbar-hidden overflow-y-hidden",
         )}
       >
@@ -319,9 +319,9 @@ function BarraLateral({
         ))}
       </nav>
 
-      <div className="mt-auto shrink-0 space-y-2 border-t border-white/10 pt-3">
+      <div className="mt-auto shrink-0 space-y-2 border-t border-[#12353c]/10 pt-3">
         {isExpanded && nombre && (
-          <p className="flex items-center gap-2 truncate px-3 text-xs text-slate-300">
+          <p className="flex items-center gap-2 truncate px-3 text-xs text-[#39575B]">
             <UserRound className="size-4 shrink-0" aria-hidden="true" />
             <span className="truncate">{nombre}</span>
           </p>
@@ -342,14 +342,13 @@ function ShellPanelLateral({
   const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(false);
   const [drawerAbierto, setDrawerAbierto] = useState(false);
-  const config = TEMAS_SIDEBAR[tema];
   const esDashboardColaborador = tema === "colaborador" && pathname === "/mis-cursos";
 
   return (
     <div className="flex min-h-dvh w-full">
       <aside
         className={cn(
-          "sticky top-0 z-40 hidden h-dvh shrink-0 self-start overflow-hidden border-r border-white/10 transition-[width] duration-200 lg:flex lg:flex-col",
+          "fixed bottom-4 left-3 top-4 z-40 hidden h-auto shrink-0 self-start overflow-hidden rounded-[22px] transition-[width] duration-200 lg:flex lg:flex-col xl:left-4",
           isExpanded ? "w-64" : "w-[5.5rem]",
         )}
       >
@@ -388,16 +387,13 @@ function ShellPanelLateral({
               aria-hidden="true"
             />
             <div
-              className={cn(
-                "absolute left-0 top-0 flex h-full w-64 flex-col shadow-xl",
-                config.clasesSidebar,
-              )}
+              className="absolute left-0 top-0 flex h-full w-64 flex-col shadow-xl"
             >
               <button
                 type="button"
                 aria-label="Cerrar menú"
                 onClick={() => setDrawerAbierto(false)}
-                className="absolute right-3 top-3 rounded-md p-1.5 text-slate-300 hover:bg-white/10 hover:text-white"
+                className="absolute right-3 top-3 rounded-md p-1.5 text-[#39575B] hover:bg-[#095348]/[0.06] hover:text-[#123238]"
               >
                 <X className="size-5" />
               </button>
@@ -425,6 +421,7 @@ function ShellPanelLateral({
                   "after:pointer-events-none after:absolute after:inset-0 after:z-20 after:bg-[linear-gradient(180deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.02)_28%,rgba(6,17,32,0.28)_100%)]",
                 ]
               : "p-5 sm:p-6 lg:p-8 xl:p-10",
+            isExpanded ? "lg:pl-[17.5rem]" : "lg:pl-[7rem]",
           )}
         >
           {esDashboardColaborador && (

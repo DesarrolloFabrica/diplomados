@@ -1,6 +1,6 @@
 import path from "node:path";
 import { Client } from "pg";
-import { applyPendingSqlFiles } from "./apply-sql-files";
+import { applyPendingSqlFiles, listSqlFiles } from "./apply-sql-files";
 import { loadMonorepoEnv } from "./load-monorepo-env";
 import {
   printConnectionPreview,
@@ -12,12 +12,18 @@ import {
 
 loadMonorepoEnv();
 
-const MIGRATIONS_DIR = path.join(import.meta.dirname, "../../../db/migrations");
+const SEEDS_DIR = path.join(import.meta.dirname, "../../../db/seeds");
 
 async function main(): Promise<void> {
+  const archivos = await listSqlFiles(SEEDS_DIR).catch(() => [] as string[]);
+  if (archivos.length === 0) {
+    console.log("No hay archivos .sql en backend/db/seeds/. Nada que aplicar.");
+    return;
+  }
+
   const target = resolveCliTarget(process.argv.slice(2));
   const { connectionString, info, entorno } = resolveMigrationsUrl(target);
-  printConnectionPreview(entorno, info);
+  printConnectionPreview(`${entorno} (seeds)`, info);
 
   const client = new Client(pgClientConfig(connectionString));
   await client.connect();
@@ -25,9 +31,9 @@ async function main(): Promise<void> {
   try {
     await applyPendingSqlFiles({
       client,
-      dir: MIGRATIONS_DIR,
-      table: "_migrations",
-      etiqueta: "Migraciones",
+      dir: SEEDS_DIR,
+      table: "_seeds",
+      etiqueta: "Seeds",
     });
   } finally {
     await client.end();

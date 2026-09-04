@@ -9,6 +9,11 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/lib/db/migrate.ts",
+    "db:migrate:production": "tsx src/lib/db/migrate.ts --production",
+    "db:check:production": "tsx src/lib/db/check-production.ts",
+    "db:migrations:status": "tsx src/lib/db/migrations-status.ts",
+    "db:seed": "tsx src/lib/db/seed.ts",
+    "db:seed:production": "tsx src/lib/db/seed.ts --production",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {

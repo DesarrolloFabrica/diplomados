@@ -144,7 +144,9 @@ function clasificarTipoDrive(tipo: string): TipoRecursoDrive {
 
 /**
  * Orden de intentos para recursos de lección en Drive:
- * - Video: proxy same-origin (evita cookies de terceros) → iframe preview
+ * - Video/audio: solo proxy same-origin (reproductor nativo). El iframe de
+ *   Drive preview falla con frecuencia en portátiles modestos, sin cookies
+ *   de terceros o con bloqueos corporativos (500/401 en el visor de Google).
  * - Imagen/infografía: proxy → miniatura → iframe
  * - PDF/presentación: iframe preview con resourcekey
  */
@@ -162,15 +164,9 @@ export function candidatosRecursoDrive(
 
   switch (clasificacion) {
     case "video":
-      return [
-        { modo: "video", url: urlProxyMediaDrive(meta) },
-        { modo: "iframe", url: preview },
-      ];
+      return [{ modo: "video", url: urlProxyMediaDrive(meta) }];
     case "audio":
-      return [
-        { modo: "audio", url: urlProxyMediaDrive(meta) },
-        { modo: "iframe", url: preview },
-      ];
+      return [{ modo: "audio", url: urlProxyMediaDrive(meta) }];
     case "imagen":
       return [
         { modo: "imagen", url: urlProxyDrive(meta) },

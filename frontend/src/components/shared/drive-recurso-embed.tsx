@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ReproductorPodcast } from "@/components/shared/reproductor-podcast";
@@ -82,6 +82,8 @@ function DriveImagen({
   );
 }
 
+const TIMEOUT_CARGA_MEDIA_MS = 18_000;
+
 function DriveVideo({
   src,
   titulo,
@@ -91,9 +93,39 @@ function DriveVideo({
   titulo: string;
   onFallo: () => void;
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    let resuelto = false;
+    const marcarFallo = () => {
+      if (resuelto) return;
+      resuelto = true;
+      onFallo();
+    };
+
+    const timeout = window.setTimeout(marcarFallo, TIMEOUT_CARGA_MEDIA_MS);
+    const onListo = () => {
+      resuelto = true;
+      window.clearTimeout(timeout);
+    };
+
+    video.addEventListener("loadeddata", onListo);
+    video.addEventListener("canplay", onListo);
+
+    return () => {
+      window.clearTimeout(timeout);
+      video.removeEventListener("loadeddata", onListo);
+      video.removeEventListener("canplay", onListo);
+    };
+  }, [src, onFallo]);
+
   return (
     // eslint-disable-next-line jsx-a11y/media-has-caption
     <video
+      ref={videoRef}
       controls
       playsInline
       preload="metadata"
@@ -138,10 +170,13 @@ export function DriveRecursoEmbed({ nombre, tipo, url, className }: DriveRecurso
 
   function renderContenido() {
     if (!candidatoActual || agotado) {
+      const esVideoOAudio = tipo === "video" || tipo === "audio";
       return (
         <div className="flex h-full min-h-[280px] flex-col items-center justify-center gap-3 p-6 text-center">
           <p className="text-sm text-muted-foreground">
-            No se pudo reproducir el contenido embebido. Ábrelo directamente en Google Drive.
+            {esVideoOAudio
+              ? "No se pudo cargar el video en este dispositivo. Suele ocurrir en equipos con poca memoria, navegadores con cookies de terceros bloqueadas o formatos no soportados. Ábrelo en Google Drive para verlo allí."
+              : "No se pudo reproducir el contenido embebido. Ábrelo directamente en Google Drive."}
           </p>
           <a
             href={enlaceDrive}
@@ -213,9 +248,12 @@ export function DriveRecursoEmbed({ nombre, tipo, url, className }: DriveRecurso
         renderContenido()
       )}
 
-      {!agotado && candidatoActual?.modo === "iframe" ? (
+      {!agotado &&
+      (candidatoActual?.modo === "iframe" ||
+        candidatoActual?.modo === "video" ||
+        candidatoActual?.modo === "audio") ? (
         <p className="text-center text-xs text-muted-foreground">
-          Si el visor no carga bien,{" "}
+          Si no se reproduce o tarda mucho,{" "}
           <a
             href={enlaceDrive}
             target="_blank"

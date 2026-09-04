@@ -192,6 +192,8 @@ Postgres queda disponible en `localhost:5433` (usuario `postgres`, contraseña `
 
 Ajusta `DATABASE_URL` y `MIGRATIONS_DATABASE_URL` en `.env` apuntando al puerto **5433**.
 
+Las migraciones de **Cloud SQL** son un paso aparte (proxy en `:5434`). Ver [docs/database-workflow.md](docs/database-workflow.md).
+
 ### 4. Aplicar migraciones
 
 ```bash
@@ -214,8 +216,9 @@ Copia `.env.example` a `.env` en la raíz del proyecto:
 
 | Variable | Descripción |
 |----------|-------------|
-| `DATABASE_URL` | Conexión de la app (rol `app_user`, sujeto a RLS) |
-| `MIGRATIONS_DATABASE_URL` | Conexión privilegiada solo para migraciones (rol `postgres`) |
+| `DATABASE_URL` | Conexión de la app local (rol `app_user`, sujeto a RLS) |
+| `MIGRATIONS_DATABASE_URL` | Conexión privilegiada para migraciones **locales** (rol `postgres`, puerto 5433) |
+| `PRODUCTION_MIGRATIONS_DATABASE_URL` | Solo migraciones/seeds **manuales** vía Cloud SQL Auth Proxy (`127.0.0.1:5434`). No versionar la contraseña real. |
 | `JWT_SECRET` | Secreto para firmar tokens de sesión (`openssl rand -base64 48`) |
 | `NEXT_PUBLIC_SITE_URL` | URL base de la app (enlaces de recuperación de contraseña) |
 | `GCS_BUCKET` | Bucket privado de Google Cloud Storage |
@@ -236,7 +239,7 @@ En **Cloud Run**, las credenciales se obtienen automáticamente de la cuenta de 
 
 - **Motor:** PostgreSQL 16
 - **ORM:** Drizzle (schema en `backend/src/lib/db/schema.ts`)
-- **Migraciones:** archivos SQL en `backend/db/migrations/`, aplicados con `npm run db:migrate`
+- **Migraciones:** archivos SQL en `backend/db/migrations/`, aplicadas con `npm run db:migrate` (local) o `npm run db:migrate:production` (Cloud SQL vía proxy). Detalle: [docs/database-workflow.md](docs/database-workflow.md).
 - **Seguridad:** Row Level Security (RLS) con aislamiento por `empresa_id`
 - **Roles de conexión:**
   - `postgres` — solo migraciones (dueño del esquema)
@@ -280,7 +283,11 @@ Ejecutar desde la **raíz del monorepo**:
 | `npm run start` | Servir el build compilado |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | Verificación de tipos (frontend + backend) |
-| `npm run db:migrate` | Aplicar migraciones SQL pendientes |
+| `npm run db:migrate` | Aplicar migraciones SQL pendientes en **local** (`MIGRATIONS_DATABASE_URL`) |
+| `npm run db:migrate:production` | Aplicar las mismas migraciones en Cloud SQL (`PRODUCTION_MIGRATIONS_DATABASE_URL`, proxy `:5434`) |
+| `npm run db:check:production` | Comprobar conexión de solo lectura al proxy de Cloud SQL |
+| `npm run db:migrations:status` | Comparar `.sql` del repo vs `public._migrations` en local y producción |
+| `npm run db:seed` / `db:seed:production` | Datos maestros idempotentes en `backend/db/seeds/` (opcional) |
 | `npm run db:studio` | Explorador visual Drizzle Studio |
 
 ---

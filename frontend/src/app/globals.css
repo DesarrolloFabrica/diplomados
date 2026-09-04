@@ -1027,7 +1027,6 @@
 }
 
 .roadmap-station-avatar {
-  transform: translate3d(0, 3px, 0);
   animation: roadmap-world-avatar-float 2.6s ease-in-out infinite;
 }
 
@@ -1221,10 +1220,10 @@
 @keyframes roadmap-world-avatar-float {
   0%,
   100% {
-    transform: translate3d(0, 3px, 0);
+    margin-top: 8px;
   }
   50% {
-    transform: translate3d(0, 0, 0);
+    margin-top: 0;
   }
 }
 
