@@ -16,7 +16,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
-  House,
   Loader2,
   LogOut,
   Menu,
@@ -25,6 +24,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { IconoMarcaFormacion } from "@/components/layout/icono-marca-formacion";
 import { LogoMarcaFormacion } from "@/components/layout/logo-marca-formacion";
 import { DashboardParticles } from "@/components/shared/dashboard-particles";
 import { NAVEGACION_POR_ROL } from "@/config/navegacion";
@@ -38,6 +38,7 @@ interface ItemNavLateral {
   titulo: string;
   href: string;
   icono: LucideIcon;
+  usarLogoMarca?: boolean;
   activo: (pathname: string) => boolean;
 }
 
@@ -103,7 +104,8 @@ const ITEMS_NAV_COLABORADOR: ItemNavLateral[] = [
     id: "home",
     titulo: "Menú principal",
     href: "/mis-cursos",
-    icono: House,
+    icono: BookOpen,
+    usarLogoMarca: true,
     activo: (pathname) => pathname === "/mis-cursos",
   },
   {
@@ -212,7 +214,11 @@ function EnlaceNav({
         )}
       >
         <span className="grid size-8 shrink-0 place-items-center">
-          <Icono className="size-[1.125rem] shrink-0" aria-hidden="true" />
+          {item.usarLogoMarca ? (
+            <IconoMarcaFormacion className="size-6" />
+          ) : (
+            <Icono className="size-[1.125rem] shrink-0" aria-hidden="true" />
+          )}
         </span>
         {isExpanded && (
           <span className={cn("text-sm font-medium", esBottom ? "whitespace-nowrap" : "truncate")}>
@@ -355,7 +361,7 @@ function BarraLateral({
           className={cn(
             "flex min-w-0 items-center",
             isExpanded ? "flex-1 gap-2.5" : "mx-auto justify-center",
-            esBottom && !isExpanded && "hidden sm:flex",
+            esBottom && "hidden",
           )}
         >
           <LogoMarcaFormacion className={isExpanded ? "size-8 p-1" : undefined} />

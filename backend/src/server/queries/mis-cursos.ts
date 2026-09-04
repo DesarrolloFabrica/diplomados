@@ -23,6 +23,7 @@ export interface CursoCatalogoFila {
   esDiplomado: boolean;
   nivelDificultad: "basico" | "intermedio" | "avanzado";
   escuela: EscuelaVisual;
+  createdAt: Date;
   inscripcionId: string | null;
   estadoInscripcion:
     | "no_iniciado"
@@ -51,6 +52,7 @@ export async function listarCursosParaColaborador(
         esDiplomado: cursos.esDiplomado,
         nivelDificultad: cursos.nivelDificultad,
         escuela: cursos.escuela,
+        createdAt: cursos.createdAt,
         inscripcionId: inscripciones.id,
         estadoInscripcion: inscripciones.estado,
         porcentajeAvance: inscripciones.porcentajeAvance,

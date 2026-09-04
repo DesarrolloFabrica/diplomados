@@ -272,7 +272,7 @@ export function DriveRecursoEmbed({ nombre, tipo, url, className }: DriveRecurso
 
   return (
     <div className="space-y-2">
-      {modoActual !== "audio" ? (
+      {modoActual !== "audio" && tipo !== "video" ? (
         <p className="text-sm font-medium text-foreground">{nombre}</p>
       ) : null}
 

@@ -50,22 +50,19 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
   if (tipo === "video") {
     const embedYoutube = obtenerEmbedYoutube(url);
     return (
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-slate-800">{nombre}</p>
-        <div className="lesson-media aspect-video w-full overflow-hidden rounded-2xl border border-border/70 bg-black shadow-[0_8px_30px_rgba(6,17,32,0.08)] ring-1 ring-emerald-500/15">
-          {embedYoutube ? (
-            <iframe
-              src={embedYoutube}
-              title={nombre}
-              className="h-full w-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          ) : (
-            // eslint-disable-next-line jsx-a11y/media-has-caption
-            <video controls src={url} className="h-full w-full" />
-          )}
-        </div>
+      <div className="lesson-media aspect-video w-full overflow-hidden rounded-2xl border border-border/70 bg-black shadow-[0_8px_30px_rgba(6,17,32,0.08)] ring-1 ring-emerald-500/15">
+        {embedYoutube ? (
+          <iframe
+            src={embedYoutube}
+            title={nombre}
+            className="h-full w-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          // eslint-disable-next-line jsx-a11y/media-has-caption
+          <video controls src={url} className="h-full w-full" />
+        )}
       </div>
     );
   }
