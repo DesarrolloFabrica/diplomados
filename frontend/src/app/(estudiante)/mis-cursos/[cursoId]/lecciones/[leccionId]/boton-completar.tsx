@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CLASE_PANEL_GLASS } from "@/config/paneles-glass";
+import { CLASE_PANEL_GLASS_LEGIBLE } from "@/config/paneles-glass";
 import { marcarLeccionCompletada } from "@backend/server/actions/progreso";
 
 interface BotonCompletarProps {
@@ -28,8 +28,8 @@ export function BotonCompletar({
     return (
       <div
         className={cn(
-          "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-emerald-200",
-          CLASE_PANEL_GLASS,
+          "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-emerald-700",
+          CLASE_PANEL_GLASS_LEGIBLE,
         )}
       >
         <CheckCircle2 className="h-4 w-4" />

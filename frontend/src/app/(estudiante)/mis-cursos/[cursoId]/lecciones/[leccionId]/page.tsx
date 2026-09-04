@@ -40,7 +40,7 @@ import { ProgresoCursoLeccion } from "@/components/shared/progreso-curso-leccion
 import { obtenerInfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
 import { BotonCompletar } from "./boton-completar";
 import { cn } from "@/lib/utils";
-import { CLASE_HERO_PANEL } from "@/config/paneles-glass";
+import { CLASE_HERO_PANEL_LEGIBLE } from "@/config/paneles-glass";
 
 
 
@@ -279,15 +279,15 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
       >
 
-        <div className={cn("mb-6 rounded-[24px] p-5 sm:p-6", CLASE_HERO_PANEL)}>
+        <div className={cn("mb-6 rounded-[24px] p-5 sm:p-6", CLASE_HERO_PANEL_LEGIBLE)}>
           <Link
             href={`/mis-cursos/${cursoId}`}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-white/80 transition-colors hover:text-white"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver al curso
           </Link>
-          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-white drop-shadow-sm">
+          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-slate-950">
             {leccion.titulo}
           </h1>
         </div>

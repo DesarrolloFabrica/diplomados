@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, LockKeyhole, PartyPopper } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CLASE_HERO_PANEL, CLASE_PANEL_GLASS } from "@/config/paneles-glass";
+import { CLASE_HERO_PANEL_LEGIBLE, CLASE_PANEL_GLASS_LEGIBLE } from "@/config/paneles-glass";
 import type { ItemRutaContenido, ProximosContenidosResultado } from "@/lib/ruta-curso";
 import { MiniaturaContenido } from "@/components/shared/miniatura-contenido";
 
@@ -30,8 +30,8 @@ function TarjetaPrincipal({
       />
 
       <div className="flex min-w-0 flex-col justify-center gap-2 p-4 sm:p-5">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-white/70">
-          <span className="rounded-full bg-white/15 px-2 py-0.5 font-medium">{item.etiquetaTipo}</span>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium">{item.etiquetaTipo}</span>
           {item.duracionTexto && (
             <span className="font-medium tabular-nums">{item.duracionTexto}</span>
           )}
@@ -42,15 +42,15 @@ function TarjetaPrincipal({
             </span>
           )}
         </div>
-        <h3 className="text-lg font-bold leading-snug text-white">{item.titulo}</h3>
-        <p className="text-sm text-white/70">
+        <h3 className="text-lg font-bold leading-snug text-slate-950">{item.titulo}</h3>
+        <p className="text-sm text-slate-600">
           Módulo {item.moduloIndice + 1}: {item.moduloTitulo}
         </p>
       </div>
 
       <div className="flex items-center justify-end p-4 sm:p-5">
         {!item.bloqueado && (
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition-colors group-hover:bg-white group-hover:text-[#061120]">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-800 transition-colors group-hover:bg-[#061120] group-hover:text-white">
             <ArrowRight className="h-5 w-5" />
           </span>
         )}
@@ -60,7 +60,7 @@ function TarjetaPrincipal({
 
   const clases = cn(
     "group grid overflow-hidden rounded-[24px] transition-[border-color,box-shadow,transform]",
-    CLASE_PANEL_GLASS,
+    CLASE_PANEL_GLASS_LEGIBLE,
     "hover:-translate-y-0.5 hover:border-white/65 hover:shadow-[0_18px_48px_rgba(6,17,32,0.24),inset_0_1px_0_rgba(255,255,255,0.5)]",
     "sm:grid-cols-[190px_minmax(0,1fr)_auto]",
     item.bloqueado && "cursor-not-allowed opacity-75 hover:translate-y-0 hover:border-white/45 hover:shadow-none",
@@ -95,8 +95,8 @@ function FilaCompacta({
         variante="compacta"
       />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-white">{item.titulo}</p>
-        <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-white/70">
+        <p className="truncate text-sm font-medium text-slate-900">{item.titulo}</p>
+        <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-600">
           <span>{item.etiquetaTipo}</span>
           {item.duracionTexto && (
             <span className="tabular-nums">· {item.duracionTexto}</span>
@@ -114,8 +114,8 @@ function FilaCompacta({
 
   const clases = cn(
     "flex items-center gap-3 rounded-[20px] px-3 py-2.5 transition-colors",
-    CLASE_HERO_PANEL,
-    !item.bloqueado && "hover:border-white/55 hover:bg-white/24",
+    CLASE_HERO_PANEL_LEGIBLE,
+    !item.bloqueado && "hover:border-white/80 hover:bg-white/90",
     item.bloqueado && "cursor-not-allowed opacity-70",
   );
 
@@ -139,12 +139,12 @@ export function ProximosContenidos({
   if (cursoCompletado) {
     return (
       <section className="mt-10 border-t border-white/20 pt-8">
-        <div className={cn("rounded-[24px] px-5 py-6", CLASE_PANEL_GLASS)}>
+        <div className={cn("rounded-[24px] px-5 py-6", CLASE_PANEL_GLASS_LEGIBLE)}>
           <div className="flex items-start gap-3">
-            <PartyPopper className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
+            <PartyPopper className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
             <div>
-              <h2 className="text-lg font-bold text-white">¡Has llegado al final del curso!</h2>
-              <p className="mt-1 text-sm text-white/75">
+              <h2 className="text-lg font-bold text-slate-950">¡Has llegado al final del curso!</h2>
+              <p className="mt-1 text-sm text-slate-600">
                 No hay más contenidos por revisar en este recorrido.
               </p>
             </div>
@@ -161,11 +161,11 @@ export function ProximosContenidos({
       <div className="mb-4 flex items-center justify-between">
         <div>
           {etiqueta && (
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#91DC00]">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#087c72]">
               {etiqueta}
             </p>
           )}
-          <h2 className="mt-1 text-xl font-bold text-white">Continúa tu aprendizaje</h2>
+          <h2 className="mt-1 text-xl font-bold text-slate-950">Continúa tu aprendizaje</h2>
         </div>
       </div>
 
@@ -174,7 +174,7 @@ export function ProximosContenidos({
 
         {secundarios.length > 0 && (
           <div className="hidden md:block">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-white/60">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
               Después
             </p>
             <div className="space-y-2">

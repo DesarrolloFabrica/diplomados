@@ -28,6 +28,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { obtenerFondoModuloInmersivo } from "@/config/roadmap-inmersivo";
+import { CLASE_TARJETA_GLASS_LEGIBLE } from "@/config/paneles-glass";
 import { obtenerSiguienteNodoRoadmap } from "@/lib/roadmap/siguiente-nodo";
 import { cn } from "@/lib/utils";
 
@@ -1610,9 +1611,12 @@ function NavegacionModulosMundo({
   return (
     <nav
       aria-label="Navegación de módulos"
-      className="roadmap-world-hud absolute bottom-20 right-4 z-40 max-w-[calc(100%-2rem)] rounded-2xl border border-white/70 bg-white/78 p-3 shadow-[0_18px_45px_rgba(6,17,32,0.12)] backdrop-blur-md dark:border-white/10 dark:bg-[#071B30]/72 sm:bottom-24 sm:right-6"
+      className={cn(
+        "roadmap-world-hud absolute bottom-20 right-4 z-40 max-w-[calc(100%-2rem)] rounded-2xl p-3 sm:bottom-24 sm:right-6",
+        CLASE_TARJETA_GLASS_LEGIBLE,
+      )}
     >
-      <div className="mb-2 flex items-center justify-between gap-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
+      <div className="mb-2 flex items-center justify-between gap-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-600">
         <span>Modulos</span>
         <span>{indiceModuloVisible + 1}/{grupos.length}</span>
       </div>
@@ -1791,7 +1795,9 @@ function EstacionMundo({
       {mostrarCard && (
         <div
           className={cn(
-            "roadmap-world-card absolute z-[70] w-[min(260px,76vw)] rounded-2xl border border-white/80 bg-white/90 p-4 text-left shadow-[0_18px_45px_rgba(6,17,32,0.16)] backdrop-blur-md dark:border-white/10 dark:bg-[#071B30]/86",
+            "roadmap-world-card absolute z-[70] w-[min(260px,76vw)] rounded-2xl p-4 text-left",
+            CLASE_TARJETA_GLASS_LEGIBLE,
+            "shadow-[0_18px_45px_rgba(6,17,32,0.16)]",
             claseCardMundo(layout.placement),
           )}
         >
@@ -1936,7 +1942,8 @@ function PanelCursoInmersivo({
   return (
     <div
       className={cn(
-        "roadmap-world-hud absolute left-4 top-4 z-50 w-[min(340px,calc(100%-2rem))] rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_18px_45px_rgba(6,17,32,0.12)] backdrop-blur-md transition-[opacity,transform] duration-300 dark:border-white/10 dark:bg-[#071B30]/72 sm:left-6 sm:top-6 sm:p-5",
+        "roadmap-world-hud absolute left-4 top-4 z-50 w-[min(340px,calc(100%-2rem))] rounded-2xl p-4 transition-[opacity,transform] duration-300 sm:left-6 sm:top-6 sm:p-5",
+        CLASE_TARJETA_GLASS_LEGIBLE,
         exploreMode && "scale-[0.94] opacity-[0.58]",
       )}
     >
@@ -1945,11 +1952,11 @@ function PanelCursoInmersivo({
           <span className="inline-flex rounded-full bg-[#071B30] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white dark:bg-[#91DC00] dark:text-[#071B30]">
             Diplomado
           </span>
-          <h1 className="mt-2 text-lg font-bold leading-tight text-slate-950 dark:text-white sm:text-xl">
+          <h1 className="mt-2 text-lg font-bold leading-tight text-slate-950 sm:text-xl">
             {hero.titulo}
           </h1>
           {hero.descripcion && (
-            <p className="mt-1.5 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">
+            <p className="mt-1.5 line-clamp-2 text-sm text-slate-600">
               {hero.descripcion}
             </p>
           )}
@@ -1974,16 +1981,16 @@ function PanelCursoInmersivo({
                 style={{ width: `${Math.round(hero.porcentajeAvance)}%` }}
               />
             </div>
-            <p className="mt-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <p className="mt-1.5 text-xs font-semibold text-slate-600">
               {Math.round(hero.porcentajeAvance)}% completado en el diplomado
             </p>
           </div>
-          <div className="mt-4 border-t border-slate-200/70 pt-3 dark:border-white/10">
+          <div className="mt-4 border-t border-slate-200/70 pt-3">
             <div className="flex items-start justify-between gap-4">
-              <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72] dark:text-[#67E8F9]">
+              <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72]">
                 Módulo {indiceModulo + 1} · {tituloModulo}
               </p>
-              <span className="shrink-0 rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-bold text-slate-700 shadow-sm dark:bg-white/10 dark:text-white">
+              <span className="shrink-0 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-bold text-slate-700 shadow-sm">
                 {progresoModulo.completados}/{progresoModulo.total}
               </span>
             </div>
@@ -1992,14 +1999,14 @@ function PanelCursoInmersivo({
       ) : (
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72] dark:text-[#67E8F9]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72]">
               Módulo {indiceModulo + 1}
             </p>
-            <h2 className="mt-1 text-base font-bold leading-tight text-slate-950 dark:text-white">
+            <h2 className="mt-1 text-base font-bold leading-tight text-slate-950">
               {tituloModulo}
             </h2>
           </div>
-          <span className="shrink-0 rounded-full bg-white/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm dark:bg-white/10 dark:text-white">
+          <span className="shrink-0 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm">
             {progresoModulo.completados}/{progresoModulo.total}
           </span>
         </div>
@@ -2044,18 +2051,19 @@ function AvatarUsuarioInmersivo({
   return (
     <div
       className={cn(
-        "roadmap-world-hud absolute right-4 top-4 z-50 flex items-center gap-2.5 rounded-full border border-white/70 bg-white/82 py-1.5 pl-2 pr-4 shadow-[0_12px_30px_rgba(6,17,32,0.10)] backdrop-blur-md transition-[opacity,transform] duration-300 dark:border-white/10 dark:bg-[#071B30]/72 sm:right-6 sm:top-6",
-        exploreMode && "translate-y-2 opacity-0 pointer-events-none",
+        "roadmap-world-hud absolute right-4 top-4 z-50 flex items-center gap-2.5 rounded-full py-1.5 pl-2 pr-4 transition-[opacity,transform] duration-300 sm:right-6 sm:top-6",
+        CLASE_TARJETA_GLASS_LEGIBLE,
+        exploreMode && "pointer-events-none translate-y-2 opacity-0",
       )}
     >
-      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#071B30] text-white dark:bg-[#91DC00] dark:text-[#071B30]">
+      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#071B30] text-white">
         <UserRound className="size-4" aria-hidden="true" />
       </span>
       <span className="min-w-0 leading-tight">
-        <span className="block max-w-[9rem] truncate text-sm font-bold text-slate-950 dark:text-white">
+        <span className="block max-w-[9rem] truncate text-sm font-bold text-slate-950">
           {nombre ?? "Estudiante"}
         </span>
-        <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-300">
+        <span className="block text-[11px] font-medium text-slate-600">
           Estudiante
         </span>
       </span>
@@ -2067,11 +2075,12 @@ function PistaExploracionInmersiva({ exploreMode }: { exploreMode: boolean }) {
   return (
     <div
       className={cn(
-        "roadmap-world-hud pointer-events-none absolute bottom-4 left-4 z-40 hidden max-w-[230px] rounded-2xl border border-white/70 bg-white/78 px-4 py-3 text-xs font-medium text-slate-600 shadow-[0_12px_30px_rgba(6,17,32,0.08)] backdrop-blur-md dark:border-white/10 dark:bg-[#071B30]/68 dark:text-slate-300 sm:block sm:bottom-6 sm:left-6",
+        "roadmap-world-hud pointer-events-none absolute bottom-4 left-4 z-40 hidden max-w-[230px] rounded-2xl px-4 py-3 text-xs font-medium text-slate-600 sm:bottom-6 sm:left-6 sm:block",
+        CLASE_TARJETA_GLASS_LEGIBLE,
         exploreMode && "opacity-0",
       )}
     >
-      <span className="mb-0.5 block font-bold text-slate-900 dark:text-white">
+      <span className="mb-0.5 block font-bold text-slate-900">
         Explora cada estación
       </span>
       Pasa el cursor sobre cada punto del mapa para ver más detalles.
@@ -2123,14 +2132,15 @@ function WorldHudLayer({
         <Link
           href={siguienteNodo.nodo.href}
           className={cn(
-            "roadmap-world-hud group absolute right-4 top-16 z-50 hidden w-[min(310px,calc(100%-2rem))] rounded-2xl border border-white/70 bg-white/78 p-4 shadow-[0_18px_45px_rgba(6,17,32,0.10)] backdrop-blur-md transition-[background-color,opacity,transform] duration-300 hover:-translate-y-0.5 hover:bg-white/90 dark:border-white/10 dark:bg-[#071B30]/68 md:block sm:right-6 sm:top-20",
-            exploreMode && "translate-y-2 opacity-0 pointer-events-none",
+            "roadmap-world-hud group absolute right-4 top-16 z-50 hidden w-[min(310px,calc(100%-2rem))] rounded-2xl p-4 transition-[background-color,opacity,transform] duration-300 hover:-translate-y-0.5 hover:bg-white/90 md:block sm:right-6 sm:top-20",
+            CLASE_TARJETA_GLASS_LEGIBLE,
+            exploreMode && "pointer-events-none translate-y-2 opacity-0",
           )}
         >
-          <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72] dark:text-[#67E8F9]">
+          <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#087c72]">
             Continuar
           </span>
-          <span className="mt-2 flex items-center justify-between gap-3 text-sm font-bold leading-snug text-slate-950 dark:text-white">
+          <span className="mt-2 flex items-center justify-between gap-3 text-sm font-bold leading-snug text-slate-950">
             <span>{siguienteNodo.nodo.titulo}</span>
             <ArrowRight className="size-4 shrink-0 transition-transform group-hover:translate-x-1" aria-hidden="true" />
           </span>
@@ -2140,14 +2150,15 @@ function WorldHudLayer({
       {cursoCompletadoSinSiguiente && (
         <div
           className={cn(
-            "roadmap-world-hud absolute right-4 top-16 z-50 hidden w-[min(280px,calc(100%-2rem))] items-center gap-3 rounded-2xl border border-emerald-300/50 bg-white/86 p-4 shadow-[0_18px_45px_rgba(6,17,32,0.10)] backdrop-blur-md dark:border-emerald-300/25 dark:bg-[#071B30]/72 md:flex sm:right-6 sm:top-20",
-            exploreMode && "translate-y-2 opacity-0 pointer-events-none",
+            "roadmap-world-hud absolute right-4 top-16 z-50 hidden w-[min(280px,calc(100%-2rem))] items-center gap-3 rounded-2xl border-emerald-300/50 p-4 md:flex sm:right-6 sm:top-20",
+            CLASE_TARJETA_GLASS_LEGIBLE,
+            exploreMode && "pointer-events-none translate-y-2 opacity-0",
           )}
         >
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-emerald-500 text-white">
             <Check className="size-4" aria-hidden="true" />
           </span>
-          <span className="text-sm font-bold text-slate-950 dark:text-white">
+          <span className="text-sm font-bold text-slate-950">
             Diplomado completado
           </span>
         </div>
