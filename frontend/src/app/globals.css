@@ -943,6 +943,56 @@
     position: relative;
     z-index: 2;
   }
+
+  .quiz-view {
+    background-color: #061120;
+    overflow: hidden;
+  }
+
+  .quiz-view::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 0;
+    min-height: 100%;
+    background-image: url("/images/quiz.jpeg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.04);
+    pointer-events: none;
+  }
+
+  .quiz-view::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    min-height: 100%;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(6, 17, 32, 0.58) 0%,
+        rgba(6, 17, 32, 0.46) 55%,
+        rgba(6, 17, 32, 0.52) 100%
+      ),
+      rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(18px) saturate(1.12);
+    -webkit-backdrop-filter: blur(18px) saturate(1.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    pointer-events: none;
+  }
+
+  .quiz-view > * {
+    position: relative;
+    z-index: 2;
+  }
 }
 
 .roadmap-world {

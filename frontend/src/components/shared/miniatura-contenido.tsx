@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   AudioLines,
   ChartNoAxesCombined,
@@ -11,6 +10,7 @@ import {
   Video,
   type LucideIcon,
 } from "lucide-react";
+import { PortadaCurso } from "@/components/shared/portada-curso";
 import { cn } from "@/lib/utils";
 import type { TabContenido } from "@/lib/contenido-leccion";
 
@@ -23,6 +23,12 @@ interface MiniaturaContenidoProps {
   tipo: "leccion" | "evaluacion";
   categoriasContenido?: TabContenido[];
   variante?: VarianteMiniatura;
+  className?: string;
+}
+
+interface IconoTipoContenidoProps {
+  tipo: MiniaturaContenidoProps["tipo"];
+  categoriasContenido?: TabContenido[];
   className?: string;
 }
 
@@ -45,6 +51,15 @@ function iconoFallback(
   return FileText;
 }
 
+export function IconoTipoContenido({
+  tipo,
+  categoriasContenido,
+  className,
+}: IconoTipoContenidoProps) {
+  const Icono = iconoFallback(tipo, categoriasContenido);
+  return <Icono className={className} aria-hidden="true" />;
+}
+
 export function MiniaturaContenido({
   portadaUrl,
   portadaCursoUrl,
@@ -55,11 +70,9 @@ export function MiniaturaContenido({
   className,
 }: MiniaturaContenidoProps) {
   const url = portadaUrl ?? portadaCursoUrl ?? null;
-  const [urlFallida, setUrlFallida] = useState(false);
-  const Icono = iconoFallback(tipo, categoriasContenido);
   const esCompacta = variante === "compacta";
 
-  if (url && !urlFallida) {
+  if (url) {
     return (
       <div
         className={cn(
@@ -70,12 +83,12 @@ export function MiniaturaContenido({
           className,
         )}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={url}
-          alt=""
-          onError={() => setUrlFallida(true)}
-          className="h-full w-full object-cover"
+        <PortadaCurso
+          url={url}
+          esDiplomado={false}
+          titulo={titulo}
+          fallback="icon"
+          className="h-full w-full transition-transform duration-300 group-hover:scale-[1.03]"
         />
       </div>
     );
@@ -92,7 +105,11 @@ export function MiniaturaContenido({
       )}
       aria-label={titulo}
     >
-      <Icono className={cn(esCompacta ? "h-5 w-5" : "h-10 w-10")} aria-hidden="true" />
+      <IconoTipoContenido
+        tipo={tipo}
+        categoriasContenido={categoriasContenido}
+        className={cn(esCompacta ? "h-5 w-5" : "h-10 w-10")}
+      />
     </div>
   );
 }

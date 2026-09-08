@@ -5,6 +5,10 @@ import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ReproductorPodcast } from "@/components/shared/reproductor-podcast";
 import {
+  useMediaRangeTracking,
+  type MediaConsumptionReporter,
+} from "@/hooks/use-auto-completion";
+import {
   candidatosRecursoDrive,
   extraerMetaGoogleDrive,
   urlVerDrive,
@@ -14,10 +18,13 @@ import {
 import type { TipoRecurso } from "@backend/lib/db/schema";
 
 interface DriveRecursoEmbedProps {
+  resourceId: string;
   nombre: string;
   tipo: TipoRecurso;
   url: string;
   className?: string;
+  autoCompletionEnabled?: boolean;
+  onConsumptionProgress?: MediaConsumptionReporter;
 }
 
 const MARCO_VISOR =
@@ -85,16 +92,29 @@ function DriveImagen({
 const TIMEOUT_CARGA_MEDIA_MS = 45_000;
 
 function DriveVideo({
+  resourceId,
   src,
   titulo,
   onFallo,
+  autoCompletionEnabled,
+  onConsumptionProgress,
 }: {
+  resourceId: string;
   src: string;
   titulo: string;
   onFallo: () => void;
+  autoCompletionEnabled: boolean;
+  onConsumptionProgress?: MediaConsumptionReporter;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cargando, setCargando] = useState(true);
+
+  useMediaRangeTracking(
+    videoRef,
+    resourceId,
+    autoCompletionEnabled,
+    onConsumptionProgress,
+  );
 
   useEffect(() => {
     setCargando(true);
@@ -162,7 +182,15 @@ function DriveVideo({
   );
 }
 
-export function DriveRecursoEmbed({ nombre, tipo, url, className }: DriveRecursoEmbedProps) {
+export function DriveRecursoEmbed({
+  resourceId,
+  nombre,
+  tipo,
+  url,
+  className,
+  autoCompletionEnabled = false,
+  onConsumptionProgress,
+}: DriveRecursoEmbedProps) {
   const candidatos = useMemo(() => candidatosRecursoDrive(url, tipo), [url, tipo]);
   const enlaceDrive = useMemo(() => {
     const meta = extraerMetaGoogleDrive(url);
@@ -238,18 +266,24 @@ export function DriveRecursoEmbed({ nombre, tipo, url, className }: DriveRecurso
         return (
           <DriveVideo
             key={`${indiceCandidato}-${candidatoActual.url}`}
+            resourceId={resourceId}
             src={candidatoActual.url}
             titulo={nombre}
             onFallo={avanzarCandidato}
+            autoCompletionEnabled={autoCompletionEnabled}
+            onConsumptionProgress={onConsumptionProgress}
           />
         );
       case "audio":
         return (
           <ReproductorPodcast
             key={`${indiceCandidato}-${candidatoActual.url}`}
+            resourceId={resourceId}
             nombre={nombre}
             url={candidatoActual.url}
             onFallo={avanzarCandidato}
+            autoCompletionEnabled={autoCompletionEnabled}
+            onConsumptionProgress={onConsumptionProgress}
           />
         );
       case "imagen":

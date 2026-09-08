@@ -15,6 +15,7 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   ChevronUp,
   Loader2,
   LogOut,
@@ -451,6 +452,11 @@ function ShellPanelLateral({
     cancelarOcultamientoDock();
   }, [cancelarOcultamientoDock]);
 
+  const ocultarDock = useCallback(() => {
+    cancelarOcultamientoDock();
+    setDockOpen(false);
+  }, [cancelarOcultamientoDock]);
+
   const programarOcultamientoDock = useCallback(() => {
     cancelarOcultamientoDock();
     ocultarTimeoutRef.current = window.setTimeout(() => {
@@ -502,17 +508,28 @@ function ShellPanelLateral({
         >
           <button
             type="button"
-            aria-label="Mostrar navegacion"
+            aria-label={dockOpen ? "Ocultar navegacion" : "Mostrar navegacion"}
             aria-expanded={dockOpen}
-            onClick={mantenerDockActivo}
+            onPointerDown={(evento) => evento.stopPropagation()}
+            onClick={(evento) => {
+              evento.stopPropagation();
+              if (dockOpen) {
+                ocultarDock();
+                return;
+              }
+              mantenerDockActivo();
+            }}
             className={cn(
               "-mb-1 flex h-6 min-w-12 items-center justify-center rounded-full px-3 text-white/85",
               "transition-[color,transform] duration-200 hover:-translate-y-0.5 hover:text-white",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
-              dockOpen && "pointer-events-none opacity-0",
             )}
           >
-            {!dockOpen && <ChevronUp className="size-4" aria-hidden="true" />}
+            {dockOpen ? (
+              <ChevronDown className="size-4" aria-hidden="true" />
+            ) : (
+              <ChevronUp className="size-4" aria-hidden="true" />
+            )}
           </button>
           <BarraLateral
             pathname={pathname}

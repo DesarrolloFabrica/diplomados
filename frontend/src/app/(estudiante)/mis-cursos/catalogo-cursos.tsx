@@ -8,6 +8,7 @@ import {
   useTransition,
   type KeyboardEvent,
   type MouseEvent,
+  type ReactNode,
 } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,7 +30,9 @@ import {
 import { PortadaCurso } from "@/components/shared/portada-curso";
 import { AnilloProgreso } from "@/components/shared/anillo-progreso";
 import { cn } from "@/lib/utils";
+import { hrefContinuarCurso } from "@/lib/href-continuar-curso";
 import type { SchoolVisualId } from "@/config/visual-themes/types";
+import { CLASE_HERO_PANEL, CLASE_PANEL_GLASS } from "@/config/paneles-glass";
 import { inscribirme } from "@backend/server/actions/inscripciones";
 import type { CursoCatalogoFila } from "@backend/server/queries/mis-cursos";
 
@@ -41,8 +44,9 @@ interface CatalogoCursosProps {
 
 const CATEGORIAS = ["Curso", "Educacion", "Creatividad", "Pensamiento", "Cortos"];
 
-type CatalogSection = "mis-cursos" | "diplomados" | "nuevos" | "nivel" | "categoria";
+type CatalogSection = "mis-cursos" | "diplomados" | "nuevos" | "descubrir" | "categoria";
 type NivelCatalogo = CursoCatalogoFila["nivelDificultad"];
+type FiltroNivel = "todos" | NivelCatalogo;
 type EscuelaCatalogo = Exclude<SchoolVisualId, "neutral">;
 
 const NEW_COURSE_DAYS = 30;
@@ -51,11 +55,12 @@ const SECCIONES_CATALOGO: ReadonlyArray<{ id: CatalogSection; label: string }> =
   { id: "mis-cursos", label: "Mis cursos" },
   { id: "diplomados", label: "Diplomados" },
   { id: "nuevos", label: "Nuevos" },
-  { id: "nivel", label: "Por nivel" },
+  { id: "descubrir", label: "Descubrir" },
   { id: "categoria", label: "Por categoria" },
 ];
 
-const NIVELES_CATALOGO: ReadonlyArray<{ id: NivelCatalogo; label: string }> = [
+const NIVELES_CATALOGO: ReadonlyArray<{ id: FiltroNivel; label: string }> = [
+  { id: "todos", label: "Todos" },
   { id: "basico", label: "Basico" },
   { id: "intermedio", label: "Intermedio" },
   { id: "avanzado", label: "Avanzado" },
@@ -76,8 +81,6 @@ const ESCUELAS_CATALOGO: ReadonlyArray<{
 /** Oculta temporalmente buscador, categorías y perfil del catálogo. */
 const MOSTRAR_BARRA_SUPERIOR_CATALOGO = false;
 
-import { CLASE_HERO_PANEL, CLASE_PANEL_GLASS } from "@/config/paneles-glass";
-
 const CLASE_TARJETA_GLASS = cn(
   "group relative flex aspect-[4/5] min-h-[300px] w-[82vw] max-w-[286px] shrink-0 snap-start flex-col justify-end overflow-hidden rounded-[24px] text-left outline-none transition-[transform,box-shadow,border-color] duration-300 sm:w-[270px] lg:w-[280px]",
   CLASE_PANEL_GLASS,
@@ -88,10 +91,7 @@ const CLASE_TARJETA_GLASS = cn(
 export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCursosProps) {
   const todosCursos = useMemo(() => [...misCursos, ...disponibles], [disponibles, misCursos]);
   const [seccionActiva, setSeccionActiva] = useState<CatalogSection>("mis-cursos");
-  const [nivelActivo, setNivelActivo] = useState<NivelCatalogo>(() =>
-    NIVELES_CATALOGO.find(({ id }) => todosCursos.some((curso) => curso.nivelDificultad === id))
-      ?.id ?? "intermedio",
-  );
+  const [nivelActivo, setNivelActivo] = useState<FiltroNivel>("todos");
   const [escuelaActiva, setEscuelaActiva] = useState<EscuelaCatalogo>(() =>
     ESCUELAS_CATALOGO.find(({ id }) => todosCursos.some((curso) => curso.escuela === id))?.id ??
     "sociales",
@@ -121,12 +121,23 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
         : [];
   const misCursosOrdenados = useMemo(
     () =>
-      [...misCursos].sort(
-        (a, b) =>
-          prioridadInscripcion(b) - prioridadInscripcion(a) ||
-          porcentajeCurso(b) - porcentajeCurso(a),
-      ),
+      misCursos
+        .filter((curso) => Boolean(curso.inscripcionId))
+        .sort(
+          (a, b) =>
+            prioridadInscripcion(b) - prioridadInscripcion(a) ||
+            porcentajeCurso(b) - porcentajeCurso(a),
+        ),
     [misCursos],
+  );
+  const misCursosFiltrados = useMemo(
+    () =>
+      nivelActivo === "todos"
+        ? misCursosOrdenados
+        : misCursosOrdenados.filter(
+            (curso) => normalizarNivel(curso.nivelDificultad) === nivelActivo,
+          ),
+    [misCursosOrdenados, nivelActivo],
   );
   const diplomados = useMemo(
     () => todosCursos.filter((curso) => curso.esDiplomado),
@@ -141,6 +152,46 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
   }, [todosCursos]);
+  const cursosCompletados = useMemo(
+    () =>
+      misCursosOrdenados.filter((curso) =>
+        cursoCompletado(curso, porcentajeCurso(curso)),
+      ),
+    [misCursosOrdenados],
+  );
+  const cursoReferenciaDescubrimiento = useMemo(
+    () =>
+      misCursosOrdenados
+        .filter(
+          (curso) =>
+            cursoEnProgreso(curso) &&
+            !cursoCompletado(curso, porcentajeCurso(curso)),
+        )
+        .sort(
+          (a, b) =>
+            porcentajeCurso(b) - porcentajeCurso(a) ||
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )[0] ?? null,
+    [misCursosOrdenados],
+  );
+  const cursosRelacionados = useMemo(() => {
+    if (!cursoReferenciaDescubrimiento) return [];
+
+    return todosCursos
+      .filter(
+        (curso) =>
+          curso.id !== cursoReferenciaDescubrimiento.id &&
+          !cursoCompletado(curso, porcentajeCurso(curso)),
+      )
+      .sort((a, b) => compararRelacionados(cursoReferenciaDescubrimiento, a, b));
+  }, [cursoReferenciaDescubrimiento, todosCursos]);
+  const recomendadosEmpresa = useMemo(
+    () =>
+      disponibles.filter(
+        (curso) => !cursoCompletado(curso, porcentajeCurso(curso)),
+      ),
+    [disponibles],
+  );
 
   const vistaCatalogo = useMemo(() => {
     if (seccionActiva === "diplomados") {
@@ -159,15 +210,6 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
       };
     }
 
-    if (seccionActiva === "nivel") {
-      const nivel = NIVELES_CATALOGO.find((item) => item.id === nivelActivo);
-      return {
-        titulo: nivel?.label ?? "Por nivel",
-        cursos: todosCursos.filter((curso) => curso.nivelDificultad === nivelActivo),
-        mensajeVacio: `No hay cursos de nivel ${nivel?.label.toLowerCase() ?? "seleccionado"}.`,
-      };
-    }
-
     if (seccionActiva === "categoria") {
       const escuela = ESCUELAS_CATALOGO.find((item) => item.id === escuelaActiva);
       return {
@@ -179,10 +221,13 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
 
     return {
       titulo: "Mis cursos",
-      cursos: misCursosOrdenados,
-      mensajeVacio: "Todavia no tienes cursos inscritos.",
+      cursos: misCursosFiltrados,
+      mensajeVacio:
+        nivelActivo === "todos"
+          ? "Todavia no tienes cursos inscritos."
+          : `No tienes cursos inscritos de nivel ${nivelActivo}.`,
     };
-  }, [diplomados, escuelaActiva, misCursosOrdenados, nivelActivo, nuevos, seccionActiva, todosCursos]);
+  }, [diplomados, escuelaActiva, misCursosFiltrados, nivelActivo, nuevos, seccionActiva, todosCursos]);
 
   return (
     <div className="flex w-full max-w-[1500px] flex-col items-start gap-5">
@@ -204,15 +249,6 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
           />
         </div>
 
-        {seccionActiva === "nivel" && (
-          <SelectorSecundario
-            ariaLabel="Filtrar cursos por nivel"
-            items={NIVELES_CATALOGO}
-            value={nivelActivo}
-            onChange={setNivelActivo}
-          />
-        )}
-
         {seccionActiva === "categoria" && (
           <SelectorSecundario
             ariaLabel="Filtrar cursos por escuela"
@@ -222,11 +258,30 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
           />
         )}
 
-        <FilaCatalogo
-          titulo={vistaCatalogo.titulo}
-          cursos={vistaCatalogo.cursos}
-          mensajeVacio={vistaCatalogo.mensajeVacio}
-        />
+        {seccionActiva === "descubrir" ? (
+          <DescubrirCatalogo
+            cursoReferencia={cursoReferenciaDescubrimiento}
+            relacionados={cursosRelacionados}
+            empresa={recomendadosEmpresa}
+            completados={cursosCompletados}
+          />
+        ) : (
+          <FilaCatalogo
+            titulo={vistaCatalogo.titulo}
+            cursos={vistaCatalogo.cursos}
+            mensajeVacio={vistaCatalogo.mensajeVacio}
+            controles={
+              seccionActiva === "mis-cursos" ? (
+                <SelectorSecundario
+                  ariaLabel="Filtrar mis cursos por nivel"
+                  items={NIVELES_CATALOGO}
+                  value={nivelActivo}
+                  onChange={setNivelActivo}
+                />
+              ) : undefined
+            }
+          />
+        )}
       </section>
     </div>
   );
@@ -310,14 +365,58 @@ function SelectorSecundario<T extends string>({
   );
 }
 
+function DescubrirCatalogo({
+  cursoReferencia,
+  relacionados,
+  empresa,
+  completados,
+}: {
+  cursoReferencia: CursoCatalogoFila | null;
+  relacionados: CursoCatalogoFila[];
+  empresa: CursoCatalogoFila[];
+  completados: CursoCatalogoFila[];
+}) {
+  return (
+    <div className="min-w-0 space-y-8">
+      <h2 className="font-display text-2xl font-bold text-white drop-shadow-sm">Descubrir</h2>
+
+      {cursoReferencia && relacionados.length > 0 && (
+        <FilaCatalogo
+          titulo={`Porque empezaste ${cursoReferencia.titulo}`}
+          cursos={relacionados}
+          mensajeVacio=""
+        />
+      )}
+
+      {empresa.length > 0 && (
+        <FilaCatalogo
+          titulo="Recomendados para tu empresa"
+          cursos={empresa}
+          mensajeVacio=""
+        />
+      )}
+
+      {completados.length > 0 && (
+        <FilaCatalogo
+          titulo="Cursos completados"
+          cursos={completados}
+          mensajeVacio=""
+        />
+      )}
+    </div>
+  );
+}
+
 function FilaCatalogo({
   titulo,
   cursos,
   mensajeVacio,
+  controles,
 }: {
   titulo: string;
   cursos: CursoCatalogoFila[];
   mensajeVacio: string;
+  controles?: ReactNode;
 }) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [puedeRetroceder, setPuedeRetroceder] = useState(false);
@@ -392,6 +491,8 @@ function FilaCatalogo({
           </button>
         </div>
       </div>
+
+      {controles}
 
       {cursos.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-white/30 bg-[#061120]/24 px-6 py-8 text-center text-sm font-semibold text-white/80 backdrop-blur-lg">
@@ -503,8 +604,11 @@ function HeroDestacado({ cursos }: { cursos: CursoCatalogoFila[] }) {
     : inscrito
       ? completado
         ? "Revisar curso"
-        : "Continuar"
+        : "Seguir aprendiendo"
       : "Comenzar";
+  const hrefAccionInscrito = completado
+    ? `/mis-cursos/${curso.id}`
+    : hrefContinuarCurso(curso);
   const hayVariosCursos = cursos.length > 1;
 
   function cambiarCurso(delta: number) {
@@ -587,7 +691,7 @@ function HeroDestacado({ cursos }: { cursos: CursoCatalogoFila[] }) {
         <div className="mt-4 flex flex-wrap items-center gap-2.5">
           {inscrito ? (
             <Link
-              href={`/mis-cursos/${curso.id}`}
+              href={hrefAccionInscrito}
               className="inline-flex min-h-10 items-center gap-2.5 rounded-full bg-white px-5 text-sm font-bold text-[#061120] shadow-[0_8px_20px_rgba(6,17,32,0.18)] transition-transform duration-300 hover:scale-[1.02]"
             >
               <Play className="size-4 fill-[#061120]" aria-hidden="true" />
@@ -861,6 +965,51 @@ function porcentajeCurso(curso: CursoCatalogoFila): number {
 
 function cursoCompletado(curso: CursoCatalogoFila, porcentaje: number): boolean {
   return porcentaje >= 100 || curso.estadoInscripcion === "finalizado" || curso.estadoInscripcion === "aprobado";
+}
+
+function cursoEnProgreso(curso: CursoCatalogoFila): boolean {
+  return (
+    curso.estadoInscripcion === "en_progreso" ||
+    curso.estadoInscripcion === "pendiente_evaluacion"
+  );
+}
+
+function normalizarNivel(nivel?: string | null): NivelCatalogo | null {
+  if (!nivel) return null;
+
+  const normalizado = nivel
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .trim();
+
+  if (normalizado === "basico" || normalizado === "intermedio" || normalizado === "avanzado") {
+    return normalizado;
+  }
+
+  return null;
+}
+
+function compararRelacionados(
+  referencia: CursoCatalogoFila,
+  a: CursoCatalogoFila,
+  b: CursoCatalogoFila,
+): number {
+  const criterios: Array<(curso: CursoCatalogoFila) => boolean> = [
+    (curso) => curso.escuela === referencia.escuela,
+    (curso) => normalizarNivel(curso.nivelDificultad) === normalizarNivel(referencia.nivelDificultad),
+    (curso) => curso.esDiplomado === referencia.esDiplomado,
+  ];
+
+  for (const coincide of criterios) {
+    const diferencia = Number(coincide(b)) - Number(coincide(a));
+    if (diferencia !== 0) return diferencia;
+  }
+
+  return (
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() ||
+    a.id.localeCompare(b.id)
+  );
 }
 
 function prioridadInscripcion(curso: CursoCatalogoFila): number {

@@ -3,11 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  useMediaRangeTracking,
+  type MediaConsumptionReporter,
+} from "@/hooks/use-auto-completion";
 
 interface ReproductorPodcastProps {
   nombre: string;
   url: string;
   onFallo?: () => void;
+  resourceId?: string;
+  autoCompletionEnabled?: boolean;
+  onConsumptionProgress?: MediaConsumptionReporter;
 }
 
 function formatearTiempo(segundos: number) {
@@ -22,11 +29,25 @@ const BARRAS = [
   52, 74, 36, 60, 44, 72, 48, 66, 38, 58, 42, 70, 50, 64,
 ];
 
-export function ReproductorPodcast({ nombre, url, onFallo }: ReproductorPodcastProps) {
+export function ReproductorPodcast({
+  nombre,
+  url,
+  onFallo,
+  resourceId,
+  autoCompletionEnabled = false,
+  onConsumptionProgress,
+}: ReproductorPodcastProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [reproduciendo, setReproduciendo] = useState(false);
   const [actual, setActual] = useState(0);
   const [duracion, setDuracion] = useState(0);
+
+  useMediaRangeTracking(
+    audioRef,
+    resourceId ?? url,
+    autoCompletionEnabled,
+    onConsumptionProgress,
+  );
 
   useEffect(() => {
     const audio = audioRef.current;

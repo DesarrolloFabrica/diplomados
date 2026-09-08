@@ -89,7 +89,7 @@ const ROADMAP_ASSETS = {
   inicio: "/images/roadmap_asset/r_inicio.png",
   mid: "/images/roadmap_asset/r_mid.png",
   fin: "/images/roadmap_asset/r_fin.png",
-  quiz: "/images/roadmap_asset/r_quiz.png",
+  quiz: "/images/roadmap_asset/r_quiz.jpeg",
   avatar: "/images/roadmap_asset/Avatar.png",
 } as const;
 

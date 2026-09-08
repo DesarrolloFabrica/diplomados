@@ -34,6 +34,8 @@ export interface CursoCatalogoFila {
     | "finalizado"
     | null;
   porcentajeAvance: string | null;
+  ultimaLeccionId: string | null;
+  primeraLeccionId: string | null;
 }
 
 // RLS ya limita `cursos` a publicados (globales o de la empresa del
@@ -42,8 +44,8 @@ export interface CursoCatalogoFila {
 export async function listarCursosParaColaborador(
   usuarioId: string,
 ): Promise<CursoCatalogoFila[]> {
-  return conSesion(usuarioId, (tx) =>
-    tx
+  return conSesion(usuarioId, async (tx) => {
+    const filas = await tx
       .select({
         id: cursos.id,
         titulo: cursos.titulo,
@@ -56,6 +58,7 @@ export async function listarCursosParaColaborador(
         inscripcionId: inscripciones.id,
         estadoInscripcion: inscripciones.estado,
         porcentajeAvance: inscripciones.porcentajeAvance,
+        ultimaLeccionId: inscripciones.ultimaLeccionId,
       })
       .from(cursos)
       .leftJoin(
@@ -63,8 +66,61 @@ export async function listarCursosParaColaborador(
         and(eq(inscripciones.cursoId, cursos.id), eq(inscripciones.profileId, usuarioId)),
       )
       .where(and(eq(cursos.estado, "publicado"), isNull(cursos.deletedAt)))
-      .orderBy(desc(cursos.createdAt)),
-  );
+      .orderBy(desc(cursos.createdAt));
+
+    const cursoIdsSinUltimaLeccion = filas
+      .filter((fila) => fila.inscripcionId && !fila.ultimaLeccionId)
+      .map((fila) => fila.id);
+
+    const primerasLecciones = await obtenerPrimerasLeccionesPorCursosEnTx(
+      tx,
+      cursoIdsSinUltimaLeccion,
+    );
+
+    return filas.map((fila) => ({
+      ...fila,
+      primeraLeccionId: fila.ultimaLeccionId ? null : (primerasLecciones.get(fila.id) ?? null),
+    }));
+  });
+}
+
+async function obtenerPrimerasLeccionesPorCursosEnTx(
+  tx: Parameters<Parameters<typeof conSesion>[1]>[0],
+  cursoIds: string[],
+): Promise<Map<string, string>> {
+  if (cursoIds.length === 0) return new Map();
+
+  const filas = await tx
+    .select({
+      cursoId: modulos.cursoId,
+      leccionId: lecciones.id,
+    })
+    .from(lecciones)
+    .innerJoin(unidades, eq(lecciones.unidadId, unidades.id))
+    .innerJoin(modulos, eq(unidades.moduloId, modulos.id))
+    .where(
+      and(
+        inArray(modulos.cursoId, cursoIds),
+        isNull(lecciones.deletedAt),
+        isNull(unidades.deletedAt),
+        isNull(modulos.deletedAt),
+      ),
+    )
+    .orderBy(
+      asc(modulos.cursoId),
+      asc(modulos.orden),
+      asc(unidades.orden),
+      asc(lecciones.orden),
+      asc(lecciones.createdAt),
+    );
+
+  const mapa = new Map<string, string>();
+  for (const fila of filas) {
+    if (!mapa.has(fila.cursoId)) {
+      mapa.set(fila.cursoId, fila.leccionId);
+    }
+  }
+  return mapa;
 }
 
 export interface InscripcionFila {

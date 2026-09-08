@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef } from "react";
 import {
   Download,
   File,
@@ -12,12 +15,19 @@ import { obtenerEmbedYoutube, esEnlaceGoogleDrive } from "@/lib/media";
 import { DriveRecursoEmbed } from "@/components/shared/drive-recurso-embed";
 import { ImagenRecurso } from "@/components/shared/imagen-recurso";
 import { ReproductorPodcast } from "@/components/shared/reproductor-podcast";
+import {
+  useMediaRangeTracking,
+  type MediaConsumptionReporter,
+} from "@/hooks/use-auto-completion";
 import type { TipoRecurso } from "@backend/lib/db/schema";
 
 interface RecursoIncrustadoProps {
+  resourceId: string;
   nombre: string;
   tipo: TipoRecurso;
   url: string | null;
+  autoCompletionEnabled?: boolean;
+  onConsumptionProgress?: MediaConsumptionReporter;
 }
 
 const ICONO_DESCARGA: Record<TipoRecurso, typeof FileText> = {
@@ -30,10 +40,52 @@ const ICONO_DESCARGA: Record<TipoRecurso, typeof FileText> = {
   archivo: File,
 };
 
+function VideoNativo({
+  resourceId,
+  nombre,
+  url,
+  autoCompletionEnabled,
+  onConsumptionProgress,
+}: {
+  resourceId: string;
+  nombre: string;
+  url: string;
+  autoCompletionEnabled: boolean;
+  onConsumptionProgress?: MediaConsumptionReporter;
+}) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  useMediaRangeTracking(
+    videoRef,
+    resourceId,
+    autoCompletionEnabled,
+    onConsumptionProgress,
+  );
+
+  return (
+    // eslint-disable-next-line jsx-a11y/media-has-caption
+    <video
+      ref={videoRef}
+      controls
+      playsInline
+      preload="metadata"
+      src={url}
+      title={nombre}
+      className="h-full w-full"
+    />
+  );
+}
+
 // Cada tipo de recurso se muestra en su formato nativo (reproductor de
 // video/audio, imagen inline) en vez de una fila de tabla con un link
 // "Abrir" genérico. Documentos y enlaces quedan como tarjeta con botón.
-export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps) {
+export function RecursoIncrustado({
+  resourceId,
+  nombre,
+  tipo,
+  url,
+  autoCompletionEnabled = false,
+  onConsumptionProgress,
+}: RecursoIncrustadoProps) {
   if (!url) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/80 p-4 text-sm text-slate-600">
@@ -44,7 +96,16 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
 
   // Google Drive: proxy same-origin + cadena de fallback (resourcekey, cookies).
   if (esEnlaceGoogleDrive(url)) {
-    return <DriveRecursoEmbed nombre={nombre} tipo={tipo} url={url} />;
+    return (
+      <DriveRecursoEmbed
+        resourceId={resourceId}
+        nombre={nombre}
+        tipo={tipo}
+        url={url}
+        autoCompletionEnabled={autoCompletionEnabled}
+        onConsumptionProgress={onConsumptionProgress}
+      />
+    );
   }
 
   if (tipo === "video") {
@@ -60,15 +121,28 @@ export function RecursoIncrustado({ nombre, tipo, url }: RecursoIncrustadoProps)
             allowFullScreen
           />
         ) : (
-          // eslint-disable-next-line jsx-a11y/media-has-caption
-          <video controls src={url} className="h-full w-full" />
+          <VideoNativo
+            resourceId={resourceId}
+            nombre={nombre}
+            url={url}
+            autoCompletionEnabled={autoCompletionEnabled}
+            onConsumptionProgress={onConsumptionProgress}
+          />
         )}
       </div>
     );
   }
 
   if (tipo === "audio") {
-    return <ReproductorPodcast nombre={nombre} url={url} />;
+    return (
+      <ReproductorPodcast
+        resourceId={resourceId}
+        nombre={nombre}
+        url={url}
+        autoCompletionEnabled={autoCompletionEnabled}
+        onConsumptionProgress={onConsumptionProgress}
+      />
+    );
   }
 
   if (tipo === "imagen") {

@@ -131,14 +131,14 @@ export function PresentarEvaluacion({
   if (!intentoId) {
     if (intentosUsados >= maxIntentos) {
       return (
-        <p className="rounded-lg border border-dashed border-border py-8 text-center text-muted-foreground">
+        <p className="rounded-lg border border-dashed border-white/35 bg-[#061120]/30 py-8 text-center text-white/78 backdrop-blur-sm">
           Ya usaste tus {maxIntentos} intento(s) permitidos.
         </p>
       );
     }
     return (
       <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-white/78">
           Intentos usados: {intentosUsados}/{maxIntentos}. Necesitas {puntajeMinimo}% para
           aprobar.
         </p>
@@ -152,7 +152,7 @@ export function PresentarEvaluacion({
 
   if (!preguntas) {
     return (
-      <div className="flex items-center justify-center py-16 text-muted-foreground">
+      <div className="flex items-center justify-center py-16 text-white/78">
         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
         Cargando preguntas...
       </div>
@@ -160,7 +160,7 @@ export function PresentarEvaluacion({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-2">
       {preguntas.map((pregunta, indice) => (
         <Card key={pregunta.id}>
           <CardHeader>

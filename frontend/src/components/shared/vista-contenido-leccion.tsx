@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AudioLines,
   ChartNoAxesCombined,
@@ -22,6 +22,10 @@ import {
   type TabContenido,
 } from "@/lib/contenido-leccion";
 import type { InfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
+import {
+  MIN_DOCUMENT_REVIEW_SECONDS,
+  type MediaConsumptionReporter,
+} from "@/hooks/use-auto-completion";
 
 export interface RecursoVista {
   id: string;
@@ -49,12 +53,104 @@ interface VistaContenidoLeccionProps {
   recursos: RecursoVista[];
   contenidoTexto?: string | null;
   infografiaInteractiva?: InfografiaInteractivaLeccion | null;
+  autoCompletion?: {
+    enabled: boolean;
+    onMediaProgress: MediaConsumptionReporter;
+    onDocumentEnd: () => void;
+  };
+}
+
+function DocumentoTextoObservable({
+  contenido,
+  enabled,
+  onDocumentEnd,
+}: {
+  contenido: string;
+  enabled: boolean;
+  onDocumentEnd?: () => void;
+}) {
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const endOfDocumentRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const content = contentRef.current;
+    const end = endOfDocumentRef.current;
+    if (!enabled || !onDocumentEnd || !content || !end) return undefined;
+
+    let reviewStartedAt: number | null = null;
+    let endVisible = false;
+    let completionSent = false;
+    let timeoutId: number | undefined;
+
+    function clearPendingTimeout() {
+      if (timeoutId === undefined) return;
+      window.clearTimeout(timeoutId);
+      timeoutId = undefined;
+    }
+
+    function tryComplete() {
+      clearPendingTimeout();
+      if (completionSent || !endVisible || reviewStartedAt === null) return;
+
+      const requiredMs = MIN_DOCUMENT_REVIEW_SECONDS * 1000;
+      const remainingMs = requiredMs - (performance.now() - reviewStartedAt);
+      if (remainingMs <= 0) {
+        completionSent = true;
+        onDocumentEnd?.();
+        return;
+      }
+
+      timeoutId = window.setTimeout(tryComplete, remainingMs);
+    }
+
+    const contentObserver = new IntersectionObserver((entries) => {
+      if (reviewStartedAt !== null || !entries.some((entry) => entry.isIntersecting)) return;
+      reviewStartedAt = performance.now();
+      tryComplete();
+    });
+
+    const endObserver = new IntersectionObserver(
+      (entries) => {
+        endVisible = entries.some((entry) => entry.isIntersecting);
+        if (endVisible) {
+          tryComplete();
+        } else {
+          clearPendingTimeout();
+        }
+      },
+      { threshold: 0.8 },
+    );
+
+    contentObserver.observe(content);
+    endObserver.observe(end);
+
+    return () => {
+      clearPendingTimeout();
+      contentObserver.disconnect();
+      endObserver.disconnect();
+    };
+  }, [enabled, onDocumentEnd]);
+
+  return (
+    <div ref={contentRef}>
+      <p className="mb-5 whitespace-pre-wrap text-base leading-relaxed text-slate-700">
+        {contenido}
+      </p>
+      <div
+        ref={endOfDocumentRef}
+        data-document-end
+        aria-hidden="true"
+        className="h-px w-full"
+      />
+    </div>
+  );
 }
 
 export function VistaContenidoLeccion({
   recursos,
   contenidoTexto,
   infografiaInteractiva = null,
+  autoCompletion,
 }: VistaContenidoLeccionProps) {
   const tabsDisponibles = useMemo(() => {
     const presentes = new Set(recursos.map((r) => tabDeTipo(r.tipo)));
@@ -133,10 +229,12 @@ export function VistaContenidoLeccion({
           />
         ) : null}
 
-        {mostrarTexto && (
-          <p className="mb-5 whitespace-pre-wrap text-base leading-relaxed text-slate-700">
-            {contenidoTexto}
-          </p>
+        {mostrarTexto && contenidoTexto && (
+          <DocumentoTextoObservable
+            contenido={contenidoTexto}
+            enabled={autoCompletion?.enabled ?? false}
+            onDocumentEnd={autoCompletion?.onDocumentEnd}
+          />
         )}
 
         {recursosFiltrados.length > 0 ? (
@@ -144,9 +242,12 @@ export function VistaContenidoLeccion({
             {recursosFiltrados.map((recurso) => (
               <RecursoIncrustado
                 key={recurso.id}
+                resourceId={recurso.id}
                 nombre={recurso.nombre}
                 tipo={recurso.tipo}
                 url={recurso.url}
+                autoCompletionEnabled={autoCompletion?.enabled ?? false}
+                onConsumptionProgress={autoCompletion?.onMediaProgress}
               />
             ))}
           </div>

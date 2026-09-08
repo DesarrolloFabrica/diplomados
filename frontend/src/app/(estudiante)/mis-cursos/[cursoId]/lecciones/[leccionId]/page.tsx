@@ -33,9 +33,8 @@ import {
   extraerMetaContenido,
   obtenerProximosContenidos,
 } from "@/lib/ruta-curso";
-import { VistaContenidoLeccion } from "@/components/shared/vista-contenido-leccion";
 import { LayoutVistaLeccion } from "@/components/shared/layout-vista-leccion";
-import { ProximosContenidos } from "@/components/shared/proximos-contenidos";
+import { ContenidoLeccionConCompletado } from "@/components/shared/contenido-leccion-con-completado";
 import { ProgresoCursoLeccion } from "@/components/shared/progreso-curso-leccion";
 import { obtenerInfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
 import { BotonCompletar } from "./boton-completar";
@@ -170,7 +169,7 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
               categoriasContenido: categoriasDeRecursos(recursosLeccion.map((r) => r.tipo)),
 
-              portadaUrl: meta.portadaUrl ?? null,
+              portadaUrl: meta.portadaUrl ?? meta.imagenPortadaUrl ?? null,
 
               duracionMin: meta.duracionMin ?? null,
 
@@ -300,53 +299,33 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
           total={progresoCurso.total}
         />
 
-        <VistaContenidoLeccion
-
-          recursos={recursosConUrl.map((r) => ({
-
-            id: r.id,
-
-            nombre: r.nombre,
-
-            tipo: r.tipo,
-
-            url: r.url,
-
+        <ContenidoLeccionConCompletado
+          courseId={cursoId}
+          enrollmentId={inscripcion.id}
+          lessonId={leccionId}
+          completionMode={leccion.marcado}
+          completed={completada}
+          recursos={recursosConUrl.map((recurso) => ({
+            id: recurso.id,
+            nombre: recurso.nombre,
+            tipo: recurso.tipo,
+            url: recurso.url,
           }))}
-
           contenidoTexto={contenidoTexto}
-
           infografiaInteractiva={infografiaInteractiva}
-
-        />
-
-
-
-        <ProximosContenidos
-
           portadaCursoUrl={curso.imagenPortadaUrl}
-
           proximos={proximos}
-
+          manualCompletionControl={
+            leccion.marcado === "manual" ? (
+              <BotonCompletar
+                cursoId={cursoId}
+                inscripcionId={inscripcion.id}
+                leccionId={leccionId}
+                completada={completada}
+              />
+            ) : null
+          }
         />
-
-
-
-        <div className="mt-5">
-
-          <BotonCompletar
-
-            cursoId={cursoId}
-
-            inscripcionId={inscripcion.id}
-
-            leccionId={leccionId}
-
-            completada={completada}
-
-          />
-
-        </div>
 
       </LayoutVistaLeccion>
 
