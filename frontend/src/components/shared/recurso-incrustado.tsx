@@ -15,10 +15,12 @@ import { obtenerEmbedYoutube, esEnlaceGoogleDrive } from "@/lib/media";
 import { DriveRecursoEmbed } from "@/components/shared/drive-recurso-embed";
 import { ImagenRecurso } from "@/components/shared/imagen-recurso";
 import { ReproductorPodcast } from "@/components/shared/reproductor-podcast";
+import { ResumePromptOverlay } from "@/components/shared/resume-prompt-overlay";
 import {
   useMediaRangeTracking,
   type MediaConsumptionReporter,
 } from "@/hooks/use-auto-completion";
+import { claveReanudacion, usePlaybackResume } from "@/hooks/use-playback-resume";
 import type { TipoRecurso } from "@backend/lib/db/schema";
 
 interface RecursoIncrustadoProps {
@@ -28,6 +30,8 @@ interface RecursoIncrustadoProps {
   url: string | null;
   autoCompletionEnabled?: boolean;
   onConsumptionProgress?: MediaConsumptionReporter;
+  enrollmentId?: string;
+  lessonId?: string;
 }
 
 const ICONO_DESCARGA: Record<TipoRecurso, typeof FileText> = {
@@ -46,12 +50,16 @@ function VideoNativo({
   url,
   autoCompletionEnabled,
   onConsumptionProgress,
+  enrollmentId,
+  lessonId,
 }: {
   resourceId: string;
   nombre: string;
   url: string;
   autoCompletionEnabled: boolean;
   onConsumptionProgress?: MediaConsumptionReporter;
+  enrollmentId?: string;
+  lessonId?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   useMediaRangeTracking(
@@ -60,18 +68,32 @@ function VideoNativo({
     autoCompletionEnabled,
     onConsumptionProgress,
   );
+  const resume = usePlaybackResume(
+    videoRef,
+    enrollmentId && lessonId ? claveReanudacion(enrollmentId, lessonId, resourceId) : null,
+    Boolean(enrollmentId && lessonId),
+  );
 
   return (
-    // eslint-disable-next-line jsx-a11y/media-has-caption
-    <video
-      ref={videoRef}
-      controls
-      playsInline
-      preload="metadata"
-      src={url}
-      title={nombre}
-      className="h-full w-full"
-    />
+    <div className="relative h-full w-full">
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <video
+        ref={videoRef}
+        controls
+        playsInline
+        preload="metadata"
+        src={url}
+        title={nombre}
+        className="h-full w-full"
+      />
+      {resume.posicionPendiente !== null ? (
+        <ResumePromptOverlay
+          segundos={resume.posicionPendiente}
+          onContinuar={resume.continuar}
+          onDescartar={resume.descartar}
+        />
+      ) : null}
+    </div>
   );
 }
 
@@ -85,6 +107,8 @@ export function RecursoIncrustado({
   url,
   autoCompletionEnabled = false,
   onConsumptionProgress,
+  enrollmentId,
+  lessonId,
 }: RecursoIncrustadoProps) {
   if (!url) {
     return (
@@ -104,6 +128,8 @@ export function RecursoIncrustado({
         url={url}
         autoCompletionEnabled={autoCompletionEnabled}
         onConsumptionProgress={onConsumptionProgress}
+        enrollmentId={enrollmentId}
+        lessonId={lessonId}
       />
     );
   }
@@ -113,6 +139,10 @@ export function RecursoIncrustado({
     return (
       <div className="lesson-media aspect-video w-full overflow-hidden rounded-2xl border border-border/70 bg-black shadow-[0_8px_30px_rgba(6,17,32,0.08)] ring-1 ring-emerald-500/15">
         {embedYoutube ? (
+          // La API JS de YouTube no se carga aquí: sin `enablejsapi`, este
+          // iframe no expone currentTime, así que no se puede reanudar el
+          // segundo exacto. Solo se recuerda la pestaña/lección (ver
+          // VistaContenidoLeccion).
           <iframe
             src={embedYoutube}
             title={nombre}
@@ -127,6 +157,8 @@ export function RecursoIncrustado({
             url={url}
             autoCompletionEnabled={autoCompletionEnabled}
             onConsumptionProgress={onConsumptionProgress}
+            enrollmentId={enrollmentId}
+            lessonId={lessonId}
           />
         )}
       </div>
@@ -141,6 +173,8 @@ export function RecursoIncrustado({
         url={url}
         autoCompletionEnabled={autoCompletionEnabled}
         onConsumptionProgress={onConsumptionProgress}
+        enrollmentId={enrollmentId}
+        lessonId={lessonId}
       />
     );
   }

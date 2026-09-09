@@ -11,6 +11,21 @@ const LH3_URL = /https:\/\/lh3\.googleusercontent\.com\/[^"'\\s<>]+/i;
 const CONFIRM_TOKEN = /confirm=([0-9A-Za-z_-]+)/;
 const CONFIRM_HREF = /href="([^"]*confirm=[^"]+)"/i;
 
+/**
+ * Cuántos bytes iniciales se inspeccionan para distinguir una página HTML de
+ * confirmación ("no se puede analizar en busca de virus") de contenido
+ * multimedia real con un tipo de contenido ambiguo (p.ej.
+ * application/octet-stream). Las páginas de confirmación de Drive pesan
+ * unos pocos KB; este límite nunca debe alcanzarse con contenido real, así
+ * que jamás se bufferiza un video/audio completo en memoria.
+ */
+const MAX_PEEK_BYTES = 65_536;
+
+/** Caché en memoria (por instancia del runtime) de la URL de descarga ya
+ * confirmada para un archivo, para evitar repetir la resolución de la
+ * página de confirmación en cada petición Range durante la reproducción. */
+const cacheUrlConfirmada = new Map<string, string>();
+
 function agregarResourceKey(url: URL, resourceKey: string | null) {
   if (resourceKey) {
     url.searchParams.set("resourcekey", resourceKey);
@@ -58,27 +73,66 @@ function pareceMedia(bytes: Uint8Array): boolean {
   return false;
 }
 
-async function leerStreamCompleto(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
+/**
+ * Lee hasta `maxBytes` del stream para poder inspeccionarlos (sniffing de
+ * HTML/magic bytes) y devuelve un stream reconstruido que emite ese
+ * fragmento seguido del resto del cuerpo original en streaming real — nunca
+ * bufferiza el archivo completo en memoria.
+ */
+async function peekYReconstruir(
+  stream: ReadableStream<Uint8Array>,
+  maxBytes: number,
+): Promise<{ peeked: Uint8Array; combinado: ReadableStream<Uint8Array> }> {
   const lector = stream.getReader();
   const partes: Uint8Array[] = [];
   let total = 0;
+  let agotado = false;
 
-  while (true) {
+  while (total < maxBytes) {
     const { done, value } = await lector.read();
-    if (done) break;
-    if (!value) continue;
-    partes.push(value);
-    total += value.byteLength;
+    if (done) {
+      agotado = true;
+      break;
+    }
+    if (value && value.byteLength > 0) {
+      partes.push(value);
+      total += value.byteLength;
+    }
   }
 
-  const buffer = new Uint8Array(total);
+  const peeked = new Uint8Array(total);
   let offset = 0;
   for (const parte of partes) {
-    buffer.set(parte, offset);
+    peeked.set(parte, offset);
     offset += parte.byteLength;
   }
 
-  return buffer;
+  const combinado = new ReadableStream<Uint8Array>({
+    start(controller) {
+      if (peeked.byteLength > 0) controller.enqueue(peeked);
+      if (agotado) {
+        controller.close();
+        return;
+      }
+      (async () => {
+        try {
+          while (true) {
+            const { done, value } = await lector.read();
+            if (done) break;
+            if (value) controller.enqueue(value);
+          }
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      })();
+    },
+    cancel(reason) {
+      return lector.cancel(reason);
+    },
+  });
+
+  return { peeked, combinado };
 }
 
 /** URLs de descarga/visualización que el proxy puede intentar en orden. */
@@ -184,11 +238,42 @@ export async function obtenerRecursoDrive(
   range: string | null,
   aceptar: (contentType: string) => boolean,
 ): Promise<RespuestaDriveUpstream | null> {
-  const sources = construirFuentesDescarga(id, resourceKey);
+  const claveCache = `${id}:${resourceKey ?? ""}`;
   const visitados = new Set<string>();
 
+  const urlCacheada = cacheUrlConfirmada.get(claveCache);
+  if (urlCacheada) {
+    try {
+      const resultado = await intentarFuente(
+        new URL(urlCacheada),
+        id,
+        resourceKey,
+        range,
+        visitados,
+        aceptar,
+        claveCache,
+      );
+      if (resultado) {
+        return resultado;
+      }
+    } catch {
+      // URL cacheada inválida: se ignora y se resuelve desde cero abajo.
+    }
+    cacheUrlConfirmada.delete(claveCache);
+  }
+
+  const sources = construirFuentesDescarga(id, resourceKey);
+
   for (const source of sources) {
-    const resultado = await intentarFuente(source, id, resourceKey, range, visitados, aceptar);
+    const resultado = await intentarFuente(
+      source,
+      id,
+      resourceKey,
+      range,
+      visitados,
+      aceptar,
+      claveCache,
+    );
     if (resultado) {
       return resultado;
     }
@@ -204,6 +289,7 @@ async function intentarFuente(
   range: string | null,
   visitados: Set<string>,
   aceptar: (contentType: string) => boolean,
+  claveCache?: string,
 ): Promise<RespuestaDriveUpstream | null> {
   if (visitados.has(url.toString())) {
     return null;
@@ -235,6 +321,7 @@ async function intentarFuente(
     normalizado.startsWith("video/") || normalizado.startsWith("audio/");
 
   if (esVideoOAudio) {
+    if (claveCache) cacheUrlConfirmada.set(claveCache, url.toString());
     return {
       body: upstream.body,
       contentType: normalizado,
@@ -244,19 +331,23 @@ async function intentarFuente(
     };
   }
 
-  // Con Range no bufferizamos respuestas ambiguas (evita romper streaming).
-  if (range) {
+  // Tipo ambiguo (p.ej. application/octet-stream) o página HTML de
+  // confirmación de Drive para archivos grandes. Solo se inspecciona un
+  // fragmento inicial acotado (ver MAX_PEEK_BYTES); el resto se retransmite
+  // en streaming real sin bufferizar el archivo completo. Esta ruta aplica
+  // igual con o sin Range: antes solo se resolvía la página de confirmación
+  // en la primera petición sin Range, pero el navegador emite peticiones
+  // Range para prácticamente toda la reproducción de video/audio, así que
+  // los archivos que requieren un token de confirmación real fallaban de
+  // forma intermitente al reproducirse.
+  const { peeked, combinado } = await peekYReconstruir(upstream.body, MAX_PEEK_BYTES);
+
+  if (peeked.byteLength === 0) {
     return null;
   }
 
-  const buffer = await leerStreamCompleto(upstream.body);
-
-  if (buffer.byteLength === 0) {
-    return null;
-  }
-
-  if (pareceHtml(buffer) || normalizado.includes("html")) {
-    const html = new TextDecoder().decode(buffer);
+  if (pareceHtml(peeked) || normalizado.includes("html")) {
+    const html = new TextDecoder().decode(peeked);
     const derivadas = extraerUrlsDesdeHtml(html, id, resourceKey);
     for (const derivada of derivadas) {
       const resultado = await intentarFuente(
@@ -266,6 +357,7 @@ async function intentarFuente(
         range,
         visitados,
         aceptar,
+        claveCache,
       );
       if (resultado) {
         return resultado;
@@ -274,32 +366,24 @@ async function intentarFuente(
     return null;
   }
 
-  if (pareceMedia(buffer)) {
+  if (pareceMedia(peeked)) {
     const tipo = normalizado.startsWith("audio/") ? normalizado : "video/mp4";
+    if (claveCache) cacheUrlConfirmada.set(claveCache, url.toString());
     return {
-      body: new ReadableStream({
-        start(controller) {
-          controller.enqueue(buffer);
-          controller.close();
-        },
-      }),
+      body: combinado,
       contentType: tipo,
-      contentLength: String(buffer.byteLength),
+      contentLength: upstream.headers.get("content-length"),
       contentRange: upstream.headers.get("content-range"),
       status: upstream.status,
     };
   }
 
   if (aceptar(normalizado) || aceptar(contentType)) {
+    if (claveCache) cacheUrlConfirmada.set(claveCache, url.toString());
     return {
-      body: new ReadableStream({
-        start(controller) {
-          controller.enqueue(buffer);
-          controller.close();
-        },
-      }),
+      body: combinado,
       contentType: normalizado || contentType,
-      contentLength: String(buffer.byteLength),
+      contentLength: upstream.headers.get("content-length"),
       contentRange: upstream.headers.get("content-range"),
       status: upstream.status,
     };

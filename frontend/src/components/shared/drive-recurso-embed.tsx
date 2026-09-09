@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type IframeHTMLAttributes } from "react";
+import { ExternalLink, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ReproductorPodcast } from "@/components/shared/reproductor-podcast";
+import { ReproductorPodcastDrive } from "@/components/shared/reproductor-podcast";
+import { ResumePromptOverlay } from "@/components/shared/resume-prompt-overlay";
 import {
   useMediaRangeTracking,
   type MediaConsumptionReporter,
 } from "@/hooks/use-auto-completion";
+import { claveReanudacion, usePlaybackResume } from "@/hooks/use-playback-resume";
 import {
   candidatosRecursoDrive,
   extraerMetaGoogleDrive,
@@ -25,6 +27,8 @@ interface DriveRecursoEmbedProps {
   className?: string;
   autoCompletionEnabled?: boolean;
   onConsumptionProgress?: MediaConsumptionReporter;
+  enrollmentId?: string;
+  lessonId?: string;
 }
 
 const MARCO_VISOR =
@@ -37,7 +41,10 @@ function clasesContenedorVisor(tipo: TipoRecurso, modo: ModoRecursoDrive): strin
       if (tipo === "audio") {
         return cn(MARCO_VISOR, "relative h-[min(40vh,400px)] min-h-[280px] bg-muted");
       }
-      return cn(MARCO_VISOR, "relative h-[min(80vh,900px)] min-h-[480px] bg-muted");
+      return cn(
+        MARCO_VISOR,
+        "relative h-[58dvh] min-h-[360px] max-h-[720px] bg-muted sm:h-[64dvh] sm:min-h-[460px] lg:h-[70dvh]",
+      );
     case "video":
       return cn(MARCO_VISOR, "relative aspect-video bg-black");
     case "audio":
@@ -45,7 +52,7 @@ function clasesContenedorVisor(tipo: TipoRecurso, modo: ModoRecursoDrive): strin
     case "imagen":
       return cn(
         MARCO_VISOR,
-        "relative flex min-h-[min(50vh,520px)] max-h-[85vh] w-full items-center justify-center bg-muted/40 p-2",
+        "relative flex min-h-[min(42vh,440px)] max-h-[68vh] w-full items-center justify-center bg-muted/40 p-2",
       );
     default: {
       const _exhaustivo: never = modo;
@@ -54,9 +61,25 @@ function clasesContenedorVisor(tipo: TipoRecurso, modo: ModoRecursoDrive): strin
   }
 }
 
+/**
+ * `credentialless` evita que el iframe reenvíe las cookies de sesión de
+ * Google del navegador del usuario. Una sesión de Google obsoleta o en
+ * conflicto (multi-cuenta, token vencido) puede hacer que Drive falle al
+ * cargar el video incluso abriendo el enlace directo fuera de esta app —
+ * "borrar cookies" lo soluciona porque elimina esa sesión. Con
+ * `credentialless` cada carga del iframe se comporta como una ventana de
+ * incógnito automáticamente, sin que el usuario tenga que hacer nada.
+ * Soportado en navegadores basados en Chromium; en el resto el atributo se
+ * ignora sin efecto (no rompe nada, solo no aporta el beneficio).
+ */
+const IFRAME_SIN_CREDENCIALES = {
+  credentialless: "",
+} as unknown as IframeHTMLAttributes<HTMLIFrameElement>;
+
 function DriveIframe({ src, titulo }: { src: string; titulo: string }) {
   return (
     <iframe
+      {...IFRAME_SIN_CREDENCIALES}
       src={src}
       title={titulo}
       className="absolute inset-0 h-full w-full border-0"
@@ -98,6 +121,8 @@ function DriveVideo({
   onFallo,
   autoCompletionEnabled,
   onConsumptionProgress,
+  enrollmentId,
+  lessonId,
 }: {
   resourceId: string;
   src: string;
@@ -105,6 +130,8 @@ function DriveVideo({
   onFallo: () => void;
   autoCompletionEnabled: boolean;
   onConsumptionProgress?: MediaConsumptionReporter;
+  enrollmentId?: string;
+  lessonId?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cargando, setCargando] = useState(true);
@@ -114,6 +141,11 @@ function DriveVideo({
     resourceId,
     autoCompletionEnabled,
     onConsumptionProgress,
+  );
+  const resume = usePlaybackResume(
+    videoRef,
+    enrollmentId && lessonId ? claveReanudacion(enrollmentId, lessonId, resourceId) : null,
+    Boolean(enrollmentId && lessonId),
   );
 
   useEffect(() => {
@@ -178,6 +210,13 @@ function DriveVideo({
           onFallo();
         }}
       />
+      {resume.posicionPendiente !== null ? (
+        <ResumePromptOverlay
+          segundos={resume.posicionPendiente}
+          onContinuar={resume.continuar}
+          onDescartar={resume.descartar}
+        />
+      ) : null}
     </>
   );
 }
@@ -190,6 +229,8 @@ export function DriveRecursoEmbed({
   className,
   autoCompletionEnabled = false,
   onConsumptionProgress,
+  enrollmentId,
+  lessonId,
 }: DriveRecursoEmbedProps) {
   const candidatos = useMemo(() => candidatosRecursoDrive(url, tipo), [url, tipo]);
   const enlaceDrive = useMemo(() => {
@@ -199,11 +240,13 @@ export function DriveRecursoEmbed({
 
   const [indiceCandidato, setIndiceCandidato] = useState(0);
   const [agotado, setAgotado] = useState(false);
+  const [intentoManual, setIntentoManual] = useState(0);
   const avanzandoRef = useRef(false);
 
   useEffect(() => {
     setIndiceCandidato(0);
     setAgotado(false);
+    setIntentoManual(0);
     avanzandoRef.current = false;
   }, [url, tipo]);
 
@@ -227,28 +270,69 @@ export function DriveRecursoEmbed({
     });
   }
 
+  // Reintento manual: vuelve al primer candidato y fuerza un remount con una
+  // URL distinta (evita servir una respuesta ya cacheada por el navegador),
+  // igual que "borrar cookies y volver a intentar" pero sin que el usuario
+  // tenga que hacerlo a mano.
+  function reintentarManualmente() {
+    avanzandoRef.current = false;
+    setAgotado(false);
+    setIndiceCandidato(0);
+    setIntentoManual((actual) => actual + 1);
+  }
+
+  function conCacheBust(src: string): string {
+    if (!intentoManual) return src;
+    const separador = src.includes("?") ? "&" : "?";
+    return `${src}${separador}cb=${intentoManual}`;
+  }
+
   const modoActual = candidatoActual?.modo ?? "iframe";
   const contenedorClase = cn(clasesContenedorVisor(tipo, modoActual), className);
 
   function renderContenido() {
     if (!candidatoActual || agotado) {
-      const esVideoOAudio = tipo === "video" || tipo === "audio";
+      if (tipo === "audio") {
+        return (
+          <ReproductorPodcastDrive
+            resourceId={resourceId}
+            nombre={nombre}
+            url={url}
+            autoCompletionEnabled={autoCompletionEnabled}
+            onConsumptionProgress={onConsumptionProgress}
+            enrollmentId={enrollmentId}
+            lessonId={lessonId}
+          />
+        );
+      }
+
+      const esVideo = tipo === "video";
       return (
         <div className="flex h-full min-h-[280px] flex-col items-center justify-center gap-3 p-6 text-center">
           <p className="text-sm text-muted-foreground">
-            {esVideoOAudio
+            {esVideo
               ? "No se pudo reproducir el video aquí. Puedes verlo directamente en Google Drive."
               : "No se pudo reproducir el contenido embebido. Ábrelo directamente en Google Drive."}
           </p>
-          <a
-            href={enlaceDrive}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
-          >
-            <ExternalLink className="h-4 w-4" />
-            Abrir en Google Drive
-          </a>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={reintentarManualmente}
+              className="inline-flex items-center gap-2 rounded-full border border-emerald-700 px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Reintentar
+            </button>
+            <a
+              href={enlaceDrive}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-800"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Abrir en Google Drive
+            </a>
+          </div>
         </div>
       );
     }
@@ -257,40 +341,43 @@ export function DriveRecursoEmbed({
       case "iframe":
         return (
           <DriveIframe
-            key={`${indiceCandidato}-${candidatoActual.url}`}
-            src={candidatoActual.url}
+            key={`${indiceCandidato}-${intentoManual}-${candidatoActual.url}`}
+            src={conCacheBust(candidatoActual.url)}
             titulo={nombre}
           />
         );
       case "video":
         return (
           <DriveVideo
-            key={`${indiceCandidato}-${candidatoActual.url}`}
+            key={`${indiceCandidato}-${intentoManual}-${candidatoActual.url}`}
             resourceId={resourceId}
-            src={candidatoActual.url}
+            src={conCacheBust(candidatoActual.url)}
             titulo={nombre}
             onFallo={avanzarCandidato}
             autoCompletionEnabled={autoCompletionEnabled}
             onConsumptionProgress={onConsumptionProgress}
+            enrollmentId={enrollmentId}
+            lessonId={lessonId}
           />
         );
       case "audio":
         return (
-          <ReproductorPodcast
-            key={`${indiceCandidato}-${candidatoActual.url}`}
+          <ReproductorPodcastDrive
+            key={`${intentoManual}-${url}`}
             resourceId={resourceId}
             nombre={nombre}
-            url={candidatoActual.url}
-            onFallo={avanzarCandidato}
+            url={url}
             autoCompletionEnabled={autoCompletionEnabled}
             onConsumptionProgress={onConsumptionProgress}
+            enrollmentId={enrollmentId}
+            lessonId={lessonId}
           />
         );
       case "imagen":
         return (
           <DriveImagen
-            key={`${indiceCandidato}-${candidatoActual.url}`}
-            src={candidatoActual.url}
+            key={`${indiceCandidato}-${intentoManual}-${candidatoActual.url}`}
+            src={conCacheBust(candidatoActual.url)}
             alt={nombre}
             onFallo={avanzarCandidato}
           />
@@ -302,7 +389,8 @@ export function DriveRecursoEmbed({
     }
   }
 
-  const usaMarcoExterno = modoActual !== "audio" || agotado || !candidatoActual;
+  const usaMarcoExterno =
+    (modoActual !== "audio" || agotado || !candidatoActual) && tipo !== "audio";
 
   return (
     <div className="space-y-2">
@@ -322,6 +410,14 @@ export function DriveRecursoEmbed({
         candidatoActual?.modo === "audio") ? (
         <p className="text-center text-xs text-muted-foreground">
           Si no se reproduce o tarda mucho,{" "}
+          <button
+            type="button"
+            onClick={reintentarManualmente}
+            className="font-medium text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400"
+          >
+            vuelve a intentarlo
+          </button>{" "}
+          o{" "}
           <a
             href={enlaceDrive}
             target="_blank"

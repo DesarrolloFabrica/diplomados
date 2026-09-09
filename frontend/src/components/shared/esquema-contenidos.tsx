@@ -12,7 +12,8 @@ import {
   CircleDashed,
   ClipboardCheck,
   FileText,
-  Headphones,
+  Layers2,
+  Lightbulb,
   LockKeyhole,
   MousePointerClick,
   PanelRightClose,
@@ -22,8 +23,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ProgresoCursoLeccion } from "@/components/shared/progreso-curso-leccion";
 import {
-  ETIQUETA_TAB,
   ORDEN_TABS,
   type TabContenido,
 } from "@/lib/contenido-leccion";
@@ -33,6 +34,7 @@ export interface ItemEsquemaLeccion {
   titulo: string;
   tipoContenido: "texto" | "video" | "archivo" | "mixto";
   completada: boolean;
+  bloqueado?: boolean;
   categoriasContenido?: TabContenido[];
 }
 
@@ -59,6 +61,11 @@ interface EsquemaContenidosProps {
   leccionActivaId?: string;
   evaluacionActivaId?: string;
   grupos: GrupoEsquema[];
+  progresoCurso: {
+    porcentaje: number;
+    completados: number;
+    total: number;
+  };
   onCerrar?: () => void;
 }
 
@@ -71,27 +78,66 @@ const ICONOS_CATEGORIA: Record<TabContenido, LucideIcon> = {
   presentacion: Presentation,
 };
 
-function categoriaPrincipal(categorias?: TabContenido[]): TabContenido | null {
-  if (!categorias?.length) return null;
-  return ORDEN_TABS.find((tab) => categorias.includes(tab)) ?? null;
+const ICONOS_POR_TIPO: Record<ItemEsquemaLeccion["tipoContenido"], LucideIcon> = {
+  texto: BookOpen,
+  video: PlayCircle,
+  archivo: FileText,
+  mixto: Layers2,
+};
+
+/** Iconos alternos cuando varias lecciones comparten el mismo tipo (p. ej. solo video). */
+const ICONOS_VARIACION: LucideIcon[] = [
+  PlayCircle,
+  BookOpen,
+  FileText,
+  AudioLines,
+  Presentation,
+  ChartNoAxesCombined,
+  MousePointerClick,
+  Lightbulb,
+];
+
+function resolverIconoLeccion(
+  categorias: TabContenido[] | undefined,
+  tipoContenido: ItemEsquemaLeccion["tipoContenido"],
+  indice: number,
+): LucideIcon {
+  const cats = ORDEN_TABS.filter((tab) => categorias?.includes(tab));
+
+  if (cats.length > 1) {
+    const preferida = cats.find((tab) => tab !== "video") ?? cats[0]!;
+    return ICONOS_CATEGORIA[preferida];
+  }
+
+  if (cats.length === 1 && cats[0] !== "video") {
+    return ICONOS_CATEGORIA[cats[0]!];
+  }
+
+  if (tipoContenido !== "video") {
+    return ICONOS_POR_TIPO[tipoContenido];
+  }
+
+  return ICONOS_VARIACION[indice % ICONOS_VARIACION.length]!;
 }
 
 function IconoLeccion({
   categorias,
   tipoContenido,
+  indice,
+  completada,
+  bloqueada,
 }: {
   categorias?: TabContenido[];
   tipoContenido: ItemEsquemaLeccion["tipoContenido"];
+  indice: number;
+  completada: boolean;
+  bloqueada: boolean;
 }) {
-  const principal = categoriaPrincipal(categorias);
-  if (principal) {
-    const Icono = ICONOS_CATEGORIA[principal];
-    return <Icono className="h-4 w-4 shrink-0" />;
-  }
-  if (tipoContenido === "video") return <PlayCircle className="h-4 w-4 shrink-0" />;
-  if (tipoContenido === "archivo") return <FileText className="h-4 w-4 shrink-0" />;
-  if (tipoContenido === "mixto") return <Headphones className="h-4 w-4 shrink-0" />;
-  return <BookOpen className="h-4 w-4 shrink-0" />;
+  if (bloqueada) return <LockKeyhole className="h-4 w-4 shrink-0" />;
+  if (completada) return <CircleCheck className="h-4 w-4 shrink-0" />;
+
+  const Icono = resolverIconoLeccion(categorias, tipoContenido, indice);
+  return <Icono className="h-4 w-4 shrink-0" />;
 }
 
 function calcularProgresoModulo(grupo: GrupoEsquema) {
@@ -121,16 +167,39 @@ function estadoQuiz(evaluacion: ItemEsquemaEvaluacion): EstadoQuiz {
 }
 
 function IconoEstadoQuiz({ estado }: { estado: EstadoQuiz }) {
-  if (estado === "completado") {
-    return <CircleCheck className="h-4 w-4 shrink-0 text-emerald-400" />;
-  }
-  if (estado === "en-progreso") {
-    return <CircleDashed className="h-4 w-4 shrink-0 text-teal-300" />;
-  }
   if (estado === "bloqueado") {
     return <LockKeyhole className="h-4 w-4 shrink-0 text-white/45" />;
   }
-  return <ClipboardCheck className="h-4 w-4 shrink-0 text-white/45" />;
+  return (
+    <ClipboardCheck
+      className={cn(
+        "h-4 w-4 shrink-0",
+        estado === "completado"
+          ? "text-emerald-400"
+          : estado === "en-progreso"
+            ? "text-teal-300"
+            : "text-white/45",
+      )}
+    />
+  );
+}
+
+function etiquetaEstadoLeccion(
+  completada: boolean,
+  activa: boolean,
+  bloqueada: boolean,
+) {
+  if (bloqueada) return "Bloqueado";
+  if (completada) return "Completado";
+  if (activa) return "En progreso";
+  return "No iniciado";
+}
+
+function etiquetaEstadoQuiz(estado: EstadoQuiz) {
+  if (estado === "completado") return "Completado";
+  if (estado === "en-progreso") return "En progreso";
+  if (estado === "bloqueado") return "Bloqueado";
+  return "No iniciado";
 }
 
 function IndicadorEstadoModulo({
@@ -181,6 +250,7 @@ export function EsquemaContenidos({
   leccionActivaId,
   evaluacionActivaId,
   grupos,
+  progresoCurso,
   onCerrar,
 }: EsquemaContenidosProps) {
   const grupoActivoId =
@@ -213,9 +283,9 @@ export function EsquemaContenidos({
 
   return (
     <aside className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-2 border-b border-white/25 px-3 py-3">
-        <h2 className="text-sm font-semibold tracking-wide text-white">
-          Esquema de Contenidos
+      <div className="flex items-center justify-between gap-2 border-b border-white/20 px-4 py-3.5">
+        <h2 className="text-sm font-semibold text-white">
+          Esquema de contenidos
         </h2>
         {onCerrar && (
           <button
@@ -233,19 +303,25 @@ export function EsquemaContenidos({
         )}
       </div>
 
-      <nav className="flex-1 space-y-2 overflow-y-auto px-2 py-2">
+      <ProgresoCursoLeccion
+        porcentaje={progresoCurso.porcentaje}
+        completados={progresoCurso.completados}
+        total={progresoCurso.total}
+      />
+
+      <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-2.5">
         {grupos.map((grupo, indice) => {
           const abierto = abiertos[grupo.id] ?? false;
           const quicesAbiertosModulo = quicesAbiertos[grupo.id] ?? false;
           const { porcentaje, estado } = calcularProgresoModulo(grupo);
 
           return (
-            <div key={grupo.id} className="rounded-xl">
-              <div className="space-y-2 px-1">
+            <div key={grupo.id} className="border-b border-white/12 pb-2 last:border-b-0">
+              <div className="space-y-2 px-0.5">
                 <button
                   type="button"
                   onClick={() => alternar(grupo.id)}
-                  className="flex w-full items-start gap-2 rounded-lg px-2 py-2 text-left transition-colors hover:bg-white/10"
+                  className="flex w-full items-start gap-2 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-white/10"
                 >
                   <ChevronDown
                     className={cn(
@@ -254,7 +330,7 @@ export function EsquemaContenidos({
                     )}
                   />
                   <IconoEstadoModulo estado={estado} />
-                  <span className="min-w-0 flex-1 whitespace-normal break-words text-sm font-semibold text-white">
+                  <span className="min-w-0 flex-1 whitespace-normal break-words text-[13px] font-semibold leading-snug text-white">
                     Módulo {indice + 1}: {grupo.titulo}
                   </span>
                   <IndicadorEstadoModulo estado={estado} porcentaje={porcentaje} />
@@ -266,7 +342,7 @@ export function EsquemaContenidos({
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={porcentaje}
-                  className="mx-2 h-1.5 overflow-hidden rounded-full bg-white/20"
+                  className="mx-2 h-1 overflow-hidden rounded-full bg-white/20"
                 >
                   <div
                     className={cn(
@@ -283,56 +359,82 @@ export function EsquemaContenidos({
               </div>
 
               {abierto && (
-                <div className="mb-2 ml-2 mt-1 space-y-1 border-l border-white/25 pl-2">
-                  <p className="px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55">
-                    Lecciones
-                  </p>
+                <div className="mb-1 ml-2 mt-1 space-y-1 border-l border-white/20 pl-2">
                   <ul className="space-y-0.5">
-                    {grupo.lecciones.map((leccion) => {
+                    {grupo.lecciones.map((leccion, indiceLeccion) => {
                       const activa = leccion.id === leccionActivaId;
-                      return (
-                        <li key={leccion.id}>
-                          <Link
-                            href={`/mis-cursos/${cursoId}/lecciones/${leccion.id}`}
+                      const bloqueada = Boolean(leccion.bloqueado);
+                      const contenido = (
+                        <>
+                          <span
                             className={cn(
-                              "group flex items-start gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors",
-                              activa
-                                ? "border-l-2 border-[#91DC00] bg-white/22 font-medium text-white"
-                                : "border-l-2 border-transparent text-white/75 hover:bg-white/12 hover:text-white",
+                              "mt-0.5",
+                              bloqueada
+                                ? "text-white/40"
+                                : leccion.completada
+                                  ? "text-emerald-300"
+                                  : activa
+                                    ? "text-[#91DC00]"
+                                    : "text-white/55 group-hover:text-white/85",
                             )}
                           >
+                            <IconoLeccion
+                              categorias={leccion.categoriasContenido}
+                              tipoContenido={leccion.tipoContenido}
+                              indice={indiceLeccion}
+                              completada={leccion.completada}
+                              bloqueada={bloqueada}
+                            />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block whitespace-normal break-words text-[13px] font-medium leading-snug">
+                              {leccion.titulo}
+                            </span>
                             <span
                               className={cn(
-                                "mt-0.5",
-                                activa
-                                  ? "text-[#91DC00]"
-                                  : "text-white/55 group-hover:text-white/85",
+                                "mt-1 block text-[11px] leading-none",
+                                bloqueada
+                                  ? "text-white/40"
+                                  : leccion.completada
+                                    ? "text-emerald-300"
+                                    : activa
+                                      ? "text-teal-200"
+                                      : "text-white/45",
                               )}
                             >
-                              <IconoLeccion
-                                categorias={leccion.categoriasContenido}
-                                tipoContenido={leccion.tipoContenido}
-                              />
+                              {etiquetaEstadoLeccion(
+                                leccion.completada,
+                                activa,
+                                bloqueada,
+                              )}
                             </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="block whitespace-normal break-words leading-snug">
-                                {leccion.titulo}
-                              </span>
-                              {leccion.categoriasContenido &&
-                                leccion.categoriasContenido.length > 0 && (
-                                  <span className="mt-1 flex flex-wrap gap-1">
-                                    {leccion.categoriasContenido.map((cat) => (
-                                      <span
-                                        key={cat}
-                                        className="inline-flex items-center rounded bg-white/15 px-1.5 py-0.5 text-[10px] font-medium leading-none text-white/75"
-                                      >
-                                        {ETIQUETA_TAB[cat]}
-                                      </span>
-                                    ))}
-                                  </span>
-                                )}
-                            </span>
-                          </Link>
+                          </span>
+                        </>
+                      );
+                      const clases = cn(
+                        "group flex items-start gap-2.5 rounded-lg border-l-2 px-2.5 py-2.5 text-sm transition-colors",
+                        activa
+                          ? "border-[#91DC00] bg-white/22 font-medium text-white"
+                          : bloqueada
+                            ? "cursor-not-allowed border-transparent text-white/45"
+                            : "border-transparent text-white/75 hover:bg-white/12 hover:text-white",
+                      );
+
+                      return (
+                        <li key={leccion.id}>
+                          {bloqueada ? (
+                            <div className={clases} aria-disabled="true">
+                              {contenido}
+                            </div>
+                          ) : (
+                            <Link
+                              href={`/mis-cursos/${cursoId}/lecciones/${leccion.id}`}
+                              className={clases}
+                              aria-current={activa ? "page" : undefined}
+                            >
+                              {contenido}
+                            </Link>
+                          )}
                         </li>
                       );
                     })}
@@ -345,7 +447,7 @@ export function EsquemaContenidos({
                         onClick={() => alternarQuices(grupo.id)}
                         aria-expanded={quicesAbiertosModulo}
                         aria-controls={`quices-${grupo.id}`}
-                        className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm font-medium text-white transition-colors hover:bg-white/12"
+                        className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-[13px] font-semibold text-white transition-colors hover:bg-white/12"
                       >
                         <ChevronDown
                           className={cn(
@@ -366,13 +468,27 @@ export function EsquemaContenidos({
                               const contenido = (
                                 <>
                                   <IconoEstadoQuiz estado={estadoQuizItem} />
-                                  <span className="min-w-0 flex-1 whitespace-normal break-words leading-snug">
-                                    {evaluacion.titulo}
+                                  <span className="min-w-0 flex-1">
+                                    <span className="block whitespace-normal break-words text-[13px] font-medium leading-snug">
+                                      {evaluacion.titulo}
+                                    </span>
+                                    <span
+                                      className={cn(
+                                        "mt-1 block text-[11px] font-normal leading-none",
+                                        estadoQuizItem === "completado"
+                                          ? "text-emerald-300"
+                                          : estadoQuizItem === "en-progreso"
+                                            ? "text-teal-200"
+                                            : "text-white/45",
+                                      )}
+                                    >
+                                      {etiquetaEstadoQuiz(estadoQuizItem)}
+                                    </span>
                                   </span>
                                 </>
                               );
                               const clases = cn(
-                                "group flex items-start gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors",
+                                "group flex items-start gap-2.5 rounded-lg px-2.5 py-2.5 text-sm transition-colors",
                                 activa
                                   ? "border-l-2 border-[#91DC00] bg-white/22 font-medium text-white"
                                   : "border-l-2 border-transparent text-white/75 hover:bg-white/12 hover:text-white",

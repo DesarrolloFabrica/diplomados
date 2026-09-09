@@ -115,6 +115,28 @@ export function urlDescargaDirectaDrive(meta: DriveImagenMeta): string {
   return url.toString();
 }
 
+export function urlStreamDrive(meta: DriveImagenMeta): string {
+  const url = new URL("https://drive.google.com/uc");
+  url.searchParams.set("export", "stream");
+  url.searchParams.set("id", meta.id);
+  if (meta.resourceKey) {
+    url.searchParams.set("resourcekey", meta.resourceKey);
+  }
+  return url.toString();
+}
+
+export function urlUserContentDrive(meta: DriveImagenMeta): string {
+  const url = new URL("https://drive.usercontent.google.com/download");
+  url.searchParams.set("export", "download");
+  url.searchParams.set("id", meta.id);
+  url.searchParams.set("authuser", "0");
+  url.searchParams.set("confirm", "t");
+  if (meta.resourceKey) {
+    url.searchParams.set("resourcekey", meta.resourceKey);
+  }
+  return url.toString();
+}
+
 /**
  * Orden de intentos para portadas en Drive:
  * 1) proxy interno (público / descarga confirmada)
@@ -182,6 +204,8 @@ export function candidatosRecursoDrive(
     case "audio":
       return [
         { modo: "audio", url: urlProxyMediaDrive(meta) },
+        { modo: "audio", url: urlUserContentDrive(meta) },
+        { modo: "audio", url: urlStreamDrive(meta) },
         { modo: "audio", url: urlDescargaDirectaDrive(meta) },
         { modo: "iframe", url: preview },
       ];

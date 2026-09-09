@@ -17,6 +17,8 @@ interface ContenidoLeccionConCompletadoProps {
   courseId: string;
   enrollmentId: string;
   lessonId: string;
+  lessonTitle: string;
+  lessonContext: string;
   completionMode: "automatico" | "manual";
   completed: boolean;
   recursos: RecursoVista[];
@@ -100,6 +102,8 @@ export function ContenidoLeccionConCompletado({
   courseId,
   enrollmentId,
   lessonId,
+  lessonTitle,
+  lessonContext,
   completionMode,
   completed,
   recursos,
@@ -121,9 +125,14 @@ export function ContenidoLeccionConCompletado({
   return (
     <>
       <VistaContenidoLeccion
+        tituloLeccion={lessonTitle}
+        contextoLeccion={lessonContext}
+        completada={completed}
         recursos={recursos}
         contenidoTexto={contenidoTexto}
         infografiaInteractiva={infografiaInteractiva}
+        enrollmentId={enrollmentId}
+        lessonId={lessonId}
         autoCompletion={
           automatic
             ? {

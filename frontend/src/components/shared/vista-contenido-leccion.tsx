@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AudioLines,
   ChartNoAxesCombined,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   MousePointerClick,
   Presentation,
@@ -11,7 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CLASE_HERO_PANEL_LEGIBLE, CLASE_PANEL_GLASS_LEGIBLE } from "@/config/paneles-glass";
+import { CLASE_PANEL_GLASS_LEGIBLE } from "@/config/paneles-glass";
 import { RecursoIncrustado } from "@/components/shared/recurso-incrustado";
 import { EmbedAdobeIndesign } from "@/components/shared/embed-adobe-indesign";
 import type { TipoRecurso } from "@backend/lib/db/schema";
@@ -50,6 +52,9 @@ const TABS = ORDEN_TABS.map((id) => ({
 }));
 
 interface VistaContenidoLeccionProps {
+  tituloLeccion: string;
+  contextoLeccion: string;
+  completada: boolean;
   recursos: RecursoVista[];
   contenidoTexto?: string | null;
   infografiaInteractiva?: InfografiaInteractivaLeccion | null;
@@ -58,6 +63,16 @@ interface VistaContenidoLeccionProps {
     onMediaProgress: MediaConsumptionReporter;
     onDocumentEnd: () => void;
   };
+  enrollmentId?: string;
+  lessonId?: string;
+}
+
+function leerTabGuardada(clave: string): string | null {
+  try {
+    return window.localStorage.getItem(clave);
+  } catch {
+    return null;
+  }
 }
 
 function DocumentoTextoObservable({
@@ -147,11 +162,17 @@ function DocumentoTextoObservable({
 }
 
 export function VistaContenidoLeccion({
+  tituloLeccion,
+  contextoLeccion,
+  completada,
   recursos,
   contenidoTexto,
   infografiaInteractiva = null,
   autoCompletion,
+  enrollmentId,
+  lessonId,
 }: VistaContenidoLeccionProps) {
+  const recursosScrollRef = useRef<HTMLDivElement | null>(null);
   const tabsDisponibles = useMemo(() => {
     const presentes = new Set(recursos.map((r) => tabDeTipo(r.tipo)));
     if (contenidoTexto && !presentes.has("documento")) {
@@ -164,33 +185,188 @@ export function VistaContenidoLeccion({
     return orden.length > 0 ? orden : TABS.filter((t) => t.id === "documento");
   }, [recursos, contenidoTexto, infografiaInteractiva]);
 
-  const [tabActiva, setTabActiva] = useState<TabContenido>(
-    () => infografiaInteractiva?.src
+  // Clave para recordar la última pestaña abierta: sirve tanto de atajo de
+  // UX como de "resume" mínimo para recursos embebidos vía iframe (YouTube,
+  // Adobe InDesign, fallback de Google Drive) donde no se puede leer/escribir
+  // currentTime — al menos se reabre el mismo recurso/pestaña de la lección.
+  const tabStorageKey =
+    enrollmentId && lessonId ? `leccion:tab-activa:v1:${enrollmentId}:${lessonId}` : null;
+
+  const [tabActiva, setTabActiva] = useState<TabContenido>(() => {
+    const guardada = tabStorageKey ? leerTabGuardada(tabStorageKey) : null;
+    if (guardada && tabsDisponibles.some((t) => t.id === guardada)) {
+      return guardada as TabContenido;
+    }
+    return infografiaInteractiva?.src
       ? "infografia_interactiva"
-      : (tabsDisponibles[0]?.id ?? "documento"),
-  );
+      : (tabsDisponibles[0]?.id ?? "documento");
+  });
 
   const tabActual = tabsDisponibles.some((t) => t.id === tabActiva)
     ? tabActiva
     : (tabsDisponibles[0]?.id ?? "documento");
+
+  useEffect(() => {
+    if (!tabStorageKey) return;
+    try {
+      window.localStorage.setItem(tabStorageKey, tabActual);
+    } catch {
+      // ignorar: localStorage puede no estar disponible
+    }
+  }, [tabActual, tabStorageKey]);
 
   const recursosFiltrados = recursos.filter((r) => tabDeTipo(r.tipo) === tabActual);
   const mostrarTexto = Boolean(contenidoTexto) && tabActual === "documento";
   const mostrarInfografiaInteractiva =
     tabActual === "infografia_interactiva" && infografiaInteractiva !== null;
 
+  function detalleTab(tab: TabContenido) {
+    if (tab === "infografia_interactiva" && infografiaInteractiva) {
+      return infografiaInteractiva.titulo ?? "Experiencia interactiva";
+    }
+
+    const recursosTab = recursos.filter((recurso) => tabDeTipo(recurso.tipo) === tab);
+    if (recursosTab.length === 1) return recursosTab[0]?.nombre ?? "Recurso disponible";
+    if (recursosTab.length > 1) return `${recursosTab.length} recursos disponibles`;
+    if (tab === "documento" && contenidoTexto) return "Lectura de la leccion";
+    return "Recurso disponible";
+  }
+
+  function desplazarRecursos(direccion: -1 | 1) {
+    recursosScrollRef.current?.scrollBy({
+      left: direccion * 240,
+      behavior: "smooth",
+    });
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      <div
+        className={cn(
+          "overflow-hidden rounded-2xl border border-white/45 bg-white/18 shadow-[0_16px_45px_rgba(3,12,28,0.2)] backdrop-blur-xl",
+          CLASE_PANEL_GLASS_LEGIBLE,
+        )}
+      >
+        <div className="relative overflow-hidden border-b border-white/15 bg-gradient-to-r from-[#061120]/92 via-[#0b3042]/78 to-[#0c514b]/62 px-5 py-4 sm:px-6 sm:py-5">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/8 to-transparent"
+          />
+          <div className="relative z-10 max-w-3xl">
+            <p className="text-[11px] font-semibold uppercase text-teal-100/75">
+              {contextoLeccion}
+            </p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
+              <h1 className="font-display text-xl font-bold text-white sm:text-2xl">
+                {tituloLeccion}
+              </h1>
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+                  completada
+                    ? "border-emerald-300/35 bg-emerald-300/15 text-emerald-100"
+                    : "border-white/25 bg-white/10 text-white/70",
+                )}
+              >
+                <span
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full",
+                    completada ? "bg-[#91DC00]" : "bg-teal-300",
+                  )}
+                />
+                {completada ? "Completado" : "En progreso"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={cn(
+            tabActual === "video"
+              ? "bg-black/90 p-1 sm:p-1.5"
+              : "bg-white/76 p-2.5 sm:p-3",
+          )}
+        >
+          {mostrarInfografiaInteractiva ? (
+            <EmbedAdobeIndesign
+              src={infografiaInteractiva.src}
+              titulo={infografiaInteractiva.titulo}
+            />
+          ) : null}
+
+          {mostrarTexto && contenidoTexto && (
+            <div className="min-h-[300px] rounded-lg bg-white/70 px-5 py-6 sm:px-7">
+              <DocumentoTextoObservable
+                contenido={contenidoTexto}
+                enabled={autoCompletion?.enabled ?? false}
+                onDocumentEnd={autoCompletion?.onDocumentEnd}
+              />
+            </div>
+          )}
+
+          {recursosFiltrados.length > 0 ? (
+            <div className={cn("space-y-4", mostrarTexto && "mt-3")}>
+              {recursosFiltrados.map((recurso) => (
+                <RecursoIncrustado
+                  key={recurso.id}
+                  resourceId={recurso.id}
+                  nombre={recurso.nombre}
+                  tipo={recurso.tipo}
+                  url={recurso.url}
+                  autoCompletionEnabled={autoCompletion?.enabled ?? false}
+                  onConsumptionProgress={autoCompletion?.onMediaProgress}
+                  enrollmentId={enrollmentId}
+                  lessonId={lessonId}
+                />
+              ))}
+            </div>
+          ) : (
+            !mostrarTexto &&
+            !mostrarInfografiaInteractiva && (
+              <div className="rounded-lg border border-dashed border-slate-300 bg-white/65 px-4 py-10 text-center text-sm text-slate-600">
+                No hay contenido de este tipo en la leccion.
+              </div>
+            )
+          )}
+        </div>
+      </div>
+
       {tabsDisponibles.length > 0 && (
-        <div className="w-full max-w-full overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex min-w-min justify-center sm:justify-start">
+        <div>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <p className="text-[11px] font-semibold uppercase text-white/65">
+              Recursos de la leccion
+            </p>
+            <div className="flex items-center gap-1 xl:hidden">
+              <span className="mr-1 text-[10px] font-medium text-white/50">
+                Desliza
+              </span>
+              <button
+                type="button"
+                onClick={() => desplazarRecursos(-1)}
+                aria-label="Ver recursos anteriores"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/25 bg-white/12 text-white/75 backdrop-blur-md transition-colors hover:bg-white/25 hover:text-white"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => desplazarRecursos(1)}
+                aria-label="Ver mas recursos"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/25 bg-white/12 text-white/75 backdrop-blur-md transition-colors hover:bg-white/25 hover:text-white"
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+          <div
+            ref={recursosScrollRef}
+            className="w-full max-w-full overflow-x-auto pb-3 [scrollbar-color:rgba(255,255,255,0.5)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/45 [&::-webkit-scrollbar-track]:bg-transparent"
+          >
             <div
-              className={cn(
-                "inline-flex items-center gap-1 rounded-full p-1.5",
-                CLASE_HERO_PANEL_LEGIBLE,
-              )}
+              className="grid min-w-max grid-flow-col auto-cols-[minmax(190px,230px)] gap-2.5 xl:min-w-0 xl:grid-flow-row xl:auto-cols-auto xl:grid-cols-[repeat(auto-fit,minmax(170px,1fr))]"
               role="tablist"
-              aria-label="Tipo de contenido"
+              aria-label="Recursos de la leccion"
             >
               {tabsDisponibles.map(({ id, etiqueta, Icono }) => {
                 const activo = id === tabActual;
@@ -203,16 +379,29 @@ export function VistaContenidoLeccion({
                     tabIndex={activo ? 0 : -1}
                     onClick={() => setTabActiva(id)}
                     className={cn(
-                      "inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-all",
+                      "group grid min-h-[68px] grid-cols-[42px_minmax(0,1fr)] items-center gap-3 rounded-lg border px-3 py-2.5 text-left backdrop-blur-xl transition-all",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]",
-                      "sm:px-4",
                       activo
-                        ? "bg-white text-[#061120] shadow-[0_4px_14px_rgba(6,17,32,0.18)]"
-                        : "text-slate-700 hover:bg-white/60 hover:text-slate-950",
+                        ? "border-white/65 bg-white/30 text-white shadow-[0_8px_24px_rgba(3,12,28,0.18)]"
+                        : "border-white/25 bg-[#061120]/26 text-white/75 hover:border-white/45 hover:bg-white/18 hover:text-white",
                     )}
                   >
-                    <Icono className="h-4 w-4 shrink-0" />
-                    <span className="whitespace-nowrap">{etiqueta}</span>
+                    <span
+                      className={cn(
+                        "flex h-10 w-10 items-center justify-center rounded-lg border",
+                        activo
+                          ? "border-white/40 bg-white/20 text-[#b7f36b]"
+                          : "border-white/15 bg-white/10 text-teal-100/80 group-hover:text-white",
+                      )}
+                    >
+                      <Icono className="h-5 w-5" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-xs font-bold text-current">{etiqueta}</span>
+                      <span className="mt-1 block truncate text-[11px] font-medium text-white/55">
+                        {detalleTab(id)}
+                      </span>
+                    </span>
                   </button>
                 );
               })}
@@ -220,46 +409,6 @@ export function VistaContenidoLeccion({
           </div>
         </div>
       )}
-
-      <div className={cn("rounded-[24px] p-4 sm:p-6", CLASE_PANEL_GLASS_LEGIBLE)}>
-        {mostrarInfografiaInteractiva ? (
-          <EmbedAdobeIndesign
-            src={infografiaInteractiva.src}
-            titulo={infografiaInteractiva.titulo}
-          />
-        ) : null}
-
-        {mostrarTexto && contenidoTexto && (
-          <DocumentoTextoObservable
-            contenido={contenidoTexto}
-            enabled={autoCompletion?.enabled ?? false}
-            onDocumentEnd={autoCompletion?.onDocumentEnd}
-          />
-        )}
-
-        {recursosFiltrados.length > 0 ? (
-          <div className="space-y-5">
-            {recursosFiltrados.map((recurso) => (
-              <RecursoIncrustado
-                key={recurso.id}
-                resourceId={recurso.id}
-                nombre={recurso.nombre}
-                tipo={recurso.tipo}
-                url={recurso.url}
-                autoCompletionEnabled={autoCompletion?.enabled ?? false}
-                onConsumptionProgress={autoCompletion?.onMediaProgress}
-              />
-            ))}
-          </div>
-        ) : (
-          !mostrarTexto &&
-          !mostrarInfografiaInteractiva && (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/80 px-4 py-10 text-center text-sm text-slate-600">
-              No hay contenido de este tipo en la lección.
-            </div>
-          )
-        )}
-      </div>
     </div>
   );
 }

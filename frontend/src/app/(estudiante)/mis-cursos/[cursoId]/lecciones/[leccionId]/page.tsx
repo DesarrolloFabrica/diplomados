@@ -35,11 +35,8 @@ import {
 } from "@/lib/ruta-curso";
 import { LayoutVistaLeccion } from "@/components/shared/layout-vista-leccion";
 import { ContenidoLeccionConCompletado } from "@/components/shared/contenido-leccion-con-completado";
-import { ProgresoCursoLeccion } from "@/components/shared/progreso-curso-leccion";
 import { obtenerInfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
 import { BotonCompletar } from "./boton-completar";
-import { cn } from "@/lib/utils";
-import { CLASE_HERO_PANEL_LEGIBLE } from "@/config/paneles-glass";
 
 
 
@@ -215,6 +212,14 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
   const proximos = obtenerProximosContenidos(itemsRuta, leccionId, "leccion", 4);
   const progresoCurso = calcularProgresoCurso(itemsRuta);
+  const indiceModuloActual = modulosRuta.findIndex((modulo) =>
+    modulo.lecciones.some((item) => item.id === leccionId),
+  );
+  const moduloActual =
+    indiceModuloActual >= 0 ? modulosRuta[indiceModuloActual] : undefined;
+  const contextoLeccion = moduloActual
+    ? `Modulo ${indiceModuloActual + 1} / ${moduloActual.titulo}`
+    : curso.titulo;
 
 
 
@@ -233,6 +238,8 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
       tipoContenido: leccionItem.tipoContenido,
 
       completada: leccionItem.completada,
+
+      bloqueado: bloqueadoPorId.get(leccionItem.id) ?? false,
 
       categoriasContenido: leccionItem.categoriasContenido,
 
@@ -276,33 +283,26 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
         grupos={gruposEsquema}
 
+        progresoCurso={progresoCurso}
+
       >
 
-        <div className={cn("mb-6 rounded-[24px] p-5 sm:p-6", CLASE_HERO_PANEL_LEGIBLE)}>
-          <Link
-            href={`/mis-cursos/${cursoId}`}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Volver al curso
-          </Link>
-          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-slate-950">
-            {leccion.titulo}
-          </h1>
-        </div>
+        <Link
+          href={`/mis-cursos/${cursoId}`}
+          className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-[#061120]/28 px-3 py-2 text-xs font-semibold text-white/80 backdrop-blur-lg transition-colors hover:bg-white/18 hover:text-white"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Volver al curso
+        </Link>
 
 
-
-        <ProgresoCursoLeccion
-          porcentaje={progresoCurso.porcentaje}
-          completados={progresoCurso.completados}
-          total={progresoCurso.total}
-        />
 
         <ContenidoLeccionConCompletado
           courseId={cursoId}
           enrollmentId={inscripcion.id}
           lessonId={leccionId}
+          lessonTitle={leccion.titulo}
+          lessonContext={contextoLeccion}
           completionMode={leccion.marcado}
           completed={completada}
           recursos={recursosConUrl.map((recurso) => ({

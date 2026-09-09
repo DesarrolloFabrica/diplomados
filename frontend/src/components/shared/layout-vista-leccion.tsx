@@ -14,6 +14,11 @@ interface LayoutVistaLeccionProps {
   leccionActivaId?: string;
   evaluacionActivaId?: string;
   grupos: GrupoEsquema[];
+  progresoCurso: {
+    porcentaje: number;
+    completados: number;
+    total: number;
+  };
   children: React.ReactNode;
 }
 
@@ -22,9 +27,10 @@ export function LayoutVistaLeccion({
   leccionActivaId,
   evaluacionActivaId,
   grupos,
+  progresoCurso,
   children,
 }: LayoutVistaLeccionProps) {
-  const [esquemaVisible, setEsquemaVisible] = useState(true);
+  const [esquemaVisible, setEsquemaVisible] = useState(false);
 
   function alternarEsquema() {
     setEsquemaVisible((prev) => !prev);
@@ -34,10 +40,10 @@ export function LayoutVistaLeccion({
     <div
       className={cn(
         "grid min-h-full w-full grid-cols-1",
-        esquemaVisible && "xl:grid-cols-[minmax(0,1fr)_320px]",
+        esquemaVisible && "xl:grid-cols-[minmax(0,1fr)_304px]",
       )}
     >
-      <section className="relative min-w-0 px-4 py-5 sm:px-5 lg:px-8 lg:py-6">
+      <section className="relative min-w-0 px-3 py-4 sm:px-4 lg:px-6 lg:py-5">
         {!esquemaVisible && (
           <button
             type="button"
@@ -56,7 +62,7 @@ export function LayoutVistaLeccion({
           </button>
         )}
 
-        {children}
+        <div className="mx-auto w-full max-w-[1520px]">{children}</div>
       </section>
 
       {esquemaVisible && (
@@ -65,7 +71,7 @@ export function LayoutVistaLeccion({
           className={cn(
             "min-w-0 rounded-none border-t border-white/25 xl:sticky xl:top-0 xl:h-full xl:max-h-dvh xl:self-start xl:border-l xl:border-t-0",
             CLASE_PANEL_GLASS,
-            "bg-white/16 shadow-none xl:rounded-l-none",
+            "bg-white/20 shadow-none xl:rounded-l-none",
           )}
         >
           <EsquemaContenidos
@@ -73,6 +79,7 @@ export function LayoutVistaLeccion({
             leccionActivaId={leccionActivaId}
             evaluacionActivaId={evaluacionActivaId}
             grupos={grupos}
+            progresoCurso={progresoCurso}
             onCerrar={alternarEsquema}
           />
         </aside>
