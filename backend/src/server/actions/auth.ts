@@ -12,6 +12,7 @@ import { firmarSesion } from "@/lib/auth/jwt";
 import { COOKIE_SESION, OPCIONES_COOKIE_SESION, OPCIONES_COOKIE_BORRADO } from "@/lib/auth/cookies";
 import { generarTokenRecuperacion, hashearToken } from "@/lib/auth/tokens";
 import { enviarCorreoRecuperacion } from "@/lib/email";
+import { obtenerPreferenciaInterfazUsuario } from "@/server/queries/preferencia-interfaz";
 import {
   loginSchema,
   recuperarSchema,
@@ -61,6 +62,14 @@ export async function iniciarSesion(
   );
 
   revalidatePath("/", "layout");
+
+  if (perfil.rol === "colaborador") {
+    const preferencia = await obtenerPreferenciaInterfazUsuario(perfil.id);
+    if (!preferencia?.interfaceOnboardingCompletedAt) {
+      redirect("/onboarding/interfaz");
+    }
+  }
+
   redirect(RUTA_INICIO_POR_ROL[perfil.rol]);
 }
 

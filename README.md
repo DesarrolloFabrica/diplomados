@@ -9,6 +9,8 @@ Desarrollada para la **Corporación Unificada Nacional de Educación Superior (C
 ## Tabla de contenidos
 
 - [Descripción general](#descripción-general)
+- [Avances completados](#avances-completados)
+- [Actualizaciones en desarrollo](#actualizaciones-en-desarrollo)
 - [Características principales](#características-principales)
 - [Stack tecnológico](#stack-tecnológico)
 - [Arquitectura](#arquitectura)
@@ -37,6 +39,34 @@ Cada empresa puede:
 - Consultar reportes de progreso.
 
 Los colaboradores avanzan por una **ruta de aprendizaje visual** (roadmap), completan lecciones, recursos multimedia y evaluaciones con reintentos configurables.
+
+---
+
+## Avances completados
+
+Funcionalidades ya finalizadas y en producción en la **interfaz de colaborador**:
+
+| Funcionalidad | Descripción |
+|---|---|
+| **Menú de navegación** | Nuevo menú de la interfaz de colaborador |
+| **Catálogo avanzado** | Catálogo de cursos con filtros y presentación mejorada |
+| **Visualizador de contenido optimizado** | Mejoras de rendimiento y experiencia en la visualización de lecciones y recursos |
+| **Categorías del curso** | Clasificación de cursos por categoría en el catálogo |
+| **Hero optimizado** | Sección hero de inicio rediseñada y optimizada |
+
+---
+
+## Actualizaciones en desarrollo
+
+> Última actualización: 22 de septiembre de 2026
+
+Funcionalidades actualmente en construcción para la **interfaz de colaborador**:
+
+| Funcionalidad | Descripción | Avance |
+|---|---|---|
+| **4 temas de interfaz** | Nuevos temas visuales para la interfaz de colaborador: *creativa, empresarial, educativa y gamificada* | 70% |
+| **Reproductor de video avanzado** | Marcado automático de progreso por lección y retomar la reproducción exactamente en el minuto donde quedó el usuario, al estilo Netflix | 70% |
+| **Home con visualización avanzada** | Nueva pantalla de inicio del colaborador con listas y características de navegación/descubrimiento tipo Netflix | 60% |
 
 ---
 

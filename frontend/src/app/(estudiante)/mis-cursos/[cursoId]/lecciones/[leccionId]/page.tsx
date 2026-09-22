@@ -24,6 +24,8 @@ import {
 
 import { generarUrlLectura } from "@backend/lib/storage";
 
+import { obtenerPreferenciaInterfazUsuario } from "@backend/server/queries/preferencia-interfaz";
+
 import { categoriasDeRecursos } from "@/lib/contenido-leccion";
 
 import {
@@ -33,6 +35,7 @@ import {
   extraerMetaContenido,
   obtenerProximosContenidos,
 } from "@/lib/ruta-curso";
+import { estiloFondoInterfaz } from "@/lib/interface-assets";
 import { LayoutVistaLeccion } from "@/components/shared/layout-vista-leccion";
 import { ContenidoLeccionConCompletado } from "@/components/shared/contenido-leccion-con-completado";
 import { obtenerInfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
@@ -68,7 +71,7 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
 
 
-  const [recursos, completada, modulos, evaluaciones, curso] = await Promise.all([
+  const [recursos, completada, modulos, evaluaciones, curso, preferenciaInterfaz] = await Promise.all([
 
     listarRecursos(sesion.id, leccionId),
 
@@ -79,6 +82,8 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
     listarEvaluacionesConEstado(sesion.id, cursoId),
 
     obtenerCurso(sesion.id, cursoId),
+
+    obtenerPreferenciaInterfazUsuario(sesion.id),
 
   ]);
 
@@ -273,11 +278,24 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
   return (
 
-    <div className="lesson-view relative isolate -mx-5 -mt-5 -mb-14 min-h-dvh pb-14 sm:-mx-6 sm:-mt-6 sm:-mb-14 lg:-mx-8 lg:-mt-8 lg:-mb-14 xl:-mx-10 xl:-mt-10 xl:-mb-14">
+    <div
+      className={
+        preferenciaInterfaz?.interfaceVariant === "creative"
+          ? "lesson-view relative isolate -mx-5 -mt-5 -mb-14 min-h-dvh pb-14 sm:-mx-6 sm:-mt-6 sm:-mb-14 lg:-mx-8 lg:-mt-8 lg:-mb-14 xl:-mx-10 xl:-mt-10 xl:-mb-14"
+          : "lesson-view interface-lesson-bg relative isolate -mx-5 -mt-5 -mb-14 min-h-dvh pb-14 sm:-mx-6 sm:-mt-6 sm:-mb-14 lg:-mx-8 lg:-mt-8 lg:-mb-14 xl:-mx-10 xl:-mt-10 xl:-mb-14"
+      }
+      style={
+        preferenciaInterfaz?.interfaceVariant === "creative"
+          ? undefined
+          : estiloFondoInterfaz(preferenciaInterfaz?.interfaceVariant, "lessonBackground")
+      }
+    >
 
       <LayoutVistaLeccion
 
         cursoId={cursoId}
+
+        enrollmentId={inscripcion.id}
 
         leccionActivaId={leccionId}
 

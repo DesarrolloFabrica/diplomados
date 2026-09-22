@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CLASE_PANEL_GLASS_LEGIBLE } from "@/config/paneles-glass";
+import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { RecursoIncrustado } from "@/components/shared/recurso-incrustado";
 import { EmbedAdobeIndesign } from "@/components/shared/embed-adobe-indesign";
 import type { TipoRecurso } from "@backend/lib/db/schema";
@@ -24,6 +25,7 @@ import {
   type TabContenido,
 } from "@/lib/contenido-leccion";
 import type { InfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
+import { marcarLeccionIniciada } from "@/lib/progreso-leccion-local";
 import {
   MIN_DOCUMENT_REVIEW_SECONDS,
   type MediaConsumptionReporter,
@@ -173,6 +175,15 @@ export function VistaContenidoLeccion({
   lessonId,
 }: VistaContenidoLeccionProps) {
   const recursosScrollRef = useRef<HTMLDivElement | null>(null);
+  const { config } = useInterfaceVariant();
+  const esEducational = config.id === "educational";
+  const esGamified = config.id === "gamified";
+
+  useEffect(() => {
+    if (!enrollmentId || !lessonId) return;
+    marcarLeccionIniciada(enrollmentId, lessonId);
+  }, [enrollmentId, lessonId]);
+
   const tabsDisponibles = useMemo(() => {
     const presentes = new Set(recursos.map((r) => tabDeTipo(r.tipo)));
     if (contenidoTexto && !presentes.has("documento")) {
@@ -243,35 +254,77 @@ export function VistaContenidoLeccion({
     <div className="space-y-4">
       <div
         className={cn(
-          "overflow-hidden rounded-2xl border border-white/45 bg-white/18 shadow-[0_16px_45px_rgba(3,12,28,0.2)] backdrop-blur-xl",
-          CLASE_PANEL_GLASS_LEGIBLE,
+          "overflow-hidden rounded-2xl",
+          esEducational
+            ? "border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] shadow-[var(--interface-shadow)]"
+            : cn(
+                "border border-white/45 bg-white/18 shadow-[0_16px_45px_rgba(3,12,28,0.2)] backdrop-blur-xl",
+                CLASE_PANEL_GLASS_LEGIBLE,
+              ),
         )}
       >
-        <div className="relative overflow-hidden border-b border-white/15 bg-gradient-to-r from-[#061120]/92 via-[#0b3042]/78 to-[#0c514b]/62 px-5 py-4 sm:px-6 sm:py-5">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/8 to-transparent"
-          />
+        <div
+          className={cn(
+            "relative overflow-hidden px-5 py-4 sm:px-6 sm:py-5",
+            esEducational
+              ? "border-b border-[var(--interface-border)] bg-[var(--interface-surface)]"
+              : "border-b border-white/15 bg-gradient-to-r from-[#061120]/92 via-[#0b3042]/78 to-[#0c514b]/62",
+          )}
+        >
+          {!esEducational && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/8 to-transparent"
+            />
+          )}
           <div className="relative z-10 max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase text-teal-100/75">
-              {contextoLeccion}
+            <p
+              className={cn(
+                "text-[11px] font-semibold uppercase tracking-[0.12em]",
+                esEducational
+                  ? "text-[var(--interface-accent-secondary)]"
+                  : esGamified
+                    ? "text-[var(--interface-accent-secondary)]"
+                    : "text-teal-100/75",
+              )}
+            >
+              {esGamified ? `Mision actual · ${contextoLeccion}` : contextoLeccion}
             </p>
             <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
-              <h1 className="font-display text-xl font-bold text-white sm:text-2xl">
+              <h1
+                className={cn(
+                  "font-display text-xl font-bold sm:text-2xl",
+                  esEducational ? "text-[var(--interface-text)]" : "text-white",
+                )}
+              >
                 {tituloLeccion}
               </h1>
               <span
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold",
-                  completada
-                    ? "border-emerald-300/35 bg-emerald-300/15 text-emerald-100"
-                    : "border-white/25 bg-white/10 text-white/70",
+                  esEducational
+                    ? completada
+                      ? "border-emerald-400/35 bg-emerald-400/12 text-emerald-600 dark:text-emerald-300"
+                      : "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)]"
+                    : esGamified
+                      ? completada
+                        ? "border-emerald-400/40 bg-emerald-400/15 text-emerald-200"
+                        : "border-[color-mix(in_srgb,var(--interface-accent-secondary)_40%,transparent)] bg-[color-mix(in_srgb,var(--interface-accent-secondary)_12%,transparent)] text-[var(--interface-accent-secondary)] shadow-[0_0_10px_rgba(103,232,249,0.25)]"
+                      : completada
+                        ? "border-emerald-300/35 bg-emerald-300/15 text-emerald-100"
+                        : "border-white/25 bg-white/10 text-white/70",
                 )}
               >
                 <span
                   className={cn(
                     "h-1.5 w-1.5 rounded-full",
-                    completada ? "bg-[#91DC00]" : "bg-teal-300",
+                    completada
+                      ? esEducational
+                        ? "bg-emerald-500"
+                        : "bg-[#91DC00]"
+                      : esEducational
+                        ? "bg-[var(--interface-accent-secondary)]"
+                        : "bg-teal-300",
                   )}
                 />
                 {completada ? "Completado" : "En progreso"}
@@ -284,7 +337,9 @@ export function VistaContenidoLeccion({
           className={cn(
             tabActual === "video"
               ? "bg-black/90 p-1 sm:p-1.5"
-              : "bg-white/76 p-2.5 sm:p-3",
+              : esEducational
+                ? "bg-[var(--interface-surface)] p-2.5 sm:p-3"
+                : "bg-white/76 p-2.5 sm:p-3",
           )}
         >
           {mostrarInfografiaInteractiva ? (
@@ -334,18 +389,33 @@ export function VistaContenidoLeccion({
       {tabsDisponibles.length > 0 && (
         <div>
           <div className="mb-2 flex items-center justify-between gap-3">
-            <p className="text-[11px] font-semibold uppercase text-white/65">
+            <p
+              className={cn(
+                "text-[11px] font-semibold uppercase",
+                esEducational ? "text-[var(--interface-text-muted)]" : "text-white/65",
+              )}
+            >
               Recursos de la leccion
             </p>
             <div className="flex items-center gap-1 xl:hidden">
-              <span className="mr-1 text-[10px] font-medium text-white/50">
+              <span
+                className={cn(
+                  "mr-1 text-[10px] font-medium",
+                  esEducational ? "text-[var(--interface-text-muted)]" : "text-white/50",
+                )}
+              >
                 Desliza
               </span>
               <button
                 type="button"
                 onClick={() => desplazarRecursos(-1)}
                 aria-label="Ver recursos anteriores"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/25 bg-white/12 text-white/75 backdrop-blur-md transition-colors hover:bg-white/25 hover:text-white"
+                className={cn(
+                  "inline-flex h-7 w-7 items-center justify-center rounded-full border backdrop-blur-md transition-colors",
+                  esEducational
+                    ? "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] hover:text-[var(--interface-text)]"
+                    : "border-white/25 bg-white/12 text-white/75 hover:bg-white/25 hover:text-white",
+                )}
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
               </button>
@@ -353,7 +423,12 @@ export function VistaContenidoLeccion({
                 type="button"
                 onClick={() => desplazarRecursos(1)}
                 aria-label="Ver mas recursos"
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/25 bg-white/12 text-white/75 backdrop-blur-md transition-colors hover:bg-white/25 hover:text-white"
+                className={cn(
+                  "inline-flex h-7 w-7 items-center justify-center rounded-full border backdrop-blur-md transition-colors",
+                  esEducational
+                    ? "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] hover:text-[var(--interface-text)]"
+                    : "border-white/25 bg-white/12 text-white/75 hover:bg-white/25 hover:text-white",
+                )}
               >
                 <ChevronRight className="h-3.5 w-3.5" />
               </button>
@@ -378,27 +453,69 @@ export function VistaContenidoLeccion({
                     aria-selected={activo}
                     tabIndex={activo ? 0 : -1}
                     onClick={() => setTabActiva(id)}
+                    style={
+                      esEducational && activo
+                        ? {
+                            backgroundColor:
+                              "color-mix(in srgb, var(--interface-accent-secondary) 12%, transparent)",
+                          }
+                        : esGamified && activo
+                          ? {
+                              backgroundColor:
+                                "color-mix(in srgb, var(--interface-accent-secondary) 14%, transparent)",
+                            }
+                          : undefined
+                    }
                     className={cn(
-                      "group grid min-h-[68px] grid-cols-[42px_minmax(0,1fr)] items-center gap-3 rounded-lg border px-3 py-2.5 text-left backdrop-blur-xl transition-all",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]",
-                      activo
-                        ? "border-white/65 bg-white/30 text-white shadow-[0_8px_24px_rgba(3,12,28,0.18)]"
-                        : "border-white/25 bg-[#061120]/26 text-white/75 hover:border-white/45 hover:bg-white/18 hover:text-white",
+                      "group grid min-h-[68px] grid-cols-[42px_minmax(0,1fr)] items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all",
+                      esEducational
+                        ? cn(
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] focus-visible:ring-offset-2",
+                            activo
+                              ? "border-[var(--interface-accent-secondary)] text-[var(--interface-text)] shadow-[var(--interface-shadow)]"
+                              : "border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)] hover:border-[var(--interface-accent-secondary)] hover:text-[var(--interface-text)]",
+                          )
+                        : esGamified
+                          ? cn(
+                              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] focus-visible:ring-offset-2",
+                              activo
+                                ? "border-[var(--interface-accent-secondary)] text-[var(--interface-text)] shadow-[0_0_18px_rgba(103,232,249,0.35)]"
+                                : "border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)] hover:border-[var(--interface-accent-secondary)] hover:text-[var(--interface-text)]",
+                            )
+                          : cn(
+                              "backdrop-blur-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]",
+                              activo
+                                ? "border-white/65 bg-white/30 text-white shadow-[0_8px_24px_rgba(3,12,28,0.18)]"
+                                : "border-white/25 bg-[#061120]/26 text-white/75 hover:border-white/45 hover:bg-white/18 hover:text-white",
+                            ),
                     )}
                   >
                     <span
                       className={cn(
                         "flex h-10 w-10 items-center justify-center rounded-lg border",
-                        activo
-                          ? "border-white/40 bg-white/20 text-[#b7f36b]"
-                          : "border-white/15 bg-white/10 text-teal-100/80 group-hover:text-white",
+                        esEducational
+                          ? activo
+                            ? "border-[var(--interface-accent-secondary)] bg-[var(--interface-surface-strong)] text-[var(--interface-accent-secondary)]"
+                            : "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] group-hover:text-[var(--interface-accent-secondary)]"
+                          : esGamified
+                            ? activo
+                              ? "border-[var(--interface-accent-secondary)] bg-[var(--interface-surface-strong)] text-[var(--interface-accent-secondary)]"
+                              : "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] group-hover:text-[var(--interface-accent-secondary)]"
+                            : activo
+                              ? "border-white/40 bg-white/20 text-[#b7f36b]"
+                              : "border-white/15 bg-white/10 text-teal-100/80 group-hover:text-white",
                       )}
                     >
                       <Icono className="h-5 w-5" />
                     </span>
                     <span className="min-w-0">
                       <span className="block text-xs font-bold text-current">{etiqueta}</span>
-                      <span className="mt-1 block truncate text-[11px] font-medium text-white/55">
+                      <span
+                        className={cn(
+                          "mt-1 block truncate text-[11px] font-medium",
+                          esEducational ? "text-[var(--interface-text-muted)]" : "text-white/55",
+                        )}
+                      >
                         {detalleTab(id)}
                       </span>
                     </span>

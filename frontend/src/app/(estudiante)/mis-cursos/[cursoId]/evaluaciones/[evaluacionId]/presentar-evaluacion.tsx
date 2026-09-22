@@ -11,6 +11,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { cn } from "@/lib/utils";
 import {
   enviarIntento,
@@ -43,6 +44,9 @@ export function PresentarEvaluacion({
   puntajeMinimo,
 }: PresentarEvaluacionProps) {
   const router = useRouter();
+  const { config } = useInterfaceVariant();
+  const esEducational = config.id === "educational";
+  const esGamified = config.id === "gamified";
   const [intentoId, setIntentoId] = useState(intentoInicial);
   const [preguntas, setPreguntas] = useState<PreguntaPresentacion[] | null>(null);
   const [respuestas, setRespuestas] = useState<Record<string, string>>({});
@@ -132,15 +136,25 @@ export function PresentarEvaluacion({
 
   if (resultado) {
     return (
-      <section className="rounded-lg border border-white/15 bg-[#061120]/72 px-5 py-10 text-center text-white shadow-[0_20px_60px_rgba(2,10,24,0.34)] backdrop-blur-md sm:px-8">
+      <section
+        data-quiz-variant={config.quiz.variant}
+        className={cn(
+          "px-5 py-10 text-center sm:px-8",
+          esEducational
+            ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[var(--interface-shadow)]"
+            : "rounded-lg border border-white/15 bg-[#061120]/72 text-white shadow-[0_20px_60px_rgba(2,10,24,0.34)] backdrop-blur-md",
+        )}
+      >
         <div className="flex flex-col items-center gap-3">
           {resultado.aprobado ? (
-            <CheckCircle2 className="h-10 w-10 text-[#91DC00]" />
+            <CheckCircle2
+              className={cn("h-10 w-10", esEducational ? "text-emerald-500" : "text-[#91DC00]")}
+            />
           ) : (
-            <XCircle className="h-10 w-10 text-red-300" />
+            <XCircle className={cn("h-10 w-10", esEducational ? "text-red-500" : "text-red-300")} />
           )}
           <p className="text-3xl font-bold">{Math.round(resultado.puntaje)}%</p>
-          <p className="text-white/70">
+          <p className={esEducational ? "text-[var(--interface-text-muted)]" : "text-white/70"}>
             {resultado.aprobado
               ? "Aprobaste esta evaluacion."
               : `No alcanzaste el minimo de ${puntajeMinimo}% para aprobar.`}
@@ -148,7 +162,12 @@ export function PresentarEvaluacion({
           <Button
             type="button"
             onClick={volverAlCursoDesdeResultado}
-            className="mt-4 bg-[#91DC00] font-bold text-[#061120] hover:bg-[#a7eb2f]"
+            className={cn(
+              "mt-4 font-bold",
+              esEducational
+                ? "bg-[var(--interface-accent)] text-white hover:bg-[var(--interface-accent-secondary)]"
+                : "bg-[#91DC00] text-[#061120] hover:bg-[#a7eb2f]",
+            )}
           >
             Volver al curso
           </Button>
@@ -160,11 +179,29 @@ export function PresentarEvaluacion({
   if (!intentoId) {
     if (intentosUsados >= maxIntentos) {
       return (
-        <section className="rounded-lg border border-white/15 bg-[#061120]/70 px-5 py-10 text-center text-white/80 shadow-[0_20px_60px_rgba(2,10,24,0.3)] backdrop-blur-md">
-          <p className="text-xs font-semibold uppercase text-teal-100/65">
-            Evaluacion
+        <section
+          data-quiz-variant={config.quiz.variant}
+          className={cn(
+            "px-5 py-10 text-center",
+            esEducational
+              ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] shadow-[var(--interface-shadow)]"
+              : "rounded-lg border border-white/15 bg-[#061120]/70 text-white/80 shadow-[0_20px_60px_rgba(2,10,24,0.3)] backdrop-blur-md",
+          )}
+        >
+          <p
+            className={cn(
+              "text-xs font-semibold uppercase",
+              esEducational ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/65",
+            )}
+          >
+            {esGamified ? "Desafio" : "Evaluacion"}
           </p>
-          <h1 className="mt-2 font-display text-2xl font-bold text-white">
+          <h1
+            className={cn(
+              "mt-2 font-display text-2xl font-bold",
+              esEducational ? "text-[var(--interface-text)]" : "text-white",
+            )}
+          >
             {titulo}
           </h1>
           <p className="mt-5">
@@ -175,26 +212,49 @@ export function PresentarEvaluacion({
     }
 
     return (
-      <section className="rounded-lg border border-white/15 bg-[#061120]/70 px-5 py-8 text-white shadow-[0_20px_60px_rgba(2,10,24,0.3)] backdrop-blur-md sm:px-8 sm:py-10">
-        <p className="text-xs font-semibold uppercase text-teal-100/65">
-          Evaluacion
+      <section
+        data-quiz-variant={config.quiz.variant}
+        className={cn(
+          "px-5 py-8 sm:px-8 sm:py-10",
+          esEducational
+            ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[var(--interface-shadow)]"
+            : "rounded-lg border border-white/15 bg-[#061120]/70 text-white shadow-[0_20px_60px_rgba(2,10,24,0.3)] backdrop-blur-md",
+        )}
+      >
+        <p
+          className={cn(
+            "text-xs font-semibold uppercase",
+            esEducational ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/65",
+          )}
+        >
+          {esGamified ? "Desafio" : "Evaluacion"}
         </p>
         <h1 className="mt-2 max-w-3xl font-display text-2xl font-bold sm:text-3xl">
           {titulo}
         </h1>
         {descripcion && (
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/68">
+          <p
+            className={cn(
+              "mt-3 max-w-2xl text-sm leading-relaxed",
+              esEducational ? "text-[var(--interface-text-muted)]" : "text-white/68",
+            )}
+          >
             {descripcion}
           </p>
         )}
-        <p className="mt-7 text-sm text-white/72">
+        <p className={cn("mt-7 text-sm", esEducational ? "text-[var(--interface-text-muted)]" : "text-white/72")}>
           Intentos usados: {intentosUsados}/{maxIntentos}. Necesitas{" "}
           {puntajeMinimo}% para aprobar.
         </p>
         <Button
           onClick={comenzar}
           disabled={enviando}
-          className="mt-4 bg-[#91DC00] font-bold text-[#061120] hover:bg-[#a7eb2f]"
+          className={cn(
+            "mt-4 font-bold",
+            esEducational
+              ? "bg-[var(--interface-accent)] text-white hover:bg-[var(--interface-accent-secondary)]"
+              : "bg-[#91DC00] text-[#061120] hover:bg-[#a7eb2f]",
+          )}
         >
           {enviando && <Loader2 className="animate-spin" />}
           Comenzar intento
@@ -205,7 +265,14 @@ export function PresentarEvaluacion({
 
   if (!preguntas) {
     return (
-      <div className="flex items-center justify-center rounded-lg border border-white/15 bg-[#061120]/65 py-16 text-white/78 backdrop-blur-md">
+      <div
+        className={cn(
+          "flex items-center justify-center py-16",
+          esEducational
+            ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)]"
+            : "rounded-lg border border-white/15 bg-[#061120]/65 text-white/78 backdrop-blur-md",
+        )}
+      >
         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
         Cargando preguntas...
       </div>
@@ -214,7 +281,14 @@ export function PresentarEvaluacion({
 
   if (preguntas.length === 0) {
     return (
-      <div className="rounded-lg border border-white/15 bg-[#061120]/70 px-5 py-12 text-center text-white/75 backdrop-blur-md">
+      <div
+        className={cn(
+          "px-5 py-12 text-center",
+          esEducational
+            ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)]"
+            : "rounded-lg border border-white/15 bg-[#061120]/70 text-white/75 backdrop-blur-md",
+        )}
+      >
         Esta evaluacion no tiene preguntas disponibles.
       </div>
     );
@@ -227,24 +301,57 @@ export function PresentarEvaluacion({
   const esUltimaPregunta = preguntaActual === preguntas.length - 1;
 
   return (
-    <section className="overflow-hidden rounded-lg border border-white/15 bg-[#061120]/72 p-4 text-white shadow-[0_24px_70px_rgba(2,10,24,0.38)] backdrop-blur-md sm:p-7 lg:p-8">
+    <section
+      data-quiz-variant={config.quiz.variant}
+      className={cn(
+        "overflow-hidden p-4 sm:p-7 lg:p-8",
+        esEducational
+          ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[var(--interface-shadow)]"
+          : "rounded-lg border border-white/15 bg-[#061120]/72 text-white shadow-[0_24px_70px_rgba(2,10,24,0.38)] backdrop-blur-md",
+      )}
+    >
       <header>
         <div className="flex min-w-0 items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-teal-100/70">
+            {esGamified && (
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--interface-accent-secondary)]">
+                Desafio
+              </p>
+            )}
+            <p
+              className={cn(
+                "text-xs font-semibold",
+                esEducational ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/70",
+              )}
+            >
               Pregunta {preguntaActual + 1} de {preguntas.length}
             </p>
-            <p className="mt-1 text-[11px] font-medium text-white/48">
+            <p
+              className={cn(
+                "mt-1 text-[11px] font-medium",
+                esEducational ? "text-[var(--interface-text-muted)]" : "text-white/48",
+              )}
+            >
               {respondidas} de {preguntas.length} respondidas
             </p>
           </div>
-          <p className="max-w-[50%] truncate text-right text-xs font-semibold text-white/60">
+          <p
+            className={cn(
+              "max-w-[50%] truncate text-right text-xs font-semibold",
+              esEducational ? "text-[var(--interface-text-muted)]" : "text-white/60",
+            )}
+          >
             {titulo}
           </p>
         </div>
 
         <div
-          className="mt-4 flex w-full gap-1.5 overflow-x-auto pb-2 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/25"
+          className={cn(
+            "mt-4 flex w-full gap-1.5 overflow-x-auto pb-2 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:rounded-full",
+            esEducational
+              ? "[&::-webkit-scrollbar-thumb]:bg-[var(--interface-border)]"
+              : "[&::-webkit-scrollbar-thumb]:bg-white/25",
+          )}
           aria-label="Progreso de la evaluacion"
         >
           {preguntas.map((item, indice) => {
@@ -261,13 +368,24 @@ export function PresentarEvaluacion({
                 }`}
                 aria-current={actual ? "step" : undefined}
                 className={cn(
-                  "h-2 min-w-6 flex-1 rounded-full border border-transparent transition-all duration-200",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00]",
-                  actual
-                    ? "bg-[#91DC00] shadow-[0_0_12px_rgba(145,220,0,0.65)]"
-                    : respondida
-                      ? "bg-teal-200/85 hover:bg-teal-100"
-                      : "bg-white/18 hover:bg-white/30",
+                  "min-w-6 flex-1 rounded-full border border-transparent transition-all duration-200",
+                  esEducational
+                    ? cn(
+                        "h-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]",
+                        actual
+                          ? "bg-[var(--interface-accent)]"
+                          : respondida
+                            ? "bg-[color-mix(in_srgb,var(--interface-accent-secondary)_65%,transparent)] hover:bg-[var(--interface-accent-secondary)]"
+                            : "bg-[var(--interface-border)] hover:bg-[var(--interface-text-muted)]",
+                      )
+                    : cn(
+                        "h-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00]",
+                        actual
+                          ? "bg-[#91DC00] shadow-[0_0_12px_rgba(145,220,0,0.65)]"
+                          : respondida
+                            ? "bg-teal-200/85 hover:bg-teal-100"
+                            : "bg-white/18 hover:bg-white/30",
+                      ),
                 )}
               />
             );
@@ -284,8 +402,15 @@ export function PresentarEvaluacion({
             : "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-left-3 motion-safe:duration-300",
         )}
       >
-        <h1 className="max-w-3xl font-display text-xl font-bold leading-snug text-white sm:text-2xl">
-          <span className="mr-2 text-[#a7eb2f]">{preguntaActual + 1}.</span>
+        <h1
+          className={cn(
+            "max-w-3xl font-display text-xl font-bold leading-snug sm:text-2xl",
+            esEducational ? "text-[var(--interface-text)]" : "text-white",
+          )}
+        >
+          <span className={esEducational ? "mr-2 text-[var(--interface-accent-secondary)]" : "mr-2 text-[#a7eb2f]"}>
+            {preguntaActual + 1}.
+          </span>
           {pregunta.enunciado}
         </h1>
 
@@ -302,11 +427,31 @@ export function PresentarEvaluacion({
                 key={opcion.id}
                 className={cn(
                   "group flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border px-3 py-3 text-sm transition-all duration-200 sm:gap-4 sm:px-4",
-                  "motion-reduce:transform-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#91DC00]",
-                  seleccionada
-                    ? "translate-x-0.5 border-[#91DC00]/85 bg-[#91DC00]/12 text-white shadow-[0_0_20px_rgba(145,220,0,0.12)]"
-                    : "border-white/15 bg-white/7 text-white/78 hover:translate-x-0.5 hover:border-teal-200/45 hover:bg-white/12 hover:text-white",
+                  "motion-reduce:transform-none",
+                  esEducational
+                    ? cn(
+                        "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--interface-accent-secondary)]",
+                        seleccionada
+                          ? "border-[var(--interface-accent-secondary)] text-[var(--interface-text)]"
+                          : "border-[var(--interface-border)] text-[var(--interface-text-muted)] hover:border-[var(--interface-accent-secondary)] hover:text-[var(--interface-text)]",
+                      )
+                    : cn(
+                        "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#91DC00]",
+                        seleccionada
+                          ? "translate-x-0.5 border-[#91DC00]/85 bg-[#91DC00]/12 text-white shadow-[0_0_20px_rgba(145,220,0,0.12)]"
+                          : "border-white/15 bg-white/7 text-white/78 hover:translate-x-0.5 hover:border-teal-200/45 hover:bg-white/12 hover:text-white",
+                      ),
                 )}
+                style={
+                  esEducational && seleccionada
+                    ? {
+                        backgroundColor:
+                          "color-mix(in srgb, var(--interface-accent-secondary) 10%, transparent)",
+                      }
+                    : esEducational
+                      ? { backgroundColor: "var(--interface-surface)" }
+                      : undefined
+                }
               >
                 <input
                   type="radio"
@@ -323,9 +468,13 @@ export function PresentarEvaluacion({
                 <span
                   className={cn(
                     "flex h-8 w-8 shrink-0 items-center justify-center rounded-md border text-xs font-bold transition-colors",
-                    seleccionada
-                      ? "border-[#b4f044] bg-[#91DC00] text-[#061120]"
-                      : "border-white/20 bg-white/8 text-white/65 group-hover:border-teal-100/45 group-hover:text-white",
+                    esEducational
+                      ? seleccionada
+                        ? "border-[var(--interface-accent-secondary)] bg-[var(--interface-accent-secondary)] text-white"
+                        : "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] group-hover:border-[var(--interface-accent-secondary)] group-hover:text-[var(--interface-text)]"
+                      : seleccionada
+                        ? "border-[#b4f044] bg-[#91DC00] text-[#061120]"
+                        : "border-white/20 bg-white/8 text-white/65 group-hover:border-teal-100/45 group-hover:text-white",
                   )}
                 >
                   {etiqueta}
@@ -337,12 +486,22 @@ export function PresentarEvaluacion({
         </div>
       </div>
 
-      <footer className="mt-7 grid grid-cols-2 gap-3 border-t border-white/12 pt-5 sm:mt-9">
+      <footer
+        className={cn(
+          "mt-7 grid grid-cols-2 gap-3 pt-5 sm:mt-9",
+          esEducational ? "border-t border-[var(--interface-border)]" : "border-t border-white/12",
+        )}
+      >
         <button
           type="button"
           onClick={() => irAPregunta(preguntaActual - 1)}
           disabled={preguntaActual === 0 || enviando}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/8 px-3 text-sm font-semibold text-white/80 backdrop-blur-sm transition-colors hover:bg-white/15 hover:text-white disabled:cursor-not-allowed disabled:opacity-35 max-sm:text-xs"
+          className={cn(
+            "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-35 max-sm:text-xs",
+            esEducational
+              ? "border border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)] hover:bg-[var(--interface-surface-strong)] hover:text-[var(--interface-text)]"
+              : "border border-white/20 bg-white/8 text-white/80 backdrop-blur-sm hover:bg-white/15 hover:text-white",
+          )}
         >
           <ArrowLeft className="h-4 w-4 shrink-0" />
           Anterior
@@ -355,7 +514,12 @@ export function PresentarEvaluacion({
               : irAPregunta(preguntaActual + 1)
           }
           disabled={enviando}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#91DC00] px-3 text-center text-sm font-bold text-[#061120] shadow-[0_8px_24px_rgba(145,220,0,0.18)] transition-colors hover:bg-[#a7eb2f] disabled:cursor-not-allowed disabled:opacity-60 max-sm:text-xs"
+          className={cn(
+            "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-center text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-60 max-sm:text-xs",
+            esEducational
+              ? "bg-[var(--interface-accent)] text-white hover:bg-[var(--interface-accent-secondary)]"
+              : "bg-[#91DC00] text-[#061120] shadow-[0_8px_24px_rgba(145,220,0,0.18)] hover:bg-[#a7eb2f]",
+          )}
         >
           {enviando ? (
             <Loader2 className="h-4 w-4 animate-spin" />

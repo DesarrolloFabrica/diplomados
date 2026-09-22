@@ -1,14 +1,11 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requerirSesion } from "@backend/lib/auth/sesion";
 import { cargarVistaCursoColaborador } from "@backend/server/queries/mis-cursos";
-import { PortadaCurso } from "@/components/shared/portada-curso";
-import { EstadisticasCurso } from "@/components/shared/estadisticas-curso";
 import {
   RutaAprendizaje,
   type GrupoRuta,
   type NodoRuta,
 } from "@/components/shared/ruta-aprendizaje";
-import { BotonInscribirme } from "./boton-inscribirme";
 import { cursoRoadmapCompletado } from "@/lib/roadmap/siguiente-nodo";
 
 interface CursoColaboradorPageProps {
@@ -30,32 +27,7 @@ export default async function CursoColaboradorPage({
   const { curso, modulos, inscripcion, modulosConLecciones, evaluaciones } = vista;
 
   if (!inscripcion) {
-    return (
-      <div className="max-w-2xl space-y-4">
-        <div className="h-40 w-full overflow-hidden rounded-lg">
-          <PortadaCurso
-            url={curso.imagenPortadaUrl}
-            esDiplomado={curso.esDiplomado}
-            titulo={curso.titulo}
-            className="rounded-none"
-          />
-        </div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">{curso.titulo}</h1>
-        <EstadisticasCurso
-          duracionEstimadaMin={curso.duracionEstimadaMin}
-          nivelDificultad={curso.nivelDificultad}
-          cantidadModulos={modulos.length}
-        />
-        {curso.descripcion && <p className="text-muted-foreground">{curso.descripcion}</p>}
-        {curso.objetivo && (
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Objetivo: </span>
-            {curso.objetivo}
-          </p>
-        )}
-        <BotonInscribirme cursoId={cursoId} />
-      </div>
-    );
+    redirect(`/mis-cursos/${cursoId}/informacion`);
   }
 
   const esObligatoria = curso.navegacion === "obligatoria";

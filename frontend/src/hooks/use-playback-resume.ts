@@ -90,17 +90,35 @@ export function usePlaybackResume(
     setPosicionPendiente(null);
 
     const media = mediaRef.current;
+    // TEMPORAL: diagnóstico para encontrar por qué no se guarda la posición
+    // en producción. Quitar una vez resuelto.
+    console.debug("[resume] efecto montado", {
+      hayMedia: !!media,
+      enabled,
+      storageKey,
+    });
     if (!media || !enabled || !storageKey) return undefined;
     const trackedMedia: HTMLMediaElement = media;
 
     let ultimoGuardado = 0;
 
-    function persistir() {
+    function persistir(origen: string) {
       const actual = trackedMedia.currentTime;
       const duracion = trackedMedia.duration;
-      if (!Number.isFinite(actual)) return;
+      if (!Number.isFinite(actual)) {
+        console.debug("[resume] persistir: currentTime no finito, se ignora", {
+          origen,
+          actual,
+        });
+        return;
+      }
 
       if (Number.isFinite(duracion) && actual >= duracion - MARGEN_FIN_SEGUNDOS) {
+        console.debug("[resume] persistir: cerca del final, se limpia", {
+          origen,
+          actual,
+          duracion,
+        });
         limpiarPosicion(storageKey!);
         return;
       }
@@ -110,16 +128,31 @@ export function usePlaybackResume(
       // usuario decida, o un remount de desarrollo). Nunca se borra una
       // posición ya guardada por estar cerca de 0 — solo se deja de
       // sobrescribir.
-      if (actual < POSICION_MINIMA_SEGUNDOS) return;
+      if (actual < POSICION_MINIMA_SEGUNDOS) {
+        console.debug("[resume] persistir: currentTime aún muy bajo, no se guarda", {
+          origen,
+          actual,
+        });
+        return;
+      }
 
+      console.debug("[resume] persistir: guardando", { origen, actual, storageKey });
       guardarPosicion(storageKey!, actual);
     }
 
     function detectarPendiente() {
-      if (resueltoRef.current) return;
+      if (resueltoRef.current) {
+        console.debug("[resume] detectarPendiente: ya resuelto, se ignora");
+        return;
+      }
       resueltoRef.current = true;
 
       const guardada = leerPosicionGuardada(storageKey!);
+      console.debug("[resume] detectarPendiente: leído de localStorage", {
+        storageKey,
+        guardada,
+        duracion: trackedMedia.duration,
+      });
       if (guardada === null) return;
 
       const duracion = trackedMedia.duration;
@@ -137,21 +170,31 @@ export function usePlaybackResume(
 
     function handleTimeUpdate() {
       const ahora = Date.now();
-      if (ahora - ultimoGuardado < INTERVALO_GUARDADO_MS) return;
+      if (ahora - ultimoGuardado < INTERVALO_GUARDADO_MS) {
+        console.debug("[resume] timeupdate: dentro del throttle, se ignora", {
+          faltanMs: INTERVALO_GUARDADO_MS - (ahora - ultimoGuardado),
+        });
+        return;
+      }
       ultimoGuardado = ahora;
-      persistir();
+      persistir("timeupdate");
     }
 
     function handlePause() {
-      persistir();
+      persistir("pause");
     }
 
     function handleEnded() {
+      console.debug("[resume] ended: se limpia la posición");
       limpiarPosicion(storageKey!);
     }
 
     function handleVisibilityChange() {
-      if (document.visibilityState === "hidden") persistir();
+      if (document.visibilityState === "hidden") persistir("visibilitychange");
+    }
+
+    function handleUnload() {
+      persistir("unload");
     }
 
     if (trackedMedia.readyState >= HTMLMediaElement.HAVE_METADATA) {
@@ -163,18 +206,19 @@ export function usePlaybackResume(
     trackedMedia.addEventListener("pause", handlePause);
     trackedMedia.addEventListener("ended", handleEnded);
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("pagehide", persistir);
-    window.addEventListener("beforeunload", persistir);
+    window.addEventListener("pagehide", handleUnload);
+    window.addEventListener("beforeunload", handleUnload);
 
     return () => {
-      persistir();
+      console.debug("[resume] efecto desmontado, persistiendo por última vez");
+      persistir("cleanup");
       trackedMedia.removeEventListener("loadedmetadata", handleLoadedMetadata);
       trackedMedia.removeEventListener("timeupdate", handleTimeUpdate);
       trackedMedia.removeEventListener("pause", handlePause);
       trackedMedia.removeEventListener("ended", handleEnded);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("pagehide", persistir);
-      window.removeEventListener("beforeunload", persistir);
+      window.removeEventListener("pagehide", handleUnload);
+      window.removeEventListener("beforeunload", handleUnload);
     };
   }, [enabled, mediaRef, storageKey]);
 

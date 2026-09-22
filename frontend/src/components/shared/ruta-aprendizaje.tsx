@@ -29,7 +29,9 @@ import {
 } from "lucide-react";
 import { obtenerFondoModuloInmersivo } from "@/config/roadmap-inmersivo";
 import { CLASE_TARJETA_GLASS_LEGIBLE } from "@/config/paneles-glass";
+import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { obtenerSiguienteNodoRoadmap } from "@/lib/roadmap/siguiente-nodo";
+import { estiloFondoInterfaz } from "@/lib/interface-assets";
 import { cn } from "@/lib/utils";
 
 export interface NodoRuta {
@@ -2049,9 +2051,11 @@ function AvatarUsuarioInmersivo({
   exploreMode: boolean;
 }) {
   return (
-    <div
+    <Link
+      href="/mis-cursos/perfil"
+      aria-label="Ir a mi perfil"
       className={cn(
-        "roadmap-world-hud absolute right-4 top-4 z-50 flex items-center gap-2.5 rounded-full py-1.5 pl-2 pr-4 transition-[opacity,transform] duration-300 sm:right-6 sm:top-6",
+        "roadmap-world-hud absolute right-4 top-4 z-50 flex items-center gap-2.5 rounded-full py-1.5 pl-2 pr-4 transition-[background-color,opacity,transform] duration-300 hover:bg-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] sm:right-6 sm:top-6",
         CLASE_TARJETA_GLASS_LEGIBLE,
         exploreMode && "pointer-events-none translate-y-2 opacity-0",
       )}
@@ -2067,7 +2071,7 @@ function AvatarUsuarioInmersivo({
           Estudiante
         </span>
       </span>
-    </div>
+    </Link>
   );
 }
 
@@ -2171,6 +2175,415 @@ function WorldHudLayer({
         onSeleccionarModulo={onSeleccionarModulo}
       />
     </>
+  );
+}
+
+function RoadmapStructuredBusiness({
+  grupos,
+  grupo,
+  indiceModulo,
+  indicesDisponibles,
+  progresoModulo,
+  nodoActivoGlobalId,
+  onSeleccionarModulo,
+}: {
+  grupos: GrupoRuta[];
+  grupo: GrupoRuta;
+  indiceModulo: number;
+  indicesDisponibles: number[];
+  progresoModulo: ProgresoModulo;
+  nodoActivoGlobalId: string | null;
+  onSeleccionarModulo: (indiceModulo: number) => void;
+}) {
+  return (
+    <section className="mx-auto w-full max-w-5xl rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6 lg:p-7">
+      <div className="flex flex-col gap-5 border-b border-[var(--interface-border)] pb-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--interface-accent)]">
+            Modulo {indiceModulo + 1} de {grupos.length}
+          </p>
+          <h1 className="mt-2 max-w-3xl text-2xl font-bold leading-tight tracking-normal">
+            {grupo.titulo}
+          </h1>
+        </div>
+
+        <div className="w-full max-w-sm">
+          <div className="mb-2 flex items-center justify-between text-sm font-semibold">
+            <span className="text-[var(--interface-text-muted)]">Avance del modulo</span>
+            <span className="tabular-nums">{progresoModulo.porcentaje}%</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-[#dbe5e2] dark:bg-white/12">
+            <div
+              className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))] transition-[width] duration-500"
+              style={{ width: `${progresoModulo.porcentaje}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {grupos.map((item, index) => {
+          const disponible = indicesDisponibles.includes(index);
+          const activo = index === indiceModulo;
+          return (
+            <button
+              key={item.moduloId}
+              type="button"
+              disabled={!disponible}
+              onClick={() => onSeleccionarModulo(index)}
+              className={cn(
+                "min-h-10 shrink-0 rounded-lg border px-3 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)] disabled:cursor-not-allowed disabled:opacity-45",
+                activo
+                  ? "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)]"
+                  : "border-[var(--interface-border)] bg-transparent text-[var(--interface-text-muted)] hover:border-[color-mix(in_srgb,var(--interface-accent)_50%,transparent)] hover:text-[var(--interface-text)]",
+              )}
+            >
+              Modulo {index + 1}
+            </button>
+          );
+        })}
+      </div>
+
+      <ol className="mt-7 space-y-0">
+        {grupo.nodos.map((nodo, index) => {
+          const activo = nodo.id === nodoActivoGlobalId && !nodo.completado && !nodo.bloqueado;
+          const esEvaluacion = nodo.tipo === "evaluacion";
+          const numero = String(index + 1).padStart(2, "0");
+          const estadoTexto = nodo.bloqueado
+            ? "Bloqueado"
+            : nodo.completado
+              ? "Completado"
+              : activo
+                ? "En curso"
+                : "Pendiente";
+          const Icono = nodo.bloqueado
+            ? Lock
+            : nodo.completado
+              ? Check
+              : esEvaluacion
+                ? ClipboardCheck
+                : BookOpen;
+          const contenido = (
+            <div
+              className={cn(
+                "group relative flex min-h-16 items-center gap-4 border-b border-[var(--interface-border)] px-1 py-4 text-left last:border-b-0",
+                !nodo.bloqueado && "transition-colors hover:bg-[#0F766E]/[0.04]",
+              )}
+            >
+              <span
+                className={cn(
+                  "grid size-10 shrink-0 place-items-center rounded-full border text-sm font-bold",
+                  nodo.completado && "border-emerald-600 bg-emerald-600 text-white",
+                  activo && "border-[#061120] bg-[#061120] text-white dark:border-[var(--interface-accent)] dark:bg-[var(--interface-accent)] dark:text-[#061120]",
+                  !nodo.completado && !activo && !nodo.bloqueado && !esEvaluacion && "border-[var(--interface-border)] bg-white text-[var(--interface-text-muted)] dark:bg-white/[0.04]",
+                  esEvaluacion && !nodo.completado && !activo && "border-amber-400/50 bg-amber-400/10 text-amber-700 dark:text-amber-200",
+                  nodo.bloqueado && "border-slate-300 bg-slate-100 text-slate-400 dark:border-white/10 dark:bg-white/[0.04]",
+                )}
+              >
+                {nodo.completado || nodo.bloqueado || esEvaluacion ? (
+                  <Icono className="size-4" aria-hidden="true" />
+                ) : (
+                  numero
+                )}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold text-[var(--interface-text)]">
+                  {numero} · {nodo.titulo}
+                </span>
+                <span className="mt-1 block text-xs font-semibold text-[var(--interface-text-muted)]">
+                  {esEvaluacion ? "Evaluacion" : "Leccion"} · {estadoTexto}
+                </span>
+              </span>
+              {!nodo.bloqueado && (
+                <ArrowRight className="size-4 shrink-0 text-[var(--interface-accent)] opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden="true" />
+              )}
+            </div>
+          );
+
+          return (
+            <li key={nodo.id}>
+              {nodo.bloqueado ? (
+                <div aria-disabled="true">{contenido}</div>
+              ) : (
+                <Link href={nodo.href}>{contenido}</Link>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+function RoadmapLearningPathEducational({
+  grupos,
+  nodoActivoGlobalId,
+}: {
+  grupos: GrupoRuta[];
+  nodoActivoGlobalId: string | null;
+}) {
+  return (
+    <section className="mx-auto w-full max-w-5xl space-y-5">
+      <div className="rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--interface-accent)]">
+          Ruta de aprendizaje
+        </p>
+        <h1 className="mt-2 text-2xl font-bold tracking-normal sm:text-3xl">
+          Temario y progreso por modulo
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--interface-text-muted)]">
+          Avanza por los contenidos en orden y revisa claramente que sigue en tu proceso de estudio.
+        </p>
+      </div>
+
+      {grupos.map((grupo, indiceModulo) => {
+        const progresoModulo = calcularProgresoModulo(grupo.nodos);
+        return (
+          <article
+            key={grupo.moduloId}
+            className="rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6"
+          >
+            <div className="flex flex-col gap-4 border-b border-[var(--interface-border)] pb-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--interface-accent)]">
+                  Modulo {indiceModulo + 1}
+                </p>
+                <h2 className="mt-1 text-xl font-bold leading-tight">{grupo.titulo}</h2>
+                <p className="mt-2 text-sm text-[var(--interface-text-muted)]">
+                  {progresoModulo.completados} de {progresoModulo.total} contenidos completados
+                </p>
+              </div>
+              <div className="w-full max-w-xs">
+                <div className="mb-2 flex items-center justify-between text-sm font-semibold">
+                  <span className="text-[var(--interface-text-muted)]">Progreso</span>
+                  <span className="tabular-nums">{progresoModulo.porcentaje}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-[#dce8e5] dark:bg-white/12">
+                  <div
+                    className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
+                    style={{ width: `${progresoModulo.porcentaje}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <ol className="mt-3 divide-y divide-[var(--interface-border)]">
+              {grupo.nodos.map((nodo) => {
+                const activo = nodo.id === nodoActivoGlobalId && !nodo.completado && !nodo.bloqueado;
+                const esEvaluacion = nodo.tipo === "evaluacion";
+                const estadoTexto = nodo.bloqueado
+                  ? "Bloqueado"
+                  : nodo.completado
+                    ? "Completado"
+                    : activo
+                      ? "En progreso"
+                      : "No iniciado";
+                const Icono = nodo.bloqueado
+                  ? Lock
+                  : nodo.completado
+                    ? Check
+                    : esEvaluacion
+                      ? ClipboardCheck
+                      : BookOpen;
+                const contenido = (
+                  <div
+                    data-roadmap-node-id={nodo.id}
+                    data-roadmap-node={nodo.id}
+                    className={cn(
+                      "group flex min-h-16 items-center gap-4 py-4",
+                      !nodo.bloqueado && "transition-colors hover:bg-[#2AA99A]/[0.045]",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "grid size-10 shrink-0 place-items-center rounded-xl border",
+                        nodo.completado && "border-emerald-600 bg-emerald-600 text-white",
+                        activo && "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-white",
+                        esEvaluacion && !nodo.completado && !activo && "border-amber-400/45 bg-amber-400/10 text-amber-700 dark:text-amber-200",
+                        nodo.bloqueado && "border-slate-300 bg-slate-100 text-slate-400 dark:border-white/10 dark:bg-white/[0.04]",
+                        !nodo.completado && !activo && !nodo.bloqueado && !esEvaluacion && "border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)]",
+                      )}
+                    >
+                      <Icono className="size-4" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-bold text-[var(--interface-text)]">
+                        {nodo.titulo}
+                      </span>
+                      <span className="mt-1 block text-xs font-semibold text-[var(--interface-text-muted)]">
+                        {esEvaluacion ? "Evaluacion" : "Leccion"} · {estadoTexto}
+                      </span>
+                    </span>
+                    {!nodo.bloqueado && (
+                      <ArrowRight className="size-4 shrink-0 text-[var(--interface-accent)] opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden="true" />
+                    )}
+                  </div>
+                );
+
+                return (
+                  <li key={nodo.id}>
+                    {nodo.bloqueado ? (
+                      <div aria-disabled="true">{contenido}</div>
+                    ) : (
+                      <Link href={nodo.href}>{contenido}</Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </article>
+        );
+      })}
+    </section>
+  );
+}
+
+function RoadmapLevelMapGamified({
+  grupos,
+  nodoActivoGlobalId,
+}: {
+  grupos: GrupoRuta[];
+  nodoActivoGlobalId: string | null;
+}) {
+  return (
+    <section className="mx-auto w-full max-w-4xl space-y-6">
+      <div className="relative overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(103,232,249,0.14),transparent_45%)]"
+        />
+        <p className="relative z-10 text-xs font-bold uppercase tracking-[0.2em] text-[var(--interface-accent-secondary)]">
+          Mapa de niveles
+        </p>
+        <h1 className="relative z-10 mt-2 text-2xl font-bold tracking-normal sm:text-3xl">
+          Avanza nivel por nivel
+        </h1>
+        <p className="relative z-10 mt-2 max-w-2xl text-sm leading-6 text-[var(--interface-text-muted)]">
+          Cada modulo es un conjunto de niveles. Completa uno para desbloquear el siguiente.
+        </p>
+      </div>
+
+      {grupos.map((grupo, indiceModulo) => {
+        const progresoModulo = calcularProgresoModulo(grupo.nodos);
+        return (
+          <article
+            key={grupo.moduloId}
+            className="rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6"
+          >
+            <div className="flex flex-col gap-4 border-b border-[var(--interface-border)] pb-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--interface-accent-secondary)]">
+                  Modulo {indiceModulo + 1}
+                </p>
+                <h2 className="mt-1 text-xl font-bold leading-tight">{grupo.titulo}</h2>
+                <p className="mt-2 text-sm text-[var(--interface-text-muted)]">
+                  {progresoModulo.completados} de {progresoModulo.total} niveles superados
+                </p>
+              </div>
+              <div className="w-full max-w-xs">
+                <div className="mb-2 flex items-center justify-between text-sm font-semibold">
+                  <span className="text-[var(--interface-text-muted)]">Progreso</span>
+                  <span className="tabular-nums">{progresoModulo.porcentaje}%</span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-[linear-gradient(90deg,#91DC00,#67e8f9)] shadow-[0_0_12px_rgba(103,232,249,0.5)]"
+                    style={{ width: `${progresoModulo.porcentaje}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <ol className="relative mt-5 space-y-1">
+              {grupo.nodos.map((nodo, indiceNodo) => {
+                const activo = nodo.id === nodoActivoGlobalId && !nodo.completado && !nodo.bloqueado;
+                const esEvaluacion = nodo.tipo === "evaluacion";
+                const esUltimo = indiceNodo === grupo.nodos.length - 1;
+                const estadoTexto = nodo.bloqueado
+                  ? "Bloqueado"
+                  : nodo.completado
+                    ? "Superado"
+                    : activo
+                      ? "Nivel actual"
+                      : "Por desbloquear";
+                const Icono = nodo.bloqueado
+                  ? Lock
+                  : nodo.completado
+                    ? Check
+                    : esEvaluacion
+                      ? ClipboardCheck
+                      : activo
+                        ? Play
+                        : BookOpen;
+
+                const contenido = (
+                  <div
+                    data-roadmap-node-id={nodo.id}
+                    data-roadmap-node={nodo.id}
+                    className="group relative flex items-start gap-4 py-3"
+                  >
+                    {!esUltimo && (
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          "absolute left-[27px] top-14 h-[calc(100%-1.5rem)] w-0.5",
+                          nodo.completado ? "bg-emerald-500/60" : "bg-[var(--interface-border)]",
+                        )}
+                      />
+                    )}
+                    <span
+                      className={cn(
+                        "relative z-10 grid size-14 shrink-0 place-items-center rounded-2xl border-2 text-base font-bold transition-shadow",
+                        nodo.completado && "border-emerald-500 bg-emerald-500 text-white",
+                        activo &&
+                          "border-[var(--interface-accent-secondary)] bg-[var(--interface-accent-secondary)] text-[#06201c] shadow-[0_0_0_6px_rgba(103,232,249,0.18),0_0_24px_rgba(103,232,249,0.55)]",
+                        esEvaluacion &&
+                          !nodo.completado &&
+                          !activo &&
+                          "border-amber-400/60 bg-amber-400/10 text-amber-600 dark:text-amber-300",
+                        nodo.bloqueado &&
+                          "border-slate-300 bg-slate-100 text-slate-400 dark:border-white/10 dark:bg-white/[0.04]",
+                        !nodo.completado &&
+                          !activo &&
+                          !nodo.bloqueado &&
+                          !esEvaluacion &&
+                          "border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)]",
+                      )}
+                    >
+                      <Icono className="size-5" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1 pt-2">
+                      <span className="block text-sm font-bold text-[var(--interface-text)]">
+                        {esEvaluacion ? "Desafio final" : `Nivel ${indiceNodo + 1}`} · {nodo.titulo}
+                      </span>
+                      <span className="mt-1 block text-xs font-semibold text-[var(--interface-text-muted)]">
+                        {estadoTexto}
+                      </span>
+                    </span>
+                    {!nodo.bloqueado && (
+                      <ArrowRight
+                        className="mt-3 size-4 shrink-0 text-[var(--interface-accent-secondary)] opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </div>
+                );
+
+                return (
+                  <li key={nodo.id}>
+                    {nodo.bloqueado ? (
+                      <div aria-disabled="true">{contenido}</div>
+                    ) : (
+                      <Link href={nodo.href}>{contenido}</Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </article>
+        );
+      })}
+    </section>
   );
 }
 
@@ -2461,6 +2874,7 @@ export function RutaAprendizaje({
   heroInmersivo?: HeroInmersivoRoadmap;
   legacy?: boolean;
 }) {
+  const { config } = useInterfaceVariant();
   const nodosPlanos = useMemo(() => aplanarNodosRoadmap(grupos), [grupos]);
   const mapaCompletadosPrevio = useRef<Map<string, boolean> | null>(null);
   const [nodoTransicionId, setNodoTransicionId] = useState<string | null>(null);
@@ -2780,9 +3194,65 @@ export function RutaAprendizaje({
     const esUltimoModulo = indiceSeguro === grupos.length - 1;
     const indiceModuloDestino = siguienteIndiceModuloDisponible(grupos, indiceSeguro);
 
+    if (config.roadmap.variant === "learning-path") {
+      return (
+        <div
+          data-roadmap-variant={config.roadmap.variant}
+          data-roadmap-mode="learning-path"
+          style={estiloFondoInterfaz(config.id, "roadmapBackground")}
+          className="interface-roadmap-bg py-2"
+        >
+          <RoadmapLearningPathEducational
+            grupos={grupos}
+            nodoActivoGlobalId={nodoActivoGlobalId}
+          />
+        </div>
+      );
+    }
+
+    if (config.roadmap.variant === "level-map") {
+      return (
+        <div
+          data-roadmap-variant={config.roadmap.variant}
+          data-roadmap-mode="level-map"
+          style={estiloFondoInterfaz(config.id, "roadmapBackground")}
+          className="interface-roadmap-bg py-2"
+        >
+          <RoadmapLevelMapGamified
+            grupos={grupos}
+            nodoActivoGlobalId={nodoActivoGlobalId}
+          />
+        </div>
+      );
+    }
+
+    if (config.roadmap.variant === "structured") {
+      return (
+        <div
+          data-roadmap-variant={config.roadmap.variant}
+          data-roadmap-mode="structured"
+          style={estiloFondoInterfaz(config.id, "roadmapBackground")}
+          className="interface-roadmap-bg py-2"
+        >
+          <RoadmapStructuredBusiness
+            grupos={grupos}
+            grupo={grupoVisible}
+            indiceModulo={indiceSeguro}
+            indicesDisponibles={indicesDisponibles}
+            progresoModulo={progresoModulo}
+            nodoActivoGlobalId={nodoActivoGlobalId}
+            onSeleccionarModulo={seleccionarModulo}
+          />
+        </div>
+      );
+    }
+
     if (modoInmersivo) {
       return (
-        <>
+        <div
+          data-roadmap-variant={config.roadmap.variant}
+          data-roadmap-mode="immersive"
+        >
           <AvatarRoadmapEnMovimiento movimiento={movimientoAvatar} />
           <div
             ref={inicioModuloRef}
@@ -2806,12 +3276,15 @@ export function RutaAprendizaje({
               onSeleccionarModulo={seleccionarModulo}
             />
           </div>
-        </>
+        </div>
       );
     }
 
     return (
-      <>
+      <div
+        data-roadmap-variant={config.roadmap.variant}
+        data-roadmap-mode="structured"
+      >
         <AvatarRoadmapEnMovimiento movimiento={movimientoAvatar} />
         <div
           ref={inicioModuloRef}
@@ -2938,7 +3411,7 @@ export function RutaAprendizaje({
               )}
             </div>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -3006,7 +3479,12 @@ export function RutaAprendizaje({
   const alto = y;
 
   return (
-    <div className="relative mx-auto" style={{ width: ANCHO_RUTA, height: alto }}>
+    <div
+      data-roadmap-variant={config.roadmap.variant}
+      data-roadmap-mode="legacy"
+      className="relative mx-auto"
+      style={{ width: ANCHO_RUTA, height: alto }}
+    >
       <svg className="absolute inset-0" width={ANCHO_RUTA} height={alto} aria-hidden>
         <polyline
           points={nodos.map((n) => `${n.cx},${n.cy}`).join(" ")}

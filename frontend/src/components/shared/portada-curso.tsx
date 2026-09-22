@@ -18,6 +18,7 @@ interface PortadaCursoProps {
   alt?: string;
   fallback?: "icon" | "abstract";
   className?: string;
+  sizes?: string;
 }
 
 function FondoAbstractoPortada({ className }: { className?: string }) {
@@ -72,10 +73,12 @@ function PortadaImagen({
   src,
   alt,
   onFallo,
+  sizes,
 }: {
   src: string;
   alt: string;
   onFallo: () => void;
+  sizes?: string;
 }) {
   const externa = esUrlExterna(src);
 
@@ -98,7 +101,7 @@ function PortadaImagen({
       src={src}
       alt={alt}
       fill
-      sizes="(max-width: 768px) 100vw, 400px"
+      sizes={sizes ?? "(max-width: 768px) 100vw, 400px"}
       className="object-cover object-center"
       onError={onFallo}
     />
@@ -113,6 +116,7 @@ export function PortadaCurso(props: PortadaCursoProps) {
     alt = "",
     fallback = "icon",
     className,
+    sizes,
   } = props;
 
   const rawUrl = resolverUrlPortada(props);
@@ -172,6 +176,7 @@ export function PortadaCurso(props: PortadaCursoProps) {
           src={candidatoActual.url}
           alt={alt || titulo}
           onFallo={avanzarCandidato}
+          sizes={sizes}
         />
       )}
     </div>

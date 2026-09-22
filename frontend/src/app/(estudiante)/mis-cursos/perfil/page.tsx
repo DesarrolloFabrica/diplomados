@@ -1,11 +1,14 @@
 import { UserRound } from "lucide-react";
 import { requerirSesion } from "@backend/lib/auth/sesion";
 import { ETIQUETA_ROL } from "@backend/config/roles";
+import { DEFAULT_INTERFACE_VARIANT } from "@backend/config/interface-variants";
 import {
   listarCursosParaColaborador,
   obtenerPerfilColaborador,
 } from "@backend/server/queries/mis-cursos";
+import { obtenerPreferenciaInterfazUsuario } from "@backend/server/queries/preferencia-interfaz";
 import { cn } from "@/lib/utils";
+import { SelectorInterfaz } from "./selector-interfaz";
 
 function valorPerfil(valor: string | null | undefined): string {
   if (!valor?.trim()) return "Información no registrada";
@@ -54,10 +57,12 @@ function TarjetaEstadistica({ etiqueta, valor }: { etiqueta: string; valor: stri
 
 export default async function PerfilColaboradorPage() {
   const sesion = await requerirSesion();
-  const [perfil, cursos] = await Promise.all([
+  const [perfil, cursos, preferenciaInterfaz] = await Promise.all([
     obtenerPerfilColaborador(sesion.id),
     listarCursosParaColaborador(sesion.id),
+    obtenerPreferenciaInterfazUsuario(sesion.id),
   ]);
+  const varianteActual = preferenciaInterfaz?.interfaceVariant ?? DEFAULT_INTERFACE_VARIANT;
 
   const cursosInscritos = cursos.filter((curso) => curso.inscripcionId);
   const cursosCompletados = cursosInscritos.filter(
@@ -135,6 +140,10 @@ export default async function PerfilColaboradorPage() {
           <TarjetaEstadistica etiqueta="Progreso general" valor={`${progresoGeneral}%`} />
         </div>
       </section>
+
+      {sesion.rol === "colaborador" && (
+        <SelectorInterfaz varianteActual={varianteActual} />
+      )}
     </div>
   );
 }

@@ -147,6 +147,148 @@
   select {
     font: inherit;
   }
+
+  [data-interface-variant] {
+    --interface-bg: #061120;
+    --interface-surface: rgba(255, 255, 255, 0.22);
+    --interface-surface-strong: rgba(255, 255, 255, 0.3);
+    --interface-border: rgba(255, 255, 255, 0.45);
+    --interface-text: #ffffff;
+    --interface-text-muted: rgba(255, 255, 255, 0.72);
+    --interface-accent: #91dc00;
+    --interface-accent-secondary: #2fb9a5;
+    --interface-radius: 24px;
+    --interface-shadow: 0 8px 32px rgba(6, 17, 32, 0.16);
+    --interface-blur: 18px;
+    --interface-content-width: 1500px;
+    --interface-card-gap: 1.25rem;
+    /* Ganchos de integración visual (Fase 8): sin valor por defecto, no
+       rompen nada mientras no se asigne un asset/token concreto por
+       variante. `--interface-bg-image` se fija desde React vía
+       `estiloFondoInterfaz()` (frontend/src/lib/interface-assets.ts) leyendo
+       `INTERFACE_VARIANT_CONFIG[variant].assets`; nunca se hardcodea una
+       ruta en el CSS. */
+    --interface-bg-image: none;
+    --interface-overlay: none;
+    --interface-glow: 0 0 24px rgba(145, 220, 0, 0.35);
+    --interface-card-shadow: var(--interface-shadow);
+    --interface-hero-border: var(--interface-border);
+    /* Color de texto seguro sobre --interface-accent/--interface-accent-secondary.
+       Cada variante lo fija según qué tan clara/oscura sea su propia marca de
+       acento, en vez de asumir "texto blanco" (falla en acentos claros como
+       el verde CUN, el dorado o el cian). */
+    --interface-accent-foreground: #061120;
+  }
+
+  [data-interface-variant="business"] {
+    --interface-bg: #eef2f6;
+    --interface-surface: rgba(255, 255, 255, 0.95);
+    --interface-surface-strong: #ffffff;
+    --interface-border: rgba(11, 42, 61, 0.1);
+    --interface-text: #0a1c2c;
+    --interface-text-muted: #5b6b7c;
+    --interface-accent: #0b5b73;
+    --interface-accent-secondary: #22d3ee;
+    --interface-radius: 12px;
+    --interface-shadow: 0 10px 24px rgba(10, 28, 44, 0.07);
+    --interface-blur: 4px;
+    --interface-content-width: 1440px;
+    --interface-card-gap: 1rem;
+    --interface-glow: 0 0 18px rgba(34, 211, 238, 0.28);
+    --interface-card-shadow: 0 6px 16px rgba(10, 28, 44, 0.06);
+    --interface-hero-border: rgba(11, 42, 61, 0.12);
+    --interface-accent-foreground: #ffffff;
+  }
+
+  [data-interface-variant="educational"] {
+    --interface-bg: #f6efe0;
+    --interface-surface: #fbf6e9;
+    --interface-surface-strong: #fffdf5;
+    --interface-border: rgba(93, 64, 28, 0.16);
+    --interface-text: #1c2b20;
+    --interface-text-muted: #6b5d44;
+    --interface-accent: #1f5c3f;
+    --interface-accent-secondary: #b8863a;
+    --interface-radius: 20px;
+    --interface-shadow: 0 14px 34px rgba(90, 62, 20, 0.12);
+    --interface-blur: 6px;
+    --interface-content-width: 1360px;
+    --interface-card-gap: 1.5rem;
+    --interface-glow: 0 0 22px rgba(184, 134, 58, 0.3);
+    --interface-card-shadow: 0 10px 26px rgba(90, 62, 20, 0.1);
+    --interface-hero-border: rgba(93, 64, 28, 0.22);
+    --interface-accent-foreground: #ffffff;
+  }
+
+  [data-interface-variant="gamified"] {
+    --interface-bg: #eef3f9;
+    --interface-surface: rgba(255, 255, 255, 0.9);
+    --interface-surface-strong: #ffffff;
+    --interface-border: rgba(8, 47, 73, 0.14);
+    --interface-text: #061120;
+    --interface-text-muted: #47607a;
+    --interface-accent: #4f8a00;
+    --interface-accent-secondary: #0891b2;
+    --interface-radius: 26px;
+    --interface-shadow: 0 16px 40px rgba(6, 17, 32, 0.1);
+    --interface-blur: 14px;
+    --interface-content-width: 1500px;
+    --interface-card-gap: 1.25rem;
+    --interface-glow: 0 0 22px rgba(8, 145, 178, 0.3);
+    --interface-card-shadow: 0 10px 26px rgba(6, 17, 32, 0.08);
+    --interface-hero-border: rgba(8, 47, 73, 0.18);
+    --interface-accent-foreground: #06201c;
+  }
+
+  html.light [data-interface-variant="creative"] {
+    --interface-text: #061120;
+    --interface-text-muted: rgba(6, 17, 32, 0.68);
+  }
+
+  html.dark [data-interface-variant="gamified"] {
+    --interface-bg: #08111f;
+    --interface-surface: rgba(18, 26, 46, 0.82);
+    --interface-surface-strong: rgba(29, 39, 70, 0.9);
+    --interface-border: rgba(125, 211, 252, 0.22);
+    --interface-text: #f8fafc;
+    --interface-text-muted: rgba(226, 232, 240, 0.74);
+    --interface-accent: #91dc00;
+    --interface-accent-secondary: #67e8f9;
+    --interface-shadow: 0 18px 48px rgba(5, 10, 24, 0.28);
+    --interface-accent-foreground: #06201c;
+  }
+
+  html.dark [data-interface-variant="business"] {
+    --interface-bg: #060f1a;
+    --interface-surface: rgba(12, 27, 41, 0.92);
+    --interface-surface-strong: #0f2233;
+    --interface-border: rgba(148, 197, 214, 0.16);
+    --interface-text: #eef6f8;
+    --interface-text-muted: rgba(191, 214, 224, 0.72);
+    --interface-accent: #22d3ee;
+    --interface-accent-secondary: #5eead4;
+    --interface-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+    --interface-glow: 0 0 20px rgba(34, 211, 238, 0.32);
+    --interface-card-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+    --interface-hero-border: rgba(148, 197, 214, 0.2);
+    --interface-accent-foreground: #061120;
+  }
+
+  html.dark [data-interface-variant="educational"] {
+    --interface-bg: #10190f;
+    --interface-surface: #16211a;
+    --interface-surface-strong: #1c2b21;
+    --interface-border: rgba(230, 214, 170, 0.16);
+    --interface-text: #f4ecd8;
+    --interface-text-muted: #c9bd9e;
+    --interface-accent: #4a9d6f;
+    --interface-accent-secondary: #d9a63e;
+    --interface-shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
+    --interface-glow: 0 0 22px rgba(217, 166, 62, 0.32);
+    --interface-card-shadow: 0 10px 26px rgba(0, 0, 0, 0.26);
+    --interface-hero-border: rgba(230, 214, 170, 0.22);
+    --interface-accent-foreground: #0d160f;
+  }
 }
 
 @layer utilities {
@@ -178,6 +320,501 @@
 
   .animate-cun-caret {
     animation: cun-caret-blink 1s step-end infinite;
+  }
+
+  .interface-variant-root {
+    min-height: 100dvh;
+  }
+
+  .interface-surface {
+    border-color: var(--interface-border);
+    border-radius: var(--interface-radius);
+    background: var(--interface-surface);
+    box-shadow: var(--interface-shadow);
+    color: var(--interface-text);
+    backdrop-filter: blur(var(--interface-blur));
+    -webkit-backdrop-filter: blur(var(--interface-blur));
+  }
+
+  .interface-surface-strong {
+    background: var(--interface-surface-strong);
+  }
+
+  .interface-text-muted {
+    color: var(--interface-text-muted);
+  }
+
+  /* Fondo decorativo genérico (asset "roadmapBackground"/"lessonBackground"/
+     "quizBackground", Fase 9). Válida para cualquier variante: sin asset
+     asignado, `none` no pinta nada. */
+  .interface-roadmap-bg,
+  .interface-lesson-bg,
+  .interface-quiz-bg {
+    background-image: var(--interface-bg-image, none), var(--interface-overlay, none);
+    background-size: cover, cover;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  [data-interface-variant="business"] .business-shell {
+    /* Capa 1: asset de fondo (Fase 9), vacía por defecto → `none` no pinta
+       nada y deja ver el degradado corporativo de abajo intacto. Capa 2:
+       overlay opcional para mantener legibilidad sobre ese asset. */
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 8% 8%, rgba(34, 211, 238, 0.12), transparent 28%),
+      radial-gradient(circle at 92% 12%, rgba(11, 91, 115, 0.1), transparent 24%),
+      linear-gradient(135deg, #eef2f6 0%, #e7edf3 55%, #f4f7fa 100%);
+    background-size: cover, cover, auto, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  html.dark [data-interface-variant="business"] .business-shell {
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 8% 8%, rgba(34, 211, 238, 0.12), transparent 28%),
+      radial-gradient(circle at 92% 12%, rgba(94, 234, 212, 0.08), transparent 24%),
+      linear-gradient(135deg, #060f1a 0%, #08131f 58%, #060f1a 100%);
+    background-size: cover, cover, auto, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  [data-interface-variant="business"] .business-main {
+    background: transparent;
+  }
+
+  [data-interface-variant="business"] .collaborator-sidebar {
+    border-color: var(--interface-border);
+    background: var(--interface-surface-strong);
+    color: var(--interface-text);
+    box-shadow: var(--interface-shadow);
+    backdrop-filter: blur(var(--interface-blur));
+    -webkit-backdrop-filter: blur(var(--interface-blur));
+  }
+
+  [data-interface-variant="business"] .collaborator-sidebar a,
+  [data-interface-variant="business"] .collaborator-sidebar button {
+    border-radius: 12px;
+  }
+
+  [data-interface-variant="business"] .collaborator-sidebar p,
+  [data-interface-variant="business"] .collaborator-sidebar span {
+    color: inherit;
+  }
+
+  [data-interface-variant="business"] [data-dashboard-layout="executive"] {
+    color: var(--interface-text);
+  }
+
+  [data-interface-variant="business"] [data-dashboard-layout="executive"] > section {
+    gap: 1rem;
+  }
+
+  [data-interface-variant="business"] [data-catalog-density="compact"] {
+    gap: 1rem;
+  }
+
+  [data-interface-variant="business"] [role="group"] > button {
+    min-height: 2.5rem;
+    border-radius: 10px;
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    color: var(--interface-text-muted);
+    backdrop-filter: none;
+  }
+
+  [data-interface-variant="business"] [role="group"] > button[aria-pressed="true"] {
+    border-color: var(--interface-border);
+    background: var(--interface-surface-strong);
+    color: var(--interface-text);
+    box-shadow: inset 0 -2px 0 var(--interface-accent);
+  }
+
+  [data-interface-variant="business"] [data-catalog-card="business"] {
+    scroll-snap-align: start;
+  }
+
+  [data-interface-variant="educational"] [data-catalog-card="academic"] {
+    scroll-snap-align: start;
+  }
+
+  [data-interface-variant="business"] .lesson-view:has([data-lesson-variant="focused"]) {
+    /* Modo "foco" deliberadamente oscuro en ambos temas (patrón ya existente
+       desde Fase 4) — se conserva, solo se actualiza el tono a azul/cian. */
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 12% 0%, rgba(34, 211, 238, 0.12), transparent 26%),
+      linear-gradient(135deg, #060f1a 0%, #0a1826 54%, #0d1f30 100%);
+    background-size: cover, cover, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  html.dark [data-interface-variant="business"] .lesson-view:has([data-lesson-variant="focused"]) {
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 12% 0%, rgba(34, 211, 238, 0.12), transparent 26%),
+      linear-gradient(135deg, var(--interface-bg), #0a1826 100%);
+    background-size: cover, cover, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  [data-interface-variant="business"] .lesson-view:has([data-lesson-variant="focused"])::before,
+  [data-interface-variant="business"] .lesson-view:has([data-lesson-variant="focused"])::after {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  [data-interface-variant="business"] [data-lesson-variant="focused"] aside,
+  [data-interface-variant="business"] [data-lesson-variant="focused"] button {
+    border-radius: var(--interface-radius);
+  }
+
+  [data-interface-variant="business"] [data-lesson-variant="focused"] aside {
+    border-color: rgba(148, 197, 214, 0.14);
+    background: rgba(15, 34, 51, 0.9);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
+  }
+
+  [data-interface-variant="business"] .quiz-view:has([data-quiz-variant="professional"]) {
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 85% 6%, rgba(34, 211, 238, 0.12), transparent 24%),
+      linear-gradient(135deg, var(--interface-bg), #e7edf3 100%);
+    background-size: cover, cover, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  html.dark [data-interface-variant="business"] .quiz-view:has([data-quiz-variant="professional"]) {
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 85% 6%, rgba(34, 211, 238, 0.12), transparent 24%),
+      linear-gradient(135deg, var(--interface-bg), #0a1826 100%);
+    background-size: cover, cover, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  [data-interface-variant="business"] .quiz-view:has([data-quiz-variant="professional"])::before,
+  [data-interface-variant="business"] .quiz-view:has([data-quiz-variant="professional"])::after {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  [data-interface-variant="business"] [data-quiz-variant="professional"] {
+    border-color: var(--interface-border);
+    border-radius: var(--interface-radius);
+    background: var(--interface-surface-strong);
+    color: var(--interface-text);
+    box-shadow: var(--interface-shadow);
+    backdrop-filter: none;
+  }
+
+  [data-interface-variant="business"] [data-quiz-variant="professional"] h1,
+  [data-interface-variant="business"] [data-quiz-variant="professional"] p,
+  [data-interface-variant="business"] [data-quiz-variant="professional"] label,
+  [data-interface-variant="business"] [data-quiz-variant="professional"] header span {
+    color: var(--interface-text);
+  }
+
+  [data-interface-variant="business"] [data-quiz-variant="professional"] header p,
+  [data-interface-variant="business"] [data-quiz-variant="professional"] label span:last-child {
+    color: var(--interface-text-muted);
+  }
+
+  [data-interface-variant="business"] [data-quiz-variant="professional"] label {
+    border-color: var(--interface-border);
+    background: rgba(11, 91, 115, 0.04);
+  }
+
+  [data-interface-variant="business"] [data-quiz-variant="professional"] label:has(input:checked) {
+    border-color: var(--interface-accent);
+    background: rgba(11, 91, 115, 0.1);
+  }
+
+  [data-interface-variant="educational"] .educational-shell {
+    /* Capas 1-2: asset/overlay de Fase 9 (vacías por defecto). El resto es
+       la textura "papel/pergamino" de respaldo: trama sutil + un cálido
+       resplandor de "luz de lectura" en tonos verde profundo/dorado. */
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      linear-gradient(rgba(93, 64, 28, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(93, 64, 28, 0.05) 1px, transparent 1px),
+      radial-gradient(circle at 12% 4%, rgba(184, 134, 58, 0.16), transparent 26%),
+      radial-gradient(circle at 92% 14%, rgba(31, 92, 63, 0.14), transparent 26%),
+      linear-gradient(135deg, #f6efe0 0%, #f1e8d4 56%, #fbf6e9 100%);
+    background-size: cover, cover, 26px 26px, 26px 26px, auto, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  html.dark [data-interface-variant="educational"] .educational-shell {
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      linear-gradient(rgba(244, 236, 216, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(244, 236, 216, 0.035) 1px, transparent 1px),
+      radial-gradient(circle at 12% 4%, rgba(217, 166, 62, 0.1), transparent 26%),
+      radial-gradient(circle at 92% 14%, rgba(74, 157, 111, 0.12), transparent 26%),
+      linear-gradient(135deg, #10190f 0%, #142117 56%, #10190f 100%);
+    background-size: cover, cover, 26px 26px, 26px 26px, auto, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  [data-interface-variant="educational"] .educational-main {
+    background: transparent;
+  }
+
+  [data-interface-variant="educational"] .collaborator-sidebar {
+    border-color: var(--interface-border);
+    background: color-mix(in srgb, var(--interface-surface-strong) 94%, transparent);
+    color: var(--interface-text);
+    box-shadow: var(--interface-shadow);
+    backdrop-filter: blur(var(--interface-blur));
+    -webkit-backdrop-filter: blur(var(--interface-blur));
+  }
+
+  [data-interface-variant="educational"] .collaborator-sidebar a,
+  [data-interface-variant="educational"] .collaborator-sidebar button {
+    border-radius: 16px;
+  }
+
+  [data-interface-variant="educational"] .collaborator-sidebar p,
+  [data-interface-variant="educational"] .collaborator-sidebar span {
+    color: inherit;
+  }
+
+  [data-interface-variant="educational"] [data-dashboard-layout="learning"] {
+    color: var(--interface-text);
+  }
+
+  [data-interface-variant="educational"] [data-catalog-density="comfortable"] {
+    gap: 1.25rem;
+  }
+
+  [data-interface-variant="educational"] [role="group"] > button {
+    min-height: 2.65rem;
+    border-radius: 12px;
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    color: var(--interface-text-muted);
+    backdrop-filter: none;
+  }
+
+  [data-interface-variant="educational"] [role="group"] > button[aria-pressed="true"] {
+    color: var(--interface-text);
+    box-shadow: inset 0 -2px 0 var(--interface-accent);
+  }
+
+  [data-interface-variant="educational"] .lesson-view:has([data-lesson-variant="study"]) {
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 12% 0%, rgba(184, 134, 58, 0.14), transparent 27%),
+      linear-gradient(135deg, #f6efe0 0%, #f1e8d4 100%);
+    background-size: cover, cover, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  html.dark [data-interface-variant="educational"] .lesson-view:has([data-lesson-variant="study"]) {
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 12% 0%, rgba(217, 166, 62, 0.1), transparent 27%),
+      linear-gradient(135deg, #10190f 0%, #142117 100%);
+    background-size: cover, cover, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  [data-interface-variant="educational"] .lesson-view:has([data-lesson-variant="study"])::before,
+  [data-interface-variant="educational"] .lesson-view:has([data-lesson-variant="study"])::after {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  [data-interface-variant="educational"] [data-lesson-variant="study"] aside {
+    border-color: var(--interface-hero-border);
+    background: var(--interface-surface-strong);
+    box-shadow: var(--interface-shadow);
+  }
+
+  [data-interface-variant="educational"] .quiz-view:has([data-quiz-variant="academic"]) {
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 85% 6%, rgba(184, 134, 58, 0.14), transparent 25%),
+      linear-gradient(135deg, #f6efe0 0%, #f1e8d4 100%);
+    background-size: cover, cover, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  html.dark [data-interface-variant="educational"] .quiz-view:has([data-quiz-variant="academic"]) {
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 85% 6%, rgba(217, 166, 62, 0.1), transparent 25%),
+      linear-gradient(135deg, #10190f 0%, #142117 100%);
+    background-size: cover, cover, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  [data-interface-variant="educational"] .quiz-view:has([data-quiz-variant="academic"])::before,
+  [data-interface-variant="educational"] .quiz-view:has([data-quiz-variant="academic"])::after {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  [data-interface-variant="educational"] [data-quiz-variant="academic"] {
+    border-color: var(--interface-border);
+    border-radius: var(--interface-radius);
+    background: var(--interface-surface-strong);
+    color: var(--interface-text);
+    box-shadow: var(--interface-shadow);
+    backdrop-filter: none;
+  }
+
+  [data-interface-variant="educational"] [data-quiz-variant="academic"] h1,
+  [data-interface-variant="educational"] [data-quiz-variant="academic"] p,
+  [data-interface-variant="educational"] [data-quiz-variant="academic"] label,
+  [data-interface-variant="educational"] [data-quiz-variant="academic"] header span {
+    color: var(--interface-text);
+  }
+
+  [data-interface-variant="educational"] [data-quiz-variant="academic"] header p,
+  [data-interface-variant="educational"] [data-quiz-variant="academic"] label span:last-child {
+    color: var(--interface-text-muted);
+  }
+
+  [data-interface-variant="educational"] [data-quiz-variant="academic"] label {
+    min-height: 4rem;
+    border-color: var(--interface-border);
+    background: rgba(31, 92, 63, 0.045);
+  }
+
+  [data-interface-variant="educational"] [data-quiz-variant="academic"] label:has(input:checked) {
+    border-color: var(--interface-accent);
+    background: rgba(31, 92, 63, 0.11);
+  }
+
+  [data-interface-variant="gamified"] .gamified-shell {
+    /* Capas 1-2: asset/overlay de Fase 9 (vacías por defecto; no se toca el
+       diseño de gamified en esta fase, solo se prepara el enganche). */
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 10% 0%, rgba(8, 145, 178, 0.14), transparent 26%),
+      radial-gradient(circle at 90% 100%, rgba(79, 138, 0, 0.12), transparent 28%),
+      linear-gradient(135deg, #eef3f9 0%, #e7eef8 55%, #f4f8fb 100%);
+    background-size: cover, cover, auto, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  html.dark [data-interface-variant="gamified"] .gamified-shell {
+    background-image:
+      var(--interface-bg-image, none),
+      var(--interface-overlay, none),
+      radial-gradient(circle at 10% 0%, rgba(103, 232, 249, 0.14), transparent 30%),
+      radial-gradient(circle at 90% 100%, rgba(145, 220, 0, 0.1), transparent 30%),
+      linear-gradient(135deg, #050b16 0%, #08111f 55%, #0b1830 100%);
+    background-size: cover, cover, auto, auto, auto;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  /* Fondo decorativo opcional del hero destacado (asset "heroBackground",
+     Fase 9). Se aplica como capa extra sobre el color de superficie que ya
+     trae cada tarjeta, así que sin asset asignado no cambia nada. */
+  [data-interface-variant="business"] .business-hero,
+  [data-interface-variant="educational"] .educational-hero,
+  [data-interface-variant="gamified"] .gamified-hero {
+    background-image: var(--interface-bg-image, none), var(--interface-overlay, none);
+    background-size: cover, cover;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+  }
+
+  [data-interface-variant="gamified"] [data-dashboard-layout="mission"] {
+    color: var(--interface-text);
+  }
+
+  [data-interface-variant="gamified"] [data-catalog-density="comfortable"] {
+    gap: 1.25rem;
+  }
+
+  [data-interface-variant="gamified"] [data-catalog-card="game"] {
+    scroll-snap-align: start;
+  }
+
+  /* Nav activa con "feedback fuerte": halo cyan sobre el enlace en curso,
+     tanto en el dock inferior como en cualquier sidebar reutilizada. */
+  [data-interface-variant="gamified"] a[aria-current="page"] {
+    box-shadow:
+      0 0 0 1px var(--interface-accent-secondary),
+      0 0 18px rgba(103, 232, 249, 0.4);
+  }
+
+  [data-interface-variant="gamified"] .lesson-view:has([data-lesson-variant="mission"]) {
+    background:
+      radial-gradient(circle at 12% 0%, rgba(8, 145, 178, 0.1), transparent 26%),
+      linear-gradient(135deg, #eef3f9 0%, #e7eef8 100%);
+  }
+
+  html.dark [data-interface-variant="gamified"] .lesson-view:has([data-lesson-variant="mission"]) {
+    background:
+      radial-gradient(circle at 12% 0%, rgba(103, 232, 249, 0.12), transparent 26%),
+      linear-gradient(135deg, #050b16 0%, #08111f 100%);
+  }
+
+  [data-interface-variant="gamified"] .lesson-view:has([data-lesson-variant="mission"])::before,
+  [data-interface-variant="gamified"] .lesson-view:has([data-lesson-variant="mission"])::after {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  [data-interface-variant="gamified"] .quiz-view:has([data-quiz-variant="challenge"]) {
+    background:
+      radial-gradient(circle at 85% 6%, rgba(8, 145, 178, 0.1), transparent 26%),
+      linear-gradient(135deg, #eef3f9 0%, #e7eef8 100%);
+  }
+
+  html.dark [data-interface-variant="gamified"] .quiz-view:has([data-quiz-variant="challenge"]) {
+    background:
+      radial-gradient(circle at 85% 6%, rgba(103, 232, 249, 0.12), transparent 26%),
+      linear-gradient(135deg, #050b16 0%, #08111f 100%);
+  }
+
+  [data-interface-variant="gamified"] .quiz-view:has([data-quiz-variant="challenge"])::before,
+  [data-interface-variant="gamified"] .quiz-view:has([data-quiz-variant="challenge"])::after {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
   }
 
   .roadmap-section {

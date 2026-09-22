@@ -28,8 +28,11 @@ import { cn } from "@/lib/utils";
 import { IconoMarcaFormacion } from "@/components/layout/icono-marca-formacion";
 import { LogoMarcaFormacion } from "@/components/layout/logo-marca-formacion";
 import { DashboardParticles } from "@/components/shared/dashboard-particles";
+import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { NAVEGACION_POR_ROL } from "@/config/navegacion";
+import { estiloFondoInterfaz } from "@/lib/interface-assets";
 import { cerrarSesion } from "@backend/server/actions/auth";
+import { resolveInterfaceAsset, type InterfaceVariantConfig } from "@backend/config/interface-variants";
 
 type TemaSidebar = "colaborador" | "superadmin";
 type OrientacionNav = "vertical" | "bottom";
@@ -49,6 +52,7 @@ interface ShellPanelLateralProps {
   items: ItemNavLateral[];
   subtitulo: string;
   tema: TemaSidebar;
+  interfaceConfig?: InterfaceVariantConfig;
 }
 
 const TEMAS_SIDEBAR = {
@@ -431,6 +435,7 @@ function ShellPanelLateral({
   items,
   subtitulo,
   tema,
+  interfaceConfig,
 }: ShellPanelLateralProps) {
   const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -439,6 +444,11 @@ function ShellPanelLateral({
   const capsulaRef = useRef<HTMLDivElement>(null);
   const ocultarTimeoutRef = useRef<number | null>(null);
   const esDashboardColaborador = tema === "colaborador" && pathname === "/mis-cursos";
+  const esBusiness = interfaceConfig?.id === "business";
+  const esEducational = interfaceConfig?.id === "educational";
+  const esGamified = interfaceConfig?.id === "gamified";
+  const esShellLateral = esBusiness || esEducational;
+  const esDashboardInmersivo = esDashboardColaborador && !esShellLateral;
 
   const cancelarOcultamientoDock = useCallback(() => {
     if (ocultarTimeoutRef.current !== null) {
@@ -490,47 +500,23 @@ function ShellPanelLateral({
   useEffect(() => () => cancelarOcultamientoDock(), [cancelarOcultamientoDock]);
 
   return (
-    <div className="flex min-h-dvh w-full bg-[#061120]">
-      <aside className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center overflow-visible px-3 pb-2 sm:px-4">
-        <div
-          ref={capsulaRef}
-          onMouseEnter={mantenerDockActivo}
-          onMouseLeave={manejarSalidaCapsula}
-          onFocusCapture={mantenerDockActivo}
-          onBlurCapture={manejarBlurCapsula}
-          onPointerDown={mantenerDockActivo}
+    <div
+      data-shell-variant={interfaceConfig?.dashboard.layout ?? "immersive"}
+      style={estiloFondoInterfaz(interfaceConfig?.id, "dashboardBackground")}
+      className={cn(
+        "flex min-h-dvh w-full bg-[#061120]",
+        esBusiness && "business-shell",
+        esEducational && "educational-shell",
+        esGamified && "gamified-shell",
+      )}
+    >
+      {esShellLateral ? (
+        <aside
           className={cn(
-            "pointer-events-auto flex flex-col items-center transition-[opacity,transform] duration-300 ease-out motion-reduce:duration-0",
-            dockOpen
-              ? "translate-y-0 opacity-100"
-              : "translate-y-[calc(100%-1.75rem)] opacity-95",
+            "fixed inset-y-0 left-0 z-40 hidden p-3 transition-[width] duration-200 lg:block",
+            isExpanded ? "w-[224px]" : "w-[76px] hover:w-[224px]",
           )}
         >
-          <button
-            type="button"
-            aria-label={dockOpen ? "Ocultar navegacion" : "Mostrar navegacion"}
-            aria-expanded={dockOpen}
-            onPointerDown={(evento) => evento.stopPropagation()}
-            onClick={(evento) => {
-              evento.stopPropagation();
-              if (dockOpen) {
-                ocultarDock();
-                return;
-              }
-              mantenerDockActivo();
-            }}
-            className={cn(
-              "-mb-1 flex h-6 min-w-12 items-center justify-center rounded-full px-3 text-white/85",
-              "transition-[color,transform] duration-200 hover:-translate-y-0.5 hover:text-white",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
-            )}
-          >
-            {dockOpen ? (
-              <ChevronDown className="size-4" aria-hidden="true" />
-            ) : (
-              <ChevronUp className="size-4" aria-hidden="true" />
-            )}
-          </button>
           <BarraLateral
             pathname={pathname}
             isExpanded={isExpanded}
@@ -539,12 +525,64 @@ function ShellPanelLateral({
             subtitulo={subtitulo}
             tema={tema}
             onToggle={() => setIsExpanded((value) => !value)}
-            orientacion="bottom"
           />
-        </div>
-      </aside>
+        </aside>
+      ) : (
+        <aside className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center overflow-visible px-3 pb-2 sm:px-4">
+          <div
+            ref={capsulaRef}
+            onMouseEnter={mantenerDockActivo}
+            onMouseLeave={manejarSalidaCapsula}
+            onFocusCapture={mantenerDockActivo}
+            onBlurCapture={manejarBlurCapsula}
+            onPointerDown={mantenerDockActivo}
+            className={cn(
+              "pointer-events-auto flex flex-col items-center transition-[opacity,transform] duration-300 ease-out motion-reduce:duration-0",
+              dockOpen
+                ? "translate-y-0 opacity-100"
+                : "translate-y-[calc(100%-1.75rem)] opacity-95",
+            )}
+          >
+            <button
+              type="button"
+              aria-label={dockOpen ? "Ocultar navegacion" : "Mostrar navegacion"}
+              aria-expanded={dockOpen}
+              onPointerDown={(evento) => evento.stopPropagation()}
+              onClick={(evento) => {
+                evento.stopPropagation();
+                if (dockOpen) {
+                  ocultarDock();
+                  return;
+                }
+                mantenerDockActivo();
+              }}
+              className={cn(
+                "-mb-1 flex h-6 min-w-12 items-center justify-center rounded-full px-3 text-white/85",
+                "transition-[color,transform] duration-200 hover:-translate-y-0.5 hover:text-white",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+              )}
+            >
+              {dockOpen ? (
+                <ChevronDown className="size-4" aria-hidden="true" />
+              ) : (
+                <ChevronUp className="size-4" aria-hidden="true" />
+              )}
+            </button>
+            <BarraLateral
+              pathname={pathname}
+              isExpanded={isExpanded}
+              nombre={nombre}
+              items={items}
+              subtitulo={subtitulo}
+              tema={tema}
+              onToggle={() => setIsExpanded((value) => !value)}
+              orientacion="bottom"
+            />
+          </div>
+        </aside>
+      )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className={cn("flex min-w-0 flex-1 flex-col", esShellLateral && "lg:pl-[76px]")}>
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden">
           <div className="flex items-center gap-2">
             <LogoMarcaFormacion />
@@ -592,21 +630,32 @@ function ShellPanelLateral({
         )}
 
         <main
+          data-dashboard-layout={interfaceConfig?.dashboard.layout}
           className={cn(
             "relative min-w-0 flex-1 overflow-x-clip bg-[#061120]",
-            esDashboardColaborador
+            esDashboardInmersivo
               ? [
                   "isolate min-h-dvh",
                   "p-4 sm:p-5 lg:p-7 lg:pb-14 xl:p-8 xl:pb-14",
                   "before:pointer-events-none before:absolute before:inset-0 before:z-20 before:bg-[linear-gradient(90deg,rgba(6,17,32,0.78)_0%,rgba(6,17,32,0.42)_34%,rgba(6,17,32,0.08)_62%,rgba(6,17,32,0.22)_100%)]",
                   "after:pointer-events-none after:absolute after:inset-0 after:z-20 after:bg-[linear-gradient(180deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.02)_28%,rgba(6,17,32,0.28)_100%)]",
                 ]
-              : "p-5 pb-14 sm:p-6 lg:p-8 xl:p-10",
+              : esShellLateral
+                ? cn(
+                    "min-h-dvh p-4 pb-10 sm:p-5 md:p-6 lg:p-7 xl:p-8",
+                    esBusiness && "business-main",
+                    esEducational && "educational-main",
+                  )
+                : "p-5 pb-14 sm:p-6 lg:p-8 xl:p-10",
           )}
         >
-          {esDashboardColaborador && (
+          {esDashboardInmersivo && (
             <video
-              src="/images/Dashboard_fondo.mp4"
+              src={resolveInterfaceAsset({
+                variant: interfaceConfig?.id,
+                asset: "dashboardBackground",
+                fallback: "/images/Dashboard_fondo.mp4",
+              })}
               autoPlay
               loop
               muted
@@ -615,8 +664,17 @@ function ShellPanelLateral({
               className="pointer-events-none absolute inset-0 z-0 size-full object-cover object-left"
             />
           )}
-          {esDashboardColaborador && <DashboardParticles preset="fireflies" accent="#74CFC4" />}
-          <div className={cn(esDashboardColaborador && "relative z-30")}>{children}</div>
+          {esDashboardInmersivo && (
+            <DashboardParticles preset="fireflies" accent="#74CFC4" />
+          )}
+          <div
+            className={cn(
+              esDashboardColaborador && "relative z-30",
+              esShellLateral && "mx-auto w-full max-w-[var(--interface-content-width)]",
+            )}
+          >
+            {children}
+          </div>
         </main>
       </div>
     </div>
@@ -630,15 +688,26 @@ export function ShellPanelColaborador({
   nombre: string | null;
   children: React.ReactNode;
 }) {
+  const { variant, config } = useInterfaceVariant();
+
   return (
-    <ShellPanelLateral
-      nombre={nombre}
-      items={ITEMS_NAV_COLABORADOR}
-      subtitulo="Colaborador"
-      tema="colaborador"
+    <div
+      data-interface-variant={variant}
+      data-interface-density={config.density}
+      data-navigation-style={config.navigation.style}
+      data-navigation-position={config.navigation.position}
+      className="interface-variant-root"
     >
-      {children}
-    </ShellPanelLateral>
+      <ShellPanelLateral
+        nombre={nombre}
+        items={ITEMS_NAV_COLABORADOR}
+        subtitulo="Colaborador"
+        tema="colaborador"
+        interfaceConfig={config}
+      >
+        {children}
+      </ShellPanelLateral>
+    </div>
   );
 }
 

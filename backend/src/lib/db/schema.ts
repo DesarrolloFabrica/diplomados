@@ -11,6 +11,7 @@ import {
   integer,
   numeric,
   bigint,
+  varchar,
   jsonb,
   timestamp,
   unique,
@@ -92,6 +93,10 @@ export const profiles = pgTable("profiles", {
   cargo: text("cargo"),
   area: text("area"),
   avatarUrl: text("avatar_url"),
+  interfaceVariant: varchar("interface_variant", { length: 32 }),
+  interfaceOnboardingCompletedAt: timestamp("interface_onboarding_completed_at", {
+    withTimezone: true,
+  }),
   activo: boolean("activo").notNull().default(true),
   ultimoAcceso: timestamp("ultimo_acceso", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

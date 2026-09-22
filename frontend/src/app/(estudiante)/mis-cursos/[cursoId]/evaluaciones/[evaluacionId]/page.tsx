@@ -5,6 +5,8 @@ import { requerirSesion } from "@backend/lib/auth/sesion";
 import { obtenerEvaluacion } from "@backend/server/queries/evaluaciones";
 import { obtenerInscripcion } from "@backend/server/queries/mis-cursos";
 import { listarIntentos } from "@backend/server/queries/evaluacion-colaborador";
+import { obtenerPreferenciaInterfazUsuario } from "@backend/server/queries/preferencia-interfaz";
+import { estiloFondoInterfaz } from "@/lib/interface-assets";
 import { PresentarEvaluacion } from "./presentar-evaluacion";
 
 interface EvaluacionColaboradorPageProps {
@@ -23,13 +25,27 @@ export default async function EvaluacionColaboradorPage({
   const inscripcion = await obtenerInscripcion(sesion.id, cursoId);
   if (!inscripcion) notFound();
 
-  const intentos = await listarIntentos(sesion.id, evaluacionId);
+  const [intentos, preferenciaInterfaz] = await Promise.all([
+    listarIntentos(sesion.id, evaluacionId),
+    obtenerPreferenciaInterfazUsuario(sesion.id),
+  ]);
 
   const intentoEnCurso = intentos.find((i) => i.estado === "en_curso");
   const finalizados = intentos.filter((i) => i.estado === "finalizado");
 
   return (
-    <div className="quiz-view relative isolate -mx-5 -mt-5 -mb-14 min-h-[calc(100dvh+3.5rem)] pb-32 sm:-mx-6 sm:-mt-6 sm:-mb-14 lg:-mx-8 lg:-mt-8 lg:-mb-14 xl:-mx-10 xl:-mt-10 xl:-mb-14">
+    <div
+      className={
+        preferenciaInterfaz?.interfaceVariant === "creative"
+          ? "quiz-view relative isolate -mx-5 -mt-5 -mb-14 min-h-[calc(100dvh+3.5rem)] pb-32 sm:-mx-6 sm:-mt-6 sm:-mb-14 lg:-mx-8 lg:-mt-8 lg:-mb-14 xl:-mx-10 xl:-mt-10 xl:-mb-14"
+          : "quiz-view interface-quiz-bg relative isolate -mx-5 -mt-5 -mb-14 min-h-[calc(100dvh+3.5rem)] pb-32 sm:-mx-6 sm:-mt-6 sm:-mb-14 lg:-mx-8 lg:-mt-8 lg:-mb-14 xl:-mx-10 xl:-mt-10 xl:-mb-14"
+      }
+      style={
+        preferenciaInterfaz?.interfaceVariant === "creative"
+          ? undefined
+          : estiloFondoInterfaz(preferenciaInterfaz?.interfaceVariant, "quizBackground")
+      }
+    >
       <div className="mx-auto w-full max-w-[960px] space-y-4 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
         <Link
           href={`/mis-cursos/${cursoId}?roadmapFocus=${encodeURIComponent(evaluacionId)}`}

@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, LockKeyhole, PartyPopper } from "lucide-react";
 import { CLASE_PANEL_GLASS_LEGIBLE } from "@/config/paneles-glass";
+import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import {
   IconoTipoContenido,
   MiniaturaContenido,
@@ -13,6 +16,60 @@ interface ProximosContenidosProps {
   proximos: ProximosContenidosResultado;
 }
 
+function ContenidoEducational({
+  item,
+  portadaCursoUrl,
+  esEvaluacion,
+  etiquetaContenido,
+}: {
+  item: ItemRutaContenido;
+  portadaCursoUrl: string | null;
+  esEvaluacion: boolean;
+  etiquetaContenido: string;
+}) {
+  return (
+    <>
+      <MiniaturaContenido
+        portadaUrl={item.portadaUrl}
+        portadaCursoUrl={esEvaluacion ? null : portadaCursoUrl}
+        titulo={item.titulo}
+        tipo={item.tipo}
+        categoriasContenido={item.categoriasContenido}
+        variante="compacta"
+        className="size-14 shrink-0 rounded-xl"
+      />
+      <div className="min-w-0">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-[var(--interface-accent-secondary)]">
+          <IconoTipoContenido
+            tipo={item.tipo}
+            categoriasContenido={item.categoriasContenido}
+            className="size-3.5"
+          />
+          {etiquetaContenido}
+          {item.bloqueado && (
+            <span className="inline-flex items-center gap-1 text-[var(--interface-text-muted)]">
+              <LockKeyhole className="size-3.5" aria-hidden="true" />
+              Bloqueado
+            </span>
+          )}
+        </span>
+        <h3 className="mt-0.5 truncate text-base font-bold text-[var(--interface-text)]">
+          {item.titulo}
+        </h3>
+        <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-[var(--interface-text-muted)]">
+          <span>{item.duracionTexto ? item.duracionTexto : `Módulo ${item.moduloIndice + 1}`}</span>
+          {item.duracionTexto && (
+            <>
+              <span aria-hidden="true">&middot;</span>
+              <span>{etiquetaContenido}</span>
+            </>
+          )}
+        </p>
+      </div>
+    </>
+  );
+}
+
 function TarjetaPrincipal({
   item,
   portadaCursoUrl,
@@ -20,9 +77,68 @@ function TarjetaPrincipal({
   item: ItemRutaContenido;
   portadaCursoUrl: string | null;
 }) {
+  const { config } = useInterfaceVariant();
+  const esEducational = config.id === "educational";
+  const esGamified = config.id === "gamified";
   const esEvaluacion = item.tipo === "evaluacion";
-  const etiquetaSeccion = esEvaluacion ? "Siguiente desafio" : "Siguiente clase";
+  const etiquetaSeccion = esEvaluacion
+    ? esEducational
+      ? "Siguiente actividad"
+      : "Siguiente desafio"
+    : esGamified
+      ? "Siguiente mision"
+      : "Siguiente clase";
   const etiquetaContenido = esEvaluacion ? "Evaluacion" : item.etiquetaTipo;
+  const etiquetaCta = item.bloqueado
+    ? null
+    : esEvaluacion
+      ? esGamified
+        ? "Iniciar desafio"
+        : "Iniciar evaluación"
+      : esGamified
+        ? "Continuar mision"
+        : "Continuar";
+
+  if (esEducational || esGamified) {
+    return (
+      <div className="space-y-3">
+        <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[var(--interface-text-muted)]">
+          {etiquetaSeccion.toUpperCase()}
+        </p>
+
+        {item.bloqueado ? (
+          <div
+            className="flex items-center gap-4 rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface)] px-5 py-4 opacity-75"
+            aria-label={`${etiquetaSeccion}: ${item.titulo}`}
+          >
+            <ContenidoEducational item={item} portadaCursoUrl={portadaCursoUrl} esEvaluacion={esEvaluacion} etiquetaContenido={etiquetaContenido} />
+          </div>
+        ) : (
+          <Link
+            href={item.href}
+            aria-label={`${etiquetaSeccion}: ${item.titulo}`}
+            className={cn(
+              "group flex items-center gap-4 rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] px-5 py-4 shadow-[var(--interface-shadow)] transition-colors hover:border-[var(--interface-accent-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] focus-visible:ring-offset-2",
+              esGamified && "hover:shadow-[0_0_24px_rgba(103,232,249,0.25)]",
+            )}
+          >
+            <ContenidoEducational item={item} portadaCursoUrl={portadaCursoUrl} esEvaluacion={esEvaluacion} etiquetaContenido={etiquetaContenido} />
+            <span
+              className={cn(
+                "ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+                esEvaluacion
+                  ? "bg-amber-500/90 text-white group-hover:bg-amber-500"
+                  : "bg-[var(--interface-accent)] text-white group-hover:bg-[var(--interface-accent-secondary)]",
+              )}
+            >
+              {etiquetaCta}
+              <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
+            </span>
+          </Link>
+        )}
+      </div>
+    );
+  }
 
   const contenido = (
     <>
@@ -148,17 +264,48 @@ export function ProximosContenidos({
   portadaCursoUrl,
   proximos,
 }: ProximosContenidosProps) {
+  const { config } = useInterfaceVariant();
+  const esEducational = config.id === "educational";
+  const esGamified = config.id === "gamified";
   const { principal, cursoCompletado } = proximos;
 
   if (cursoCompletado) {
     return (
-      <section className="mt-6 border-t border-white/20 pt-5">
-        <div className={cn("rounded-[24px] px-5 py-6", CLASE_PANEL_GLASS_LEGIBLE)}>
+      <section
+        className={cn(
+          "mt-6 pt-5",
+          esEducational || esGamified
+            ? "border-t border-[var(--interface-border)]"
+            : "border-t border-white/20",
+        )}
+      >
+        <div
+          className={cn(
+            "rounded-[24px] px-5 py-6",
+            esEducational || esGamified
+              ? "border border-[var(--interface-border)] bg-[var(--interface-surface-strong)]"
+              : CLASE_PANEL_GLASS_LEGIBLE,
+          )}
+        >
           <div className="flex items-start gap-3">
             <PartyPopper className="mt-0.5 size-5 shrink-0 text-emerald-600" aria-hidden="true" />
             <div>
-              <h2 className="text-lg font-bold text-slate-950">Has completado el curso</h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <h2
+                className={cn(
+                  "text-lg font-bold",
+                  esEducational || esGamified ? "text-[var(--interface-text)]" : "text-slate-950",
+                )}
+              >
+                Has completado el curso
+              </h2>
+              <p
+                className={cn(
+                  "mt-1 text-sm",
+                  esEducational || esGamified
+                    ? "text-[var(--interface-text-muted)]"
+                    : "text-slate-600",
+                )}
+              >
                 No hay mas contenidos por revisar en este recorrido.
               </p>
             </div>
@@ -171,7 +318,14 @@ export function ProximosContenidos({
   if (!principal) return null;
 
   return (
-    <section className="mt-8 border-t border-white/20 pt-6">
+    <section
+      className={cn(
+        "mt-8 pt-6",
+        esEducational || esGamified
+          ? "border-t border-[var(--interface-border)]"
+          : "border-t border-white/20",
+      )}
+    >
       <TarjetaPrincipal item={principal} portadaCursoUrl={portadaCursoUrl} />
     </section>
   );
