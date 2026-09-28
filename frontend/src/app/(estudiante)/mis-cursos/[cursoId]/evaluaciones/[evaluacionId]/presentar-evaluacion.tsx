@@ -47,6 +47,8 @@ export function PresentarEvaluacion({
   const { config } = useInterfaceVariant();
   const esEducational = config.id === "educational";
   const esGamified = config.id === "gamified";
+  const esBusiness = config.id === "business";
+  const esTemaPropio = esEducational || esGamified || esBusiness;
   const [intentoId, setIntentoId] = useState(intentoInicial);
   const [preguntas, setPreguntas] = useState<PreguntaPresentacion[] | null>(null);
   const [respuestas, setRespuestas] = useState<Record<string, string>>({});
@@ -140,21 +142,21 @@ export function PresentarEvaluacion({
         data-quiz-variant={config.quiz.variant}
         className={cn(
           "px-5 py-10 text-center sm:px-8",
-          esEducational
-            ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[var(--interface-shadow)]"
+          esTemaPropio
+            ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)]"
             : "rounded-lg border border-white/15 bg-[#061120]/72 text-white shadow-[0_20px_60px_rgba(2,10,24,0.34)] backdrop-blur-md",
         )}
       >
         <div className="flex flex-col items-center gap-3">
           {resultado.aprobado ? (
             <CheckCircle2
-              className={cn("h-10 w-10", esEducational ? "text-emerald-500" : "text-[#91DC00]")}
+              className={cn("h-10 w-10", esTemaPropio ? "text-[var(--interface-accent)]" : "text-[#91DC00]")}
             />
           ) : (
-            <XCircle className={cn("h-10 w-10", esEducational ? "text-red-500" : "text-red-300")} />
+            <XCircle className={cn("h-10 w-10", esTemaPropio ? "text-red-500" : "text-red-300")} />
           )}
           <p className="text-3xl font-bold">{Math.round(resultado.puntaje)}%</p>
-          <p className={esEducational ? "text-[var(--interface-text-muted)]" : "text-white/70"}>
+          <p className={esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/70"}>
             {resultado.aprobado
               ? "Aprobaste esta evaluacion."
               : `No alcanzaste el minimo de ${puntajeMinimo}% para aprobar.`}
@@ -164,8 +166,8 @@ export function PresentarEvaluacion({
             onClick={volverAlCursoDesdeResultado}
             className={cn(
               "mt-4 font-bold",
-              esEducational
-                ? "bg-[var(--interface-accent)] text-white hover:bg-[var(--interface-accent-secondary)]"
+              esTemaPropio
+                ? "bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)] hover:bg-[var(--interface-accent-secondary)]"
                 : "bg-[#91DC00] text-[#061120] hover:bg-[#a7eb2f]",
             )}
           >
@@ -183,15 +185,15 @@ export function PresentarEvaluacion({
           data-quiz-variant={config.quiz.variant}
           className={cn(
             "px-5 py-10 text-center",
-            esEducational
-              ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] shadow-[var(--interface-shadow)]"
+            esTemaPropio
+              ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] [box-shadow:var(--interface-shadow)]"
               : "rounded-lg border border-white/15 bg-[#061120]/70 text-white/80 shadow-[0_20px_60px_rgba(2,10,24,0.3)] backdrop-blur-md",
           )}
         >
           <p
             className={cn(
               "text-xs font-semibold uppercase",
-              esEducational ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/65",
+              esTemaPropio ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/65",
             )}
           >
             {esGamified ? "Desafio" : "Evaluacion"}
@@ -199,7 +201,7 @@ export function PresentarEvaluacion({
           <h1
             className={cn(
               "mt-2 font-display text-2xl font-bold",
-              esEducational ? "text-[var(--interface-text)]" : "text-white",
+              esTemaPropio ? "text-[var(--interface-text)]" : "text-white",
             )}
           >
             {titulo}
@@ -216,15 +218,15 @@ export function PresentarEvaluacion({
         data-quiz-variant={config.quiz.variant}
         className={cn(
           "px-5 py-8 sm:px-8 sm:py-10",
-          esEducational
-            ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[var(--interface-shadow)]"
+          esTemaPropio
+            ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)]"
             : "rounded-lg border border-white/15 bg-[#061120]/70 text-white shadow-[0_20px_60px_rgba(2,10,24,0.3)] backdrop-blur-md",
         )}
       >
         <p
           className={cn(
             "text-xs font-semibold uppercase",
-            esEducational ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/65",
+            esTemaPropio ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/65",
           )}
         >
           {esGamified ? "Desafio" : "Evaluacion"}
@@ -236,13 +238,13 @@ export function PresentarEvaluacion({
           <p
             className={cn(
               "mt-3 max-w-2xl text-sm leading-relaxed",
-              esEducational ? "text-[var(--interface-text-muted)]" : "text-white/68",
+              esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/68",
             )}
           >
             {descripcion}
           </p>
         )}
-        <p className={cn("mt-7 text-sm", esEducational ? "text-[var(--interface-text-muted)]" : "text-white/72")}>
+        <p className={cn("mt-7 text-sm", esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/72")}>
           Intentos usados: {intentosUsados}/{maxIntentos}. Necesitas{" "}
           {puntajeMinimo}% para aprobar.
         </p>
@@ -251,8 +253,8 @@ export function PresentarEvaluacion({
           disabled={enviando}
           className={cn(
             "mt-4 font-bold",
-            esEducational
-              ? "bg-[var(--interface-accent)] text-white hover:bg-[var(--interface-accent-secondary)]"
+            esTemaPropio
+              ? "bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)] hover:bg-[var(--interface-accent-secondary)]"
               : "bg-[#91DC00] text-[#061120] hover:bg-[#a7eb2f]",
           )}
         >
@@ -268,7 +270,7 @@ export function PresentarEvaluacion({
       <div
         className={cn(
           "flex items-center justify-center py-16",
-          esEducational
+          esTemaPropio
             ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)]"
             : "rounded-lg border border-white/15 bg-[#061120]/65 text-white/78 backdrop-blur-md",
         )}
@@ -284,7 +286,7 @@ export function PresentarEvaluacion({
       <div
         className={cn(
           "px-5 py-12 text-center",
-          esEducational
+          esTemaPropio
             ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)]"
             : "rounded-lg border border-white/15 bg-[#061120]/70 text-white/75 backdrop-blur-md",
         )}
@@ -305,8 +307,8 @@ export function PresentarEvaluacion({
       data-quiz-variant={config.quiz.variant}
       className={cn(
         "overflow-hidden p-4 sm:p-7 lg:p-8",
-        esEducational
-          ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[var(--interface-shadow)]"
+        esTemaPropio
+          ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)]"
           : "rounded-lg border border-white/15 bg-[#061120]/72 text-white shadow-[0_24px_70px_rgba(2,10,24,0.38)] backdrop-blur-md",
       )}
     >
@@ -321,7 +323,7 @@ export function PresentarEvaluacion({
             <p
               className={cn(
                 "text-xs font-semibold",
-                esEducational ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/70",
+                esTemaPropio ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/70",
               )}
             >
               Pregunta {preguntaActual + 1} de {preguntas.length}
@@ -329,7 +331,7 @@ export function PresentarEvaluacion({
             <p
               className={cn(
                 "mt-1 text-[11px] font-medium",
-                esEducational ? "text-[var(--interface-text-muted)]" : "text-white/48",
+                esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/48",
               )}
             >
               {respondidas} de {preguntas.length} respondidas
@@ -338,7 +340,7 @@ export function PresentarEvaluacion({
           <p
             className={cn(
               "max-w-[50%] truncate text-right text-xs font-semibold",
-              esEducational ? "text-[var(--interface-text-muted)]" : "text-white/60",
+              esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/60",
             )}
           >
             {titulo}
@@ -348,7 +350,7 @@ export function PresentarEvaluacion({
         <div
           className={cn(
             "mt-4 flex w-full gap-1.5 overflow-x-auto pb-2 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:rounded-full",
-            esEducational
+            esTemaPropio
               ? "[&::-webkit-scrollbar-thumb]:bg-[var(--interface-border)]"
               : "[&::-webkit-scrollbar-thumb]:bg-white/25",
           )}
@@ -369,7 +371,7 @@ export function PresentarEvaluacion({
                 aria-current={actual ? "step" : undefined}
                 className={cn(
                   "min-w-6 flex-1 rounded-full border border-transparent transition-all duration-200",
-                  esEducational
+                  esTemaPropio
                     ? cn(
                         "h-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]",
                         actual
@@ -405,10 +407,10 @@ export function PresentarEvaluacion({
         <h1
           className={cn(
             "max-w-3xl font-display text-xl font-bold leading-snug sm:text-2xl",
-            esEducational ? "text-[var(--interface-text)]" : "text-white",
+            esTemaPropio ? "text-[var(--interface-text)]" : "text-white",
           )}
         >
-          <span className={esEducational ? "mr-2 text-[var(--interface-accent-secondary)]" : "mr-2 text-[#a7eb2f]"}>
+          <span className={esTemaPropio ? "mr-2 text-[var(--interface-accent-secondary)]" : "mr-2 text-[#a7eb2f]"}>
             {preguntaActual + 1}.
           </span>
           {pregunta.enunciado}
@@ -428,7 +430,7 @@ export function PresentarEvaluacion({
                 className={cn(
                   "group flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border px-3 py-3 text-sm transition-all duration-200 sm:gap-4 sm:px-4",
                   "motion-reduce:transform-none",
-                  esEducational
+                  esTemaPropio
                     ? cn(
                         "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--interface-accent-secondary)]",
                         seleccionada
@@ -443,12 +445,12 @@ export function PresentarEvaluacion({
                       ),
                 )}
                 style={
-                  esEducational && seleccionada
+                  esTemaPropio && seleccionada
                     ? {
                         backgroundColor:
                           "color-mix(in srgb, var(--interface-accent-secondary) 10%, transparent)",
                       }
-                    : esEducational
+                    : esTemaPropio
                       ? { backgroundColor: "var(--interface-surface)" }
                       : undefined
                 }
@@ -468,7 +470,7 @@ export function PresentarEvaluacion({
                 <span
                   className={cn(
                     "flex h-8 w-8 shrink-0 items-center justify-center rounded-md border text-xs font-bold transition-colors",
-                    esEducational
+                    esTemaPropio
                       ? seleccionada
                         ? "border-[var(--interface-accent-secondary)] bg-[var(--interface-accent-secondary)] text-white"
                         : "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] group-hover:border-[var(--interface-accent-secondary)] group-hover:text-[var(--interface-text)]"
@@ -489,7 +491,7 @@ export function PresentarEvaluacion({
       <footer
         className={cn(
           "mt-7 grid grid-cols-2 gap-3 pt-5 sm:mt-9",
-          esEducational ? "border-t border-[var(--interface-border)]" : "border-t border-white/12",
+          esTemaPropio ? "border-t border-[var(--interface-border)]" : "border-t border-white/12",
         )}
       >
         <button
@@ -498,7 +500,7 @@ export function PresentarEvaluacion({
           disabled={preguntaActual === 0 || enviando}
           className={cn(
             "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-35 max-sm:text-xs",
-            esEducational
+            esTemaPropio
               ? "border border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)] hover:bg-[var(--interface-surface-strong)] hover:text-[var(--interface-text)]"
               : "border border-white/20 bg-white/8 text-white/80 backdrop-blur-sm hover:bg-white/15 hover:text-white",
           )}
@@ -516,8 +518,8 @@ export function PresentarEvaluacion({
           disabled={enviando}
           className={cn(
             "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-center text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-60 max-sm:text-xs",
-            esEducational
-              ? "bg-[var(--interface-accent)] text-white hover:bg-[var(--interface-accent-secondary)]"
+            esTemaPropio
+              ? "bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)] hover:bg-[var(--interface-accent-secondary)]"
               : "bg-[#91DC00] text-[#061120] shadow-[0_8px_24px_rgba(145,220,0,0.18)] hover:bg-[#a7eb2f]",
           )}
         >

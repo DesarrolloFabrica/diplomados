@@ -16,7 +16,11 @@ interface ProximosContenidosProps {
   proximos: ProximosContenidosResultado;
 }
 
-function ContenidoEducational({
+// Fila compacta de "próximo contenido" con superficie sólida y tokens
+// --interface-*: la comparten business, educational y gamified (cada una
+// resuelve a su propia paleta vía CSS custom properties); solo creative
+// conserva la tarjeta cinematográfica original más abajo.
+function ContenidoCompacto({
   item,
   portadaCursoUrl,
   esEvaluacion,
@@ -80,14 +84,20 @@ function TarjetaPrincipal({
   const { config } = useInterfaceVariant();
   const esEducational = config.id === "educational";
   const esGamified = config.id === "gamified";
+  const esBusiness = config.id === "business";
+  const esTemaPropio = esEducational || esGamified || esBusiness;
   const esEvaluacion = item.tipo === "evaluacion";
-  const etiquetaSeccion = esEvaluacion
-    ? esEducational
-      ? "Siguiente actividad"
-      : "Siguiente desafio"
-    : esGamified
-      ? "Siguiente mision"
-      : "Siguiente clase";
+  const etiquetaSeccion = esBusiness
+    ? esEvaluacion
+      ? "Siguiente evaluación"
+      : "Siguiente contenido"
+    : esEvaluacion
+      ? esEducational
+        ? "Siguiente actividad"
+        : "Siguiente desafio"
+      : esGamified
+        ? "Siguiente mision"
+        : "Siguiente clase";
   const etiquetaContenido = esEvaluacion ? "Evaluacion" : item.etiquetaTipo;
   const etiquetaCta = item.bloqueado
     ? null
@@ -99,7 +109,7 @@ function TarjetaPrincipal({
         ? "Continuar mision"
         : "Continuar";
 
-  if (esEducational || esGamified) {
+  if (esTemaPropio) {
     return (
       <div className="space-y-3">
         <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[var(--interface-text-muted)]">
@@ -111,24 +121,24 @@ function TarjetaPrincipal({
             className="flex items-center gap-4 rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface)] px-5 py-4 opacity-75"
             aria-label={`${etiquetaSeccion}: ${item.titulo}`}
           >
-            <ContenidoEducational item={item} portadaCursoUrl={portadaCursoUrl} esEvaluacion={esEvaluacion} etiquetaContenido={etiquetaContenido} />
+            <ContenidoCompacto item={item} portadaCursoUrl={portadaCursoUrl} esEvaluacion={esEvaluacion} etiquetaContenido={etiquetaContenido} />
           </div>
         ) : (
           <Link
             href={item.href}
             aria-label={`${etiquetaSeccion}: ${item.titulo}`}
             className={cn(
-              "group flex items-center gap-4 rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] px-5 py-4 shadow-[var(--interface-shadow)] transition-colors hover:border-[var(--interface-accent-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] focus-visible:ring-offset-2",
+              "group flex items-center gap-4 rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] px-5 py-4 [box-shadow:var(--interface-shadow)] transition-colors hover:border-[var(--interface-accent-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] focus-visible:ring-offset-2",
               esGamified && "hover:shadow-[0_0_24px_rgba(103,232,249,0.25)]",
             )}
           >
-            <ContenidoEducational item={item} portadaCursoUrl={portadaCursoUrl} esEvaluacion={esEvaluacion} etiquetaContenido={etiquetaContenido} />
+            <ContenidoCompacto item={item} portadaCursoUrl={portadaCursoUrl} esEvaluacion={esEvaluacion} etiquetaContenido={etiquetaContenido} />
             <span
               className={cn(
                 "ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                 esEvaluacion
                   ? "bg-amber-500/90 text-white group-hover:bg-amber-500"
-                  : "bg-[var(--interface-accent)] text-white group-hover:bg-[var(--interface-accent-secondary)]",
+                  : "bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)] group-hover:bg-[var(--interface-accent-secondary)]",
               )}
             >
               {etiquetaCta}
@@ -267,6 +277,8 @@ export function ProximosContenidos({
   const { config } = useInterfaceVariant();
   const esEducational = config.id === "educational";
   const esGamified = config.id === "gamified";
+  const esBusiness = config.id === "business";
+  const esTemaPropio = esEducational || esGamified || esBusiness;
   const { principal, cursoCompletado } = proximos;
 
   if (cursoCompletado) {
@@ -274,7 +286,7 @@ export function ProximosContenidos({
       <section
         className={cn(
           "mt-6 pt-5",
-          esEducational || esGamified
+          esTemaPropio
             ? "border-t border-[var(--interface-border)]"
             : "border-t border-white/20",
         )}
@@ -282,18 +294,24 @@ export function ProximosContenidos({
         <div
           className={cn(
             "rounded-[24px] px-5 py-6",
-            esEducational || esGamified
+            esTemaPropio
               ? "border border-[var(--interface-border)] bg-[var(--interface-surface-strong)]"
               : CLASE_PANEL_GLASS_LEGIBLE,
           )}
         >
           <div className="flex items-start gap-3">
-            <PartyPopper className="mt-0.5 size-5 shrink-0 text-emerald-600" aria-hidden="true" />
+            <PartyPopper
+              className={cn(
+                "mt-0.5 size-5 shrink-0",
+                esTemaPropio ? "text-[var(--interface-accent)]" : "text-emerald-600",
+              )}
+              aria-hidden="true"
+            />
             <div>
               <h2
                 className={cn(
                   "text-lg font-bold",
-                  esEducational || esGamified ? "text-[var(--interface-text)]" : "text-slate-950",
+                  esTemaPropio ? "text-[var(--interface-text)]" : "text-slate-950",
                 )}
               >
                 Has completado el curso
@@ -301,7 +319,7 @@ export function ProximosContenidos({
               <p
                 className={cn(
                   "mt-1 text-sm",
-                  esEducational || esGamified
+                  esTemaPropio
                     ? "text-[var(--interface-text-muted)]"
                     : "text-slate-600",
                 )}
@@ -321,7 +339,7 @@ export function ProximosContenidos({
     <section
       className={cn(
         "mt-8 pt-6",
-        esEducational || esGamified
+        esTemaPropio
           ? "border-t border-[var(--interface-border)]"
           : "border-t border-white/20",
       )}

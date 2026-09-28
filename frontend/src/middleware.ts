@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Todas las rutas salvo estáticos, proxy de imágenes e imágenes embebidas.
-    "/((?!_next/static|_next/image|favicon.ico|api/imagenes|api/media|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    // Todas las rutas salvo estáticos, proxy de imágenes, fuentes e imágenes embebidas.
+    "/((?!_next/static|_next/image|favicon.ico|api/imagenes|api/media|fonts/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf)$).*)",
   ],
 };

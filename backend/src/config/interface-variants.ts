@@ -115,7 +115,7 @@ export const INTERFACE_VARIANT_CONFIG = {
     density: "compact",
     navigation: {
       style: "corporate",
-      position: "side",
+      position: "bottom",
     },
     dashboard: {
       layout: "executive",
@@ -152,7 +152,7 @@ export const INTERFACE_VARIANT_CONFIG = {
     density: "spacious",
     navigation: {
       style: "academic",
-      position: "top",
+      position: "bottom",
     },
     dashboard: {
       layout: "learning",

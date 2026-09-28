@@ -145,7 +145,7 @@ export function SelectorInterfaz({ varianteActual }: SelectorInterfazProps) {
                 "group flex flex-col gap-3 rounded-[var(--interface-radius)] border p-4 text-left transition-colors",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)] focus-visible:ring-offset-2",
                 activa
-                  ? "border-[var(--interface-accent)] bg-[var(--interface-surface-strong)] shadow-[var(--interface-shadow)]"
+                  ? "border-[var(--interface-accent)] bg-[var(--interface-surface-strong)] [box-shadow:var(--interface-shadow)]"
                   : "border-[var(--interface-border)] bg-[var(--interface-surface)] hover:border-[var(--interface-accent)]",
                 guardando && !activa && !cargandoEsta && "opacity-60",
                 guardando && "cursor-wait",

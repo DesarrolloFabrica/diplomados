@@ -368,7 +368,7 @@ function ResumenDashboardEducational({
   const tituloCurso = cursoActual?.titulo ?? "Explora tu siguiente curso";
 
   return (
-    <section className="educational-dashboard-summary w-full rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6">
+    <section className="educational-dashboard-summary w-full rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] sm:p-6">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)]">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--interface-accent)]">
@@ -386,7 +386,7 @@ function ResumenDashboardEducational({
               <span className="text-sm font-semibold text-[var(--interface-text-muted)]">
                 Progreso general
               </span>
-              <div className="h-2 min-w-[180px] flex-1 overflow-hidden rounded-full bg-[#dce8e5] dark:bg-white/12">
+              <div className="h-2 min-w-[180px] flex-1 overflow-hidden rounded-full bg-[var(--interface-border)]">
                 <div
                   className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
                   style={{ width: `${progresoPromedio}%` }}
@@ -427,7 +427,7 @@ function ResumenDashboardGamified({
   const porcentajeMision = cursoActual ? porcentajeCurso(cursoActual) : 0;
 
   return (
-    <section className="gamified-dashboard-summary w-full overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6">
+    <section className="gamified-dashboard-summary w-full overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] sm:p-6">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)]">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--interface-accent-secondary)]">
@@ -442,7 +442,7 @@ function ResumenDashboardGamified({
             </span>
             <div className="h-2.5 min-w-[160px] flex-1 overflow-hidden rounded-full bg-white/10">
               <div
-                className="h-full rounded-full bg-[linear-gradient(90deg,#91DC00,#67e8f9)] shadow-[0_0_12px_rgba(103,232,249,0.45)]"
+                className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))] shadow-[0_0_12px_rgba(103,232,249,0.45)]"
                 style={{ width: `${progresoPromedio}%` }}
               />
             </div>
@@ -458,14 +458,14 @@ function ResumenDashboardGamified({
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <div className="h-2 min-w-[160px] flex-1 overflow-hidden rounded-full bg-white/10">
                   <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,#91DC00,#2fb9a5)]"
+                    className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
                     style={{ width: `${porcentajeMision}%` }}
                   />
                 </div>
                 <span className="text-sm font-bold tabular-nums">{porcentajeMision}%</span>
                 <Link
                   href={cursoActual.inscripcionId ? `/mis-cursos/${cursoActual.id}` : `/mis-cursos/${cursoActual.id}/informacion`}
-                  className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-full bg-[var(--interface-accent)] px-4 text-xs font-bold text-[#06201c] transition hover:-translate-y-0.5 hover:bg-[var(--interface-accent-secondary)]"
+                  className="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-full bg-[var(--interface-accent)] px-4 text-xs font-bold text-[var(--interface-accent-foreground)] transition hover:-translate-y-0.5 hover:bg-[var(--interface-accent-secondary)]"
                 >
                   Continuar mision
                   <ChevronRight className="size-3.5" aria-hidden="true" />
@@ -528,7 +528,7 @@ function ResumenDashboardBusiness({
   const primerNombre = nombre?.trim().split(/\s+/)[0] ?? "Usuario";
 
   return (
-    <section className="business-dashboard-summary w-full rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6">
+    <section className="business-dashboard-summary w-full rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] sm:p-6">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--interface-accent)]">
@@ -595,7 +595,7 @@ function SelectorCatalogo({
             aria-pressed={activa}
             onClick={() => onChange(seccion.id)}
             className={cn(
-              "min-h-11 shrink-0 whitespace-nowrap rounded-full border px-5 text-sm font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] backdrop-blur-xl transition-[transform,background-color,border-color,color,box-shadow] duration-200 hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00]",
+              "min-h-11 shrink-0 whitespace-nowrap rounded-full border px-5 text-sm font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] backdrop-blur-xl transition-[transform,background-color,border-color,color,box-shadow] duration-200 hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]",
               activa
                 ? "border-white/75 bg-white/30 text-white shadow-[0_8px_22px_rgba(6,17,32,0.14),inset_0_1px_0_rgba(255,255,255,0.65)]"
                 : "border-white/30 bg-[#061120]/28 text-white hover:border-white/50 hover:bg-white/22",
@@ -636,7 +636,7 @@ function SelectorSecundario<T extends string>({
             aria-pressed={activo}
             onClick={() => onChange(item.id)}
             className={cn(
-              "min-h-9 shrink-0 whitespace-nowrap rounded-full border px-4 text-xs font-bold backdrop-blur-lg transition-[transform,background-color,border-color,color] hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00]",
+              "min-h-9 shrink-0 whitespace-nowrap rounded-full border px-4 text-xs font-bold backdrop-blur-lg transition-[transform,background-color,border-color,color] hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]",
               activo
                 ? "border-[#83E6D4]/80 bg-[#83E6D4]/75 text-[#061120]"
                 : "border-white/25 bg-[#061120]/24 text-white/90 hover:bg-white/20",
@@ -1132,7 +1132,7 @@ function HeroDestacadoGamified({
     <article
       data-hero-variant="quest"
       style={estiloFondoInterfaz("gamified", "heroBackground")}
-      className="gamified-hero relative grid w-full overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[var(--interface-shadow)] lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.95fr)]"
+      className="gamified-hero relative grid w-full overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.95fr)]"
     >
       <div
         aria-hidden="true"
@@ -1162,7 +1162,7 @@ function HeroDestacadoGamified({
           </div>
           <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
             <div
-              className="h-full rounded-full bg-[linear-gradient(90deg,#91DC00,#67e8f9)] shadow-[0_0_14px_rgba(103,232,249,0.5)] transition-[width] duration-500"
+              className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))] shadow-[0_0_14px_rgba(103,232,249,0.5)] transition-[width] duration-500"
               style={{ width: `${porcentaje}%` }}
             />
           </div>
@@ -1226,7 +1226,7 @@ function HeroDestacadoEducational({
     <article
       data-hero-variant="academic"
       style={estiloFondoInterfaz("educational", "heroBackground")}
-      className="educational-hero grid w-full overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[var(--interface-shadow)] lg:grid-cols-[minmax(0,1.65fr)_minmax(260px,0.75fr)]"
+      className="educational-hero grid w-full overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] lg:grid-cols-[minmax(0,1.65fr)_minmax(260px,0.75fr)]"
     >
       <div className="min-w-0 p-5 sm:p-6 lg:p-7">
         <div className="flex flex-wrap gap-2">
@@ -1247,7 +1247,7 @@ function HeroDestacadoEducational({
             <span className="text-[var(--interface-text-muted)]">Progreso de aprendizaje</span>
             <span className="tabular-nums">{porcentaje}%</span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-[#dce8e5] dark:bg-white/12">
+          <div className="h-2 overflow-hidden rounded-full bg-[var(--interface-border)]">
             <div
               className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
               style={{ width: `${porcentaje}%` }}
@@ -1312,7 +1312,7 @@ function HeroDestacadoBusiness({
     <article
       data-hero-variant="corporate"
       style={estiloFondoInterfaz("business", "heroBackground")}
-      className="business-hero grid w-full overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[var(--interface-shadow)] lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.75fr)]"
+      className="business-hero grid w-full overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.75fr)]"
     >
       <div className="flex min-w-0 flex-col p-5 sm:p-6 lg:p-7">
         <div className="flex flex-wrap items-center gap-2">
@@ -1325,7 +1325,12 @@ function HeroDestacadoBusiness({
             {curso.esDiplomado ? "Diplomado" : "Curso"}
           </span>
           {completado && (
-            <span className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-200">
+            <span
+              className="rounded-md border border-[color-mix(in_srgb,var(--interface-accent)_20%,transparent)] px-2.5 py-1 text-xs font-bold text-[var(--interface-accent)]"
+              style={{
+                backgroundColor: "color-mix(in srgb, var(--interface-accent) 10%, transparent)",
+              }}
+            >
               Completado
             </span>
           )}
@@ -1343,7 +1348,7 @@ function HeroDestacadoBusiness({
             <span className="text-[var(--interface-text-muted)]">Progreso</span>
             <span className="tabular-nums text-[var(--interface-text)]">{porcentaje}%</span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-[#dbe5e2] dark:bg-white/12">
+          <div className="h-2 overflow-hidden rounded-full bg-[var(--interface-border)]">
             <div
               className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))] transition-[width] duration-500"
               style={{ width: `${porcentaje}%` }}
@@ -1406,7 +1411,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
         data-catalog-card="business"
         href={hrefDestino}
         aria-label={`${textoAccion}: ${curso.titulo}`}
-        className="business-course-card group flex min-h-[330px] w-[min(88vw,310px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] shadow-[var(--interface-card-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--interface-accent)_50%,transparent)] hover:shadow-[var(--interface-glow)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]"
+        className="business-course-card group flex min-h-[330px] w-[min(88vw,310px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] [box-shadow:var(--interface-card-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--interface-accent)_50%,transparent)] hover:[box-shadow:var(--interface-glow)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]"
       >
         <ContenidoTarjetaCursoBusiness
           curso={curso}
@@ -1425,7 +1430,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
         data-catalog-card="game"
         href={hrefDestino}
         aria-label={`${textoAccion}: ${curso.titulo}`}
-        className="gamified-course-card group flex min-h-[350px] w-[min(88vw,318px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] shadow-[var(--interface-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-[var(--interface-accent-secondary)] hover:shadow-[0_0_0_1px_var(--interface-accent-secondary),0_18px_40px_rgba(103,232,249,0.14)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
+        className="gamified-course-card group flex min-h-[350px] w-[min(88vw,318px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-[var(--interface-accent-secondary)] hover:shadow-[0_0_0_1px_var(--interface-accent-secondary),0_18px_40px_rgba(103,232,249,0.14)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
       >
         <ContenidoTarjetaCursoGamified
           curso={curso}
@@ -1444,7 +1449,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
         data-catalog-card="academic"
         href={hrefDestino}
         aria-label={`${textoAccion}: ${curso.titulo}`}
-        className="educational-course-card group flex min-h-[350px] w-[min(88vw,318px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-hero-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] shadow-[var(--interface-card-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--interface-accent-secondary)_55%,transparent)] hover:shadow-[var(--interface-glow)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
+        className="educational-course-card group flex min-h-[350px] w-[min(88vw,318px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-hero-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] [box-shadow:var(--interface-card-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--interface-accent-secondary)_55%,transparent)] hover:[box-shadow:var(--interface-glow)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
       >
         <ContenidoTarjetaCursoEducational
           curso={curso}
@@ -1513,7 +1518,12 @@ function ContenidoTarjetaCursoGamified({
 
         <div className="mt-3 flex flex-wrap gap-2">
           {completado && (
-            <span className="w-fit rounded-lg bg-emerald-500/15 px-2.5 py-1 text-xs font-bold text-emerald-300">
+            <span
+              className="w-fit rounded-lg px-2.5 py-1 text-xs font-bold text-[var(--interface-accent)]"
+              style={{
+                backgroundColor: "color-mix(in srgb, var(--interface-accent) 15%, transparent)",
+              }}
+            >
               Completado
             </span>
           )}
@@ -1548,7 +1558,7 @@ function ContenidoTarjetaCursoGamified({
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/10">
                 <div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,#91DC00,#67e8f9)] shadow-[0_0_10px_rgba(103,232,249,0.4)]"
+                  className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))] shadow-[0_0_10px_rgba(103,232,249,0.4)]"
                   style={{ width: `${porcentaje}%` }}
                 />
               </div>
@@ -1605,7 +1615,12 @@ function ContenidoTarjetaCursoEducational({
           {curso.esDiplomado ? "Diplomado" : "Curso"} · {capitalizar(nivel)}
         </p>
         {completado && (
-          <span className="mt-3 w-fit rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-200">
+          <span
+            className="mt-3 w-fit rounded-lg px-2.5 py-1 text-xs font-bold text-[var(--interface-accent)]"
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--interface-accent) 10%, transparent)",
+            }}
+          >
             Completado
           </span>
         )}
@@ -1617,7 +1632,7 @@ function ContenidoTarjetaCursoEducational({
                 <span className="text-[var(--interface-text-muted)]">Progreso</span>
                 <span className="tabular-nums">{porcentaje}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-[#dce8e5] dark:bg-white/12">
+              <div className="h-2 overflow-hidden rounded-full bg-[var(--interface-border)]">
                 <div
                   className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
                   style={{ width: `${porcentaje}%` }}
@@ -1680,7 +1695,12 @@ function ContenidoTarjetaCursoBusiness({
             {curso.esDiplomado ? "Diplomado" : "Curso"}
           </span>
           {completado && (
-            <span className="rounded-md bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-200">
+            <span
+              className="rounded-md px-2 py-1 text-[10px] font-bold text-[var(--interface-accent)]"
+              style={{
+                backgroundColor: "color-mix(in srgb, var(--interface-accent) 10%, transparent)",
+              }}
+            >
               Completado
             </span>
           )}
@@ -1700,7 +1720,7 @@ function ContenidoTarjetaCursoBusiness({
                 <span className="text-[var(--interface-text-muted)]">Progreso</span>
                 <span className="tabular-nums">{porcentaje}%</span>
               </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-[#dbe5e2] dark:bg-white/12">
+              <div className="h-1.5 overflow-hidden rounded-full bg-[var(--interface-border)]">
                 <div
                   className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))] transition-[width] duration-500"
                   style={{ width: `${porcentaje}%` }}

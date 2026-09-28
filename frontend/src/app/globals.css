@@ -9,8 +9,34 @@
   Variables en canales HSL para compatibilidad con hsl(var(--token)).
 */
 
+/* Montserrat autoalojada (no depende de Google Fonts en build/runtime). */
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("/fonts/montserrat/montserrat-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("/fonts/montserrat/montserrat-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 @layer base {
   :root {
+    --font-montserrat: "Montserrat", system-ui, "Segoe UI", Arial, sans-serif;
+
     /* Marca CUN (hex directo) */
     --cun-blue: #061120;
     --cun-green: #91dc00;
@@ -99,7 +125,7 @@
 
   body {
     min-height: 100vh;
-    font-family: var(--font-montserrat), sans-serif;
+    font-family: "Montserrat", var(--font-montserrat), system-ui, sans-serif;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     background-repeat: no-repeat;
@@ -252,7 +278,7 @@
     --interface-border: rgba(125, 211, 252, 0.22);
     --interface-text: #f8fafc;
     --interface-text-muted: rgba(226, 232, 240, 0.74);
-    --interface-accent: #91dc00;
+    --interface-accent: #3ddc97;
     --interface-accent-secondary: #67e8f9;
     --interface-shadow: 0 18px 48px rgba(5, 10, 24, 0.28);
     --interface-accent-foreground: #06201c;
@@ -350,7 +376,7 @@
   .interface-roadmap-bg,
   .interface-lesson-bg,
   .interface-quiz-bg {
-    background-image: var(--interface-bg-image, none), var(--interface-overlay, none);
+    background-image: var(--interface-overlay, none), var(--interface-bg-image, none);
     background-size: cover, cover;
     background-position: var(--interface-bg-position, center);
     background-repeat: no-repeat;
@@ -361,8 +387,8 @@
        nada y deja ver el degradado corporativo de abajo intacto. Capa 2:
        overlay opcional para mantener legibilidad sobre ese asset. */
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 8% 8%, rgba(34, 211, 238, 0.12), transparent 28%),
       radial-gradient(circle at 92% 12%, rgba(11, 91, 115, 0.1), transparent 24%),
       linear-gradient(135deg, #eef2f6 0%, #e7edf3 55%, #f4f7fa 100%);
@@ -373,8 +399,8 @@
 
   html.dark [data-interface-variant="business"] .business-shell {
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 8% 8%, rgba(34, 211, 238, 0.12), transparent 28%),
       radial-gradient(circle at 92% 12%, rgba(94, 234, 212, 0.08), transparent 24%),
       linear-gradient(135deg, #060f1a 0%, #08131f 58%, #060f1a 100%);
@@ -447,8 +473,8 @@
     /* Modo "foco" deliberadamente oscuro en ambos temas (patrón ya existente
        desde Fase 4) — se conserva, solo se actualiza el tono a azul/cian. */
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 12% 0%, rgba(34, 211, 238, 0.12), transparent 26%),
       linear-gradient(135deg, #060f1a 0%, #0a1826 54%, #0d1f30 100%);
     background-size: cover, cover, auto, auto;
@@ -458,8 +484,8 @@
 
   html.dark [data-interface-variant="business"] .lesson-view:has([data-lesson-variant="focused"]) {
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 12% 0%, rgba(34, 211, 238, 0.12), transparent 26%),
       linear-gradient(135deg, var(--interface-bg), #0a1826 100%);
     background-size: cover, cover, auto, auto;
@@ -487,8 +513,8 @@
 
   [data-interface-variant="business"] .quiz-view:has([data-quiz-variant="professional"]) {
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 85% 6%, rgba(34, 211, 238, 0.12), transparent 24%),
       linear-gradient(135deg, var(--interface-bg), #e7edf3 100%);
     background-size: cover, cover, auto, auto;
@@ -498,8 +524,8 @@
 
   html.dark [data-interface-variant="business"] .quiz-view:has([data-quiz-variant="professional"]) {
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 85% 6%, rgba(34, 211, 238, 0.12), transparent 24%),
       linear-gradient(135deg, var(--interface-bg), #0a1826 100%);
     background-size: cover, cover, auto, auto;
@@ -551,8 +577,8 @@
        la textura "papel/pergamino" de respaldo: trama sutil + un cálido
        resplandor de "luz de lectura" en tonos verde profundo/dorado. */
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       linear-gradient(rgba(93, 64, 28, 0.05) 1px, transparent 1px),
       linear-gradient(90deg, rgba(93, 64, 28, 0.05) 1px, transparent 1px),
       radial-gradient(circle at 12% 4%, rgba(184, 134, 58, 0.16), transparent 26%),
@@ -565,8 +591,8 @@
 
   html.dark [data-interface-variant="educational"] .educational-shell {
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       linear-gradient(rgba(244, 236, 216, 0.035) 1px, transparent 1px),
       linear-gradient(90deg, rgba(244, 236, 216, 0.035) 1px, transparent 1px),
       radial-gradient(circle at 12% 4%, rgba(217, 166, 62, 0.1), transparent 26%),
@@ -625,8 +651,8 @@
 
   [data-interface-variant="educational"] .lesson-view:has([data-lesson-variant="study"]) {
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 12% 0%, rgba(184, 134, 58, 0.14), transparent 27%),
       linear-gradient(135deg, #f6efe0 0%, #f1e8d4 100%);
     background-size: cover, cover, auto, auto;
@@ -636,8 +662,8 @@
 
   html.dark [data-interface-variant="educational"] .lesson-view:has([data-lesson-variant="study"]) {
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 12% 0%, rgba(217, 166, 62, 0.1), transparent 27%),
       linear-gradient(135deg, #10190f 0%, #142117 100%);
     background-size: cover, cover, auto, auto;
@@ -660,8 +686,8 @@
 
   [data-interface-variant="educational"] .quiz-view:has([data-quiz-variant="academic"]) {
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 85% 6%, rgba(184, 134, 58, 0.14), transparent 25%),
       linear-gradient(135deg, #f6efe0 0%, #f1e8d4 100%);
     background-size: cover, cover, auto, auto;
@@ -671,8 +697,8 @@
 
   html.dark [data-interface-variant="educational"] .quiz-view:has([data-quiz-variant="academic"]) {
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 85% 6%, rgba(217, 166, 62, 0.1), transparent 25%),
       linear-gradient(135deg, #10190f 0%, #142117 100%);
     background-size: cover, cover, auto, auto;
@@ -724,8 +750,8 @@
     /* Capas 1-2: asset/overlay de Fase 9 (vacías por defecto; no se toca el
        diseño de gamified en esta fase, solo se prepara el enganche). */
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 10% 0%, rgba(8, 145, 178, 0.14), transparent 26%),
       radial-gradient(circle at 90% 100%, rgba(79, 138, 0, 0.12), transparent 28%),
       linear-gradient(135deg, #eef3f9 0%, #e7eef8 55%, #f4f8fb 100%);
@@ -736,14 +762,18 @@
 
   html.dark [data-interface-variant="gamified"] .gamified-shell {
     background-image:
-      var(--interface-bg-image, none),
       var(--interface-overlay, none),
+      var(--interface-bg-image, none),
       radial-gradient(circle at 10% 0%, rgba(103, 232, 249, 0.14), transparent 30%),
-      radial-gradient(circle at 90% 100%, rgba(145, 220, 0, 0.1), transparent 30%),
+      radial-gradient(circle at 90% 100%, rgba(61, 220, 151, 0.1), transparent 30%),
       linear-gradient(135deg, #050b16 0%, #08111f 55%, #0b1830 100%);
     background-size: cover, cover, auto, auto, auto;
     background-position: var(--interface-bg-position, center);
     background-repeat: no-repeat;
+  }
+
+  [data-interface-variant="gamified"] .gamified-main {
+    background: transparent;
   }
 
   /* Fondo decorativo opcional del hero destacado (asset "heroBackground",
@@ -752,7 +782,7 @@
   [data-interface-variant="business"] .business-hero,
   [data-interface-variant="educational"] .educational-hero,
   [data-interface-variant="gamified"] .gamified-hero {
-    background-image: var(--interface-bg-image, none), var(--interface-overlay, none);
+    background-image: var(--interface-overlay, none), var(--interface-bg-image, none);
     background-size: cover, cover;
     background-position: var(--interface-bg-position, center);
     background-repeat: no-repeat;

@@ -199,28 +199,35 @@ export function EsquemaContenidos({
   const { config } = useInterfaceVariant();
   const esEducational = config.id === "educational";
   const esGamified = config.id === "gamified";
+  const esBusiness = config.id === "business";
+  // Gate genérico "tema propio (tokens) vs. creative (colores fijos)". Las
+  // tres variantes no-creative comparten aquí las mismas clases porque son
+  // tokens (--interface-*) que ya resuelven al color correcto de cada una;
+  // gamified conserva además sus propios matices puntuales más abajo donde
+  // aportan valor (p. ej. el resplandor cian de la lección activa).
+  const esTemaPropio = esEducational || esGamified || esBusiness;
 
-  const claseTextoPrincipal = esEducational ? "text-[var(--interface-text)]" : "text-white";
-  const claseTextoMuted = esEducational
+  const claseTextoPrincipal = esTemaPropio ? "text-[var(--interface-text)]" : "text-white";
+  const claseTextoMuted = esTemaPropio
     ? "text-[var(--interface-text-muted)]"
     : "text-white/55";
-  const claseTextoMutedTenue = esEducational
+  const claseTextoMutedTenue = esTemaPropio
     ? "text-[var(--interface-text-muted)]"
     : "text-white/45";
-  const claseBordeSutil = esEducational ? "border-[var(--interface-border)]" : "border-white/20";
-  const claseBordeMuyTenue = esEducational
+  const claseBordeSutil = esTemaPropio ? "border-[var(--interface-border)]" : "border-white/20";
+  const claseBordeMuyTenue = esTemaPropio
     ? "border-[var(--interface-border)]"
     : "border-white/12";
-  const claseHoverSutil = esEducational
+  const claseHoverSutil = esTemaPropio
     ? "hover:text-[var(--interface-text)]"
     : "hover:text-white";
-  const claseHoverFondo = esEducational
+  const claseHoverFondo = esTemaPropio
     ? "hover:bg-[color-mix(in_srgb,var(--interface-accent)_8%,transparent)]"
     : "hover:bg-white/10";
-  const claseHoverFondo12 = esEducational
+  const claseHoverFondo12 = esTemaPropio
     ? "hover:bg-[color-mix(in_srgb,var(--interface-accent)_10%,transparent)]"
     : "hover:bg-white/12";
-  const claseTrackProgreso = esEducational ? "bg-[var(--interface-border)]" : "bg-white/20";
+  const claseTrackProgreso = esTemaPropio ? "bg-[var(--interface-border)]" : "bg-white/20";
 
   const [leccionesIniciadas, setLeccionesIniciadas] = useState<Set<string>>(
     () => new Set(),
@@ -285,10 +292,10 @@ export function EsquemaContenidos({
             className={cn(
               "inline-flex shrink-0 items-center justify-center rounded-md p-1.5",
               "transition-colors",
-              esEducational ? claseTextoMuted : "text-white/70",
+              esTemaPropio ? claseTextoMuted : "text-white/70",
               claseHoverFondo,
               claseHoverSutil,
-              esEducational
+              esTemaPropio
                 ? "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
                 : "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00]",
             )}
@@ -363,11 +370,11 @@ export function EsquemaContenidos({
                     className={cn(
                       "h-full rounded-full transition-[width]",
                       estado === "completado"
-                        ? esEducational
+                        ? esTemaPropio
                           ? "bg-[var(--interface-accent)]"
                           : "bg-gradient-to-r from-teal-500 to-[#91dc00]"
                         : estado === "en-progreso"
-                          ? esEducational
+                          ? esTemaPropio
                             ? "bg-[var(--interface-accent-secondary)]"
                             : "bg-gradient-to-r from-teal-600 to-teal-400"
                           : "bg-transparent",
@@ -393,12 +400,14 @@ export function EsquemaContenidos({
                               bloqueada
                                 ? claseTextoMutedTenue
                                 : leccion.completada
-                                  ? "text-emerald-300"
+                                  ? esTemaPropio
+                                    ? "text-[var(--interface-accent)]"
+                                    : "text-emerald-300"
                                   : iniciada
-                                    ? esEducational
+                                    ? esTemaPropio
                                       ? "text-[var(--interface-accent-secondary)]"
                                       : "text-[#91DC00]"
-                                    : esEducational
+                                    : esTemaPropio
                                       ? cn(claseTextoMuted, "group-hover:text-[var(--interface-text)]")
                                       : "text-white/55 group-hover:text-white/85",
                             )}
@@ -417,13 +426,15 @@ export function EsquemaContenidos({
                               className={cn(
                                 "mt-1 block text-[11px] leading-none",
                                 bloqueada
-                                  ? esEducational
+                                  ? esTemaPropio
                                     ? claseTextoMutedTenue
                                     : "text-white/40"
                                   : leccion.completada
-                                    ? "text-emerald-300"
+                                    ? esTemaPropio
+                                      ? "text-[var(--interface-accent)]"
+                                      : "text-emerald-300"
                                     : iniciada
-                                      ? esEducational
+                                      ? esTemaPropio
                                         ? "text-[var(--interface-accent-secondary)]"
                                         : "text-teal-200"
                                       : claseTextoMutedTenue,
@@ -438,11 +449,13 @@ export function EsquemaContenidos({
                           </span>
                         </>
                       );
-                      const clases = esEducational
+                      const clases = esTemaPropio
                         ? cn(
                             "group flex items-start gap-2.5 rounded-lg border-l-2 px-2.5 py-2.5 text-sm transition-colors",
                             activa
-                              ? "border-[var(--interface-accent-secondary)] font-semibold text-[var(--interface-text)]"
+                              ? esGamified
+                                ? "border-[var(--interface-accent-secondary)] bg-[color-mix(in_srgb,var(--interface-accent-secondary)_14%,transparent)] font-semibold text-[var(--interface-text)] shadow-[0_0_16px_rgba(103,232,249,0.25)]"
+                                : "border-[var(--interface-accent-secondary)] font-semibold text-[var(--interface-text)]"
                               : bloqueada
                                 ? cn("cursor-not-allowed border-transparent", claseTextoMutedTenue)
                                 : cn(
@@ -454,14 +467,12 @@ export function EsquemaContenidos({
                         : cn(
                             "group flex items-start gap-2.5 rounded-lg border-l-2 px-2.5 py-2.5 text-sm transition-colors",
                             activa
-                              ? esGamified
-                                ? "border-[var(--interface-accent-secondary)] bg-[var(--interface-accent-secondary)]/[0.14] font-semibold text-white shadow-[0_0_16px_rgba(103,232,249,0.25)]"
-                                : "border-[#91DC00] bg-[#91DC00]/14 font-semibold text-white shadow-[inset_0_0_18px_rgba(145,220,0,0.08)]"
+                              ? "border-[#91DC00] bg-[#91DC00]/14 font-semibold text-white shadow-[inset_0_0_18px_rgba(145,220,0,0.08)]"
                               : bloqueada
                                 ? "cursor-not-allowed border-transparent bg-[#061120]/12 text-white/45"
                                 : "border-transparent text-white/75 hover:bg-white/12 hover:text-white",
                           );
-                      const estiloClases = !esEducational
+                      const estiloClases = !(esEducational || esBusiness)
                         ? undefined
                         : activa
                           ? TINTE_ACTIVO_EDUCATIONAL
@@ -531,9 +542,11 @@ export function EsquemaContenidos({
                                       className={cn(
                                         "mt-1 block text-[11px] font-normal leading-none",
                                         estadoQuizItem === "completado"
-                                          ? "text-emerald-300"
+                                          ? esTemaPropio
+                                            ? "text-[var(--interface-accent)]"
+                                            : "text-emerald-300"
                                           : estadoQuizItem === "en-progreso"
-                                            ? esEducational
+                                            ? esTemaPropio
                                               ? "text-[var(--interface-accent-secondary)]"
                                               : "text-teal-200"
                                             : claseTextoMutedTenue,
@@ -544,7 +557,7 @@ export function EsquemaContenidos({
                                   </span>
                                 </>
                               );
-                              const clases = esEducational
+                              const clases = esTemaPropio
                                 ? cn(
                                     "group flex items-start gap-2.5 rounded-lg px-2.5 py-2.5 text-sm transition-colors",
                                     activa
@@ -554,7 +567,7 @@ export function EsquemaContenidos({
                                           claseHoverFondo12,
                                           "hover:text-[var(--interface-text)]",
                                         ),
-                                    evaluacion.completada && !activa && "text-emerald-300/90",
+                                    evaluacion.completada && !activa && "text-[var(--interface-accent)]",
                                     estadoQuizItem === "bloqueado" && "cursor-not-allowed opacity-70",
                                   )
                                 : cn(
@@ -568,7 +581,7 @@ export function EsquemaContenidos({
                                     estadoQuizItem === "bloqueado" && "cursor-not-allowed opacity-70",
                                   );
                               const estiloQuiz =
-                                esEducational && activa ? TINTE_ACTIVO_EDUCATIONAL : undefined;
+                                esTemaPropio && activa ? TINTE_ACTIVO_EDUCATIONAL : undefined;
 
                               return (
                                 <li key={evaluacion.id}>
@@ -598,7 +611,7 @@ export function EsquemaContenidos({
         })}
 
         {grupos.length === 0 && (
-          <p className={cn("px-2 py-4 text-sm", esEducational ? claseTextoMuted : "text-white/65")}>
+          <p className={cn("px-2 py-4 text-sm", esTemaPropio ? claseTextoMuted : "text-white/65")}>
             No hay contenidos disponibles.
           </p>
         )}

@@ -36,8 +36,12 @@ export function LayoutVistaLeccion({
   const { config } = useInterfaceVariant();
   const esEducational = config.id === "educational";
   const esGamified = config.id === "gamified";
+  const esBusiness = config.id === "business";
+  const esTemaPropio = esEducational || esGamified || esBusiness;
   // Educational/Gamified dan protagonismo al índice de contenidos/objetivos:
   // el esquema queda visible por defecto (70/30) en vez de requerir abrirlo.
+  // Business no hereda ese comportamiento (no lo pidió Fase 11): mantiene el
+  // esquema colapsado por defecto, igual que creative.
   const [esquemaVisible, setEsquemaVisible] = useState(esEducational || esGamified);
 
   function alternarEsquema() {
@@ -50,7 +54,7 @@ export function LayoutVistaLeccion({
       className={cn(
         "grid min-h-full w-full grid-cols-1",
         esquemaVisible &&
-          (esEducational || esGamified
+          (esTemaPropio
             ? "xl:grid-cols-[minmax(0,1fr)_380px]"
             : "xl:grid-cols-[minmax(0,1fr)_304px]"),
       )}
@@ -64,8 +68,8 @@ export function LayoutVistaLeccion({
             aria-controls="esquema-contenidos-panel"
             className={cn(
               "fixed bottom-6 right-6 z-20 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold",
-              esEducational
-                ? "border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[var(--interface-shadow)] transition-colors hover:bg-[var(--interface-surface)] xl:absolute xl:bottom-auto xl:right-0 xl:top-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] focus-visible:ring-offset-2"
+              esEducational || esBusiness
+                ? "border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] transition-colors hover:bg-[var(--interface-surface)] xl:absolute xl:bottom-auto xl:right-0 xl:top-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] focus-visible:ring-offset-2"
                 : esGamified
                   ? "border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[0_0_20px_rgba(103,232,249,0.2)] transition-colors hover:border-[var(--interface-accent-secondary)] xl:absolute xl:bottom-auto xl:right-0 xl:top-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] focus-visible:ring-offset-2"
                   : cn(
@@ -89,15 +93,13 @@ export function LayoutVistaLeccion({
           id="esquema-contenidos-panel"
           className={cn(
             "min-w-0 rounded-none xl:sticky xl:top-0 xl:h-full xl:max-h-dvh xl:self-start xl:border-t-0",
-            esEducational
+            esTemaPropio
               ? "border-t border-[var(--interface-border)] bg-[var(--interface-surface)] shadow-none xl:border-l xl:border-t-0"
-              : esGamified
-                ? "border-t border-[var(--interface-border)] bg-[var(--interface-surface)] shadow-none xl:border-l xl:border-t-0"
-                : cn(
-                    "border-t border-white/25 xl:border-l",
-                    CLASE_PANEL_GLASS,
-                    "bg-white/20 shadow-none xl:rounded-l-none",
-                  ),
+              : cn(
+                  "border-t border-white/25 xl:border-l",
+                  CLASE_PANEL_GLASS,
+                  "bg-white/20 shadow-none xl:rounded-l-none",
+                ),
           )}
         >
           <EsquemaContenidos

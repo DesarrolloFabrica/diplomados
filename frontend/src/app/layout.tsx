@@ -1,17 +1,8 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ThemeScript } from "@/components/providers/theme-script";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
-
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal"],
-  variable: "--font-montserrat",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Plataforma de Formación",
@@ -30,11 +21,22 @@ export default function RootLayout({
     <html lang="es" className="dark" suppressHydrationWarning>
       <head>
         <ThemeScript />
+        <link
+          rel="preload"
+          href="/fonts/montserrat/montserrat-latin-wght-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/montserrat/montserrat-latin-ext-wght-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
       </head>
-      <body
-        className={`${montserrat.className} ${montserrat.variable} min-h-screen antialiased`}
-        suppressHydrationWarning
-      >
+      <body className="min-h-screen font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider>
           {children}
           <Toaster position="top-center" richColors />

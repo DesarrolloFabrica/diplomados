@@ -13,8 +13,8 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-montserrat)", ...defaultTheme.fontFamily.sans],
-        display: ["var(--font-montserrat)", ...defaultTheme.fontFamily.sans],
+        sans: ["Montserrat", "var(--font-montserrat)", ...defaultTheme.fontFamily.sans],
+        display: ["Montserrat", "var(--font-montserrat)", ...defaultTheme.fontFamily.sans],
       },
       colors: {
         cun: {

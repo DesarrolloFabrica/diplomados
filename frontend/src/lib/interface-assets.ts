@@ -11,13 +11,49 @@ import {
  * superficies que no tienen imagen de fondo asignada (p. ej. el hero o el
  * dashboard de una variante sin `heroBackground`/`dashboardBackground`).
  *
+ * IMPORTANTE: `--interface-overlay` se usa como una capa más dentro de
+ * `background-image` (junto a `--interface-bg-image` y los degradados de
+ * respaldo). `background-image` exige un valor `<image>` en cada capa —
+ * un `<color>` suelto (p. ej. `color-mix()` a secas) es inválido ahí y
+ * invalida TODA la propiedad en tiempo de cómputo, con lo que ni el overlay
+ * ni el asset ni los degradados de respaldo llegan a pintarse. Por eso cada
+ * valor se envuelve en `linear-gradient(color, color)`: un degradado plano
+ * es un `<image>` válido y produce el mismo efecto visual de velo sólido.
  * Usa `color-mix()` sobre `var(--interface-bg)` en vez de un color fijo, así
  * el velo se adapta solo a claro/oscuro sin duplicar valores por tema.
  */
+function overlaySolido(color: string): string {
+  return `linear-gradient(${color}, ${color})`;
+}
+
 const OVERLAY_POR_VARIANTE: Partial<Record<InterfaceVariant, string>> = {
-  business: "color-mix(in srgb, var(--interface-bg) 60%, transparent)",
-  educational: "color-mix(in srgb, var(--interface-bg) 45%, transparent)",
-  gamified: "color-mix(in srgb, var(--interface-bg) 45%, transparent)",
+  business: overlaySolido("color-mix(in srgb, var(--interface-bg) 60%, transparent)"),
+  educational: overlaySolido("color-mix(in srgb, var(--interface-bg) 45%, transparent)"),
+  gamified: overlaySolido("color-mix(in srgb, var(--interface-bg) 45%, transparent)"),
+};
+
+/**
+ * Overrides puntuales por combinación variante:pantalla, para cuando el
+ * asset de esa pantalla concreta necesita más o menos velo que el resto
+ * (p. ej. lección/quiz muestran texto denso encima del fondo — más
+ * ilustrado/detallado en `Edu-dash.png`/`game-quiz.png`/`emp-quiz.png` que
+ * `emp-dash.png` — y piden un poco más de contraste). Si no hay entrada
+ * aquí, se usa el valor por variante de `OVERLAY_POR_VARIANTE`.
+ *
+ * Un valor `""` desactiva el velo por completo para esa combinación
+ * (distinto de "sin entrada", que hereda el valor por variante): el roadmap
+ * en zigzag de business/educational (Fase 12) queda demasiado opaco con el
+ * velo por defecto de su variante, así que se pide explícitamente sin velo.
+ */
+const OVERLAY_POR_ASSET: Record<string, string> = {
+  "business:lessonBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 70%, transparent)"),
+  "business:quizBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 70%, transparent)"),
+  "business:roadmapBackground": "",
+  "educational:lessonBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 55%, transparent)"),
+  "educational:quizBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 55%, transparent)"),
+  "educational:roadmapBackground": "",
+  "gamified:lessonBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 55%, transparent)"),
+  "gamified:quizBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 55%, transparent)"),
 };
 
 /**
@@ -52,11 +88,13 @@ export function estiloFondoInterfaz(
   const url = resolveInterfaceAsset({ variant, asset, fallback });
   if (!url) return undefined;
 
-  const overlay = variant ? OVERLAY_POR_VARIANTE[variant as InterfaceVariant] : undefined;
+  const overlay = variant
+    ? (OVERLAY_POR_ASSET[`${variant}:${asset}`] ?? OVERLAY_POR_VARIANTE[variant as InterfaceVariant])
+    : undefined;
   const posicion = variant ? POSICION_POR_ASSET[`${variant}:${asset}`] : undefined;
 
   return {
-    "--interface-bg-image": `url(${url})`,
+    "--interface-bg-image": `url("${url}")`,
     ...(overlay ? { "--interface-overlay": overlay } : {}),
     ...(posicion ? { "--interface-bg-position": posicion } : {}),
   } as CSSProperties;

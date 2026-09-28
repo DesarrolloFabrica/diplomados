@@ -447,8 +447,18 @@ function ShellPanelLateral({
   const esBusiness = interfaceConfig?.id === "business";
   const esEducational = interfaceConfig?.id === "educational";
   const esGamified = interfaceConfig?.id === "gamified";
-  const esShellLateral = esBusiness || esEducational;
-  const esDashboardInmersivo = esDashboardColaborador && !esShellLateral;
+  // El menú es siempre el dock inferior estilo "creative" para las 4
+  // interfaces (pedido explícito: unificar el menú, no la superficie).
+  const esMenuLateral = false;
+  // Business/educational/gamified conservan su propio fondo de shell (CSS +
+  // asset estático via --interface-bg-image) y ancho de contenido acotado —
+  // eso es independiente de qué menú se use. El tratamiento "inmersivo"
+  // (video + partículas) es exclusivo de creative: es el único que tiene un
+  // asset de video real para dashboardBackground; gamified tiene una imagen
+  // estática (fondo-cursos.png) y necesita el mismo mecanismo CSS que
+  // business/educational, no un <video> intentando reproducir un .png.
+  const esSuperficiePropia = esBusiness || esEducational || esGamified;
+  const esDashboardInmersivo = esDashboardColaborador && !esSuperficiePropia;
 
   const cancelarOcultamientoDock = useCallback(() => {
     if (ocultarTimeoutRef.current !== null) {
@@ -510,7 +520,7 @@ function ShellPanelLateral({
         esGamified && "gamified-shell",
       )}
     >
-      {esShellLateral ? (
+      {esMenuLateral ? (
         <aside
           className={cn(
             "fixed inset-y-0 left-0 z-40 hidden p-3 transition-[width] duration-200 lg:block",
@@ -582,7 +592,7 @@ function ShellPanelLateral({
         </aside>
       )}
 
-      <div className={cn("flex min-w-0 flex-1 flex-col", esShellLateral && "lg:pl-[76px]")}>
+      <div className={cn("flex min-w-0 flex-1 flex-col", esMenuLateral && "lg:pl-[76px]")}>
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden">
           <div className="flex items-center gap-2">
             <LogoMarcaFormacion />
@@ -640,11 +650,12 @@ function ShellPanelLateral({
                   "before:pointer-events-none before:absolute before:inset-0 before:z-20 before:bg-[linear-gradient(90deg,rgba(6,17,32,0.78)_0%,rgba(6,17,32,0.42)_34%,rgba(6,17,32,0.08)_62%,rgba(6,17,32,0.22)_100%)]",
                   "after:pointer-events-none after:absolute after:inset-0 after:z-20 after:bg-[linear-gradient(180deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.02)_28%,rgba(6,17,32,0.28)_100%)]",
                 ]
-              : esShellLateral
+              : esSuperficiePropia
                 ? cn(
                     "min-h-dvh p-4 pb-10 sm:p-5 md:p-6 lg:p-7 xl:p-8",
                     esBusiness && "business-main",
                     esEducational && "educational-main",
+                    esGamified && "gamified-main",
                   )
                 : "p-5 pb-14 sm:p-6 lg:p-8 xl:p-10",
           )}
@@ -670,7 +681,7 @@ function ShellPanelLateral({
           <div
             className={cn(
               esDashboardColaborador && "relative z-30",
-              esShellLateral && "mx-auto w-full max-w-[var(--interface-content-width)]",
+              esSuperficiePropia && "mx-auto w-full max-w-[var(--interface-content-width)]",
             )}
           >
             {children}

@@ -2178,6 +2178,248 @@ function WorldHudLayer({
   );
 }
 
+// ---------------------------------------------------------------------------
+// Roadmap en zigzag (business/educational): estaciones por lección conectadas
+// por un camino en zigzag sobre el fondo de la variante (Fase 12). Reutiliza
+// la matemática de posiciones de `layoutNodosRoadmap` (misma cuadrícula que
+// el modo estructurado de creative) pero con una capa visual propia en
+// tokens --interface-*, sin los assets decorativos ni los colores fijos del
+// modo inmersivo de creative — así cada variante resuelve su propia
+// identidad sin tocar `AnilloEstacion`/`NucleoEstacion` (protegidos, creative
+// no se rediseña).
+
+function CaminoZigzagTematico({ layouts }: { layouts: LayoutNodoRoadmap[] }) {
+  if (layouts.length < 2) return null;
+
+  const gradId = `roadmap-zigzag-grad-${layouts[0]!.nodo.id}`;
+  const points = layouts.map((layout) => `${layout.x},${layout.y}`).join(" ");
+  const alto = layouts.at(-1)!.y + 96;
+
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-0 overflow-visible"
+      viewBox={`0 0 ${ROADMAP_STAGE_WIDTH} ${alto}`}
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" style={{ stopColor: "var(--interface-accent)" }} />
+          <stop offset="100%" style={{ stopColor: "var(--interface-accent-secondary)" }} />
+        </linearGradient>
+      </defs>
+      <polyline
+        points={points}
+        fill="none"
+        stroke="var(--interface-border)"
+        strokeWidth={10}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <polyline
+        points={points}
+        fill="none"
+        stroke={`url(#${gradId})`}
+        strokeWidth={5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function EstacionZigzagTematica({
+  estado,
+  Icono,
+}: {
+  estado: EstadoEstacion;
+  Icono: LucideIcon;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative z-20 flex size-16 shrink-0 items-center justify-center rounded-full border-2 shadow-md transition-transform",
+        estado === "completado" &&
+          "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)]",
+        estado === "activo" &&
+          "scale-110 border-[var(--interface-accent-secondary)] bg-[var(--interface-surface-strong)] text-[var(--interface-accent-secondary)] [box-shadow:var(--interface-glow)]",
+        estado === "pendiente" &&
+          "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)]",
+        estado === "bloqueado" &&
+          "border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)] opacity-70",
+      )}
+    >
+      <Icono className="size-6 shrink-0" aria-hidden="true" />
+    </div>
+  );
+}
+
+function EtiquetaZigzagTematica({
+  titulo,
+  estado,
+  esEvaluacion,
+  alineacion,
+}: {
+  titulo: string;
+  estado: EstadoEstacion;
+  esEvaluacion: boolean;
+  alineacion: "left" | "right" | "center";
+}) {
+  return (
+    <div
+      className={cn(
+        "flex min-h-14 items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold leading-snug shadow-sm backdrop-blur-sm",
+        "border-[var(--interface-border)] bg-[color-mix(in_srgb,var(--interface-surface-strong)_92%,transparent)] text-[var(--interface-text)]",
+        alineacion === "right" && "flex-row-reverse text-right",
+        alineacion === "center" && "flex-col text-center",
+        estado === "activo" && "border-[var(--interface-accent-secondary)] [box-shadow:var(--interface-glow)]",
+        estado === "bloqueado" && "text-[var(--interface-text-muted)] opacity-80",
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className="grid size-8 shrink-0 place-items-center rounded-full bg-[color-mix(in_srgb,var(--interface-accent)_14%,transparent)] text-[var(--interface-accent)]"
+      >
+        {estado === "bloqueado" ? (
+          <Lock className="size-4" />
+        ) : estado === "completado" ? (
+          <Check className="size-4" />
+        ) : esEvaluacion ? (
+          <ClipboardCheck className="size-4" />
+        ) : (
+          <span className="size-2 rounded-full bg-current" />
+        )}
+      </span>
+      <span className="min-w-0 whitespace-normal break-words">{titulo}</span>
+    </div>
+  );
+}
+
+function RoadmapZigzagModulo({
+  grupo,
+  nodoActivoGlobalId,
+}: {
+  grupo: GrupoRuta;
+  nodoActivoGlobalId: string | null;
+}) {
+  const layouts = layoutNodosRoadmap(grupo.nodos);
+  const altoDesktop = Math.max(360, (layouts.at(-1)?.y ?? ROADMAP_TOP_Y) + 140);
+
+  return (
+    <div className="w-full">
+      <div
+        className="relative mx-auto hidden overflow-visible lg:block"
+        style={{ width: ROADMAP_STAGE_WIDTH, maxWidth: "100%", height: altoDesktop }}
+      >
+        <CaminoZigzagTematico layouts={layouts} />
+        {layouts.map((layout) => {
+          const activo =
+            layout.nodo.id === nodoActivoGlobalId && !layout.nodo.completado && !layout.nodo.bloqueado;
+          const estado = estadoEstacion(layout.nodo, activo);
+          const Icono = iconoEstacion(layout.nodo, layout.indiceLeccion);
+          const esEvaluacion = layout.nodo.tipo === "evaluacion";
+          const gap = 26;
+
+          const contenido = (
+            <>
+              <div
+                className="absolute"
+                style={{ left: layout.x - ANILLO / 2, top: layout.y - ANILLO / 2 }}
+              >
+                <EstacionZigzagTematica estado={estado} Icono={Icono} />
+              </div>
+              <div
+                className="absolute z-10 w-[230px]"
+                style={
+                  layout.textoALaIzquierda
+                    ? { left: layout.x - ANILLO / 2 - gap, top: layout.y, transform: "translate(-100%, -50%)" }
+                    : { left: layout.x + ANILLO / 2 + gap, top: layout.y, transform: "translateY(-50%)" }
+                }
+              >
+                <EtiquetaZigzagTematica
+                  titulo={layout.nodo.titulo}
+                  estado={estado}
+                  esEvaluacion={esEvaluacion}
+                  alineacion={layout.textoALaIzquierda ? "right" : "left"}
+                />
+              </div>
+            </>
+          );
+
+          return (
+            <div
+              key={layout.nodo.id}
+              data-roadmap-node-id={layout.nodo.id}
+              data-roadmap-node={layout.nodo.id}
+              className="absolute inset-0 overflow-visible"
+            >
+              {layout.nodo.bloqueado ? (
+                <div className="contents" aria-disabled="true">
+                  {contenido}
+                </div>
+              ) : (
+                <Link href={layout.nodo.href} className="contents">
+                  {contenido}
+                </Link>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mx-auto flex w-full max-w-xs flex-col items-center lg:hidden">
+        {grupo.nodos.map((nodo, indice) => {
+          const activo = nodo.id === nodoActivoGlobalId && !nodo.completado && !nodo.bloqueado;
+          const estado = estadoEstacion(nodo, activo);
+          const Icono = iconoEstacion(nodo, indiceLeccionEnNodo(grupo.nodos, indice));
+          const esEvaluacion = nodo.tipo === "evaluacion";
+          const esUltimo = indice === grupo.nodos.length - 1;
+
+          const contenido = (
+            <div className="flex w-full flex-col items-center">
+              <EstacionZigzagTematica estado={estado} Icono={Icono} />
+              <div className="mt-3 w-full">
+                <EtiquetaZigzagTematica
+                  titulo={nodo.titulo}
+                  estado={estado}
+                  esEvaluacion={esEvaluacion}
+                  alineacion="center"
+                />
+              </div>
+            </div>
+          );
+
+          return (
+            <div
+              key={nodo.id}
+              data-roadmap-node-id={nodo.id}
+              data-roadmap-node={nodo.id}
+              className="flex w-full flex-col items-center"
+            >
+              {nodo.bloqueado ? (
+                <div aria-disabled="true">{contenido}</div>
+              ) : (
+                <Link href={nodo.href} className="flex w-full flex-col items-center">
+                  {contenido}
+                </Link>
+              )}
+              {!esUltimo && (
+                <div
+                  aria-hidden="true"
+                  className={cn(
+                    "my-3 h-10 w-1 shrink-0 rounded-full",
+                    nodo.completado ? "bg-[var(--interface-accent)]" : "bg-[var(--interface-border)]",
+                  )}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function RoadmapStructuredBusiness({
   grupos,
   grupo,
@@ -2196,122 +2438,60 @@ function RoadmapStructuredBusiness({
   onSeleccionarModulo: (indiceModulo: number) => void;
 }) {
   return (
-    <section className="mx-auto w-full max-w-5xl rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6 lg:p-7">
-      <div className="flex flex-col gap-5 border-b border-[var(--interface-border)] pb-5 lg:flex-row lg:items-end lg:justify-between">
-        <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--interface-accent)]">
-            Modulo {indiceModulo + 1} de {grupos.length}
-          </p>
-          <h1 className="mt-2 max-w-3xl text-2xl font-bold leading-tight tracking-normal">
-            {grupo.titulo}
-          </h1>
+    <div className="mx-auto w-full max-w-5xl">
+      <div className="rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[color-mix(in_srgb,var(--interface-surface-strong)_90%,transparent)] p-5 text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] backdrop-blur-sm sm:p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--interface-accent)]">
+              Modulo {indiceModulo + 1} de {grupos.length}
+            </p>
+            <h1 className="mt-2 max-w-3xl text-2xl font-bold leading-tight tracking-normal">
+              {grupo.titulo}
+            </h1>
+          </div>
+
+          <div className="w-full max-w-sm">
+            <div className="mb-2 flex items-center justify-between text-sm font-semibold">
+              <span className="text-[var(--interface-text-muted)]">Avance del modulo</span>
+              <span className="tabular-nums">{progresoModulo.porcentaje}%</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-[var(--interface-border)]">
+              <div
+                className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))] transition-[width] duration-500"
+                style={{ width: `${progresoModulo.porcentaje}%` }}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="w-full max-w-sm">
-          <div className="mb-2 flex items-center justify-between text-sm font-semibold">
-            <span className="text-[var(--interface-text-muted)]">Avance del modulo</span>
-            <span className="tabular-nums">{progresoModulo.porcentaje}%</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-[#dbe5e2] dark:bg-white/12">
-            <div
-              className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))] transition-[width] duration-500"
-              style={{ width: `${progresoModulo.porcentaje}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {grupos.map((item, index) => {
-          const disponible = indicesDisponibles.includes(index);
-          const activo = index === indiceModulo;
-          return (
-            <button
-              key={item.moduloId}
-              type="button"
-              disabled={!disponible}
-              onClick={() => onSeleccionarModulo(index)}
-              className={cn(
-                "min-h-10 shrink-0 rounded-lg border px-3 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)] disabled:cursor-not-allowed disabled:opacity-45",
-                activo
-                  ? "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)]"
-                  : "border-[var(--interface-border)] bg-transparent text-[var(--interface-text-muted)] hover:border-[color-mix(in_srgb,var(--interface-accent)_50%,transparent)] hover:text-[var(--interface-text)]",
-              )}
-            >
-              Modulo {index + 1}
-            </button>
-          );
-        })}
-      </div>
-
-      <ol className="mt-7 space-y-0">
-        {grupo.nodos.map((nodo, index) => {
-          const activo = nodo.id === nodoActivoGlobalId && !nodo.completado && !nodo.bloqueado;
-          const esEvaluacion = nodo.tipo === "evaluacion";
-          const numero = String(index + 1).padStart(2, "0");
-          const estadoTexto = nodo.bloqueado
-            ? "Bloqueado"
-            : nodo.completado
-              ? "Completado"
-              : activo
-                ? "En curso"
-                : "Pendiente";
-          const Icono = nodo.bloqueado
-            ? Lock
-            : nodo.completado
-              ? Check
-              : esEvaluacion
-                ? ClipboardCheck
-                : BookOpen;
-          const contenido = (
-            <div
-              className={cn(
-                "group relative flex min-h-16 items-center gap-4 border-b border-[var(--interface-border)] px-1 py-4 text-left last:border-b-0",
-                !nodo.bloqueado && "transition-colors hover:bg-[#0F766E]/[0.04]",
-              )}
-            >
-              <span
+        <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {grupos.map((item, index) => {
+            const disponible = indicesDisponibles.includes(index);
+            const activo = index === indiceModulo;
+            return (
+              <button
+                key={item.moduloId}
+                type="button"
+                disabled={!disponible}
+                onClick={() => onSeleccionarModulo(index)}
                 className={cn(
-                  "grid size-10 shrink-0 place-items-center rounded-full border text-sm font-bold",
-                  nodo.completado && "border-emerald-600 bg-emerald-600 text-white",
-                  activo && "border-[#061120] bg-[#061120] text-white dark:border-[var(--interface-accent)] dark:bg-[var(--interface-accent)] dark:text-[#061120]",
-                  !nodo.completado && !activo && !nodo.bloqueado && !esEvaluacion && "border-[var(--interface-border)] bg-white text-[var(--interface-text-muted)] dark:bg-white/[0.04]",
-                  esEvaluacion && !nodo.completado && !activo && "border-amber-400/50 bg-amber-400/10 text-amber-700 dark:text-amber-200",
-                  nodo.bloqueado && "border-slate-300 bg-slate-100 text-slate-400 dark:border-white/10 dark:bg-white/[0.04]",
+                  "min-h-10 shrink-0 rounded-lg border px-3 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)] disabled:cursor-not-allowed disabled:opacity-45",
+                  activo
+                    ? "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)]"
+                    : "border-[var(--interface-border)] bg-transparent text-[var(--interface-text-muted)] hover:border-[color-mix(in_srgb,var(--interface-accent)_50%,transparent)] hover:text-[var(--interface-text)]",
                 )}
               >
-                {nodo.completado || nodo.bloqueado || esEvaluacion ? (
-                  <Icono className="size-4" aria-hidden="true" />
-                ) : (
-                  numero
-                )}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold text-[var(--interface-text)]">
-                  {numero} · {nodo.titulo}
-                </span>
-                <span className="mt-1 block text-xs font-semibold text-[var(--interface-text-muted)]">
-                  {esEvaluacion ? "Evaluacion" : "Leccion"} · {estadoTexto}
-                </span>
-              </span>
-              {!nodo.bloqueado && (
-                <ArrowRight className="size-4 shrink-0 text-[var(--interface-accent)] opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden="true" />
-              )}
-            </div>
-          );
+                Modulo {index + 1}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-          return (
-            <li key={nodo.id}>
-              {nodo.bloqueado ? (
-                <div aria-disabled="true">{contenido}</div>
-              ) : (
-                <Link href={nodo.href}>{contenido}</Link>
-              )}
-            </li>
-          );
-        })}
-      </ol>
-    </section>
+      <div className="mt-8">
+        <RoadmapZigzagModulo grupo={grupo} nodoActivoGlobalId={nodoActivoGlobalId} />
+      </div>
+    </div>
   );
 }
 
@@ -2323,8 +2503,8 @@ function RoadmapLearningPathEducational({
   nodoActivoGlobalId: string | null;
 }) {
   return (
-    <section className="mx-auto w-full max-w-5xl space-y-5">
-      <div className="rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6">
+    <div className="mx-auto w-full max-w-5xl space-y-10">
+      <div className="rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[color-mix(in_srgb,var(--interface-surface-strong)_90%,transparent)] p-5 text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] backdrop-blur-sm sm:p-6">
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--interface-accent)]">
           Ruta de aprendizaje
         </p>
@@ -2339,102 +2519,38 @@ function RoadmapLearningPathEducational({
       {grupos.map((grupo, indiceModulo) => {
         const progresoModulo = calcularProgresoModulo(grupo.nodos);
         return (
-          <article
-            key={grupo.moduloId}
-            className="rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6"
-          >
-            <div className="flex flex-col gap-4 border-b border-[var(--interface-border)] pb-4 sm:flex-row sm:items-end sm:justify-between">
-              <div className="min-w-0">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--interface-accent)]">
-                  Modulo {indiceModulo + 1}
-                </p>
-                <h2 className="mt-1 text-xl font-bold leading-tight">{grupo.titulo}</h2>
-                <p className="mt-2 text-sm text-[var(--interface-text-muted)]">
-                  {progresoModulo.completados} de {progresoModulo.total} contenidos completados
-                </p>
-              </div>
-              <div className="w-full max-w-xs">
-                <div className="mb-2 flex items-center justify-between text-sm font-semibold">
-                  <span className="text-[var(--interface-text-muted)]">Progreso</span>
-                  <span className="tabular-nums">{progresoModulo.porcentaje}%</span>
+          <section key={grupo.moduloId} className="space-y-6">
+            <div className="rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[color-mix(in_srgb,var(--interface-surface-strong)_90%,transparent)] p-5 text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] backdrop-blur-sm sm:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--interface-accent)]">
+                    Modulo {indiceModulo + 1}
+                  </p>
+                  <h2 className="mt-1 text-xl font-bold leading-tight">{grupo.titulo}</h2>
+                  <p className="mt-2 text-sm text-[var(--interface-text-muted)]">
+                    {progresoModulo.completados} de {progresoModulo.total} contenidos completados
+                  </p>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-[#dce8e5] dark:bg-white/12">
-                  <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
-                    style={{ width: `${progresoModulo.porcentaje}%` }}
-                  />
+                <div className="w-full max-w-xs">
+                  <div className="mb-2 flex items-center justify-between text-sm font-semibold">
+                    <span className="text-[var(--interface-text-muted)]">Progreso</span>
+                    <span className="tabular-nums">{progresoModulo.porcentaje}%</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-[var(--interface-border)]">
+                    <div
+                      className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
+                      style={{ width: `${progresoModulo.porcentaje}%` }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <ol className="mt-3 divide-y divide-[var(--interface-border)]">
-              {grupo.nodos.map((nodo) => {
-                const activo = nodo.id === nodoActivoGlobalId && !nodo.completado && !nodo.bloqueado;
-                const esEvaluacion = nodo.tipo === "evaluacion";
-                const estadoTexto = nodo.bloqueado
-                  ? "Bloqueado"
-                  : nodo.completado
-                    ? "Completado"
-                    : activo
-                      ? "En progreso"
-                      : "No iniciado";
-                const Icono = nodo.bloqueado
-                  ? Lock
-                  : nodo.completado
-                    ? Check
-                    : esEvaluacion
-                      ? ClipboardCheck
-                      : BookOpen;
-                const contenido = (
-                  <div
-                    data-roadmap-node-id={nodo.id}
-                    data-roadmap-node={nodo.id}
-                    className={cn(
-                      "group flex min-h-16 items-center gap-4 py-4",
-                      !nodo.bloqueado && "transition-colors hover:bg-[#2AA99A]/[0.045]",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "grid size-10 shrink-0 place-items-center rounded-xl border",
-                        nodo.completado && "border-emerald-600 bg-emerald-600 text-white",
-                        activo && "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-white",
-                        esEvaluacion && !nodo.completado && !activo && "border-amber-400/45 bg-amber-400/10 text-amber-700 dark:text-amber-200",
-                        nodo.bloqueado && "border-slate-300 bg-slate-100 text-slate-400 dark:border-white/10 dark:bg-white/[0.04]",
-                        !nodo.completado && !activo && !nodo.bloqueado && !esEvaluacion && "border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)]",
-                      )}
-                    >
-                      <Icono className="size-4" aria-hidden="true" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-bold text-[var(--interface-text)]">
-                        {nodo.titulo}
-                      </span>
-                      <span className="mt-1 block text-xs font-semibold text-[var(--interface-text-muted)]">
-                        {esEvaluacion ? "Evaluacion" : "Leccion"} · {estadoTexto}
-                      </span>
-                    </span>
-                    {!nodo.bloqueado && (
-                      <ArrowRight className="size-4 shrink-0 text-[var(--interface-accent)] opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden="true" />
-                    )}
-                  </div>
-                );
-
-                return (
-                  <li key={nodo.id}>
-                    {nodo.bloqueado ? (
-                      <div aria-disabled="true">{contenido}</div>
-                    ) : (
-                      <Link href={nodo.href}>{contenido}</Link>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          </article>
+            <RoadmapZigzagModulo grupo={grupo} nodoActivoGlobalId={nodoActivoGlobalId} />
+          </section>
         );
       })}
-    </section>
+    </div>
   );
 }
 
@@ -2447,7 +2563,7 @@ function RoadmapLevelMapGamified({
 }) {
   return (
     <section className="mx-auto w-full max-w-4xl space-y-6">
-      <div className="relative overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6">
+      <div className="relative overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] sm:p-6">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_0%,rgba(103,232,249,0.14),transparent_45%)]"
@@ -2468,7 +2584,7 @@ function RoadmapLevelMapGamified({
         return (
           <article
             key={grupo.moduloId}
-            className="rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] shadow-[var(--interface-shadow)] sm:p-6"
+            className="rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] sm:p-6"
           >
             <div className="flex flex-col gap-4 border-b border-[var(--interface-border)] pb-4 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
@@ -2485,9 +2601,9 @@ function RoadmapLevelMapGamified({
                   <span className="text-[var(--interface-text-muted)]">Progreso</span>
                   <span className="tabular-nums">{progresoModulo.porcentaje}%</span>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
+                <div className="h-2.5 overflow-hidden rounded-full bg-[var(--interface-border)]">
                   <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,#91DC00,#67e8f9)] shadow-[0_0_12px_rgba(103,232,249,0.5)]"
+                    className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))] shadow-[0_0_12px_rgba(103,232,249,0.5)]"
                     style={{ width: `${progresoModulo.porcentaje}%` }}
                   />
                 </div>
@@ -2527,16 +2643,18 @@ function RoadmapLevelMapGamified({
                         aria-hidden="true"
                         className={cn(
                           "absolute left-[27px] top-14 h-[calc(100%-1.5rem)] w-0.5",
-                          nodo.completado ? "bg-emerald-500/60" : "bg-[var(--interface-border)]",
+                          nodo.completado
+                            ? "bg-[color-mix(in_srgb,var(--interface-accent)_60%,transparent)]"
+                            : "bg-[var(--interface-border)]",
                         )}
                       />
                     )}
                     <span
                       className={cn(
                         "relative z-10 grid size-14 shrink-0 place-items-center rounded-2xl border-2 text-base font-bold transition-shadow",
-                        nodo.completado && "border-emerald-500 bg-emerald-500 text-white",
+                        nodo.completado && "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)]",
                         activo &&
-                          "border-[var(--interface-accent-secondary)] bg-[var(--interface-accent-secondary)] text-[#06201c] shadow-[0_0_0_6px_rgba(103,232,249,0.18),0_0_24px_rgba(103,232,249,0.55)]",
+                          "border-[var(--interface-accent-secondary)] bg-[var(--interface-accent-secondary)] text-[var(--interface-accent-foreground)] shadow-[0_0_0_6px_rgba(103,232,249,0.18),0_0_24px_rgba(103,232,249,0.55)]",
                         esEvaluacion &&
                           !nodo.completado &&
                           !activo &&
