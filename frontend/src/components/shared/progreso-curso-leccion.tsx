@@ -10,7 +10,7 @@ export function ProgresoCursoLeccion({
   total,
 }: ProgresoCursoLeccionProps) {
   return (
-    <div className="space-y-2 border-b border-white/15 bg-[#061120]/14 px-4 py-3">
+    <div className="space-y-2 border-b border-white/12 bg-[#061120]/10 px-4 py-3">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs font-semibold text-white opacity-80">Progreso del curso</p>
         <p className="text-xs font-bold tabular-nums text-white">{porcentaje}%</p>

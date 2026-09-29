@@ -46,10 +46,20 @@ export default async function EvaluacionColaboradorPage({
           : estiloFondoInterfaz(preferenciaInterfaz?.interfaceVariant, "quizBackground")
       }
     >
-      <div className="mx-auto w-full max-w-[960px] space-y-4 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+      <div
+        className={
+          preferenciaInterfaz?.interfaceVariant === "business"
+            ? "mx-auto w-full max-w-[1420px] space-y-5 px-4 py-6 sm:px-8 sm:py-8 lg:px-10"
+            : "mx-auto w-full max-w-[960px] space-y-4 px-4 py-5 sm:px-6 sm:py-7 lg:px-8"
+        }
+      >
         <Link
           href={`/mis-cursos/${cursoId}?roadmapFocus=${encodeURIComponent(evaluacionId)}`}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-[#061120]/35 px-3 py-2 text-xs font-semibold text-white/80 backdrop-blur-md transition-colors hover:bg-white/15 hover:text-white"
+          className={
+            preferenciaInterfaz?.interfaceVariant === "business"
+              ? "inline-flex items-center gap-2 rounded-full border border-[#9ec8ff]/55 bg-[#123f86]/36 px-4 py-2.5 text-sm font-bold text-[#e8f2ff] shadow-[0_8px_24px_rgba(2,16,50,0.22)] backdrop-blur-md transition-colors hover:bg-[#174d95]/55 hover:text-white"
+              : "inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-[#061120]/35 px-3 py-2 text-xs font-semibold text-white/80 backdrop-blur-md transition-colors hover:bg-white/15 hover:text-white"
+          }
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Volver al curso

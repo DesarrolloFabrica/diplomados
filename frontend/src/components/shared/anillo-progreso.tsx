@@ -3,11 +3,22 @@ interface AnilloProgresoProps {
   tamano: number;
   grosor?: number;
   className?: string;
+  /** Color del track de fondo. Por defecto, el de marca CUN (no tocar los llamadores existentes). */
+  claseTrack?: string;
+  /** Color del segmento de progreso. Por defecto, el verde de marca CUN. */
+  claseProgreso?: string;
 }
 
 // Anillo de progreso circular (como los de actividad de un reloj), para
 // mostrar avance sin recurrir a una barra rectangular tipo lista/tabla.
-export function AnilloProgreso({ porcentaje, tamano, grosor = 5, className }: AnilloProgresoProps) {
+export function AnilloProgreso({
+  porcentaje,
+  tamano,
+  grosor = 5,
+  className,
+  claseTrack = "stroke-[#DCE3EA] dark:stroke-border",
+  claseProgreso = "stroke-cun-green dark:stroke-primary",
+}: AnilloProgresoProps) {
   const radio = (tamano - grosor) / 2;
   const circunferencia = 2 * Math.PI * radio;
   const offset = circunferencia * (1 - Math.min(100, Math.max(0, porcentaje)) / 100);
@@ -19,7 +30,7 @@ export function AnilloProgreso({ porcentaje, tamano, grosor = 5, className }: An
         cy={tamano / 2}
         r={radio}
         fill="none"
-        className="stroke-[#DCE3EA] dark:stroke-border"
+        className={claseTrack}
         strokeWidth={grosor}
       />
       <circle
@@ -27,7 +38,7 @@ export function AnilloProgreso({ porcentaje, tamano, grosor = 5, className }: An
         cy={tamano / 2}
         r={radio}
         fill="none"
-        className="stroke-cun-green dark:stroke-primary"
+        className={claseProgreso}
         strokeWidth={grosor}
         strokeDasharray={circunferencia}
         strokeDashoffset={offset}

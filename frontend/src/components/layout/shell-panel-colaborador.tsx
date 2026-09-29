@@ -444,6 +444,13 @@ function ShellPanelLateral({
   const capsulaRef = useRef<HTMLDivElement>(null);
   const ocultarTimeoutRef = useRef<number | null>(null);
   const esDashboardColaborador = tema === "colaborador" && pathname === "/mis-cursos";
+  // Visualizador de contenido (lección/evaluación): igual que creative, no
+  // debe quedar acotado por --interface-content-width — el fondo y el panel
+  // de esquema necesitan todo el ancho disponible, no solo el resto de
+  // pantallas (dashboard/catálogo/roadmap sí conservan ese ancho acotado).
+  const esVisualizadorContenido = /^\/mis-cursos\/[^/]+\/(lecciones|evaluaciones)\//.test(
+    pathname ?? "",
+  );
   const esBusiness = interfaceConfig?.id === "business";
   const esEducational = interfaceConfig?.id === "educational";
   const esGamified = interfaceConfig?.id === "gamified";
@@ -459,6 +466,14 @@ function ShellPanelLateral({
   // business/educational, no un <video> intentando reproducir un .png.
   const esSuperficiePropia = esBusiness || esEducational || esGamified;
   const esDashboardInmersivo = esDashboardColaborador && !esSuperficiePropia;
+  const dashboardBackgroundAsset = resolveInterfaceAsset({
+    variant: interfaceConfig?.id,
+    asset: "dashboardBackground",
+    fallback: esDashboardInmersivo ? "/images/Dashboard_fondo.mp4" : undefined,
+  });
+  const esDashboardConVideo =
+    esDashboardColaborador &&
+    Boolean(dashboardBackgroundAsset?.match(/\.(mp4|webm|ogg)(?:[?#].*)?$/i));
 
   const cancelarOcultamientoDock = useCallback(() => {
     if (ocultarTimeoutRef.current !== null) {
@@ -512,7 +527,11 @@ function ShellPanelLateral({
   return (
     <div
       data-shell-variant={interfaceConfig?.dashboard.layout ?? "immersive"}
-      style={estiloFondoInterfaz(interfaceConfig?.id, "dashboardBackground")}
+      style={
+        esDashboardConVideo
+          ? undefined
+          : estiloFondoInterfaz(interfaceConfig?.id, "dashboardBackground")
+      }
       className={cn(
         "flex min-h-dvh w-full bg-[#061120]",
         esBusiness && "business-shell",
@@ -650,9 +669,18 @@ function ShellPanelLateral({
                   "before:pointer-events-none before:absolute before:inset-0 before:z-20 before:bg-[linear-gradient(90deg,rgba(6,17,32,0.78)_0%,rgba(6,17,32,0.42)_34%,rgba(6,17,32,0.08)_62%,rgba(6,17,32,0.22)_100%)]",
                   "after:pointer-events-none after:absolute after:inset-0 after:z-20 after:bg-[linear-gradient(180deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.02)_28%,rgba(6,17,32,0.28)_100%)]",
                 ]
+              : esDashboardConVideo
+                ? [
+                    "isolate min-h-dvh",
+                    "p-4 pb-10 sm:p-5 md:p-6 lg:p-7 xl:p-8",
+                    "before:pointer-events-none before:absolute before:inset-0 before:z-20 before:bg-black/10",
+                    esGamified && "gamified-main",
+                  ]
               : esSuperficiePropia
                 ? cn(
-                    "min-h-dvh p-4 pb-10 sm:p-5 md:p-6 lg:p-7 xl:p-8",
+                    esVisualizadorContenido
+                      ? "p-5 pb-14 sm:p-6 lg:p-8 xl:p-10"
+                      : "min-h-dvh p-4 pb-10 sm:p-5 md:p-6 lg:p-7 xl:p-8",
                     esBusiness && "business-main",
                     esEducational && "educational-main",
                     esGamified && "gamified-main",
@@ -660,13 +688,9 @@ function ShellPanelLateral({
                 : "p-5 pb-14 sm:p-6 lg:p-8 xl:p-10",
           )}
         >
-          {esDashboardInmersivo && (
+          {esDashboardConVideo && dashboardBackgroundAsset && (
             <video
-              src={resolveInterfaceAsset({
-                variant: interfaceConfig?.id,
-                asset: "dashboardBackground",
-                fallback: "/images/Dashboard_fondo.mp4",
-              })}
+              src={dashboardBackgroundAsset}
               autoPlay
               loop
               muted
@@ -681,7 +705,9 @@ function ShellPanelLateral({
           <div
             className={cn(
               esDashboardColaborador && "relative z-30",
-              esSuperficiePropia && "mx-auto w-full max-w-[var(--interface-content-width)]",
+              esSuperficiePropia &&
+                !esVisualizadorContenido &&
+                "mx-auto w-full max-w-[var(--interface-content-width)]",
             )}
           >
             {children}

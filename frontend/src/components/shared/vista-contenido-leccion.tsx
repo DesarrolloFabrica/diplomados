@@ -262,9 +262,9 @@ export function VistaContenidoLeccion({
         className={cn(
           "overflow-hidden",
           esFocused
-            ? "rounded-lg border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] [box-shadow:var(--interface-shadow)]"
+            ? "business-player-panel rounded-[20px] border border-[var(--business-player-border)] bg-[var(--business-player-panel)] shadow-[0_22px_55px_rgba(4,28,74,0.32)] backdrop-blur-sm"
             : esStudy
-              ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] [box-shadow:var(--interface-shadow)]"
+              ? "study-player-panel rounded-2xl border border-[var(--study-border)] bg-[var(--study-surface-strong)] shadow-[0_20px_50px_rgba(6,17,10,0.35)]"
               : esMission
                 ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] shadow-[0_0_28px_rgba(103,232,249,0.16)]"
                 : cn(
@@ -276,9 +276,13 @@ export function VistaContenidoLeccion({
         <div
           className={cn(
             "relative overflow-hidden px-5 py-4 sm:px-6 sm:py-5",
-            esFocused || esStudy || esMission
-              ? "border-b border-[var(--interface-border)] bg-[var(--interface-surface)]"
-              : "border-b border-white/15 bg-gradient-to-r from-[#061120]/92 via-[#0b3042]/78 to-[#0c514b]/62",
+            esStudy
+              ? "border-b border-[var(--study-border)] bg-[var(--study-surface)]"
+              : esFocused
+                ? "border-b border-[var(--business-player-border)] bg-[linear-gradient(180deg,rgba(245,250,255,0.94),rgba(213,233,255,0.78))]"
+              : esMission
+                ? "border-b border-[var(--interface-border)] bg-[var(--interface-surface)]"
+                : "border-b border-white/15 bg-gradient-to-r from-[#061120]/92 via-[#0b3042]/78 to-[#0c514b]/62",
           )}
         >
           {!(esFocused || esStudy || esMission) && (
@@ -291,7 +295,9 @@ export function VistaContenidoLeccion({
             <p
               className={cn(
                 "text-[11px] font-semibold uppercase tracking-[0.12em]",
-                esFocused || esStudy || esMission
+                esFocused
+                  ? "text-[var(--business-player-muted)]"
+                  : esStudy || esMission
                   ? "text-[var(--interface-accent-secondary)]"
                   : "text-teal-100/75",
               )}
@@ -302,7 +308,13 @@ export function VistaContenidoLeccion({
               <h1
                 className={cn(
                   "font-display text-xl font-bold sm:text-2xl",
-                  esFocused || esStudy || esMission ? "text-[var(--interface-text)]" : "text-white",
+                  esStudy
+                    ? "text-[var(--study-text)]"
+                    : esFocused
+                      ? "text-[var(--business-player-text)]"
+                    : esMission
+                      ? "text-[var(--interface-text)]"
+                      : "text-white",
                 )}
               >
                 {tituloLeccion}
@@ -312,12 +324,10 @@ export function VistaContenidoLeccion({
                   "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold",
                   esFocused
                     ? completada
-                      ? "border-[var(--interface-accent)] bg-[color-mix(in_srgb,var(--interface-accent)_12%,transparent)] text-[var(--interface-accent)]"
-                      : "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)]"
+                      ? "border-[var(--business-player-accent)] bg-[rgba(200,255,245,0.78)] text-[var(--business-player-text)] shadow-[0_0_18px_rgba(34,212,189,0.28)]"
+                      : "border-[var(--business-player-accent)] bg-[rgba(200,255,245,0.72)] text-[var(--business-player-text)] shadow-[0_0_18px_rgba(34,212,189,0.22)]"
                     : esStudy
-                      ? completada
-                        ? "border-[var(--interface-accent)] bg-[color-mix(in_srgb,var(--interface-accent)_12%,transparent)] text-[var(--interface-accent)]"
-                        : "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)]"
+                      ? "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)]"
                       : esMission
                         ? completada
                           ? "border-[var(--interface-accent-secondary)] bg-[color-mix(in_srgb,var(--interface-accent-secondary)_15%,transparent)] text-[var(--interface-accent-secondary)] shadow-[0_0_10px_rgba(103,232,249,0.25)]"
@@ -330,15 +340,15 @@ export function VistaContenidoLeccion({
                 <span
                   className={cn(
                     "h-1.5 w-1.5 rounded-full",
-                    esFocused || esStudy
-                      ? completada
-                        ? "bg-[var(--interface-accent)]"
-                        : "bg-[var(--interface-accent-secondary)]"
-                      : esMission
-                        ? "bg-[var(--interface-accent-secondary)]"
-                        : completada
-                          ? "bg-[#91DC00]"
-                          : "bg-teal-300",
+                    esStudy
+                      ? "bg-[var(--interface-accent-foreground)]"
+                      : esFocused
+                        ? "bg-[var(--business-player-accent)]"
+                        : esMission
+                          ? "bg-[var(--interface-accent-secondary)]"
+                          : completada
+                            ? "bg-[#91DC00]"
+                            : "bg-teal-300",
                   )}
                 />
                 {completada ? "Completado" : "En progreso"}
@@ -351,9 +361,13 @@ export function VistaContenidoLeccion({
           className={cn(
             tabActual === "video"
               ? "bg-black/90 p-1 sm:p-1.5"
-              : esFocused || esStudy || esMission
-                ? "bg-[var(--interface-surface)] p-2.5 sm:p-3"
-                : "bg-white/76 p-2.5 sm:p-3",
+              : esStudy
+                ? "border-y-2 border-[var(--interface-accent-secondary)] bg-[#fffdf6] p-2.5 sm:p-3"
+                : esFocused
+                  ? "bg-[rgba(245,250,255,0.76)] p-2.5 sm:p-3"
+                : esMission
+                  ? "bg-[var(--interface-surface)] p-2.5 sm:p-3"
+                  : "bg-white/76 p-2.5 sm:p-3",
           )}
         >
           {mostrarInfografiaInteractiva ? (
@@ -468,10 +482,10 @@ export function VistaContenidoLeccion({
                     tabIndex={activo ? 0 : -1}
                     onClick={() => setTabActiva(id)}
                     style={
-                      (esFocused || esStudy) && activo
+                      esFocused && activo
                         ? {
                             backgroundColor:
-                              "color-mix(in srgb, var(--interface-accent-secondary) 12%, transparent)",
+                              "rgba(205, 255, 245, 0.82)",
                           }
                         : esMission && activo
                           ? {
@@ -484,17 +498,17 @@ export function VistaContenidoLeccion({
                       "group grid min-h-[68px] grid-cols-[42px_minmax(0,1fr)] items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all",
                       esFocused
                         ? cn(
-                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] focus-visible:ring-offset-2",
+                            "rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--business-player-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05306e]",
                             activo
-                              ? "border-[var(--interface-accent-secondary)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)]"
-                              : "border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)] hover:border-[var(--interface-accent-secondary)] hover:text-[var(--interface-text)]",
+                              ? "border-[var(--business-player-accent)] text-[var(--business-player-text)] shadow-[0_0_0_2px_rgba(34,212,189,0.35),0_12px_24px_rgba(4,28,74,0.18)]"
+                              : "border-[var(--business-player-border)] bg-[rgba(220,238,255,0.86)] text-[var(--business-player-muted)] shadow-[0_8px_18px_rgba(4,28,74,0.14)] hover:border-[var(--business-player-accent)] hover:text-[var(--business-player-text)]",
                           )
                         : esStudy
                           ? cn(
-                              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] focus-visible:ring-offset-2",
+                              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)] focus-visible:ring-offset-2",
                               activo
-                                ? "border-[var(--interface-accent-secondary)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)]"
-                                : "border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)] hover:border-[var(--interface-accent-secondary)] hover:text-[var(--interface-text)]",
+                                ? "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)] [box-shadow:0_0_14px_color-mix(in_srgb,var(--interface-accent)_45%,transparent)]"
+                                : "border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)] hover:border-[var(--interface-accent)] hover:text-[var(--interface-text)]",
                             )
                           : esMission
                             ? cn(
@@ -514,13 +528,19 @@ export function VistaContenidoLeccion({
                     <span
                       className={cn(
                         "flex h-10 w-10 items-center justify-center rounded-lg border",
-                        esFocused || esStudy || esMission
-                          ? activo
-                            ? "border-[var(--interface-accent-secondary)] bg-[var(--interface-surface-strong)] text-[var(--interface-accent-secondary)]"
-                            : "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] group-hover:text-[var(--interface-accent-secondary)]"
-                          : activo
-                            ? "border-white/40 bg-white/20 text-[#b7f36b]"
-                            : "border-white/15 bg-white/10 text-teal-100/80 group-hover:text-white",
+                        esStudy && activo
+                          ? "border-white/35 bg-white/20 text-[var(--interface-accent-foreground)]"
+                          : esFocused
+                            ? activo
+                              ? "border-white/80 bg-white/75 text-[var(--business-player-accent)] shadow-[0_0_18px_rgba(34,212,189,0.35)]"
+                              : "border-white/70 bg-[rgba(245,250,255,0.46)] text-[var(--business-player-muted)] group-hover:text-[var(--business-player-accent)]"
+                          : esStudy || esMission
+                            ? activo
+                              ? "border-[var(--interface-accent-secondary)] bg-[var(--interface-surface-strong)] text-[var(--interface-accent-secondary)]"
+                              : "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] group-hover:text-[var(--interface-accent-secondary)]"
+                            : activo
+                              ? "border-white/40 bg-white/20 text-[#b7f36b]"
+                              : "border-white/15 bg-white/10 text-teal-100/80 group-hover:text-white",
                       )}
                     >
                       <Icono className="h-5 w-5" />
@@ -530,7 +550,13 @@ export function VistaContenidoLeccion({
                       <span
                         className={cn(
                           "mt-1 block truncate text-[11px] font-medium",
-                          esFocused || esStudy || esMission ? "text-[var(--interface-text-muted)]" : "text-white/55",
+                          esStudy && activo
+                            ? "text-[color-mix(in_srgb,var(--interface-accent-foreground)_80%,transparent)]"
+                            : esFocused
+                              ? "text-[rgba(31,63,133,0.78)]"
+                            : esStudy || esMission
+                              ? "text-[var(--interface-text-muted)]"
+                              : "text-white/55",
                         )}
                       >
                         {detalleTab(id)}

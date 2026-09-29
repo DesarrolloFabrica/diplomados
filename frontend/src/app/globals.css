@@ -444,23 +444,6 @@
     gap: 1rem;
   }
 
-  [data-interface-variant="business"] [role="group"] > button {
-    min-height: 2.5rem;
-    border-radius: 10px;
-    border-color: transparent;
-    background: transparent;
-    box-shadow: none;
-    color: var(--interface-text-muted);
-    backdrop-filter: none;
-  }
-
-  [data-interface-variant="business"] [role="group"] > button[aria-pressed="true"] {
-    border-color: var(--interface-border);
-    background: var(--interface-surface-strong);
-    color: var(--interface-text);
-    box-shadow: inset 0 -2px 0 var(--interface-accent);
-  }
-
   [data-interface-variant="business"] [data-catalog-card="business"] {
     scroll-snap-align: start;
   }
@@ -477,7 +460,7 @@
       var(--interface-bg-image, none),
       radial-gradient(circle at 12% 0%, rgba(34, 211, 238, 0.12), transparent 26%),
       linear-gradient(135deg, #060f1a 0%, #0a1826 54%, #0d1f30 100%);
-    background-size: cover, cover, auto, auto;
+    background-size: cover, cover, auto, auto, auto;
     background-position: var(--interface-bg-position, center);
     background-repeat: no-repeat;
   }
@@ -488,7 +471,7 @@
       var(--interface-bg-image, none),
       radial-gradient(circle at 12% 0%, rgba(34, 211, 238, 0.12), transparent 26%),
       linear-gradient(135deg, var(--interface-bg), #0a1826 100%);
-    background-size: cover, cover, auto, auto;
+    background-size: cover, cover, auto, auto, auto;
     background-position: var(--interface-bg-position, center);
     background-repeat: no-repeat;
   }
@@ -511,26 +494,40 @@
     box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
   }
 
+  .business-player-panel {
+    --business-player-panel: rgba(214, 234, 255, 0.88);
+    --business-player-surface: rgba(231, 244, 255, 0.84);
+    --business-player-surface-strong: rgba(247, 251, 255, 0.94);
+    --business-player-border: rgba(184, 213, 247, 0.92);
+    --business-player-text: #172f78;
+    --business-player-muted: #536faa;
+    --business-player-accent: #22d4bd;
+  }
+
   [data-interface-variant="business"] .quiz-view:has([data-quiz-variant="professional"]) {
     background-image:
       var(--interface-overlay, none),
       var(--interface-bg-image, none),
-      radial-gradient(circle at 85% 6%, rgba(34, 211, 238, 0.12), transparent 24%),
-      linear-gradient(135deg, var(--interface-bg), #e7edf3 100%);
+      radial-gradient(circle at 86% 8%, rgba(0, 115, 255, 0.22), transparent 30%),
+      radial-gradient(circle at 4% 78%, rgba(0, 115, 255, 0.18), transparent 34%),
+      linear-gradient(135deg, #031a48 0%, #063b8f 48%, #021438 100%);
     background-size: cover, cover, auto, auto;
     background-position: var(--interface-bg-position, center);
     background-repeat: no-repeat;
+    background-color: #021438;
   }
 
   html.dark [data-interface-variant="business"] .quiz-view:has([data-quiz-variant="professional"]) {
     background-image:
       var(--interface-overlay, none),
       var(--interface-bg-image, none),
-      radial-gradient(circle at 85% 6%, rgba(34, 211, 238, 0.12), transparent 24%),
-      linear-gradient(135deg, var(--interface-bg), #0a1826 100%);
+      radial-gradient(circle at 86% 8%, rgba(0, 115, 255, 0.22), transparent 30%),
+      radial-gradient(circle at 4% 78%, rgba(0, 115, 255, 0.18), transparent 34%),
+      linear-gradient(135deg, #031a48 0%, #063b8f 48%, #021438 100%);
     background-size: cover, cover, auto, auto;
     background-position: var(--interface-bg-position, center);
     background-repeat: no-repeat;
+    background-color: #021438;
   }
 
   [data-interface-variant="business"] .quiz-view:has([data-quiz-variant="professional"])::before,
@@ -542,49 +539,67 @@
   }
 
   [data-interface-variant="business"] [data-quiz-variant="professional"] {
-    border-color: var(--interface-border);
-    border-radius: var(--interface-radius);
-    background: var(--interface-surface-strong);
-    color: var(--interface-text);
-    box-shadow: var(--interface-shadow);
-    backdrop-filter: none;
+    --business-quiz-panel: rgba(7, 46, 111, 0.7);
+    --business-quiz-border: rgba(128, 174, 239, 0.62);
+    --business-quiz-text: #f3f8ff;
+    --business-quiz-muted: rgba(224, 236, 255, 0.82);
+    --business-quiz-aqua: #93f5ec;
+    --business-quiz-lime: #91dc00;
+    border-color: var(--business-quiz-border);
+    border-radius: 22px;
+    background: var(--business-quiz-panel);
+    color: var(--business-quiz-text);
+    box-shadow: 0 26px 70px rgba(2, 16, 50, 0.34);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   [data-interface-variant="business"] [data-quiz-variant="professional"] h1,
   [data-interface-variant="business"] [data-quiz-variant="professional"] p,
   [data-interface-variant="business"] [data-quiz-variant="professional"] label,
   [data-interface-variant="business"] [data-quiz-variant="professional"] header span {
-    color: var(--interface-text);
+    color: inherit;
   }
 
   [data-interface-variant="business"] [data-quiz-variant="professional"] header p,
   [data-interface-variant="business"] [data-quiz-variant="professional"] label span:last-child {
-    color: var(--interface-text-muted);
+    color: inherit;
   }
 
   [data-interface-variant="business"] [data-quiz-variant="professional"] label {
-    border-color: var(--interface-border);
-    background: rgba(11, 91, 115, 0.04);
+    border-color: rgba(132, 170, 230, 0.36);
+    background: rgba(6, 32, 82, 0.38);
   }
 
   [data-interface-variant="business"] [data-quiz-variant="professional"] label:has(input:checked) {
-    border-color: var(--interface-accent);
-    background: rgba(11, 91, 115, 0.1);
+    border-color: var(--business-quiz-lime);
+    background: rgba(6, 32, 82, 0.64);
   }
 
+  /* Pedido explícito: el fondo del dashboard educativo un poco más oscuro y
+     con un poco de blur. El asset (--interface-bg-image) se pinta en un
+     ::before propio con `filter: blur()` — filtrar el elemento entero
+     también difuminaría las tarjetas/texto encima, así que solo la capa de
+     imagen vive ahí. `isolation: isolate` contiene el z-index negativo del
+     pseudo-elemento dentro de este contenedor (no se escapa detrás de un
+     ancestro), y no afecta al dock `position: fixed` (isolation/position:
+     relative no crean un nuevo contenedor para fixed, solo transform/filter
+     en el propio elemento posicionado lo harían). */
   [data-interface-variant="educational"] .educational-shell {
-    /* Capas 1-2: asset/overlay de Fase 9 (vacías por defecto). El resto es
-       la textura "papel/pergamino" de respaldo: trama sutil + un cálido
-       resplandor de "luz de lectura" en tonos verde profundo/dorado. */
+    position: relative;
+    isolation: isolate;
+    /* Capas: overlay (Fase 9, ahora más oscuro) + textura "papel/pergamino"
+       de respaldo: trama sutil + un cálido resplandor de "luz de lectura"
+       en tonos verde profundo/dorado. La imagen de fondo va aparte, en
+       ::before, para poder difuminarla sin afectar este texto/tarjetas. */
     background-image:
       var(--interface-overlay, none),
-      var(--interface-bg-image, none),
       linear-gradient(rgba(93, 64, 28, 0.05) 1px, transparent 1px),
       linear-gradient(90deg, rgba(93, 64, 28, 0.05) 1px, transparent 1px),
       radial-gradient(circle at 12% 4%, rgba(184, 134, 58, 0.16), transparent 26%),
       radial-gradient(circle at 92% 14%, rgba(31, 92, 63, 0.14), transparent 26%),
       linear-gradient(135deg, #f6efe0 0%, #f1e8d4 56%, #fbf6e9 100%);
-    background-size: cover, cover, 26px 26px, 26px 26px, auto, auto, auto;
+    background-size: cover, 26px 26px, 26px 26px, auto, auto, auto;
     background-position: var(--interface-bg-position, center);
     background-repeat: no-repeat;
   }
@@ -592,26 +607,42 @@
   html.dark [data-interface-variant="educational"] .educational-shell {
     background-image:
       var(--interface-overlay, none),
-      var(--interface-bg-image, none),
       linear-gradient(rgba(244, 236, 216, 0.035) 1px, transparent 1px),
       linear-gradient(90deg, rgba(244, 236, 216, 0.035) 1px, transparent 1px),
       radial-gradient(circle at 12% 4%, rgba(217, 166, 62, 0.1), transparent 26%),
       radial-gradient(circle at 92% 14%, rgba(74, 157, 111, 0.12), transparent 26%),
       linear-gradient(135deg, #10190f 0%, #142117 56%, #10190f 100%);
-    background-size: cover, cover, 26px 26px, 26px 26px, auto, auto, auto;
+    background-size: cover, 26px 26px, 26px 26px, auto, auto, auto;
     background-position: var(--interface-bg-position, center);
     background-repeat: no-repeat;
+  }
+
+  [data-interface-variant="educational"] .educational-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--interface-bg-image, none);
+    background-size: cover;
+    background-position: var(--interface-bg-position, center);
+    background-repeat: no-repeat;
+    filter: blur(6px);
   }
 
   [data-interface-variant="educational"] .educational-main {
     background: transparent;
   }
 
+  /* Pedido explícito: el menú (dock/sidebar) de educational se aparta del
+     ivory/dorado del resto de la interfaz — verde esmeralda notorio, con
+     detalles dorados sutiles en hover/estado activo. Es una desviación
+     deliberada (corrección sobre un primer intento en azul), no una
+     filtración de otra variante. */
   [data-interface-variant="educational"] .collaborator-sidebar {
-    border-color: var(--interface-border);
-    background: color-mix(in srgb, var(--interface-surface-strong) 94%, transparent);
-    color: var(--interface-text);
-    box-shadow: var(--interface-shadow);
+    border-color: rgba(184, 134, 58, 0.35);
+    background: linear-gradient(135deg, #022c22 0%, #065f46 60%, #047857 100%);
+    color: #fdf8ec;
+    box-shadow: 0 14px 36px rgba(6, 95, 70, 0.35);
     backdrop-filter: blur(var(--interface-blur));
     -webkit-backdrop-filter: blur(var(--interface-blur));
   }
@@ -624,6 +655,23 @@
   [data-interface-variant="educational"] .collaborator-sidebar p,
   [data-interface-variant="educational"] .collaborator-sidebar span {
     color: inherit;
+  }
+
+  [data-interface-variant="educational"] .collaborator-sidebar a {
+    border-color: transparent;
+    background-color: rgba(253, 248, 236, 0.1);
+    color: rgba(253, 248, 236, 0.85);
+  }
+
+  [data-interface-variant="educational"] .collaborator-sidebar a:hover {
+    background-color: rgba(184, 134, 58, 0.22);
+    color: #fdf8ec;
+  }
+
+  [data-interface-variant="educational"] .collaborator-sidebar a[aria-current="page"] {
+    background-color: #b8863a;
+    color: #06251b;
+    box-shadow: 0 4px 14px rgba(6, 17, 32, 0.25);
   }
 
   [data-interface-variant="educational"] [data-dashboard-layout="learning"] {
@@ -682,6 +730,20 @@
     border-color: var(--interface-hero-border);
     background: var(--interface-surface-strong);
     box-shadow: var(--interface-shadow);
+  }
+
+  /* Panel del reproductor (Fase 14): vidrio verde oscuro translúcido con
+     borde dorado, para que la biblioteca de fondo se vea a través de él —
+     independiente de --interface-surface/-strong (esos siguen siendo el
+     marfil claro habitual para las tarjetas de recursos y "Siguiente
+     clase", que se quedan como están). Mismo valor en claro/oscuro: la
+     referencia visual pide una única atmósfera fija para esta pantalla. */
+  .study-player-panel {
+    --study-surface: color-mix(in srgb, #16211a 80%, transparent);
+    --study-surface-strong: color-mix(in srgb, #16211a 90%, transparent);
+    --study-border: rgba(212, 175, 100, 0.45);
+    --study-text: #f4ecd8;
+    --study-text-muted: rgba(244, 236, 216, 0.72);
   }
 
   [data-interface-variant="educational"] .quiz-view:has([data-quiz-variant="academic"]) {

@@ -46,14 +46,34 @@ const OVERLAY_POR_VARIANTE: Partial<Record<InterfaceVariant, string>> = {
  * velo por defecto de su variante, así que se pide explícitamente sin velo.
  */
 const OVERLAY_POR_ASSET: Record<string, string> = {
-  "business:lessonBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 70%, transparent)"),
-  "business:quizBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 70%, transparent)"),
+  "business:lessonBackground": overlaySolido("rgba(4, 22, 64, 0.14)"),
+  "business:quizBackground": overlaySolido("rgba(2, 16, 50, 0.1)"),
   "business:roadmapBackground": "",
-  "educational:lessonBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 55%, transparent)"),
+  // Pedido explícito: el fondo del dashboard se veía lavado (el velo por
+  // defecto de la variante, 60% de --interface-bg, aclara demasiado la
+  // imagen navy oscura en modo claro). La referencia quiere el fondo
+  // tecnológico bien visible.
+  "business:dashboardBackground": "",
+  // Pedido explícito: el dashboard educativo un poco más oscuro que el
+  // velo por defecto de la variante (45%).
+  "educational:dashboardBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 60%, transparent)"),
+  // Reproductor de contenido (Fase 14): la biblioteca de fondo debe quedar
+  // claramente visible — el panel se rediseñó como vidrio verde oscuro con
+  // su propia superficie clara para el contenido, así que ya no necesita un
+  // velo fuerte para dar contraste.
+  "educational:lessonBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 20%, transparent)"),
   "educational:quizBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 55%, transparent)"),
   "educational:roadmapBackground": "",
   "gamified:lessonBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 55%, transparent)"),
   "gamified:quizBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 55%, transparent)"),
+  // Rediseño del dashboard gamificado: velo suave (no el 45% por defecto de
+  // la variante) para que la imagen de fondo quede claramente visible detrás
+  // de las tarjetas, con solo un poco de contraste azul oscuro.
+  "gamified:dashboardBackground": overlaySolido("rgba(0, 0, 0, 0.1)"),
+  // Roadmap horizontal (estaciones + texto blanco con drop-shadow, sin
+  // tarjeta detrás del encabezado): el paisaje debe quedar tan visible como
+  // en business/educational, que ya desactivan el velo para su roadmap.
+  "gamified:roadmapBackground": "",
 };
 
 /**

@@ -142,7 +142,9 @@ export function PresentarEvaluacion({
         data-quiz-variant={config.quiz.variant}
         className={cn(
           "px-5 py-10 text-center sm:px-8",
-          esTemaPropio
+          esBusiness
+            ? "business-quiz-panel rounded-[22px] border border-[var(--business-quiz-border)] bg-[var(--business-quiz-panel)] text-[var(--business-quiz-text)] shadow-[0_26px_70px_rgba(2,16,50,0.34)] backdrop-blur-md"
+            : esTemaPropio
             ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)]"
             : "rounded-lg border border-white/15 bg-[#061120]/72 text-white shadow-[0_20px_60px_rgba(2,10,24,0.34)] backdrop-blur-md",
         )}
@@ -150,7 +152,7 @@ export function PresentarEvaluacion({
         <div className="flex flex-col items-center gap-3">
           {resultado.aprobado ? (
             <CheckCircle2
-              className={cn("h-10 w-10", esTemaPropio ? "text-[var(--interface-accent)]" : "text-[#91DC00]")}
+              className={cn("h-10 w-10", esBusiness ? "text-[var(--business-quiz-lime)]" : esTemaPropio ? "text-[var(--interface-accent)]" : "text-[#91DC00]")}
             />
           ) : (
             <XCircle className={cn("h-10 w-10", esTemaPropio ? "text-red-500" : "text-red-300")} />
@@ -166,7 +168,9 @@ export function PresentarEvaluacion({
             onClick={volverAlCursoDesdeResultado}
             className={cn(
               "mt-4 font-bold",
-              esTemaPropio
+              esBusiness
+                ? "bg-[var(--business-quiz-lime)] text-[#061120] hover:bg-[#a8ff2f]"
+                : esTemaPropio
                 ? "bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)] hover:bg-[var(--interface-accent-secondary)]"
                 : "bg-[#91DC00] text-[#061120] hover:bg-[#a7eb2f]",
             )}
@@ -185,7 +189,9 @@ export function PresentarEvaluacion({
           data-quiz-variant={config.quiz.variant}
           className={cn(
             "px-5 py-10 text-center",
-            esTemaPropio
+            esBusiness
+              ? "business-quiz-panel rounded-[22px] border border-[var(--business-quiz-border)] bg-[var(--business-quiz-panel)] text-[var(--business-quiz-muted)] shadow-[0_26px_70px_rgba(2,16,50,0.34)] backdrop-blur-md"
+              : esTemaPropio
               ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] [box-shadow:var(--interface-shadow)]"
               : "rounded-lg border border-white/15 bg-[#061120]/70 text-white/80 shadow-[0_20px_60px_rgba(2,10,24,0.3)] backdrop-blur-md",
           )}
@@ -193,7 +199,7 @@ export function PresentarEvaluacion({
           <p
             className={cn(
               "text-xs font-semibold uppercase",
-              esTemaPropio ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/65",
+              esBusiness ? "text-[var(--business-quiz-aqua)]" : esTemaPropio ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/65",
             )}
           >
             {esGamified ? "Desafio" : "Evaluacion"}
@@ -201,7 +207,7 @@ export function PresentarEvaluacion({
           <h1
             className={cn(
               "mt-2 font-display text-2xl font-bold",
-              esTemaPropio ? "text-[var(--interface-text)]" : "text-white",
+              esBusiness ? "text-[var(--business-quiz-text)]" : esTemaPropio ? "text-[var(--interface-text)]" : "text-white",
             )}
           >
             {titulo}
@@ -218,7 +224,9 @@ export function PresentarEvaluacion({
         data-quiz-variant={config.quiz.variant}
         className={cn(
           "px-5 py-8 sm:px-8 sm:py-10",
-          esTemaPropio
+          esBusiness
+            ? "business-quiz-panel rounded-[22px] border border-[var(--business-quiz-border)] bg-[var(--business-quiz-panel)] text-[var(--business-quiz-text)] shadow-[0_26px_70px_rgba(2,16,50,0.34)] backdrop-blur-md"
+          : esTemaPropio
             ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)]"
             : "rounded-lg border border-white/15 bg-[#061120]/70 text-white shadow-[0_20px_60px_rgba(2,10,24,0.3)] backdrop-blur-md",
         )}
@@ -226,7 +234,7 @@ export function PresentarEvaluacion({
         <p
           className={cn(
             "text-xs font-semibold uppercase",
-            esTemaPropio ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/65",
+            esBusiness ? "text-[var(--business-quiz-aqua)]" : esTemaPropio ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/65",
           )}
         >
           {esGamified ? "Desafio" : "Evaluacion"}
@@ -238,13 +246,13 @@ export function PresentarEvaluacion({
           <p
             className={cn(
               "mt-3 max-w-2xl text-sm leading-relaxed",
-              esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/68",
+              esBusiness ? "text-[var(--business-quiz-muted)]" : esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/68",
             )}
           >
             {descripcion}
           </p>
         )}
-        <p className={cn("mt-7 text-sm", esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/72")}>
+        <p className={cn("mt-7 text-sm", esBusiness ? "text-[var(--business-quiz-muted)]" : esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/72")}>
           Intentos usados: {intentosUsados}/{maxIntentos}. Necesitas{" "}
           {puntajeMinimo}% para aprobar.
         </p>
@@ -253,7 +261,9 @@ export function PresentarEvaluacion({
           disabled={enviando}
           className={cn(
             "mt-4 font-bold",
-            esTemaPropio
+            esBusiness
+              ? "bg-[var(--business-quiz-lime)] text-[#061120] hover:bg-[#a8ff2f]"
+              : esTemaPropio
               ? "bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)] hover:bg-[var(--interface-accent-secondary)]"
               : "bg-[#91DC00] text-[#061120] hover:bg-[#a7eb2f]",
           )}
@@ -270,7 +280,9 @@ export function PresentarEvaluacion({
       <div
         className={cn(
           "flex items-center justify-center py-16",
-          esTemaPropio
+          esBusiness
+            ? "business-quiz-panel rounded-[22px] border border-[var(--business-quiz-border)] bg-[var(--business-quiz-panel)] text-[var(--business-quiz-muted)]"
+            : esTemaPropio
             ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)]"
             : "rounded-lg border border-white/15 bg-[#061120]/65 text-white/78 backdrop-blur-md",
         )}
@@ -286,7 +298,9 @@ export function PresentarEvaluacion({
       <div
         className={cn(
           "px-5 py-12 text-center",
-          esTemaPropio
+          esBusiness
+            ? "business-quiz-panel rounded-[22px] border border-[var(--business-quiz-border)] bg-[var(--business-quiz-panel)] text-[var(--business-quiz-muted)]"
+            : esTemaPropio
             ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)]"
             : "rounded-lg border border-white/15 bg-[#061120]/70 text-white/75 backdrop-blur-md",
         )}
@@ -307,7 +321,9 @@ export function PresentarEvaluacion({
       data-quiz-variant={config.quiz.variant}
       className={cn(
         "overflow-hidden p-4 sm:p-7 lg:p-8",
-        esTemaPropio
+        esBusiness
+          ? "business-quiz-panel rounded-[22px] border border-[var(--business-quiz-border)] bg-[var(--business-quiz-panel)] text-[var(--business-quiz-text)] shadow-[0_26px_70px_rgba(2,16,50,0.36)] backdrop-blur-md sm:p-10 lg:p-12"
+          : esTemaPropio
           ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] [box-shadow:var(--interface-shadow)]"
           : "rounded-lg border border-white/15 bg-[#061120]/72 text-white shadow-[0_24px_70px_rgba(2,10,24,0.38)] backdrop-blur-md",
       )}
@@ -323,7 +339,7 @@ export function PresentarEvaluacion({
             <p
               className={cn(
                 "text-xs font-semibold",
-                esTemaPropio ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/70",
+                esBusiness ? "text-[var(--business-quiz-aqua)]" : esTemaPropio ? "text-[var(--interface-accent-secondary)]" : "text-teal-100/70",
               )}
             >
               Pregunta {preguntaActual + 1} de {preguntas.length}
@@ -331,7 +347,7 @@ export function PresentarEvaluacion({
             <p
               className={cn(
                 "mt-1 text-[11px] font-medium",
-                esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/48",
+                esBusiness ? "text-[var(--business-quiz-text)]" : esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/48",
               )}
             >
               {respondidas} de {preguntas.length} respondidas
@@ -340,7 +356,7 @@ export function PresentarEvaluacion({
           <p
             className={cn(
               "max-w-[50%] truncate text-right text-xs font-semibold",
-              esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/60",
+              esBusiness ? "text-[var(--business-quiz-muted)]" : esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/60",
             )}
           >
             {titulo}
@@ -350,7 +366,9 @@ export function PresentarEvaluacion({
         <div
           className={cn(
             "mt-4 flex w-full gap-1.5 overflow-x-auto pb-2 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:rounded-full",
-            esTemaPropio
+            esBusiness
+              ? "[&::-webkit-scrollbar-thumb]:bg-[var(--business-quiz-border)]"
+              : esTemaPropio
               ? "[&::-webkit-scrollbar-thumb]:bg-[var(--interface-border)]"
               : "[&::-webkit-scrollbar-thumb]:bg-white/25",
           )}
@@ -371,7 +389,16 @@ export function PresentarEvaluacion({
                 aria-current={actual ? "step" : undefined}
                 className={cn(
                   "min-w-6 flex-1 rounded-full border border-transparent transition-all duration-200",
-                  esTemaPropio
+                  esBusiness
+                    ? cn(
+                        "h-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--business-quiz-lime)]",
+                        actual
+                          ? "bg-[var(--business-quiz-lime)] shadow-[0_0_14px_rgba(145,220,0,0.7)]"
+                          : respondida
+                            ? "bg-[var(--business-quiz-aqua)] shadow-[0_0_10px_rgba(132,245,236,0.28)] hover:bg-[#b4fff7]"
+                            : "bg-[rgba(132,245,236,0.28)] hover:bg-[rgba(132,245,236,0.42)]",
+                      )
+                    : esTemaPropio
                     ? cn(
                         "h-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]",
                         actual
@@ -406,11 +433,12 @@ export function PresentarEvaluacion({
       >
         <h1
           className={cn(
-            "max-w-3xl font-display text-xl font-bold leading-snug sm:text-2xl",
-            esTemaPropio ? "text-[var(--interface-text)]" : "text-white",
+            "font-display text-xl font-bold leading-snug sm:text-2xl",
+            esBusiness ? "max-w-6xl text-[var(--business-quiz-text)] sm:text-4xl" : "max-w-3xl",
+            esBusiness ? "text-[var(--business-quiz-text)]" : esTemaPropio ? "text-[var(--interface-text)]" : "text-white",
           )}
         >
-          <span className={esTemaPropio ? "mr-2 text-[var(--interface-accent-secondary)]" : "mr-2 text-[#a7eb2f]"}>
+          <span className={esBusiness ? "mr-2 text-[var(--business-quiz-lime)]" : esTemaPropio ? "mr-2 text-[var(--interface-accent-secondary)]" : "mr-2 text-[#a7eb2f]"}>
             {preguntaActual + 1}.
           </span>
           {pregunta.enunciado}
@@ -430,7 +458,14 @@ export function PresentarEvaluacion({
                 className={cn(
                   "group flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border px-3 py-3 text-sm transition-all duration-200 sm:gap-4 sm:px-4",
                   "motion-reduce:transform-none",
-                  esTemaPropio
+                  esBusiness
+                    ? cn(
+                        "rounded-[14px] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--business-quiz-lime)]",
+                        seleccionada
+                          ? "translate-x-0.5 border-[var(--business-quiz-lime)] bg-[rgba(6,32,82,0.64)] text-[var(--business-quiz-text)] shadow-[0_0_20px_rgba(145,220,0,0.14)]"
+                          : "border-[rgba(132,170,230,0.36)] bg-[rgba(6,32,82,0.38)] text-[var(--business-quiz-muted)] hover:translate-x-0.5 hover:border-[rgba(132,245,236,0.62)] hover:bg-[rgba(12,50,112,0.48)] hover:text-[var(--business-quiz-text)]",
+                      )
+                    : esTemaPropio
                     ? cn(
                         "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--interface-accent-secondary)]",
                         seleccionada
@@ -445,7 +480,9 @@ export function PresentarEvaluacion({
                       ),
                 )}
                 style={
-                  esTemaPropio && seleccionada
+                  esBusiness
+                    ? undefined
+                    : esTemaPropio && seleccionada
                     ? {
                         backgroundColor:
                           "color-mix(in srgb, var(--interface-accent-secondary) 10%, transparent)",
@@ -470,7 +507,11 @@ export function PresentarEvaluacion({
                 <span
                   className={cn(
                     "flex h-8 w-8 shrink-0 items-center justify-center rounded-md border text-xs font-bold transition-colors",
-                    esTemaPropio
+                    esBusiness
+                      ? seleccionada
+                        ? "border-[var(--business-quiz-lime)] bg-[var(--business-quiz-lime)] text-[#061120]"
+                        : "border-[rgba(132,170,230,0.48)] bg-[rgba(8,35,86,0.55)] text-[var(--business-quiz-text)] group-hover:border-[var(--business-quiz-aqua)] group-hover:text-white"
+                      : esTemaPropio
                       ? seleccionada
                         ? "border-[var(--interface-accent-secondary)] bg-[var(--interface-accent-secondary)] text-white"
                         : "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] group-hover:border-[var(--interface-accent-secondary)] group-hover:text-[var(--interface-text)]"
@@ -491,7 +532,7 @@ export function PresentarEvaluacion({
       <footer
         className={cn(
           "mt-7 grid grid-cols-2 gap-3 pt-5 sm:mt-9",
-          esTemaPropio ? "border-t border-[var(--interface-border)]" : "border-t border-white/12",
+          esBusiness ? "border-t border-[rgba(218,232,255,0.72)]" : esTemaPropio ? "border-t border-[var(--interface-border)]" : "border-t border-white/12",
         )}
       >
         <button
@@ -500,7 +541,9 @@ export function PresentarEvaluacion({
           disabled={preguntaActual === 0 || enviando}
           className={cn(
             "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-35 max-sm:text-xs",
-            esTemaPropio
+            esBusiness
+              ? "border border-[rgba(132,170,230,0.5)] bg-[rgba(8,35,86,0.38)] text-[var(--business-quiz-text)] backdrop-blur-sm hover:bg-[rgba(12,50,112,0.58)] hover:text-white"
+              : esTemaPropio
               ? "border border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)] hover:bg-[var(--interface-surface-strong)] hover:text-[var(--interface-text)]"
               : "border border-white/20 bg-white/8 text-white/80 backdrop-blur-sm hover:bg-white/15 hover:text-white",
           )}
@@ -518,7 +561,9 @@ export function PresentarEvaluacion({
           disabled={enviando}
           className={cn(
             "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-center text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-60 max-sm:text-xs",
-            esTemaPropio
+            esBusiness
+              ? "bg-[var(--business-quiz-lime)] text-[#061120] shadow-[0_10px_26px_rgba(145,220,0,0.22)] hover:bg-[#a8ff2f]"
+              : esTemaPropio
               ? "bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)] hover:bg-[var(--interface-accent-secondary)]"
               : "bg-[#91DC00] text-[#061120] shadow-[0_8px_24px_rgba(145,220,0,0.18)] hover:bg-[#a7eb2f]",
           )}

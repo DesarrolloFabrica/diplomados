@@ -174,7 +174,10 @@ export const INTERFACE_VARIANT_CONFIG = {
       variant: "academic",
     },
     // Assets reales asignados en Fase 9 (edu-road.png / Edu-dash.png).
+    // dashboardBackground reutiliza Edu-dash.png (pedido explícito: el
+    // dashboard necesita una imagen de fondo, no se generó un asset nuevo).
     assets: {
+      dashboardBackground: "/images/Edu-dash.png",
       roadmapBackground: "/images/edu-road.png",
       lessonBackground: "/images/Edu-dash.png",
       quizBackground: "/images/Edu-dash.png",
@@ -182,7 +185,7 @@ export const INTERFACE_VARIANT_CONFIG = {
   },
   gamified: {
     id: "gamified",
-    label: "Interfaz Gamificada",
+    label: "Interfaz Aventura",
     description: "Base futura para progreso protagonista, niveles, logros y misiones.",
     intent: "niveles, misiones, progreso, logros, feedback, cards dinamicas y microinteraccion",
     density: "balanced",
@@ -209,9 +212,9 @@ export const INTERFACE_VARIANT_CONFIG = {
     quiz: {
       variant: "challenge",
     },
-    // Assets reales asignados en Fase 9 (fondo-cursos.png / game-quiz.png).
+    // Assets reales asignados en Fase 9. Dashboard aventura usa video de fondo.
     assets: {
-      dashboardBackground: "/images/fondo-cursos.png",
+      dashboardBackground: "/images/fondo_aventura.mp4",
       roadmapBackground: "/images/fondo-cursos.png",
       lessonBackground: "/images/game-quiz.png",
       quizBackground: "/images/game-quiz.png",

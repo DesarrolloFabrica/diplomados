@@ -139,7 +139,7 @@ const FINAL_VARIANT_DETAILS = {
     icon: BookOpenCheck,
   },
   gamified: {
-    label: "Interfaz Gamificada",
+    label: "Interfaz Aventura",
     description:
       "Dinamica y orientada a retos. Destaca niveles, progreso y objetivos.",
     icon: Trophy,

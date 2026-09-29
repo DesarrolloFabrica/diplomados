@@ -32,7 +32,7 @@ const DETALLE_VARIANTE: Record<
     icon: BookOpenCheck,
   },
   gamified: {
-    label: "Gamificada",
+    label: "Aventura",
     description: "Dinámica, orientada a misiones, niveles y retos.",
     icon: Trophy,
   },

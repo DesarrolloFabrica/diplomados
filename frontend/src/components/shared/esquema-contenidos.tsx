@@ -109,18 +109,31 @@ function estadoQuiz(evaluacion: ItemEsquemaEvaluacion): EstadoQuiz {
 }
 
 function IconoEstadoQuiz({ estado }: { estado: EstadoQuiz }) {
+  const { config } = useInterfaceVariant();
+  const esTemaPropio = config.id === "educational" || config.id === "gamified" || config.id === "business";
+
   if (estado === "bloqueado") {
-    return <LockKeyhole className="h-4 w-4 shrink-0 text-white/45" />;
+    return (
+      <LockKeyhole
+        className={cn("h-4 w-4 shrink-0", esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/45")}
+      />
+    );
   }
   return (
     <ClipboardCheck
       className={cn(
         "h-4 w-4 shrink-0",
         estado === "completado"
-          ? "text-emerald-400"
+          ? esTemaPropio
+            ? "text-[var(--interface-accent)]"
+            : "text-emerald-400"
           : estado === "en-progreso"
-            ? "text-teal-300"
-            : "text-white/45",
+            ? esTemaPropio
+              ? "text-[var(--interface-accent-secondary)]"
+              : "text-teal-300"
+            : esTemaPropio
+              ? "text-[var(--interface-text-muted)]"
+              : "text-white/45",
       )}
     />
   );
@@ -151,9 +164,17 @@ function IndicadorEstadoModulo({
   estado: EstadoModulo;
   porcentaje: number;
 }) {
+  const { config } = useInterfaceVariant();
+  const esTemaPropio = config.id === "educational" || config.id === "gamified" || config.id === "business";
+
   if (estado === "completado") {
     return (
-      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-emerald-300">
+      <span
+        className={cn(
+          "inline-flex shrink-0 items-center gap-1 text-xs font-medium",
+          esTemaPropio ? "text-[var(--interface-accent)]" : "text-emerald-300",
+        )}
+      >
         <CircleCheck className="h-3.5 w-3.5" />
         Completado
       </span>
@@ -162,7 +183,12 @@ function IndicadorEstadoModulo({
 
   if (estado === "en-progreso") {
     return (
-      <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-teal-200">
+      <span
+        className={cn(
+          "inline-flex shrink-0 items-center gap-1 text-xs font-medium",
+          esTemaPropio ? "text-[var(--interface-accent-secondary)]" : "text-teal-200",
+        )}
+      >
         <CircleDashed className="h-3.5 w-3.5" />
         {porcentaje}%
       </span>
@@ -170,7 +196,12 @@ function IndicadorEstadoModulo({
   }
 
   return (
-    <span className="inline-flex shrink-0 items-center gap-1 text-xs text-white/55">
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1 text-xs",
+        esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/55",
+      )}
+    >
       <LockKeyhole className="h-3.5 w-3.5" />
       No iniciado
     </span>
@@ -178,13 +209,31 @@ function IndicadorEstadoModulo({
 }
 
 function IconoEstadoModulo({ estado }: { estado: EstadoModulo }) {
+  const { config } = useInterfaceVariant();
+  const esTemaPropio = config.id === "educational" || config.id === "gamified" || config.id === "business";
+
   if (estado === "completado") {
-    return <CircleCheck className="h-4 w-4 shrink-0 text-emerald-400" />;
+    return (
+      <CircleCheck
+        className={cn("h-4 w-4 shrink-0", esTemaPropio ? "text-[var(--interface-accent)]" : "text-emerald-400")}
+      />
+    );
   }
   if (estado === "en-progreso") {
-    return <CircleDashed className="h-4 w-4 shrink-0 text-teal-300" />;
+    return (
+      <CircleDashed
+        className={cn(
+          "h-4 w-4 shrink-0",
+          esTemaPropio ? "text-[var(--interface-accent-secondary)]" : "text-teal-300",
+        )}
+      />
+    );
   }
-  return <LockKeyhole className="h-4 w-4 shrink-0 text-white/45" />;
+  return (
+    <LockKeyhole
+      className={cn("h-4 w-4 shrink-0", esTemaPropio ? "text-[var(--interface-text-muted)]" : "text-white/45")}
+    />
+  );
 }
 
 export function EsquemaContenidos({
@@ -207,27 +256,51 @@ export function EsquemaContenidos({
   // aportan valor (p. ej. el resplandor cian de la lección activa).
   const esTemaPropio = esEducational || esGamified || esBusiness;
 
-  const claseTextoPrincipal = esTemaPropio ? "text-[var(--interface-text)]" : "text-white";
+  const claseTextoPrincipal = esBusiness
+    ? "text-[#e8f4ff]"
+    : esTemaPropio
+      ? "text-[var(--interface-text)]"
+      : "text-white";
   const claseTextoMuted = esTemaPropio
-    ? "text-[var(--interface-text-muted)]"
+    ? esBusiness
+      ? "text-[#cfe1f8]/80"
+      : "text-[var(--interface-text-muted)]"
     : "text-white/55";
   const claseTextoMutedTenue = esTemaPropio
-    ? "text-[var(--interface-text-muted)]"
+    ? esBusiness
+      ? "text-[#aac2df]/62"
+      : "text-[var(--interface-text-muted)]"
     : "text-white/45";
-  const claseBordeSutil = esTemaPropio ? "border-[var(--interface-border)]" : "border-white/20";
+  const claseBordeSutil = esBusiness
+    ? "border-[#7fb5ff]/24"
+    : esTemaPropio
+      ? "border-[var(--interface-border)]"
+      : "border-white/20";
   const claseBordeMuyTenue = esTemaPropio
-    ? "border-[var(--interface-border)]"
+    ? esBusiness
+      ? "border-[#7fb5ff]/16"
+      : "border-[var(--interface-border)]"
     : "border-white/12";
   const claseHoverSutil = esTemaPropio
-    ? "hover:text-[var(--interface-text)]"
+    ? esBusiness
+      ? "hover:text-white"
+      : "hover:text-[var(--interface-text)]"
     : "hover:text-white";
   const claseHoverFondo = esTemaPropio
-    ? "hover:bg-[color-mix(in_srgb,var(--interface-accent)_8%,transparent)]"
+    ? esBusiness
+      ? "hover:bg-[#154b86]/32"
+      : "hover:bg-[color-mix(in_srgb,var(--interface-accent)_8%,transparent)]"
     : "hover:bg-white/10";
   const claseHoverFondo12 = esTemaPropio
-    ? "hover:bg-[color-mix(in_srgb,var(--interface-accent)_10%,transparent)]"
+    ? esBusiness
+      ? "hover:bg-[#154b86]/38"
+      : "hover:bg-[color-mix(in_srgb,var(--interface-accent)_10%,transparent)]"
     : "hover:bg-white/12";
-  const claseTrackProgreso = esTemaPropio ? "bg-[var(--interface-border)]" : "bg-white/20";
+  const claseTrackProgreso = esBusiness
+    ? "bg-[#7fb5ff]/18"
+    : esTemaPropio
+      ? "bg-[var(--interface-border)]"
+      : "bg-white/20";
 
   const [leccionesIniciadas, setLeccionesIniciadas] = useState<Set<string>>(
     () => new Set(),
