@@ -17,6 +17,7 @@ import { CLASE_PANEL_GLASS_LEGIBLE } from "@/config/paneles-glass";
 import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { RecursoIncrustado } from "@/components/shared/recurso-incrustado";
 import { EmbedAdobeIndesign } from "@/components/shared/embed-adobe-indesign";
+import { SelectorRecursosAventura } from "@/components/shared/selector-recursos-aventura";
 import type { TipoRecurso } from "@backend/lib/db/schema";
 import {
   ETIQUETA_TAB,
@@ -266,7 +267,7 @@ export function VistaContenidoLeccion({
             : esStudy
               ? "study-player-panel rounded-2xl border border-[var(--study-border)] bg-[var(--study-surface-strong)] shadow-[0_20px_50px_rgba(6,17,10,0.35)]"
               : esMission
-                ? "rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] shadow-[0_0_28px_rgba(103,232,249,0.16)]"
+                ? "rounded-2xl border border-white/30 bg-[#061120]/24 shadow-[0_16px_42px_rgba(6,17,32,0.2)] backdrop-blur-md"
                 : cn(
                     "rounded-2xl border border-white/45 bg-white/18 shadow-[0_16px_45px_rgba(3,12,28,0.2)] backdrop-blur-xl",
                     CLASE_PANEL_GLASS_LEGIBLE,
@@ -281,7 +282,7 @@ export function VistaContenidoLeccion({
               : esFocused
                 ? "border-b border-[var(--business-player-border)] bg-[linear-gradient(180deg,rgba(245,250,255,0.94),rgba(213,233,255,0.78))]"
               : esMission
-                ? "border-b border-[var(--interface-border)] bg-[var(--interface-surface)]"
+                ? "border-b border-white/70 bg-white/82 shadow-[0_8px_24px_rgba(6,17,32,0.12)] backdrop-blur-xl"
                 : "border-b border-white/15 bg-gradient-to-r from-[#061120]/92 via-[#0b3042]/78 to-[#0c514b]/62",
           )}
         >
@@ -297,8 +298,10 @@ export function VistaContenidoLeccion({
                 "text-[11px] font-semibold uppercase tracking-[0.12em]",
                 esFocused
                   ? "text-[var(--business-player-muted)]"
-                  : esStudy || esMission
+                  : esStudy
                   ? "text-[var(--interface-accent-secondary)]"
+                  : esMission
+                    ? "text-[#08708a]"
                   : "text-teal-100/75",
               )}
             >
@@ -313,7 +316,7 @@ export function VistaContenidoLeccion({
                     : esFocused
                       ? "text-[var(--business-player-text)]"
                     : esMission
-                      ? "text-[var(--interface-text)]"
+                      ? "text-slate-950"
                       : "text-white",
                 )}
               >
@@ -330,8 +333,8 @@ export function VistaContenidoLeccion({
                       ? "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)]"
                       : esMission
                         ? completada
-                          ? "border-[var(--interface-accent-secondary)] bg-[color-mix(in_srgb,var(--interface-accent-secondary)_15%,transparent)] text-[var(--interface-accent-secondary)] shadow-[0_0_10px_rgba(103,232,249,0.25)]"
-                          : "border-[color-mix(in_srgb,var(--interface-accent-secondary)_40%,transparent)] bg-[color-mix(in_srgb,var(--interface-accent-secondary)_12%,transparent)] text-[var(--interface-accent-secondary)]"
+                          ? "border-emerald-600/35 bg-emerald-100/90 text-emerald-800 shadow-sm"
+                          : "border-cyan-700/35 bg-cyan-50/90 text-cyan-800 shadow-sm"
                         : completada
                           ? "border-emerald-300/35 bg-emerald-300/15 text-emerald-100"
                           : "border-white/25 bg-white/10 text-white/70",
@@ -345,7 +348,9 @@ export function VistaContenidoLeccion({
                       : esFocused
                         ? "bg-[var(--business-player-accent)]"
                         : esMission
-                          ? "bg-[var(--interface-accent-secondary)]"
+                          ? completada
+                            ? "bg-emerald-600"
+                            : "bg-cyan-700"
                           : completada
                             ? "bg-[#91DC00]"
                             : "bg-teal-300",
@@ -360,13 +365,15 @@ export function VistaContenidoLeccion({
         <div
           className={cn(
             tabActual === "video"
-              ? "bg-black/90 p-1 sm:p-1.5"
+              ? esMission
+                ? "bg-black/45 p-1 sm:p-1.5"
+                : "bg-black/90 p-1 sm:p-1.5"
               : esStudy
                 ? "border-y-2 border-[var(--interface-accent-secondary)] bg-[#fffdf6] p-2.5 sm:p-3"
                 : esFocused
                   ? "bg-[rgba(245,250,255,0.76)] p-2.5 sm:p-3"
                 : esMission
-                  ? "bg-[var(--interface-surface)] p-2.5 sm:p-3"
+                  ? "bg-white/16 p-2.5 backdrop-blur-sm sm:p-3"
                   : "bg-white/76 p-2.5 sm:p-3",
           )}
         >
@@ -378,7 +385,14 @@ export function VistaContenidoLeccion({
           ) : null}
 
           {mostrarTexto && contenidoTexto && (
-            <div className="min-h-[300px] rounded-lg bg-white/70 px-5 py-6 sm:px-7">
+            <div
+              className={cn(
+                "min-h-[300px] rounded-lg px-5 py-6 sm:px-7",
+                esMission
+                  ? "border border-white/25 bg-white/62 backdrop-blur-md"
+                  : "bg-white/70",
+              )}
+            >
               <DocumentoTextoObservable
                 contenido={contenidoTexto}
                 enabled={autoCompletion?.enabled ?? false}
@@ -414,7 +428,19 @@ export function VistaContenidoLeccion({
         </div>
       </div>
 
-      {tabsDisponibles.length > 0 && (
+      {esMission && tabsDisponibles.length > 0 && (
+        <SelectorRecursosAventura
+          recursos={tabsDisponibles.map(({ id, etiqueta, Icono }) => ({
+            id,
+            etiqueta,
+            Icono,
+          }))}
+          activoId={tabActual}
+          onSeleccionar={setTabActiva}
+        />
+      )}
+
+      {!esMission && tabsDisponibles.length > 0 && (
         <div>
           <div className="mb-2 flex items-center justify-between gap-3">
             <p

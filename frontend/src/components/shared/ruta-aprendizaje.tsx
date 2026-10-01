@@ -2938,7 +2938,7 @@ function RoadmapLevelMapGamified({
     null;
 
   return (
-    <section className="mx-auto flex min-h-dvh w-full max-w-[1500px] flex-col gap-6 px-5 py-8 text-white sm:px-8 lg:px-12">
+    <section className="relative mx-auto flex min-h-dvh w-full max-w-[1500px] flex-col gap-6 px-5 py-8 text-white sm:px-8 lg:px-12">
       <header className="max-w-xl">
         <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-white/85 drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)]">
           <Compass className="size-3.5 text-[var(--interface-accent-secondary)]" aria-hidden="true" />
@@ -2981,6 +2981,7 @@ function RoadmapLevelMapGamified({
                   disabled={!disponible}
                   onClick={() => setIndiceActivo(indice)}
                   aria-current={esActivo ? "step" : undefined}
+                  aria-label={`Módulo ${indice + 1}: ${grupo.titulo}`}
                   className={cn(
                     "flex w-20 shrink-0 flex-col items-center gap-1.5 sm:w-24",
                     !disponible && "cursor-not-allowed",
@@ -3012,9 +3013,8 @@ function RoadmapLevelMapGamified({
                         ? "border-[var(--interface-accent-secondary)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)]"
                         : "border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)]",
                     )}
-                    title={grupo.titulo}
                   >
-                    {indice + 1}. {grupo.titulo}
+                    Módulo {indice + 1}
                   </span>
                 </button>
               </Fragment>
@@ -3023,16 +3023,16 @@ function RoadmapLevelMapGamified({
         </div>
       </nav>
 
-      <article className="flex w-full max-w-4xl flex-col gap-3 rounded-2xl border border-white/18 bg-[#061120]/36 px-5 py-3 text-white shadow-[0_14px_38px_rgba(0,0,0,0.2)] sm:flex-row sm:items-center">
-        <div className="min-w-0 flex-1">
+      <article className="flex w-full flex-col gap-4 rounded-2xl border border-white/24 bg-[#061120]/78 px-5 py-4 text-white shadow-[0_14px_38px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:flex-row sm:items-center sm:px-6">
+        <div className="min-w-0 flex-[1.35]">
           <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--interface-accent-secondary)]">
             <BookOpen className="size-3.5" aria-hidden="true" />
             Modulo {indiceSeguro + 1}
           </p>
-          <h2 className="mt-0.5 line-clamp-1 text-base font-bold leading-tight sm:text-lg">{grupoActivo.titulo}</h2>
+          <h2 className="mt-1 text-base font-bold leading-snug sm:text-lg">{grupoActivo.titulo}</h2>
         </div>
 
-        <div className="flex min-w-0 flex-1 items-center gap-3 sm:max-w-md">
+        <div className="flex min-w-0 flex-1 items-center gap-3 sm:max-w-lg">
           <div className="h-2 min-w-32 flex-1 overflow-hidden rounded-full bg-white/20">
             <div
               className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
@@ -3060,12 +3060,12 @@ function RoadmapLevelMapGamified({
               <path
                 d={pathRuta}
                 fill="none"
-                stroke="rgba(255,255,245,0.88)"
-                strokeWidth="2.2"
+                stroke="rgba(255,255,245,0.8)"
+                strokeWidth="4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeDasharray="0.6 1.35"
-                pathLength="100"
+                strokeDasharray="8 10"
+                vectorEffect="non-scaling-stroke"
                 filter="drop-shadow(0 0 4px rgba(255,255,255,0.35))"
               />
             </svg>
@@ -3076,7 +3076,7 @@ function RoadmapLevelMapGamified({
               key={layout.nodo.id}
               layout={layout}
               indiceModulo={indiceSeguro}
-              totalModulo={grupoActivo.nodos.length}
+              siguienteNodoId={siguienteNodoModulo?.id ?? null}
               nodoActivoGlobalId={nodoActivoGlobalId}
             />
           ))}
@@ -3093,6 +3093,7 @@ function RoadmapLevelMapGamified({
               indiceModulo={indiceSeguro}
               totalModulo={grupoActivo.nodos.length}
               moduloTitulo={grupoActivo.titulo}
+              siguienteNodoId={siguienteNodoModulo?.id ?? null}
               nodoActivoGlobalId={nodoActivoGlobalId}
             />
           ))}
@@ -3112,10 +3113,10 @@ function RoadmapLevelMapGamified({
       )}
 
       {hrefContinuar && (
-        <div className="flex justify-center pb-8">
+        <div className="flex justify-center pb-8 md:absolute md:right-8 md:top-8 md:z-30 md:pb-0 lg:right-12">
           <Link
             href={hrefContinuar}
-            className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[var(--interface-accent)] bg-[#04140d]/78 px-8 text-sm font-bold text-white shadow-[0_0_28px_rgba(145,220,0,0.26)] transition hover:-translate-y-0.5 hover:bg-[#062012]/88 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]"
+            className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/30 bg-[#061120]/40 px-8 text-sm font-bold text-white shadow-[0_12px_28px_rgba(6,17,32,0.24)] backdrop-blur-sm transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-[#061120]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]"
           >
             Continuar recorrido
             <ArrowRight className="size-4" aria-hidden="true" />
@@ -3132,7 +3133,6 @@ interface LayoutEstacionAventura {
   x: number;
   y: number;
   labelTop: boolean;
-  tooltipSide: "left" | "center" | "right";
 }
 
 function layoutEstacionesAventura(nodos: NodoRuta[]): LayoutEstacionAventura[] {
@@ -3153,7 +3153,6 @@ function layoutEstacionesAventura(nodos: NodoRuta[]): LayoutEstacionAventura[] {
       x,
       y,
       labelTop: indice % 2 === 1,
-      tooltipSide: progreso < 0.22 ? "right" : progreso > 0.78 ? "left" : "center",
     };
   });
 }
@@ -3183,69 +3182,56 @@ function estadoTextoAventura(nodo: NodoRuta, activo: boolean): string {
 function EstacionAventura({
   layout,
   indiceModulo,
-  totalModulo,
+  siguienteNodoId,
   nodoActivoGlobalId,
 }: {
   layout: LayoutEstacionAventura;
   indiceModulo: number;
-  totalModulo: number;
+  siguienteNodoId: string | null;
   nodoActivoGlobalId: string | null;
 }) {
-  const { nodo, indice, x, y, labelTop, tooltipSide } = layout;
+  const { nodo, indice, x, y, labelTop } = layout;
   const activo = nodo.id === nodoActivoGlobalId && !nodo.completado && !nodo.bloqueado;
   const estado = estadoEstacion(nodo, activo);
+  const esEstacionFutura = !nodo.completado && nodo.id !== siguienteNodoId;
   const Icono = iconoEstacion(nodo, indice);
+  const colorModulo = colorModuloPorIndice(indiceModulo);
+  const estiloEstacionCompletada: CSSProperties | undefined =
+    estado === "completado"
+      ? {
+          borderColor: colorModulo.final,
+          background: `linear-gradient(135deg, ${colorModulo.inicio}, ${colorModulo.final})`,
+          boxShadow: `0 0 0 5px ${colorModulo.glow}, 0 0 22px ${colorModulo.glow}`,
+        }
+      : undefined;
   const contenido = (
     <>
       <span
         className={cn(
-          "relative z-10 grid size-12 place-items-center rounded-full border-2 transition-[transform,box-shadow,background-color,border-color] duration-300 lg:size-14",
-          estado === "completado" &&
-            "border-white/80 bg-[linear-gradient(135deg,#7c3aed,#c084fc)] text-white shadow-[0_0_0_6px_rgba(192,132,252,0.18),0_0_24px_rgba(168,85,247,0.46)]",
+          "relative z-10 grid size-12 place-items-center rounded-full border-2 transition-[transform,box-shadow,background-color,border-color] duration-200 ease-out group-hover:scale-[1.08] group-focus-visible:scale-[1.08] lg:size-14",
+          estado === "completado" && "text-white",
           estado === "activo" &&
-            "scale-110 border-[var(--interface-accent)] bg-[linear-gradient(135deg,#91DC00,#5EEAD4)] text-[#061120] shadow-[0_0_0_5px_rgba(145,220,0,0.18),0_0_24px_rgba(145,220,0,0.5)]",
+            "border-[#22d3ee] bg-[linear-gradient(135deg,#f0fdfa,#d9f4ef)] text-[#164e46] shadow-[0_0_0_5px_rgba(45,212,191,0.16),0_0_24px_rgba(34,211,238,0.32)]",
           estado === "pendiente" &&
-            "border-white/70 bg-[#f8fbff]/92 text-[#17345d] shadow-[0_10px_24px_rgba(0,0,0,0.25)]",
+            "border-[#b8d4ce] bg-[linear-gradient(135deg,#f4fbfa,#dcefeb)] text-[#1a4d45] shadow-[0_10px_24px_rgba(6,17,32,0.2)]",
           estado === "bloqueado" &&
-            "border-white/35 bg-[#d7e4f2]/70 text-[#37506c] opacity-80 shadow-[0_8px_18px_rgba(0,0,0,0.18)]",
+            "border-[#cbd5e1] bg-[linear-gradient(135deg,#f8fafc,#e2e8f0)] text-[#64748b] shadow-[0_8px_18px_rgba(6,17,32,0.12)]",
+          esEstacionFutura && "bg-none bg-[#e2e8f0]/20",
         )}
+        style={estiloEstacionCompletada}
       >
-        <Icono className="size-5" aria-hidden="true" />
+        <Icono
+          className={cn("size-5", esEstacionFutura && "opacity-80")}
+          aria-hidden="true"
+        />
       </span>
       <span
         className={cn(
-          "absolute left-1/2 z-20 w-32 -translate-x-1/2 rounded-lg border border-white/18 bg-[#061120]/86 px-2 py-1.5 text-center text-[10px] font-bold leading-snug text-white shadow-[0_10px_28px_rgba(0,0,0,0.32)]",
+          "absolute left-1/2 z-20 w-36 -translate-x-1/2 rounded-full border border-[#cbd5e1]/90 bg-[#f8fafc]/60 px-3 py-2 text-center text-[10px] font-semibold leading-snug text-[#1e293b] shadow-[0_8px_22px_rgba(6,17,32,0.22)] backdrop-blur-sm xl:w-40",
           labelTop ? "bottom-[calc(100%+0.65rem)]" : "top-[calc(100%+0.65rem)]",
         )}
       >
-        <span className="line-clamp-2">
-          {indice + 1}. {nodo.titulo}
-        </span>
-      </span>
-      <span
-        className={cn(
-          "pointer-events-none absolute z-30 w-64 rounded-xl border border-[#9db3cf]/70 bg-[#f5f8fc] p-3 text-left text-[#10243f] opacity-0 shadow-[0_16px_34px_rgba(3,16,36,0.32)] transition duration-200 group-hover:scale-[1.01] group-hover:opacity-100 group-focus-visible:scale-[1.01] group-focus-visible:opacity-100",
-          labelTop ? "top-[calc(100%+2.4rem)]" : "bottom-[calc(100%+2.4rem)]",
-          tooltipSide === "left"
-            ? "right-0"
-            : tooltipSide === "right"
-              ? "left-0"
-              : "left-1/2 -translate-x-1/2 group-hover:-translate-x-1/2 group-focus-visible:-translate-x-1/2",
-        )}
-      >
-        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#08778f]">
-          Modulo {indiceModulo + 1}
-        </span>
-        <span className="mt-1 block text-sm font-bold leading-snug">{nodo.titulo}</span>
-        <span className="mt-2 block text-xs leading-relaxed text-[#40536d]">
-          {nodo.tipo === "evaluacion" ? "Evaluacion del modulo" : "Leccion del recorrido"}
-        </span>
-        <span className="mt-3 flex items-center justify-between border-t border-[#c8d3e1] pt-3 text-xs font-semibold text-[#263b58]">
-          <span>{estadoTextoAventura(nodo, activo)}</span>
-          <span>
-            {Math.min(indice + 1, totalModulo)}/{totalModulo}
-          </span>
-        </span>
+        <span>{indice + 1}. {nodo.titulo}</span>
       </span>
     </>
   );
@@ -3274,6 +3260,7 @@ function EstacionAventuraMobile({
   indiceModulo,
   totalModulo,
   moduloTitulo,
+  siguienteNodoId,
   nodoActivoGlobalId,
 }: {
   nodo: NodoRuta;
@@ -3281,30 +3268,49 @@ function EstacionAventuraMobile({
   indiceModulo: number;
   totalModulo: number;
   moduloTitulo: string;
+  siguienteNodoId: string | null;
   nodoActivoGlobalId: string | null;
 }) {
   const activo = nodo.id === nodoActivoGlobalId && !nodo.completado && !nodo.bloqueado;
   const estado = estadoEstacion(nodo, activo);
+  const esEstacionFutura = !nodo.completado && nodo.id !== siguienteNodoId;
   const Icono = iconoEstacion(nodo, indice);
+  const colorModulo = colorModuloPorIndice(indiceModulo);
+  const estiloEstacionCompletada: CSSProperties | undefined =
+    estado === "completado"
+      ? {
+          borderColor: colorModulo.final,
+          background: `linear-gradient(135deg, ${colorModulo.inicio}, ${colorModulo.final})`,
+          boxShadow: `0 0 16px ${colorModulo.glow}`,
+        }
+      : undefined;
   const contenido = (
     <div className="flex items-start gap-3">
       <span
         className={cn(
-          "grid size-12 shrink-0 place-items-center rounded-full border-2",
-          estado === "completado" && "border-white/75 bg-[#7c3aed] text-white",
-          estado === "activo" && "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[#061120]",
-          estado === "pendiente" && "border-white/50 bg-white/85 text-[#17345d]",
-          estado === "bloqueado" && "border-white/30 bg-[#d7e4f2]/60 text-[#37506c]",
+          "grid size-12 shrink-0 place-items-center rounded-full border-2 transition-transform duration-200 ease-out group-hover:scale-[1.06] group-focus-visible:scale-[1.06]",
+          estado === "completado" && "text-white",
+          estado === "activo" &&
+            "border-[#22d3ee] bg-[linear-gradient(135deg,#f0fdfa,#d9f4ef)] text-[#164e46]",
+          estado === "pendiente" &&
+            "border-[#b8d4ce] bg-[linear-gradient(135deg,#f4fbfa,#dcefeb)] text-[#1a4d45]",
+          estado === "bloqueado" &&
+            "border-[#cbd5e1] bg-[linear-gradient(135deg,#f8fafc,#e2e8f0)] text-[#64748b]",
+          esEstacionFutura && "bg-none bg-[#e2e8f0]/100",
         )}
+        style={estiloEstacionCompletada}
       >
-        <Icono className="size-5" aria-hidden="true" />
+        <Icono
+          className={cn("size-5", esEstacionFutura && "opacity-40")}
+          aria-hidden="true"
+        />
       </span>
       <span className="min-w-0">
         <span className="block text-xs font-bold uppercase tracking-[0.14em] text-[var(--interface-accent-secondary)]">
           Modulo {indiceModulo + 1} · {indice + 1}/{totalModulo}
         </span>
-        <span className="mt-1 block text-sm font-bold leading-snug text-white">{nodo.titulo}</span>
-        <span className="mt-1 block text-xs text-white/68">
+        <span className="mt-1 block text-sm font-bold leading-snug text-[#10243f]">{nodo.titulo}</span>
+        <span className="mt-1 block text-xs text-[#52657d]">
           {moduloTitulo} · {estadoTextoAventura(nodo, activo)}
         </span>
       </span>
@@ -3313,14 +3319,17 @@ function EstacionAventuraMobile({
 
   if (nodo.bloqueado) {
     return (
-      <div className="rounded-2xl border border-white/16 bg-[#061120]/45 p-3 opacity-75">
+      <div className="group rounded-2xl border border-[#cbd5e1] bg-[#f8fafc] p-3 opacity-80 shadow-[0_10px_24px_rgba(6,17,32,0.18)]">
         {contenido}
       </div>
     );
   }
 
   return (
-    <Link href={nodo.href} className="block rounded-2xl border border-white/16 bg-[#061120]/45 p-3 transition hover:bg-[#061120]/58">
+    <Link
+      href={nodo.href}
+      className="group block rounded-2xl border border-[#cbd5e1] bg-[#f8fafc] p-3 shadow-[0_10px_26px_rgba(6,17,32,0.2)] transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
+    >
       {contenido}
     </Link>
   );

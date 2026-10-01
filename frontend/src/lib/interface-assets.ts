@@ -64,7 +64,7 @@ const OVERLAY_POR_ASSET: Record<string, string> = {
   "educational:lessonBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 20%, transparent)"),
   "educational:quizBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 55%, transparent)"),
   "educational:roadmapBackground": "",
-  "gamified:lessonBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 55%, transparent)"),
+  "gamified:lessonBackground": overlaySolido("rgba(6, 17, 32, 0.2)"),
   "gamified:quizBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 55%, transparent)"),
   // Rediseño del dashboard gamificado: velo suave (no el 45% por defecto de
   // la variante) para que la imagen de fondo quede claramente visible detrás
@@ -86,6 +86,7 @@ const POSICION_POR_ASSET: Record<string, string> = {
   // fondo-cursos.png: las ruinas/templo quedan a la derecha del encuadre.
   "gamified:dashboardBackground": "70% 45%",
   "gamified:roadmapBackground": "70% 45%",
+  "gamified:lessonBackground": "70% 45%",
 };
 
 /**

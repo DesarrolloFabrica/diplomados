@@ -216,7 +216,7 @@ export const INTERFACE_VARIANT_CONFIG = {
     assets: {
       dashboardBackground: "/images/fondo_aventura.mp4",
       roadmapBackground: "/images/fondo-cursos.png",
-      lessonBackground: "/images/game-quiz.png",
+      lessonBackground: "/images/fondo-cursos.png",
       quizBackground: "/images/game-quiz.png",
     },
   },

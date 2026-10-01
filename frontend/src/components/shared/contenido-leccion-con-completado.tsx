@@ -1,8 +1,19 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { AlertCircle, CheckCircle2, Loader2, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Loader2,
+  LockKeyhole,
+  PartyPopper,
+  RotateCcw,
+} from "lucide-react";
 import { CLASE_PANEL_GLASS_LEGIBLE } from "@/config/paneles-glass";
+import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { useAutoCompletion } from "@/hooks/use-auto-completion";
 import type { InfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
 import type { ProximosContenidosResultado } from "@/lib/ruta-curso";
@@ -113,6 +124,8 @@ export function ContenidoLeccionConCompletado({
   proximos,
   manualCompletionControl,
 }: ContenidoLeccionConCompletadoProps) {
+  const { config } = useInterfaceVariant();
+  const esAventura = config.id === "gamified";
   const automatic = completionMode === "automatico";
   const autoCompletion = useAutoCompletion({
     enabled: automatic,
@@ -121,9 +134,66 @@ export function ContenidoLeccionConCompletado({
     enrollmentId,
     lessonId,
   });
+  const siguiente = proximos.principal;
+
+  const estadoCompletado = automatic ? (
+    <EstadoCompletadoAutomatico
+      completed={completed}
+      status={autoCompletion.status}
+      errorMessage={autoCompletion.errorMessage}
+      justCompleted={autoCompletion.justCompleted}
+      onRetry={autoCompletion.retry}
+    />
+  ) : (
+    manualCompletionControl
+  );
 
   return (
     <>
+      {esAventura && (
+        <nav
+          aria-label="Navegacion de la leccion"
+          className="mb-4 grid grid-cols-1 items-center gap-3 rounded-2xl border border-white/35 bg-white/24 p-3 shadow-[0_12px_32px_rgba(6,17,32,0.14)] backdrop-blur-md sm:grid-cols-[1fr_auto_1fr]"
+        >
+          <Link
+            href={`/mis-cursos/${courseId}`}
+            className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition-[transform,background-color] hover:-translate-x-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
+          >
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            Volver al curso
+          </Link>
+
+          <div className="flex min-w-0 justify-center sm:justify-self-center">
+            {estadoCompletado}
+          </div>
+
+          <div className="flex justify-start sm:justify-end">
+            {proximos.cursoCompletado ? (
+              <span className="inline-flex min-h-10 items-center gap-2 rounded-full border border-emerald-200/80 bg-white/85 px-4 py-2 text-sm font-bold text-emerald-700 shadow-sm">
+                <PartyPopper className="size-4" aria-hidden="true" />
+                Recorrido completado
+              </span>
+            ) : siguiente?.bloqueado ? (
+              <span className="inline-flex min-h-10 cursor-not-allowed items-center gap-2 rounded-full border border-white/45 bg-white/55 px-4 py-2 text-sm font-bold text-slate-500 opacity-75">
+                <LockKeyhole className="size-4" aria-hidden="true" />
+                {siguiente.tipo === "evaluacion" ? "Siguiente desafio" : "Siguiente leccion"}
+              </span>
+            ) : siguiente ? (
+              <Link
+                href={siguiente.href}
+                className="group inline-flex min-h-10 items-center gap-2 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition-[transform,background-color] hover:translate-x-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
+              >
+                {siguiente.tipo === "evaluacion" ? "Siguiente desafio" : "Siguiente leccion"}
+                <ArrowRight
+                  className="size-4 transition-transform group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
+              </Link>
+            ) : null}
+          </div>
+        </nav>
+      )}
+
       <VistaContenidoLeccion
         tituloLeccion={lessonTitle}
         contextoLeccion={lessonContext}
@@ -144,21 +214,17 @@ export function ContenidoLeccionConCompletado({
         }
       />
 
-      {automatic && (
+      {!esAventura && automatic && (
         <div className="mt-5">
-          <EstadoCompletadoAutomatico
-            completed={completed}
-            status={autoCompletion.status}
-            errorMessage={autoCompletion.errorMessage}
-            justCompleted={autoCompletion.justCompleted}
-            onRetry={autoCompletion.retry}
-          />
+          {estadoCompletado}
         </div>
       )}
 
-      <ProximosContenidos portadaCursoUrl={portadaCursoUrl} proximos={proximos} />
+      {!esAventura && (
+        <ProximosContenidos portadaCursoUrl={portadaCursoUrl} proximos={proximos} />
+      )}
 
-      {!automatic && (
+      {!esAventura && !automatic && (
         <div className="mt-5">
           {manualCompletionControl}
         </div>

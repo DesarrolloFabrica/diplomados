@@ -1,6 +1,8 @@
 import { TituloMarcaTypewriter } from "@/components/layout/titulo-marca-typewriter";
 import { LogoMarcaFormacion } from "@/components/layout/logo-marca-formacion";
 
+export const LOGIN_BACKGROUND_VIDEO = "/images/fondo_login.mp4";
+
 // Panel lateral de las pantallas de acceso. El elemento distintivo es la
 // "ruta": nodos conectados que representan módulo → unidad → lección, la
 // misma estructura académica de la plataforma.
@@ -15,7 +17,25 @@ const PASOS: ReadonlyArray<{
   { titulo: "Evaluación", detalle: "Aprobado · 92%", aprobado: true },
 ];
 
-export function PanelMarca() {
+export function PanelMarca({ variant = "legacy" }: { variant?: "legacy" | "login" }) {
+  if (variant === "login") {
+    return (
+      <aside className="relative min-h-screen overflow-hidden">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+          className="absolute inset-0 size-full object-cover object-[54%_center] md:object-[48%_center]"
+        >
+          <source src={LOGIN_BACKGROUND_VIDEO} type="video/mp4" />
+        </video>
+      </aside>
+    );
+  }
+
   return (
     <aside className="bg-cun-auth-panel relative flex flex-col justify-between overflow-hidden px-5 py-8 text-white md:px-8 md:py-10 lg:px-12 lg:py-12">
       <div className="flex items-center gap-2.5">

@@ -50,7 +50,7 @@ export interface GrupoEsquema {
   evaluaciones: ItemEsquemaEvaluacion[];
 }
 
-type EstadoModulo = "no-iniciado" | "en-progreso" | "completado";
+export type EstadoModulo = "no-iniciado" | "en-progreso" | "completado";
 type EstadoQuiz = "pendiente" | "en-progreso" | "completado" | "bloqueado";
 
 interface EsquemaContenidosProps {
@@ -82,7 +82,7 @@ function IconoLeccion({
   return <LockKeyhole className="h-4 w-4 shrink-0" />;
 }
 
-function calcularProgresoModulo(grupo: GrupoEsquema) {
+export function calcularProgresoModulo(grupo: GrupoEsquema) {
   const elementos = [
     ...grupo.lecciones.map((l) => ({ completado: l.completada })),
     ...grupo.evaluaciones.map((e) => ({ completado: e.completada })),
@@ -355,13 +355,13 @@ export function EsquemaContenidos({
     <aside className="flex h-full flex-col">
       <div className={cn("flex items-center justify-between gap-2 border-b px-4 py-3.5", claseBordeSutil)}>
         <h2 className={cn("text-sm font-semibold", claseTextoPrincipal)}>
-          {esGamified ? "Objetivos del modulo" : "Esquema de contenidos"}
+          Esquema de contenidos
         </h2>
         {onCerrar && (
           <button
             type="button"
             onClick={onCerrar}
-            aria-label={esGamified ? "Ocultar objetivos" : "Ocultar esquema de contenidos"}
+            aria-label="Ocultar esquema de contenidos"
             className={cn(
               "inline-flex shrink-0 items-center justify-center rounded-md p-1.5",
               "transition-colors",
@@ -495,30 +495,32 @@ export function EsquemaContenidos({
                             <span className="block whitespace-normal break-words text-[13px] font-medium leading-snug">
                               {leccion.titulo}
                             </span>
-                            <span
-                              className={cn(
-                                "mt-1 block text-[11px] leading-none",
-                                bloqueada
-                                  ? esTemaPropio
-                                    ? claseTextoMutedTenue
-                                    : "text-white/40"
-                                  : leccion.completada
+                            {!esGamified && (
+                              <span
+                                className={cn(
+                                  "mt-1 block text-[11px] leading-none",
+                                  bloqueada
                                     ? esTemaPropio
-                                      ? "text-[var(--interface-accent)]"
-                                      : "text-emerald-300"
-                                    : iniciada
+                                      ? claseTextoMutedTenue
+                                      : "text-white/40"
+                                    : leccion.completada
                                       ? esTemaPropio
-                                        ? "text-[var(--interface-accent-secondary)]"
-                                        : "text-teal-200"
-                                      : claseTextoMutedTenue,
-                              )}
-                            >
-                              {etiquetaEstadoLeccion(
-                                leccion.completada,
-                                iniciada,
-                                bloqueada,
-                              )}
-                            </span>
+                                        ? "text-[var(--interface-accent)]"
+                                        : "text-emerald-300"
+                                      : iniciada
+                                        ? esTemaPropio
+                                          ? "text-[var(--interface-accent-secondary)]"
+                                          : "text-teal-200"
+                                        : claseTextoMutedTenue,
+                                )}
+                              >
+                                {etiquetaEstadoLeccion(
+                                  leccion.completada,
+                                  iniciada,
+                                  bloqueada,
+                                )}
+                              </span>
+                            )}
                           </span>
                         </>
                       );
@@ -611,22 +613,24 @@ export function EsquemaContenidos({
                                     <span className="block whitespace-normal break-words text-[13px] font-medium leading-snug">
                                       {evaluacion.titulo}
                                     </span>
-                                    <span
-                                      className={cn(
-                                        "mt-1 block text-[11px] font-normal leading-none",
-                                        estadoQuizItem === "completado"
-                                          ? esTemaPropio
-                                            ? "text-[var(--interface-accent)]"
-                                            : "text-emerald-300"
-                                          : estadoQuizItem === "en-progreso"
+                                    {!esGamified && (
+                                      <span
+                                        className={cn(
+                                          "mt-1 block text-[11px] font-normal leading-none",
+                                          estadoQuizItem === "completado"
                                             ? esTemaPropio
-                                              ? "text-[var(--interface-accent-secondary)]"
-                                              : "text-teal-200"
-                                            : claseTextoMutedTenue,
-                                      )}
-                                    >
-                                      {etiquetaEstadoQuiz(estadoQuizItem)}
-                                    </span>
+                                              ? "text-[var(--interface-accent)]"
+                                              : "text-emerald-300"
+                                            : estadoQuizItem === "en-progreso"
+                                              ? esTemaPropio
+                                                ? "text-[var(--interface-accent-secondary)]"
+                                                : "text-teal-200"
+                                              : claseTextoMutedTenue,
+                                        )}
+                                      >
+                                        {etiquetaEstadoQuiz(estadoQuizItem)}
+                                      </span>
+                                    )}
                                   </span>
                                 </>
                               );

@@ -1,0 +1,134 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { TabContenido } from "@/lib/contenido-leccion";
+
+interface RecursoSelectorAventura {
+  id: TabContenido;
+  etiqueta: string;
+  Icono: LucideIcon;
+}
+
+interface SelectorRecursosAventuraProps {
+  recursos: RecursoSelectorAventura[];
+  activoId: TabContenido;
+  onSeleccionar: (id: TabContenido) => void;
+}
+
+export function SelectorRecursosAventura({
+  recursos,
+  activoId,
+  onSeleccionar,
+}: SelectorRecursosAventuraProps) {
+  const contenedorRef = useRef<HTMLDivElement | null>(null);
+  const indiceActivo = Math.max(0, recursos.findIndex((item) => item.id === activoId));
+
+  function enfocarRecurso(id: TabContenido) {
+    window.requestAnimationFrame(() => {
+      const elemento = contenedorRef.current?.querySelector<HTMLElement>(
+        `[data-recurso-aventura="${id}"]`,
+      );
+      elemento?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      elemento?.focus({ preventScroll: true });
+    });
+  }
+
+  function seleccionarIndice(indice: number) {
+    const recurso = recursos[indice];
+    if (!recurso) return;
+    onSeleccionar(recurso.id);
+    enfocarRecurso(recurso.id);
+  }
+
+  useEffect(() => {
+    const elemento = contenedorRef.current?.querySelector<HTMLElement>(
+      `[data-recurso-aventura="${activoId}"]`,
+    );
+    elemento?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [activoId]);
+
+  return (
+    <section className="mx-auto w-fit max-w-full rounded-2xl border border-white/30 bg-[#061120]/22 px-2.5 py-2.5 shadow-[0_12px_32px_rgba(6,17,32,0.16)] backdrop-blur-md sm:px-3">
+      <div className="flex max-w-full items-center justify-center gap-2">
+        <button
+          type="button"
+          onClick={() => seleccionarIndice(indiceActivo - 1)}
+          disabled={indiceActivo === 0}
+          aria-label="Seleccionar recurso anterior"
+          className="grid size-10 shrink-0 place-items-center rounded-full border border-white/75 bg-white/85 text-slate-700 shadow-sm transition-[transform,background-color,opacity] duration-200 hover:-translate-x-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none"
+        >
+          <ChevronLeft className="size-4" aria-hidden="true" />
+        </button>
+
+        <div
+          ref={contenedorRef}
+          className="min-w-0 max-w-[calc(100vw-8rem)] overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:max-w-[min(68vw,42rem)]"
+        >
+          <div
+            role="tablist"
+            aria-label="Recursos de la lección"
+            className="flex min-w-max snap-x snap-mandatory items-stretch justify-center gap-2 px-1 py-1"
+          >
+            {recursos.map(({ id, etiqueta, Icono }, indice) => {
+              const activo = id === activoId;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activo}
+                  tabIndex={activo ? 0 : -1}
+                  data-recurso-aventura={id}
+                  onClick={() => seleccionarIndice(indice)}
+                  onKeyDown={(event) => {
+                    if (event.key === "ArrowLeft") {
+                      event.preventDefault();
+                      seleccionarIndice(Math.max(0, indice - 1));
+                    } else if (event.key === "ArrowRight") {
+                      event.preventDefault();
+                      seleccionarIndice(Math.min(recursos.length - 1, indice + 1));
+                    } else if (event.key === "Home") {
+                      event.preventDefault();
+                      seleccionarIndice(0);
+                    } else if (event.key === "End") {
+                      event.preventDefault();
+                      seleccionarIndice(recursos.length - 1);
+                    }
+                  }}
+                  className={cn(
+                    "group flex w-20 snap-center flex-col items-center gap-2 rounded-xl px-1 py-1.5 text-center text-[var(--interface-text-muted)] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] motion-reduce:transition-none sm:w-24",
+                    activo && "font-bold text-[var(--interface-text)]",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "grid size-12 shrink-0 place-items-center rounded-full border bg-white/70 text-slate-700 shadow-sm transition-[transform,border-color,background-color,box-shadow] duration-200 motion-reduce:transition-none",
+                      activo
+                        ? "scale-110 border-[var(--interface-accent-secondary)] bg-white/95 text-[var(--interface-accent-secondary)] shadow-[0_0_18px_rgba(103,232,249,0.34)]"
+                        : "border-white/60 group-hover:scale-105 group-hover:border-[var(--interface-accent-secondary)] group-hover:bg-white/90 group-hover:text-[var(--interface-accent-secondary)] group-focus-visible:scale-105",
+                    )}
+                  >
+                    <Icono className="size-5" aria-hidden="true" />
+                  </span>
+                  <span className="block max-w-full truncate text-[11px] font-semibold">{etiqueta}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => seleccionarIndice(indiceActivo + 1)}
+          disabled={indiceActivo === recursos.length - 1}
+          aria-label="Seleccionar recurso siguiente"
+          className="grid size-10 shrink-0 place-items-center rounded-full border border-white/75 bg-white/85 text-slate-700 shadow-sm transition-[transform,background-color,opacity] duration-200 hover:translate-x-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none"
+        >
+          <ChevronRight className="size-4" aria-hidden="true" />
+        </button>
+      </div>
+    </section>
+  );
+}

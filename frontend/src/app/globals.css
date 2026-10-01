@@ -871,15 +871,11 @@
   }
 
   [data-interface-variant="gamified"] .lesson-view:has([data-lesson-variant="mission"]) {
-    background:
-      radial-gradient(circle at 12% 0%, rgba(8, 145, 178, 0.1), transparent 26%),
-      linear-gradient(135deg, #eef3f9 0%, #e7eef8 100%);
+    background-color: #e7eef8;
   }
 
   html.dark [data-interface-variant="gamified"] .lesson-view:has([data-lesson-variant="mission"]) {
-    background:
-      radial-gradient(circle at 12% 0%, rgba(103, 232, 249, 0.12), transparent 26%),
-      linear-gradient(135deg, #050b16 0%, #08111f 100%);
+    background-color: #050b16;
   }
 
   [data-interface-variant="gamified"] .lesson-view:has([data-lesson-variant="mission"])::before,

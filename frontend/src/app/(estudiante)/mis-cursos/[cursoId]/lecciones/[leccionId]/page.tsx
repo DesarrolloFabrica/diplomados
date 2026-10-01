@@ -305,21 +305,19 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
       >
 
-        <Link
+        {preferenciaInterfaz?.interfaceVariant !== "gamified" && <Link
           href={`/mis-cursos/${cursoId}`}
           className={
             preferenciaInterfaz?.interfaceVariant === "educational"
               ? "mb-3 inline-flex items-center gap-1.5 rounded-full border border-[rgba(212,175,100,0.45)] bg-[color-mix(in_srgb,#16211a_82%,transparent)] px-3 py-2 text-xs font-semibold text-[#f4ecd8] backdrop-blur-lg transition-colors hover:bg-[color-mix(in_srgb,#16211a_70%,transparent)]"
               : preferenciaInterfaz?.interfaceVariant === "business"
                 ? "mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#9ec8ff]/70 bg-[#174d95]/38 px-3.5 py-2 text-xs font-semibold text-[#dcecff] shadow-[0_8px_22px_rgba(2,18,54,0.22)] backdrop-blur-md transition-colors hover:bg-[#174d95]/55 hover:text-white"
-                : preferenciaInterfaz?.interfaceVariant === "gamified"
-                  ? "mb-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] px-3 py-2 text-xs font-semibold text-[var(--interface-text)] backdrop-blur-lg transition-colors hover:bg-[var(--interface-surface)]"
                 : "mb-3 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-[#061120]/28 px-3 py-2 text-xs font-semibold text-white/80 backdrop-blur-lg transition-colors hover:bg-white/18 hover:text-white"
           }
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Volver al curso
-        </Link>
+        </Link>}
 
 
 
