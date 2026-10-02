@@ -404,17 +404,17 @@ function DashboardEducativoColaborador({
     : cursosActivos;
 
   return (
-    <div className="w-full space-y-7 text-[var(--interface-text)]">
+    <div className="w-full space-y-6 text-[var(--interface-text)] sm:space-y-7">
       <section
-        className="educational-hero relative min-h-[420px] overflow-hidden rounded-[28px] border border-black/5 bg-[#061120] text-white shadow-[0_24px_70px_rgba(6,17,32,0.18)] sm:min-h-[360px]"
+        className="educational-hero relative min-h-[360px] overflow-hidden rounded-[22px] border border-black/5 bg-[#061120] text-white shadow-[0_24px_70px_rgba(6,17,32,0.18)] sm:min-h-[360px] sm:rounded-[28px]"
         style={estiloHero}
       >
         <div
           aria-hidden="true"
           className="absolute inset-0 bg-[linear-gradient(90deg,rgba(6,17,32,0.96)_0%,rgba(6,17,32,0.84)_35%,rgba(6,17,32,0.36)_64%,rgba(6,17,32,0.04)_100%)]"
         />
-        <div className="relative z-10 flex min-h-[420px] max-w-3xl flex-col justify-center px-6 py-10 sm:min-h-[360px] sm:px-8 lg:px-12">
-          <h1 className="max-w-2xl text-3xl font-bold tracking-tight text-white lg:text-5xl">
+        <div className="relative z-10 flex min-h-[360px] max-w-3xl flex-col justify-center px-5 py-8 sm:min-h-[360px] sm:px-8 lg:px-12">
+          <h1 className="max-w-2xl text-2xl font-bold tracking-tight text-white min-[430px]:text-3xl lg:text-5xl">
             {titulo}
           </h1>
           <p className="mt-4 max-w-xl text-base text-white/72 lg:text-lg">
@@ -451,7 +451,7 @@ function DashboardEducativoColaborador({
           </a>
         </div>
 
-        <nav className="mb-5 flex flex-wrap gap-2" aria-label="Categorias de cursos">
+        <nav className="mb-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible sm:pb-0" aria-label="Categorias de cursos">
           {CATEGORIAS.map((categoria) => {
             const activo = categoria === categoriaActiva;
             return (
@@ -461,7 +461,7 @@ function DashboardEducativoColaborador({
                 aria-pressed={activo}
                 onClick={() => setCategoriaActiva(categoria)}
                 className={cn(
-                  "min-h-10 whitespace-nowrap rounded-full border px-5 text-sm font-semibold shadow-[0_4px_14px_rgba(2,44,34,0.28)] transition-colors",
+                  "min-h-10 shrink-0 whitespace-nowrap rounded-full border px-4 text-sm font-semibold shadow-[0_4px_14px_rgba(2,44,34,0.28)] transition-colors sm:px-5",
                   activo
                     ? "border-white/40 bg-[linear-gradient(135deg,#022c22_0%,#065f46_60%,#047857_100%)] text-white"
                     : "border-transparent bg-[#0b3d2e] text-white/85 hover:bg-[#0f4a38] hover:text-white",
@@ -493,8 +493,8 @@ function TarjetaCursoActivaEducativa({ curso }: { curso: CursoCatalogoFila }) {
   const porcentaje = porcentajeCurso(curso);
 
   return (
-    <article className="rounded-2xl border border-[#ded4bf] bg-[#fffdf7]/95 p-6 text-[#061120] shadow-[0_8px_22px_rgba(61,45,20,0.08)] transition-[transform,border-color,box-shadow] hover:-translate-y-0.5 hover:border-[#cfc2aa] hover:shadow-[0_14px_34px_rgba(61,45,20,0.12)]">
-      <h3 className="line-clamp-2 text-xl font-bold uppercase leading-tight tracking-wide">
+    <article className="rounded-2xl border border-[#ded4bf] bg-[#fffdf7]/95 p-5 text-[#061120] shadow-[0_8px_22px_rgba(61,45,20,0.08)] transition-[transform,border-color,box-shadow] hover:-translate-y-0.5 hover:border-[#cfc2aa] hover:shadow-[0_14px_34px_rgba(61,45,20,0.12)] sm:p-6">
+      <h3 className="line-clamp-2 text-lg font-bold uppercase leading-tight tracking-wide sm:text-xl">
         {curso.titulo}
       </h3>
       <p className="mt-3 text-sm text-[#6f644e]">
@@ -506,7 +506,7 @@ function TarjetaCursoActivaEducativa({ curso }: { curso: CursoCatalogoFila }) {
           style={{ width: `${porcentaje}%` }}
         />
       </div>
-      <div className="mt-5 flex items-center justify-between gap-4">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
         <Link
           href={`/mis-cursos/${curso.id}`}
           className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#91DC00] px-5 text-sm font-medium text-[#061120] transition hover:-translate-y-0.5 hover:bg-[#91DC00]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2"
@@ -584,8 +584,8 @@ function DashboardGamificadoColaborador({
   }
 
   return (
-    <div className="w-full space-y-7 text-[var(--interface-text)]">
-      <div className="flex items-center gap-3">
+    <div className="w-full space-y-5 text-[var(--interface-text)] sm:space-y-7">
+      <div className="flex items-center gap-3 px-1 sm:px-0">
         <span className="grid size-12 shrink-0 place-items-center rounded-full border border-white/40 bg-white/10 text-white backdrop-blur-sm">
           <UserRound className="size-6" aria-hidden="true" />
         </span>
@@ -599,7 +599,7 @@ function DashboardGamificadoColaborador({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 min-[430px]:grid-cols-2 sm:grid-cols-3">
         <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-[rgba(4,15,30,0.55)] px-4 py-3 backdrop-blur-md">
           <AnilloProgreso
             porcentaje={progresoGeneral}
@@ -642,27 +642,27 @@ function DashboardGamificadoColaborador({
       </div>
 
       <div className="pt-1 text-center">
-        <h1 className="font-display text-3xl font-bold tracking-tight text-white drop-shadow-[0_3px_10px_rgba(2,10,20,0.55)] sm:text-4xl">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-white drop-shadow-[0_3px_10px_rgba(2,10,20,0.55)] min-[430px]:text-3xl sm:text-4xl">
           Selecciona tu curso
         </h1>
-        <p className="mt-2 text-xs font-bold uppercase tracking-[0.3em] text-white/70">
+        <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-white/70 sm:text-xs sm:tracking-[0.3em]">
           Explora · Aprende · Transforma
         </p>
       </div>
 
       {items.length > 0 && (
-        <div className="flex items-center justify-center gap-2 sm:gap-4">
+        <div className="flex items-center justify-center gap-1 pt-4 sm:gap-4 sm:pt-7">
           <button
             type="button"
             aria-label="Curso anterior"
             onClick={() => moverCarrusel(-1)}
             disabled={indiceSeguro === 0}
-            className="grid size-10 shrink-0 place-items-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 disabled:opacity-30"
+            className="grid size-9 shrink-0 place-items-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 disabled:opacity-30 sm:size-10"
           >
             <ChevronLeft className="size-5" aria-hidden="true" />
           </button>
 
-          <div className="flex min-w-0 flex-1 items-end justify-center gap-3 overflow-x-auto scroll-smooth px-1 pb-1 sm:gap-4">
+          <div className="flex min-w-0 flex-1 items-end justify-start gap-3 overflow-x-auto scroll-smooth px-1 pb-5 pt-4 [scrollbar-width:none] sm:justify-center sm:gap-4 sm:pb-6 sm:pt-7 [&::-webkit-scrollbar]:hidden">
             {items.map((item, indice) => (
               <TarjetaCursoGamified
                 key={item.curso.id}
@@ -679,7 +679,7 @@ function DashboardGamificadoColaborador({
             aria-label="Curso siguiente"
             onClick={() => moverCarrusel(1)}
             disabled={indiceSeguro === items.length - 1}
-            className="grid size-10 shrink-0 place-items-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 disabled:opacity-30"
+            className="grid size-9 shrink-0 place-items-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 disabled:opacity-30 sm:size-10"
           >
             <ChevronRight className="size-5" aria-hidden="true" />
           </button>
@@ -725,11 +725,11 @@ function TarjetaCursoGamified({
       className={cn(
         "group relative flex shrink-0 flex-col overflow-hidden rounded-[26px] text-left transition-all duration-300",
         seleccionado
-          ? "w-[260px] -translate-y-4 border-2 border-[var(--interface-accent)] shadow-[0_0_32px_rgba(79,138,0,0.55),0_22px_44px_rgba(2,10,6,0.45)] sm:w-[300px]"
-          : "w-[210px] border border-white/15 opacity-80 hover:-translate-y-1 hover:opacity-100 sm:w-[240px]",
+          ? "w-[min(74vw,260px)] -translate-y-2 border-2 border-[var(--interface-accent)] shadow-[0_0_32px_rgba(79,138,0,0.55),0_22px_44px_rgba(2,10,6,0.45)] sm:w-[300px] sm:-translate-y-3"
+          : "w-[min(62vw,210px)] border border-white/15 opacity-80 hover:-translate-y-1 hover:opacity-100 sm:w-[240px]",
       )}
     >
-      <div className="relative h-[300px] w-full shrink-0 overflow-hidden bg-white/5 sm:h-[360px]">
+      <div className="relative h-[260px] w-full shrink-0 overflow-hidden bg-white/5 min-[430px]:h-[300px] sm:h-[360px]">
         <PortadaCurso
           cursoId={curso.id}
           imagenPortadaUrl={curso.imagenPortadaUrl}
@@ -752,7 +752,7 @@ function TarjetaCursoGamified({
             <Lock className="size-4" aria-hidden="true" />
           </span>
         )}
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-4">
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-3.5 sm:p-4">
           <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-white/15 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur-sm">
             {curso.esDiplomado ? (
               <GraduationCap className="size-3.5" aria-hidden="true" />
@@ -761,7 +761,7 @@ function TarjetaCursoGamified({
             )}
             {curso.esDiplomado ? "Diplomado" : "Curso"}
           </span>
-          <p className="line-clamp-2 text-base font-bold leading-snug text-white sm:text-lg">
+          <p className="line-clamp-2 text-sm font-bold leading-snug text-white min-[430px]:text-base sm:text-lg">
             {curso.titulo}
           </p>
         </div>

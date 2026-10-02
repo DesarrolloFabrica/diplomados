@@ -1,0 +1,5 @@
+2026/10/02 09:18:24 Authorizing with Application Default Credentials
+2026/10/02 09:18:24 [gen-lang-client-0049269139:us-central1:diplomados] Listening on 127.0.0.1:5435
+2026/10/02 09:18:24 The proxy has started successfully and is ready for new connections!
+2026/10/02 09:18:24 Connection test started
+2026/10/02 09:18:26 proxy server error: dial error: handshake failed (connection name = "gen-lang-client-0049269139:us-central1:diplomados"): tls: failed to parse certificate from server: x509: invalid key usage

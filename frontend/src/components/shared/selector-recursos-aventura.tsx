@@ -50,14 +50,14 @@ export function SelectorRecursosAventura({
   }, [activoId]);
 
   return (
-    <section className="mx-auto w-fit max-w-full rounded-2xl border border-white/30 bg-[#061120]/22 px-2.5 py-2.5 shadow-[0_12px_32px_rgba(6,17,32,0.16)] backdrop-blur-md sm:px-3">
+    <section className="mx-auto w-fit max-w-full">
       <div className="flex max-w-full items-center justify-center gap-2">
         <button
           type="button"
           onClick={() => seleccionarIndice(indiceActivo - 1)}
           disabled={indiceActivo === 0}
           aria-label="Seleccionar recurso anterior"
-          className="grid size-10 shrink-0 place-items-center rounded-full border border-white/75 bg-white/85 text-slate-700 shadow-sm transition-[transform,background-color,opacity] duration-200 hover:-translate-x-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none"
+          className="grid size-10 shrink-0 place-items-center rounded-full border border-white/75 bg-white/85 text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.2)] transition-[transform,background-color,opacity] duration-200 hover:-translate-x-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none"
         >
           <ChevronLeft className="size-4" aria-hidden="true" />
         </button>
@@ -104,9 +104,9 @@ export function SelectorRecursosAventura({
                 >
                   <span
                     className={cn(
-                      "grid size-12 shrink-0 place-items-center rounded-full border bg-white/70 text-slate-700 shadow-sm transition-[transform,border-color,background-color,box-shadow] duration-200 motion-reduce:transition-none",
+                      "grid size-12 shrink-0 place-items-center rounded-full border bg-white/70 text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.18)] transition-[transform,border-color,background-color,box-shadow] duration-200 motion-reduce:transition-none",
                       activo
-                        ? "scale-110 border-[var(--interface-accent-secondary)] bg-white/95 text-[var(--interface-accent-secondary)] shadow-[0_0_18px_rgba(103,232,249,0.34)]"
+                        ? "scale-110 border-[var(--interface-accent-secondary)] bg-white/95 text-[var(--interface-accent-secondary)] shadow-[0_4px_12px_rgba(15,23,42,0.18),0_0_18px_rgba(103,232,249,0.34)]"
                         : "border-white/60 group-hover:scale-105 group-hover:border-[var(--interface-accent-secondary)] group-hover:bg-white/90 group-hover:text-[var(--interface-accent-secondary)] group-focus-visible:scale-105",
                     )}
                   >
@@ -124,7 +124,7 @@ export function SelectorRecursosAventura({
           onClick={() => seleccionarIndice(indiceActivo + 1)}
           disabled={indiceActivo === recursos.length - 1}
           aria-label="Seleccionar recurso siguiente"
-          className="grid size-10 shrink-0 place-items-center rounded-full border border-white/75 bg-white/85 text-slate-700 shadow-sm transition-[transform,background-color,opacity] duration-200 hover:translate-x-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none"
+          className="grid size-10 shrink-0 place-items-center rounded-full border border-white/75 bg-white/85 text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.2)] transition-[transform,background-color,opacity] duration-200 hover:translate-x-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none"
         >
           <ChevronRight className="size-4" aria-hidden="true" />
         </button>

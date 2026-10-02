@@ -66,7 +66,7 @@ export interface PlaybackResumeState {
   posicionPendiente: number | null;
   /** El usuario eligió continuar: salta al segundo guardado. */
   continuar: () => void;
-  /** El usuario eligió empezar de nuevo: descarta el aviso sin mover la posición. */
+  /** El usuario eligió empezar de nuevo: descarta el aviso y borra la posición guardada. */
   descartar: () => void;
 }
 
@@ -74,8 +74,9 @@ export interface PlaybackResumeState {
  * Detecta si hay una posición guardada para un <video>/<audio> nativo y deja
  * que el usuario decida si continuar desde ahí o empezar de nuevo (en vez de
  * saltar en silencio). Persiste la posición actual periódicamente, y en
- * pause/ended/antes de salir. Solo funciona sobre elementos con `currentTime`
- * controlable: no aplica a iframes (YouTube, Drive-preview, Adobe InDesign).
+ * pause/ended/cambio de pestaña/antes de salir/desmontaje. Solo funciona
+ * sobre elementos con `currentTime` controlable: no aplica a iframes
+ * (YouTube sin `enablejsapi`, Drive-preview, Adobe InDesign).
  */
 export function usePlaybackResume(
   mediaRef: RefObject<HTMLMediaElement | null>,
@@ -84,19 +85,17 @@ export function usePlaybackResume(
 ): PlaybackResumeState {
   const [posicionPendiente, setPosicionPendiente] = useState<number | null>(null);
   const resueltoRef = useRef(false);
+  const storageKeyRef = useRef(storageKey);
+  storageKeyRef.current = storageKey;
 
   useEffect(() => {
     resueltoRef.current = false;
     setPosicionPendiente(null);
 
     const media = mediaRef.current;
-    // TEMPORAL: diagnóstico para encontrar por qué no se guarda la posición
-    // en producción. Quitar una vez resuelto.
-    console.debug("[resume] efecto montado", {
-      hayMedia: !!media,
-      enabled,
-      storageKey,
-    });
+    // TEMPORAL: diagnóstico. Quitar una vez confirmado el problema en
+    // producción (ver DEBUGGING.md / conversación con el usuario).
+    console.debug("[resume] efecto montado", { hayMedia: !!media, enabled, storageKey });
     if (!media || !enabled || !storageKey) return undefined;
     const trackedMedia: HTMLMediaElement = media;
 
@@ -106,19 +105,12 @@ export function usePlaybackResume(
       const actual = trackedMedia.currentTime;
       const duracion = trackedMedia.duration;
       if (!Number.isFinite(actual)) {
-        console.debug("[resume] persistir: currentTime no finito, se ignora", {
-          origen,
-          actual,
-        });
+        console.debug("[resume] persistir: currentTime no finito, se ignora", { origen, actual });
         return;
       }
 
       if (Number.isFinite(duracion) && actual >= duracion - MARGEN_FIN_SEGUNDOS) {
-        console.debug("[resume] persistir: cerca del final, se limpia", {
-          origen,
-          actual,
-          duracion,
-        });
+        console.debug("[resume] persistir: cerca del final, se limpia", { origen, actual, duracion });
         limpiarPosicion(storageKey!);
         return;
       }
@@ -129,10 +121,7 @@ export function usePlaybackResume(
       // posición ya guardada por estar cerca de 0 — solo se deja de
       // sobrescribir.
       if (actual < POSICION_MINIMA_SEGUNDOS) {
-        console.debug("[resume] persistir: currentTime aún muy bajo, no se guarda", {
-          origen,
-          actual,
-        });
+        console.debug("[resume] persistir: currentTime aun muy bajo, no se guarda", { origen, actual });
         return;
       }
 
@@ -140,42 +129,54 @@ export function usePlaybackResume(
       guardarPosicion(storageKey!, actual);
     }
 
-    function detectarPendiente() {
-      if (resueltoRef.current) {
-        console.debug("[resume] detectarPendiente: ya resuelto, se ignora");
+    function detectarPendiente(origen: string) {
+      if (resueltoRef.current) return;
+
+      const duracion = trackedMedia.duration;
+      // Con `preload="metadata"` algunos streams (sobre todo los que pasan
+      // por el proxy de Drive, cuyo Content-Length puede llegar tarde o no
+      // llegar) reportan `duration` NaN/Infinity en el primer evento y solo
+      // obtienen un valor real un poco después via `durationchange`. No se
+      // marca como resuelto hasta tener una duración utilizable o hasta que
+      // el video ya pueda reproducirse (`canplay`), para no perder la
+      // detección por una carrera con ese evento tardío.
+      const duracionUtilizable = Number.isFinite(duracion) && duracion > 0;
+      if (!duracionUtilizable && trackedMedia.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        console.debug("[resume] detectarPendiente: aun sin duracion/datos utilizables, se espera", {
+          origen,
+          duracion,
+          readyState: trackedMedia.readyState,
+        });
         return;
       }
+
       resueltoRef.current = true;
 
       const guardada = leerPosicionGuardada(storageKey!);
-      console.debug("[resume] detectarPendiente: leído de localStorage", {
+      console.debug("[resume] detectarPendiente: leido de localStorage", {
+        origen,
         storageKey,
         guardada,
-        duracion: trackedMedia.duration,
+        duracion,
       });
       if (guardada === null) return;
 
-      const duracion = trackedMedia.duration;
-      if (Number.isFinite(duracion) && guardada >= duracion - MARGEN_FIN_SEGUNDOS) {
+      if (duracionUtilizable && guardada >= duracion - MARGEN_FIN_SEGUNDOS) {
+        console.debug("[resume] detectarPendiente: guardada muy cerca del final, se limpia", {
+          guardada,
+          duracion,
+        });
         limpiarPosicion(storageKey!);
         return;
       }
 
+      console.debug("[resume] detectarPendiente: hay posicion pendiente", { guardada });
       setPosicionPendiente(guardada);
-    }
-
-    function handleLoadedMetadata() {
-      detectarPendiente();
     }
 
     function handleTimeUpdate() {
       const ahora = Date.now();
-      if (ahora - ultimoGuardado < INTERVALO_GUARDADO_MS) {
-        console.debug("[resume] timeupdate: dentro del throttle, se ignora", {
-          faltanMs: INTERVALO_GUARDADO_MS - (ahora - ultimoGuardado),
-        });
-        return;
-      }
+      if (ahora - ultimoGuardado < INTERVALO_GUARDADO_MS) return;
       ultimoGuardado = ahora;
       persistir("timeupdate");
     }
@@ -185,7 +186,7 @@ export function usePlaybackResume(
     }
 
     function handleEnded() {
-      console.debug("[resume] ended: se limpia la posición");
+      console.debug("[resume] ended: se limpia la posicion");
       limpiarPosicion(storageKey!);
     }
 
@@ -197,11 +198,15 @@ export function usePlaybackResume(
       persistir("unload");
     }
 
-    if (trackedMedia.readyState >= HTMLMediaElement.HAVE_METADATA) {
-      detectarPendiente();
-    }
+    const alDetectarLoadedmetadata = () => detectarPendiente("loadedmetadata");
+    const alDetectarDurationchange = () => detectarPendiente("durationchange");
+    const alDetectarCanplay = () => detectarPendiente("canplay");
 
-    trackedMedia.addEventListener("loadedmetadata", handleLoadedMetadata);
+    detectarPendiente("mount");
+
+    trackedMedia.addEventListener("loadedmetadata", alDetectarLoadedmetadata);
+    trackedMedia.addEventListener("durationchange", alDetectarDurationchange);
+    trackedMedia.addEventListener("canplay", alDetectarCanplay);
     trackedMedia.addEventListener("timeupdate", handleTimeUpdate);
     trackedMedia.addEventListener("pause", handlePause);
     trackedMedia.addEventListener("ended", handleEnded);
@@ -210,9 +215,11 @@ export function usePlaybackResume(
     window.addEventListener("beforeunload", handleUnload);
 
     return () => {
-      console.debug("[resume] efecto desmontado, persistiendo por última vez");
+      console.debug("[resume] efecto desmontado, persistiendo por ultima vez");
       persistir("cleanup");
-      trackedMedia.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      trackedMedia.removeEventListener("loadedmetadata", alDetectarLoadedmetadata);
+      trackedMedia.removeEventListener("durationchange", alDetectarDurationchange);
+      trackedMedia.removeEventListener("canplay", alDetectarCanplay);
       trackedMedia.removeEventListener("timeupdate", handleTimeUpdate);
       trackedMedia.removeEventListener("pause", handlePause);
       trackedMedia.removeEventListener("ended", handleEnded);
@@ -224,17 +231,27 @@ export function usePlaybackResume(
 
   const continuar = useCallback(() => {
     const media = mediaRef.current;
-    if (media && posicionPendiente !== null) {
-      try {
-        media.currentTime = posicionPendiente;
-      } catch {
-        // el navegador puede rechazar la asignación puntualmente
+    const objetivo = posicionPendiente;
+    if (media && objetivo !== null) {
+      const aplicar = () => {
+        try {
+          media.currentTime = objetivo;
+        } catch {
+          // el navegador puede rechazar la asignación puntualmente
+        }
+      };
+      if (media.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        aplicar();
+      } else {
+        media.addEventListener("loadedmetadata", aplicar, { once: true });
       }
     }
     setPosicionPendiente(null);
   }, [mediaRef, posicionPendiente]);
 
   const descartar = useCallback(() => {
+    const clave = storageKeyRef.current;
+    if (clave) limpiarPosicion(clave);
     setPosicionPendiente(null);
   }, []);
 

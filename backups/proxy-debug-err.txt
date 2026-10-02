@@ -1,0 +1,2 @@
+2026/10/02 09:18:44 Connection test failed
+2026/10/02 09:18:44 The proxy has encountered a terminal error: dial error: handshake failed (connection name = "gen-lang-client-0049269139:us-central1:diplomados"): tls: failed to parse certificate from server: x509: invalid key usage

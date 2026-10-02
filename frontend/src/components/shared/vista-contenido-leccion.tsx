@@ -276,7 +276,7 @@ export function VistaContenidoLeccion({
       >
         <div
           className={cn(
-            "relative overflow-hidden px-5 py-4 sm:px-6 sm:py-5",
+            "relative overflow-hidden px-4 py-4 sm:px-6 sm:py-5",
             esStudy
               ? "border-b border-[var(--study-border)] bg-[var(--study-surface)]"
               : esFocused
@@ -310,7 +310,7 @@ export function VistaContenidoLeccion({
             <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
               <h1
                 className={cn(
-                  "font-display text-xl font-bold sm:text-2xl",
+                  "font-display text-lg font-bold min-[430px]:text-xl sm:text-2xl",
                   esStudy
                     ? "text-[var(--study-text)]"
                     : esFocused
@@ -362,6 +362,20 @@ export function VistaContenidoLeccion({
           </div>
         </div>
 
+        {esMission && tabsDisponibles.length > 0 && (
+          <div className="px-4 py-3 sm:px-5">
+            <SelectorRecursosAventura
+              recursos={tabsDisponibles.map(({ id, etiqueta, Icono }) => ({
+                id,
+                etiqueta,
+                Icono,
+              }))}
+              activoId={tabActual}
+              onSeleccionar={setTabActiva}
+            />
+          </div>
+        )}
+
         <div
           className={cn(
             tabActual === "video"
@@ -387,7 +401,7 @@ export function VistaContenidoLeccion({
           {mostrarTexto && contenidoTexto && (
             <div
               className={cn(
-                "min-h-[300px] rounded-lg px-5 py-6 sm:px-7",
+                "min-h-[240px] rounded-lg px-4 py-5 sm:min-h-[300px] sm:px-7 sm:py-6",
                 esMission
                   ? "border border-white/25 bg-white/62 backdrop-blur-md"
                   : "bg-white/70",
@@ -427,18 +441,6 @@ export function VistaContenidoLeccion({
           )}
         </div>
       </div>
-
-      {esMission && tabsDisponibles.length > 0 && (
-        <SelectorRecursosAventura
-          recursos={tabsDisponibles.map(({ id, etiqueta, Icono }) => ({
-            id,
-            etiqueta,
-            Icono,
-          }))}
-          activoId={tabActual}
-          onSeleccionar={setTabActiva}
-        />
-      )}
 
       {!esMission && tabsDisponibles.length > 0 && (
         <div>
@@ -493,7 +495,7 @@ export function VistaContenidoLeccion({
             className="w-full max-w-full overflow-x-auto pb-3 [scrollbar-color:rgba(255,255,255,0.5)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/45 [&::-webkit-scrollbar-track]:bg-transparent"
           >
             <div
-              className="grid min-w-max grid-flow-col auto-cols-[minmax(190px,230px)] gap-2.5 xl:min-w-0 xl:grid-flow-row xl:auto-cols-auto xl:grid-cols-[repeat(auto-fit,minmax(170px,1fr))]"
+              className="grid min-w-max grid-flow-col auto-cols-[minmax(160px,200px)] gap-2.5 sm:auto-cols-[minmax(190px,230px)] xl:min-w-0 xl:grid-flow-row xl:auto-cols-auto xl:grid-cols-[repeat(auto-fit,minmax(170px,1fr))]"
               role="tablist"
               aria-label="Recursos de la leccion"
             >
@@ -521,7 +523,7 @@ export function VistaContenidoLeccion({
                           : undefined
                     }
                     className={cn(
-                      "group grid min-h-[68px] grid-cols-[42px_minmax(0,1fr)] items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all",
+                      "group grid min-h-[64px] grid-cols-[38px_minmax(0,1fr)] items-center gap-2.5 rounded-lg border px-2.5 py-2.5 text-left transition-all sm:min-h-[68px] sm:grid-cols-[42px_minmax(0,1fr)] sm:gap-3 sm:px-3",
                       esFocused
                         ? cn(
                             "rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--business-player-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05306e]",
@@ -553,7 +555,7 @@ export function VistaContenidoLeccion({
                   >
                     <span
                       className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-lg border",
+                        "flex h-9 w-9 items-center justify-center rounded-lg border sm:h-10 sm:w-10",
                         esStudy && activo
                           ? "border-white/35 bg-white/20 text-[var(--interface-accent-foreground)]"
                           : esFocused
@@ -569,7 +571,7 @@ export function VistaContenidoLeccion({
                               : "border-white/15 bg-white/10 text-teal-100/80 group-hover:text-white",
                       )}
                     >
-                      <Icono className="h-5 w-5" />
+                      <Icono className="size-4 sm:size-5" />
                     </span>
                     <span className="min-w-0">
                       <span className="block text-xs font-bold text-current">{etiqueta}</span>

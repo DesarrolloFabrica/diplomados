@@ -157,35 +157,49 @@ function DriveVideo({
     if (!video) return;
 
     let resuelto = false;
-    const marcarFallo = () => {
+    const marcarFallo = (motivo: string) => {
       if (resuelto) return;
       resuelto = true;
+      // TEMPORAL: diagnóstico para confirmar si el candidato "video" (el
+      // único que soporta reanudar el minuto exacto) realmente falla y cae
+      // al iframe de Drive (que no lo soporta). Quitar una vez confirmado.
+      console.debug("[drive-embed] candidato video falló, se avanza al siguiente", {
+        motivo,
+        src,
+        readyState: video.readyState,
+        networkState: video.networkState,
+        errorCode: video.error?.code ?? null,
+        errorMessage: video.error?.message ?? null,
+      });
       setCargando(false);
       onFallo();
     };
 
-    const marcarListo = () => {
+    const marcarListo = (motivo: string) => {
       if (resuelto) return;
       resuelto = true;
       window.clearTimeout(timeout);
+      console.debug("[drive-embed] candidato video listo", { motivo, src });
       setCargando(false);
     };
 
     const timeout = window.setTimeout(() => {
       if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
-        marcarListo();
+        marcarListo("timeout-pero-con-metadata");
         return;
       }
-      marcarFallo();
+      marcarFallo("timeout");
     }, TIMEOUT_CARGA_MEDIA_MS);
 
-    video.addEventListener("loadeddata", marcarListo);
-    video.addEventListener("canplay", marcarListo);
+    const alListoLoadeddata = () => marcarListo("loadeddata");
+    const alListoCanplay = () => marcarListo("canplay");
+    video.addEventListener("loadeddata", alListoLoadeddata);
+    video.addEventListener("canplay", alListoCanplay);
 
     return () => {
       window.clearTimeout(timeout);
-      video.removeEventListener("loadeddata", marcarListo);
-      video.removeEventListener("canplay", marcarListo);
+      video.removeEventListener("loadeddata", alListoLoadeddata);
+      video.removeEventListener("canplay", alListoCanplay);
     };
   }, [src, onFallo]);
 
@@ -205,7 +219,13 @@ function DriveVideo({
         src={src}
         title={titulo}
         className="absolute inset-0 h-full w-full bg-black"
-        onError={() => {
+        onError={(event) => {
+          const videoEl = event.currentTarget;
+          console.debug("[drive-embed] evento error en <video>", {
+            src,
+            errorCode: videoEl.error?.code ?? null,
+            errorMessage: videoEl.error?.message ?? null,
+          });
           setCargando(false);
           onFallo();
         }}
@@ -255,6 +275,19 @@ export function DriveRecursoEmbed({
   }, [indiceCandidato]);
 
   const candidatoActual: CandidatoRecursoDrive | undefined = candidatos[indiceCandidato];
+
+  useEffect(() => {
+    // TEMPORAL: diagnóstico para confirmar qué candidato se está usando
+    // realmente (solo "video" soporta reanudar el minuto exacto). Quitar
+    // una vez confirmado.
+    console.debug("[drive-embed] candidato activo", {
+      resourceId,
+      tipo,
+      indiceCandidato,
+      modo: candidatoActual?.modo ?? null,
+      candidatos: candidatos.map((c) => c.modo),
+    });
+  }, [resourceId, tipo, indiceCandidato, candidatoActual, candidatos]);
 
   function avanzarCandidato() {
     if (avanzandoRef.current) return;

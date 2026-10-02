@@ -1,0 +1,16 @@
+2026/10/02 09:18:42 Authorizing with Application Default Credentials
+2026/10/02 09:18:42 [gen-lang-client-0049269139:us-central1:diplomados] Connection info added to cache
+2026/10/02 09:18:42 [gen-lang-client-0049269139:us-central1:diplomados] Connection info refresh operation started
+2026/10/02 09:18:42 [gen-lang-client-0049269139:us-central1:diplomados] Listening on 127.0.0.1:5435
+2026/10/02 09:18:42 The proxy has started successfully and is ready for new connections!
+2026/10/02 09:18:42 Connection test started
+2026/10/02 09:18:44 [gen-lang-client-0049269139:us-central1:diplomados] Connection info refresh operation complete
+2026/10/02 09:18:44 [gen-lang-client-0049269139:us-central1:diplomados] Current certificate expiration = 2026-10-02T15:18:44Z
+2026/10/02 09:18:44 [gen-lang-client-0049269139:us-central1:diplomados] Connection info refresh operation scheduled at 2026-10-02T15:14:44Z (now + 56m0s)
+2026/10/02 09:18:44 [gen-lang-client-0049269139:us-central1:diplomados] Now = 2026-10-02T14:18:44Z, Current cert expiration = 2026-10-02T15:18:44Z
+2026/10/02 09:18:44 [gen-lang-client-0049269139:us-central1:diplomados] Cert is valid = true
+2026/10/02 09:18:44 [gen-lang-client-0049269139:us-central1:diplomados] Dialing 34.133.92.171:3307
+2026/10/02 09:18:44 [gen-lang-client-0049269139:us-central1:diplomados] TLS handshake failed: tls: failed to parse certificate from server: x509: invalid key usage
+2026/10/02 09:18:44 [gen-lang-client-0049269139:us-central1:diplomados] Removing connection info from cache: tls: failed to parse certificate from server: x509: invalid key usage
+2026/10/02 09:18:44 proxy server error: dial error: handshake failed (connection name = "gen-lang-client-0049269139:us-central1:diplomados"): tls: failed to parse certificate from server: x509: invalid key usage
+2026/10/02 09:18:44 Sending SIGINT signal for proxy to shutdown.

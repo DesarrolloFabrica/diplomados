@@ -2938,13 +2938,13 @@ function RoadmapLevelMapGamified({
     null;
 
   return (
-    <section className="relative mx-auto flex min-h-dvh w-full max-w-[1500px] flex-col gap-6 px-5 py-8 text-white sm:px-8 lg:px-12">
+    <section className="relative mx-auto flex min-h-dvh w-full max-w-[1500px] flex-col gap-5 px-4 py-6 text-white sm:gap-6 sm:px-8 sm:py-8 lg:px-12">
       <header className="max-w-xl">
-        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-white/85 drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)]">
+        <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white/85 drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] sm:text-xs sm:tracking-[0.18em]">
           <Compass className="size-3.5 text-[var(--interface-accent-secondary)]" aria-hidden="true" />
           Ruta de aprendizaje
         </p>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_4px_14px_rgba(0,0,0,0.58)] sm:text-5xl">
+        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_4px_14px_rgba(0,0,0,0.58)] min-[430px]:text-4xl sm:text-5xl">
           {cursoTitulo ?? grupoActivo.titulo}
         </h1>
         <div className="mt-5 flex max-w-lg flex-col gap-2 sm:flex-row sm:items-center">
@@ -2960,8 +2960,8 @@ function RoadmapLevelMapGamified({
         </div>
       </header>
 
-      <nav className="pb-1" aria-label="Seleccionar modulo">
-        <div className="flex w-full items-start justify-between gap-0 px-1">
+      <nav className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden" aria-label="Seleccionar modulo">
+        <div className="flex min-w-max items-start justify-start gap-0 px-1 sm:min-w-0 sm:justify-between">
           {grupos.map((grupo, indice) => {
             const disponible = moduloDisponible(grupo);
             const progresoModulo = calcularProgresoModulo(grupo.nodos);
@@ -2983,13 +2983,13 @@ function RoadmapLevelMapGamified({
                   aria-current={esActivo ? "step" : undefined}
                   aria-label={`Módulo ${indice + 1}: ${grupo.titulo}`}
                   className={cn(
-                    "flex w-20 shrink-0 flex-col items-center gap-1.5 sm:w-24",
+                    "flex w-[4.5rem] shrink-0 flex-col items-center gap-1.5 sm:w-24",
                     !disponible && "cursor-not-allowed",
                   )}
                 >
                   <span
                     className={cn(
-                      "grid size-10 shrink-0 place-items-center rounded-full border-2 transition-[transform,box-shadow] duration-300 sm:size-11",
+                      "grid size-9 shrink-0 place-items-center rounded-full border-2 transition-[transform,box-shadow] duration-300 sm:size-11",
                       progresoModulo.completo &&
                         "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)]",
                       !progresoModulo.completo &&
@@ -3008,7 +3008,7 @@ function RoadmapLevelMapGamified({
                   </span>
                   <span
                     className={cn(
-                      "w-full truncate rounded-full border px-2 py-0.5 text-center text-[10px] font-bold",
+                      "w-full truncate rounded-full border px-1.5 py-0.5 text-center text-[9px] font-bold sm:px-2 sm:text-[10px]",
                       esActivo
                         ? "border-[var(--interface-accent-secondary)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)]"
                         : "border-[var(--interface-border)] bg-[var(--interface-surface)] text-[var(--interface-text-muted)]",
@@ -3023,23 +3023,23 @@ function RoadmapLevelMapGamified({
         </div>
       </nav>
 
-      <article className="flex w-full flex-col gap-4 rounded-2xl border border-white/24 bg-[#061120]/78 px-5 py-4 text-white shadow-[0_14px_38px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:flex-row sm:items-center sm:px-6">
+      <article className="flex w-full flex-col gap-4 rounded-2xl border border-white/24 bg-[#061120]/78 px-4 py-4 text-white shadow-[0_14px_38px_rgba(0,0,0,0.32)] backdrop-blur-sm sm:flex-row sm:items-center sm:px-6">
         <div className="min-w-0 flex-[1.35]">
           <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--interface-accent-secondary)]">
             <BookOpen className="size-3.5" aria-hidden="true" />
             Modulo {indiceSeguro + 1}
           </p>
-          <h2 className="mt-1 text-base font-bold leading-snug sm:text-lg">{grupoActivo.titulo}</h2>
+          <h2 className="mt-1 text-sm font-bold leading-snug min-[430px]:text-base sm:text-lg">{grupoActivo.titulo}</h2>
         </div>
 
-        <div className="flex min-w-0 flex-1 items-center gap-3 sm:max-w-lg">
-          <div className="h-2 min-w-32 flex-1 overflow-hidden rounded-full bg-white/20">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 sm:max-w-lg sm:flex-nowrap">
+          <div className="h-2 min-w-[9rem] flex-1 overflow-hidden rounded-full bg-white/20">
             <div
               className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
               style={{ width: `${progresoModuloActivo.porcentaje}%` }}
             />
           </div>
-          <span className="shrink-0 text-sm font-bold tabular-nums">
+          <span className="shrink-0 text-xs font-bold tabular-nums sm:text-sm">
             {progresoModuloActivo.completados}/{progresoModuloActivo.total} · {progresoModuloActivo.porcentaje}%
           </span>
         </div>

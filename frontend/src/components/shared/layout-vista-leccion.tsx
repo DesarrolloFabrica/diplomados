@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CLASE_PANEL_GLASS } from "@/config/paneles-glass";
@@ -44,10 +44,71 @@ export function LayoutVistaLeccion({
   // Business no hereda ese comportamiento (no lo pidió Fase 11): mantiene el
   // esquema colapsado por defecto, igual que creative.
   const [esquemaVisible, setEsquemaVisible] = useState(esEducational || esGamified);
+  const [esquemaCerrando, setEsquemaCerrando] = useState(false);
   const [esquemaMobileVisible, setEsquemaMobileVisible] = useState(false);
+  const [esquemaMobileCerrando, setEsquemaMobileCerrando] = useState(false);
+  const esquemaCerrarTimeoutRef = useRef<number | null>(null);
+  const esquemaMobileCerrarTimeoutRef = useRef<number | null>(null);
+  const esquemaEnLayout = esquemaVisible || esquemaCerrando;
+  const esquemaMobileEnLayout = esquemaMobileVisible || esquemaMobileCerrando;
+
+  useEffect(() => {
+    return () => {
+      if (esquemaCerrarTimeoutRef.current !== null) {
+        window.clearTimeout(esquemaCerrarTimeoutRef.current);
+      }
+      if (esquemaMobileCerrarTimeoutRef.current !== null) {
+        window.clearTimeout(esquemaMobileCerrarTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  function abrirEsquema() {
+    if (esquemaCerrarTimeoutRef.current !== null) {
+      window.clearTimeout(esquemaCerrarTimeoutRef.current);
+      esquemaCerrarTimeoutRef.current = null;
+    }
+    setEsquemaCerrando(false);
+    setEsquemaVisible(true);
+  }
+
+  function cerrarEsquema() {
+    if (!esquemaVisible || esquemaCerrando) return;
+
+    setEsquemaCerrando(true);
+    esquemaCerrarTimeoutRef.current = window.setTimeout(() => {
+      setEsquemaVisible(false);
+      setEsquemaCerrando(false);
+      esquemaCerrarTimeoutRef.current = null;
+    }, 180);
+  }
+
+  function abrirEsquemaMobile() {
+    if (esquemaMobileCerrarTimeoutRef.current !== null) {
+      window.clearTimeout(esquemaMobileCerrarTimeoutRef.current);
+      esquemaMobileCerrarTimeoutRef.current = null;
+    }
+    setEsquemaMobileCerrando(false);
+    setEsquemaMobileVisible(true);
+  }
+
+  function cerrarEsquemaMobile() {
+    if (!esquemaMobileVisible || esquemaMobileCerrando) return;
+
+    setEsquemaMobileCerrando(true);
+    esquemaMobileCerrarTimeoutRef.current = window.setTimeout(() => {
+      setEsquemaMobileVisible(false);
+      setEsquemaMobileCerrando(false);
+      esquemaMobileCerrarTimeoutRef.current = null;
+    }, 180);
+  }
 
   function alternarEsquema() {
-    setEsquemaVisible((prev) => !prev);
+    if (esquemaVisible) {
+      cerrarEsquema();
+    } else {
+      abrirEsquema();
+    }
   }
 
   if (esGamified) {
@@ -57,18 +118,18 @@ export function LayoutVistaLeccion({
         className={cn(
           "grid min-h-full w-full grid-cols-1",
           "lg:grid-cols-[minmax(0,1fr)_80px]",
-          esquemaVisible
+          esquemaEnLayout
             ? "xl:grid-cols-[minmax(0,3fr)_minmax(304px,1fr)]"
             : "xl:grid-cols-[minmax(0,1fr)_80px]",
         )}
       >
-        <section className="relative min-w-0 px-3 py-4 sm:px-4 lg:px-6 lg:py-5">
+        <section className="relative min-w-0 px-3 pb-28 pt-4 sm:px-4 sm:pb-28 lg:px-6 lg:pb-28 lg:pt-5">
           <button
             type="button"
-            onClick={() => setEsquemaMobileVisible(true)}
+            onClick={abrirEsquemaMobile}
             aria-expanded={esquemaMobileVisible}
             aria-controls="esquema-contenidos-aventura-mobile"
-            className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 rounded-full border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] px-4 py-2.5 text-sm font-semibold text-[var(--interface-text)] shadow-[0_0_20px_rgba(103,232,249,0.2)] backdrop-blur-md transition-colors hover:border-[var(--interface-accent-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] lg:hidden"
+            className="fixed bottom-20 right-4 z-40 inline-flex items-center gap-2 rounded-full border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] px-4 py-2.5 text-sm font-semibold text-[var(--interface-text)] shadow-[0_0_20px_rgba(103,232,249,0.2)] backdrop-blur-md transition-colors hover:border-[var(--interface-accent-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] sm:bottom-6 sm:right-6 lg:hidden"
           >
             <PanelRightOpen className="size-4" aria-hidden="true" />
             Contenido
@@ -80,7 +141,7 @@ export function LayoutVistaLeccion({
         <div
           className={cn(
             "hidden min-w-0 lg:sticky lg:top-0 lg:block lg:h-dvh lg:self-start",
-            esquemaVisible && "xl:hidden",
+            esquemaEnLayout && "xl:hidden",
           )}
         >
           <RailModulosAventura
@@ -88,14 +149,20 @@ export function LayoutVistaLeccion({
             grupos={grupos}
             leccionActivaId={leccionActivaId}
             evaluacionActivaId={evaluacionActivaId}
-            onExpandir={() => setEsquemaVisible(true)}
+            progresoCurso={progresoCurso}
+            onExpandir={abrirEsquema}
           />
         </div>
 
-        {esquemaVisible && (
+        {esquemaEnLayout && (
           <aside
             id="esquema-contenidos-panel"
-            className="hidden min-w-0 border-l border-[var(--interface-border)] bg-[var(--interface-surface)] shadow-none xl:sticky xl:top-0 xl:block xl:h-dvh xl:self-start"
+            className={cn(
+              "hidden min-w-0 border-l border-[var(--interface-border)] bg-[var(--interface-surface)] shadow-none xl:sticky xl:top-0 xl:block xl:h-dvh xl:self-start",
+              esquemaCerrando
+                ? "motion-safe:animate-out motion-safe:fade-out motion-safe:slide-out-to-right-4 motion-safe:duration-200"
+                : "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-200",
+            )}
           >
             <EsquemaContenidos
               cursoId={cursoId}
@@ -109,17 +176,27 @@ export function LayoutVistaLeccion({
           </aside>
         )}
 
-        {esquemaMobileVisible && (
+        {esquemaMobileEnLayout && (
           <div className="fixed inset-0 z-[90] lg:hidden">
             <button
               type="button"
               aria-label="Cerrar esquema de contenidos"
-              onClick={() => setEsquemaMobileVisible(false)}
-              className="absolute inset-0 bg-[#061120]/62 backdrop-blur-sm"
+              onClick={cerrarEsquemaMobile}
+              className={cn(
+                "absolute inset-0 bg-[#061120]/62 backdrop-blur-sm",
+                esquemaMobileCerrando
+                  ? "motion-safe:animate-out motion-safe:fade-out motion-safe:duration-200"
+                  : "motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200",
+              )}
             />
             <aside
               id="esquema-contenidos-aventura-mobile"
-              className="absolute inset-y-0 right-0 w-[min(88vw,380px)] overflow-y-auto border-l border-[var(--interface-border)] bg-[var(--interface-surface)] shadow-[-20px_0_50px_rgba(6,17,32,0.32)]"
+              className={cn(
+                "absolute inset-y-0 right-0 w-[min(92vw,380px)] overflow-y-auto border-l border-[var(--interface-border)] bg-[var(--interface-surface)] shadow-[-20px_0_50px_rgba(6,17,32,0.32)]",
+                esquemaMobileCerrando
+                  ? "motion-safe:animate-out motion-safe:fade-out motion-safe:slide-out-to-right-4 motion-safe:duration-200"
+                  : "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-200",
+              )}
             >
               <EsquemaContenidos
                 cursoId={cursoId}
@@ -128,7 +205,7 @@ export function LayoutVistaLeccion({
                 evaluacionActivaId={evaluacionActivaId}
                 grupos={grupos}
                 progresoCurso={progresoCurso}
-                onCerrar={() => setEsquemaMobileVisible(false)}
+                onCerrar={cerrarEsquemaMobile}
               />
             </aside>
           </div>
@@ -142,21 +219,21 @@ export function LayoutVistaLeccion({
       data-lesson-variant={config.lesson.variant}
       className={cn(
         "grid min-h-full w-full grid-cols-1",
-        esquemaVisible &&
+        esquemaEnLayout &&
           (esTemaPropio
             ? "xl:grid-cols-[minmax(0,1fr)_380px]"
             : "xl:grid-cols-[minmax(0,1fr)_304px]"),
       )}
     >
       <section className="relative min-w-0 px-3 py-4 sm:px-4 lg:px-6 lg:py-5">
-        {!esquemaVisible && (
+        {!esquemaEnLayout && (
           <button
             type="button"
             onClick={alternarEsquema}
             aria-expanded={false}
             aria-controls="esquema-contenidos-panel"
             className={cn(
-              "fixed bottom-6 right-6 z-20 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold",
+              "fixed bottom-20 right-4 z-20 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold sm:bottom-6 sm:right-6",
               esBusiness
                 ? "border border-[#7fb5ff]/45 bg-[#0b2b5c]/55 text-[#e8f4ff] shadow-[0_10px_28px_rgba(2,16,50,0.28)] backdrop-blur-md transition-colors hover:bg-[#123f86]/62 xl:absolute xl:bottom-auto xl:right-0 xl:top-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE] focus-visible:ring-offset-2"
                 : esEducational
@@ -179,11 +256,14 @@ export function LayoutVistaLeccion({
         <div className="mx-auto w-full max-w-[1520px]">{children}</div>
       </section>
 
-      {esquemaVisible && (
+      {esquemaEnLayout && (
         <aside
           id="esquema-contenidos-panel"
           className={cn(
             "min-w-0 rounded-none xl:sticky xl:top-0 xl:h-full xl:max-h-dvh xl:self-start xl:border-t-0",
+            esquemaCerrando
+              ? "motion-safe:animate-out motion-safe:fade-out motion-safe:slide-out-to-right-4 motion-safe:duration-200"
+              : "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-200",
             esBusiness
               ? "border-t border-[#7fb5ff]/24 bg-[#071f39]/72 text-[#e8f4ff] shadow-[inset_1px_0_0_rgba(127,181,255,0.12)] backdrop-blur-md [--interface-accent-secondary:#22D3EE] [--interface-accent:#91DC00] [--interface-border:rgba(127,181,255,0.24)] [--interface-text-muted:rgba(206,225,248,0.72)] [--interface-text:#E8F4FF] xl:border-l xl:border-t-0"
               : esTemaPropio

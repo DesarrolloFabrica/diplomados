@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CircleCheck,
   CircleDashed,
   ClipboardCheck,
@@ -80,6 +82,13 @@ function IconoLeccion({
   if (completada) return <CircleCheck className="h-4 w-4 shrink-0" />;
   if (iniciada) return <CircleDashed className="h-4 w-4 shrink-0" />;
   return <LockKeyhole className="h-4 w-4 shrink-0" />;
+}
+
+function moduloTieneDisponibles(grupo: GrupoEsquema): boolean {
+  return (
+    grupo.lecciones.some((leccion) => !leccion.bloqueado) ||
+    grupo.evaluaciones.some((evaluacion) => !evaluacion.bloqueado)
+  );
 }
 
 export function calcularProgresoModulo(grupo: GrupoEsquema) {
@@ -249,6 +258,7 @@ export function EsquemaContenidos({
   const esEducational = config.id === "educational";
   const esGamified = config.id === "gamified";
   const esBusiness = config.id === "business";
+
   // Gate genérico "tema propio (tokens) vs. creative (colores fijos)". Las
   // tres variantes no-creative comparten aquí las mismas clases porque son
   // tokens (--interface-*) que ya resuelven al color correcto de cada una;
@@ -349,6 +359,19 @@ export function EsquemaContenidos({
 
   function alternarQuices(id: string) {
     setQuicesAbiertos((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  if (esGamified) {
+    return (
+      <EsquemaContenidosAventura
+        cursoId={cursoId}
+        leccionActivaId={leccionActivaId}
+        evaluacionActivaId={evaluacionActivaId}
+        grupos={grupos}
+        progresoCurso={progresoCurso}
+        onCerrar={onCerrar}
+      />
+    );
   }
 
   return (
@@ -693,6 +716,251 @@ export function EsquemaContenidos({
           </p>
         )}
       </nav>
+    </aside>
+  );
+}
+
+/**
+ * Esquema de contenidos para la interfaz aventura: en vez del acordeón con
+ * todos los módulos a la vez (el resto de variantes), muestra solo el
+ * módulo visible con sus lecciones/quices y navega entre módulos con los
+ * botones anterior/siguiente — misma idea que el flyout del rail lateral
+ * colapsado, para que la experiencia sea consistente en toda la interfaz.
+ */
+function EsquemaContenidosAventura({
+  cursoId,
+  leccionActivaId,
+  evaluacionActivaId,
+  grupos,
+  progresoCurso,
+  onCerrar,
+}: Omit<EsquemaContenidosProps, "enrollmentId">) {
+  const indiceModuloActivo = Math.max(
+    0,
+    grupos.findIndex(
+      (grupo) =>
+        grupo.lecciones.some((leccion) => leccion.id === leccionActivaId) ||
+        grupo.evaluaciones.some((evaluacion) => evaluacion.id === evaluacionActivaId),
+    ),
+  );
+  const [indiceVisible, setIndiceVisible] = useState(indiceModuloActivo);
+
+  useEffect(() => {
+    setIndiceVisible(indiceModuloActivo);
+  }, [indiceModuloActivo]);
+
+  const grupoVisible = grupos[indiceVisible] ?? grupos[0] ?? null;
+  const progresoModulo = grupoVisible ? calcularProgresoModulo(grupoVisible) : null;
+
+  let indicePrevio: number | null = null;
+  for (let indice = indiceVisible - 1; indice >= 0; indice -= 1) {
+    if (moduloTieneDisponibles(grupos[indice]!)) {
+      indicePrevio = indice;
+      break;
+    }
+  }
+
+  let indiceSiguiente: number | null = null;
+  for (let indice = indiceVisible + 1; indice < grupos.length; indice += 1) {
+    if (moduloTieneDisponibles(grupos[indice]!)) {
+      indiceSiguiente = indice;
+      break;
+    }
+  }
+
+  return (
+    <aside className="flex h-full flex-col">
+      <div className="flex items-center justify-between gap-2 border-b border-[var(--interface-border)] px-4 py-3.5">
+        <h2 className="text-sm font-semibold text-[var(--interface-text)]">Esquema de contenidos</h2>
+        {onCerrar && (
+          <button
+            type="button"
+            onClick={onCerrar}
+            aria-label="Ocultar esquema de contenidos"
+            className="inline-flex shrink-0 items-center justify-center rounded-md p-1.5 text-[var(--interface-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--interface-accent)_8%,transparent)] hover:text-[var(--interface-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
+          >
+            <PanelRightClose className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      <div className="space-y-2 border-b border-[var(--interface-border)] px-4 py-3">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs font-semibold text-[var(--interface-text-muted)]">Progreso del curso</p>
+          <p className="text-xs font-bold tabular-nums text-[var(--interface-text)]">
+            {progresoCurso.porcentaje}%
+          </p>
+        </div>
+        <div
+          role="progressbar"
+          aria-label="Progreso general del curso"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progresoCurso.porcentaje}
+          className="h-1.5 overflow-hidden rounded-full bg-[var(--interface-border)]"
+        >
+          <div
+            className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))] transition-[width] duration-500"
+            style={{ width: `${progresoCurso.porcentaje}%` }}
+          />
+        </div>
+        <p className="text-[11px] text-[var(--interface-text-muted)]">
+          {progresoCurso.completados} de {progresoCurso.total} contenidos completados
+        </p>
+      </div>
+
+      {grupoVisible ? (
+        <>
+          <div className="flex items-center justify-between gap-2 border-b border-[var(--interface-border)] px-3 py-2.5">
+            <button
+              type="button"
+              onClick={() => indicePrevio !== null && setIndiceVisible(indicePrevio)}
+              disabled={indicePrevio === null}
+              aria-label="Modulo anterior"
+              className="grid size-8 shrink-0 place-items-center rounded-full border border-[var(--interface-border)] text-[var(--interface-text-muted)] transition-colors hover:border-[var(--interface-accent-secondary)] hover:text-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              <ChevronLeft className="size-4" aria-hidden="true" />
+            </button>
+            <div className="min-w-0 flex-1 text-center">
+              <p className="truncate text-[13px] font-bold text-[var(--interface-text)]">
+                Módulo {indiceVisible + 1}: {grupoVisible.titulo}
+              </p>
+              <p className="text-[11px] font-semibold text-[var(--interface-text-muted)]">
+                {progresoModulo?.completados ?? 0} de {progresoModulo?.total ?? 0} completados ·{" "}
+                {progresoModulo?.porcentaje ?? 0}%
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => indiceSiguiente !== null && setIndiceVisible(indiceSiguiente)}
+              disabled={indiceSiguiente === null}
+              aria-label="Modulo siguiente"
+              className="grid size-8 shrink-0 place-items-center rounded-full border border-[var(--interface-border)] text-[var(--interface-text-muted)] transition-colors hover:border-[var(--interface-accent-secondary)] hover:text-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              <ChevronRight className="size-4" aria-hidden="true" />
+            </button>
+          </div>
+
+          <nav
+            className="flex-1 space-y-2 overflow-y-auto px-2 py-2.5"
+            aria-label={`Lecciones de Módulo ${indiceVisible + 1}`}
+          >
+            <ul className="space-y-0.5">
+              {grupoVisible.lecciones.map((leccion) => {
+                const activa = leccion.id === leccionActivaId;
+                const bloqueada = Boolean(leccion.bloqueado);
+                const Icono = bloqueada
+                  ? LockKeyhole
+                  : leccion.completada
+                    ? CircleCheck
+                    : activa
+                      ? CircleDashed
+                      : null;
+
+                const contenido = (
+                  <>
+                    <span
+                      className={cn(
+                        "grid size-7 shrink-0 place-items-center rounded-full border text-[11px] font-bold",
+                        bloqueada
+                          ? "border-[var(--interface-border)] text-[var(--interface-text-muted)] opacity-60"
+                          : leccion.completada
+                            ? "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)]"
+                            : activa
+                              ? "border-[var(--interface-accent-secondary)] bg-[var(--interface-accent-secondary)] text-[var(--interface-accent-foreground)]"
+                              : "border-[var(--interface-border)] text-[var(--interface-text-muted)]",
+                      )}
+                    >
+                      {Icono && <Icono className="size-3.5" aria-hidden="true" />}
+                    </span>
+                    <span className="min-w-0 flex-1 whitespace-normal break-words text-[13px] font-medium leading-snug text-[var(--interface-text)]">
+                      {leccion.titulo}
+                    </span>
+                  </>
+                );
+                const clases = cn(
+                  "group flex items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-sm transition-colors",
+                  activa
+                    ? "bg-[color-mix(in_srgb,var(--interface-accent-secondary)_14%,transparent)] font-semibold"
+                    : bloqueada
+                      ? "cursor-not-allowed opacity-60"
+                      : "hover:bg-[color-mix(in_srgb,var(--interface-accent)_8%,transparent)]",
+                );
+
+                return (
+                  <li key={leccion.id}>
+                    {bloqueada ? (
+                      <div className={clases} aria-disabled="true">
+                        {contenido}
+                      </div>
+                    ) : (
+                      <Link
+                        href={`/mis-cursos/${cursoId}/lecciones/${leccion.id}`}
+                        className={clases}
+                        aria-current={activa ? "page" : undefined}
+                      >
+                        {contenido}
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+
+            {grupoVisible.evaluaciones.length > 0 && (
+              <ul className="space-y-0.5 border-t border-[var(--interface-border)] pt-2">
+                {grupoVisible.evaluaciones.map((evaluacion) => {
+                  const activa = evaluacion.id === evaluacionActivaId;
+                  const bloqueada = Boolean(evaluacion.bloqueado);
+                  const Icono = bloqueada ? LockKeyhole : evaluacion.completada ? CircleCheck : ClipboardCheck;
+
+                  const contenido = (
+                    <>
+                      <span
+                        className={cn(
+                          "grid size-7 shrink-0 place-items-center rounded-full border text-[11px] font-bold",
+                          bloqueada
+                            ? "border-[var(--interface-border)] text-[var(--interface-text-muted)] opacity-60"
+                            : "border-[#64748B] bg-gradient-to-br from-[#E2E8F0] to-[#94A3B8] text-[#1E293B]",
+                        )}
+                      >
+                        <Icono className="size-3.5" aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1 whitespace-normal break-words text-[13px] font-medium leading-snug text-[var(--interface-text)]">
+                        {evaluacion.titulo}
+                      </span>
+                    </>
+                  );
+                  const clases = cn(
+                    "group flex items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-sm transition-colors",
+                    activa
+                      ? "bg-[color-mix(in_srgb,var(--interface-accent-secondary)_14%,transparent)] font-semibold"
+                      : bloqueada
+                        ? "cursor-not-allowed opacity-60"
+                        : "hover:bg-[color-mix(in_srgb,var(--interface-accent)_8%,transparent)]",
+                  );
+
+                  return (
+                    <li key={evaluacion.id}>
+                      {bloqueada ? (
+                        <div className={clases} aria-disabled="true">
+                          {contenido}
+                        </div>
+                      ) : (
+                        <Link href={`/mis-cursos/${cursoId}/evaluaciones/${evaluacion.id}`} className={clases}>
+                          {contenido}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </nav>
+        </>
+      ) : (
+        <p className="px-2 py-4 text-sm text-[var(--interface-text-muted)]">No hay contenidos disponibles.</p>
+      )}
     </aside>
   );
 }
