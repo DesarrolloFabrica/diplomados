@@ -128,6 +128,7 @@ export interface InscripcionFila {
   estado: CursoCatalogoFila["estadoInscripcion"];
   porcentajeAvance: string;
   calificacionFinal: string | null;
+  ultimaLeccionId: string | null;
 }
 
 export async function obtenerInscripcion(
@@ -141,6 +142,7 @@ export async function obtenerInscripcion(
         estado: inscripciones.estado,
         porcentajeAvance: inscripciones.porcentajeAvance,
         calificacionFinal: inscripciones.calificacionFinal,
+        ultimaLeccionId: inscripciones.ultimaLeccionId,
       })
       .from(inscripciones)
       .where(and(eq(inscripciones.cursoId, cursoId), eq(inscripciones.profileId, usuarioId)))
@@ -295,6 +297,87 @@ export interface ModuloConLeccionesProgreso extends ModuloFila {
   lecciones: LeccionProgresoFila[];
 }
 
+async function listarLeccionesMetadataPorModulosEnTx(
+  tx: Parameters<Parameters<typeof conSesion>[1]>[0],
+  moduloIds: string[],
+  inscripcionId: string | null,
+): Promise<Array<LeccionProgresoFila & { moduloId: string }>> {
+  if (moduloIds.length === 0) return [];
+
+  if (!inscripcionId) {
+    return tx
+      .select({
+        id: lecciones.id,
+        titulo: lecciones.titulo,
+        tipoContenido: lecciones.tipoContenido,
+        esObligatoria: lecciones.esObligatoria,
+        orden: lecciones.orden,
+        completada: sql<boolean>`false`,
+        moduloId: unidades.moduloId,
+      })
+      .from(lecciones)
+      .innerJoin(unidades, eq(lecciones.unidadId, unidades.id))
+      .where(
+        and(
+          inArray(unidades.moduloId, moduloIds),
+          isNull(unidades.deletedAt),
+          isNull(lecciones.deletedAt),
+        ),
+      )
+      .orderBy(asc(unidades.orden), asc(lecciones.orden), asc(lecciones.createdAt));
+  }
+
+  return tx
+    .select({
+      id: lecciones.id,
+      titulo: lecciones.titulo,
+      tipoContenido: lecciones.tipoContenido,
+      esObligatoria: lecciones.esObligatoria,
+      orden: lecciones.orden,
+      completada: sql<boolean>`coalesce(${progresoLecciones.completada}, false)`,
+      moduloId: unidades.moduloId,
+    })
+    .from(lecciones)
+    .innerJoin(unidades, eq(lecciones.unidadId, unidades.id))
+    .leftJoin(
+      progresoLecciones,
+      and(
+        eq(progresoLecciones.leccionId, lecciones.id),
+        eq(progresoLecciones.inscripcionId, inscripcionId),
+      ),
+    )
+    .where(
+      and(
+        inArray(unidades.moduloId, moduloIds),
+        isNull(unidades.deletedAt),
+        isNull(lecciones.deletedAt),
+      ),
+    )
+    .orderBy(asc(unidades.orden), asc(lecciones.orden), asc(lecciones.createdAt));
+}
+
+async function listarEvaluacionesMetadataEnTx(
+  tx: Parameters<Parameters<typeof conSesion>[1]>[0],
+  cursoId: string,
+): Promise<EvaluacionEstadoFila[]> {
+  const filasEvaluaciones = await tx
+    .select({
+      id: evaluaciones.id,
+      titulo: evaluaciones.titulo,
+      maxIntentos: evaluaciones.maxIntentos,
+      puntajeMinimo: evaluaciones.puntajeMinimo,
+    })
+    .from(evaluaciones)
+    .where(and(eq(evaluaciones.cursoId, cursoId), isNull(evaluaciones.deletedAt)));
+
+  return filasEvaluaciones.map((evaluacion) => ({
+    ...evaluacion,
+    intentosUsados: 0,
+    mejorPuntaje: null,
+    aprobado: false,
+  }));
+}
+
 export interface VistaCursoColaborador {
   curso: CursoDetalle;
   modulos: ModuloFila[];
@@ -334,6 +417,7 @@ export async function cargarVistaCursoColaborador(
         estado: inscripciones.estado,
         porcentajeAvance: inscripciones.porcentajeAvance,
         calificacionFinal: inscripciones.calificacionFinal,
+        ultimaLeccionId: inscripciones.ultimaLeccionId,
       })
       .from(inscripciones)
       .where(and(eq(inscripciones.cursoId, cursoId), eq(inscripciones.profileId, usuarioId)))
@@ -341,47 +425,12 @@ export async function cargarVistaCursoColaborador(
 
     const inscripcion = inscripcionRaw ?? null;
 
-    if (!inscripcion) {
-      return {
-        curso,
-        modulos: listaModulos,
-        inscripcion: null,
-        modulosConLecciones: [],
-        evaluaciones: [],
-      };
-    }
-
     const moduloIds = listaModulos.map((m) => m.id);
-    const leccionesFilas =
-      moduloIds.length === 0
-        ? []
-        : await tx
-            .select({
-              id: lecciones.id,
-              titulo: lecciones.titulo,
-              tipoContenido: lecciones.tipoContenido,
-              esObligatoria: lecciones.esObligatoria,
-              orden: lecciones.orden,
-              completada: sql<boolean>`coalesce(${progresoLecciones.completada}, false)`,
-              moduloId: unidades.moduloId,
-            })
-            .from(lecciones)
-            .innerJoin(unidades, eq(lecciones.unidadId, unidades.id))
-            .leftJoin(
-              progresoLecciones,
-              and(
-                eq(progresoLecciones.leccionId, lecciones.id),
-                eq(progresoLecciones.inscripcionId, inscripcion.id),
-              ),
-            )
-            .where(
-              and(
-                inArray(unidades.moduloId, moduloIds),
-                isNull(unidades.deletedAt),
-                isNull(lecciones.deletedAt),
-              ),
-            )
-            .orderBy(asc(unidades.orden), asc(lecciones.orden), asc(lecciones.createdAt));
+    const leccionesFilas = await listarLeccionesMetadataPorModulosEnTx(
+      tx,
+      moduloIds,
+      inscripcion?.id ?? null,
+    );
 
     const leccionesPorModulo = new Map<string, LeccionProgresoFila[]>();
     for (const fila of leccionesFilas) {
@@ -402,7 +451,9 @@ export async function cargarVistaCursoColaborador(
       lecciones: leccionesPorModulo.get(modulo.id) ?? [],
     }));
 
-    const listaEvaluaciones = await listarEvaluacionesConEstadoEnTx(tx, usuarioId, cursoId);
+    const listaEvaluaciones = inscripcion
+      ? await listarEvaluacionesConEstadoEnTx(tx, usuarioId, cursoId)
+      : await listarEvaluacionesMetadataEnTx(tx, cursoId);
 
     return {
       curso,

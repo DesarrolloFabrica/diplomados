@@ -62,13 +62,13 @@ export function TablaEmpresas({ empresas }: TablaEmpresasProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={abrirCrear}>
+        <Button className="admin-primary-button" onClick={abrirCrear}>
           <Plus className="h-4 w-4" />
           Nueva empresa
         </Button>
       </div>
 
-      <div className="rounded-lg border border-border bg-card">
+      <div className="admin-table-panel rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -91,18 +91,27 @@ export function TablaEmpresas({ empresas }: TablaEmpresasProps) {
                 <TableCell className="font-medium">{empresa.nombre}</TableCell>
                 <TableCell className="text-muted-foreground">{empresa.nit ?? "—"}</TableCell>
                 <TableCell>
-                  <Badge variant={empresa.estado === "activa" ? "default" : "secondary"}>
+                  <Badge
+                    className={empresa.estado === "activa" ? "admin-badge-success" : "admin-badge"}
+                    variant={empresa.estado === "activa" ? "default" : "secondary"}
+                  >
                     {empresa.estado === "activa" ? "Activa" : "Inactiva"}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-3">
                     <Switch
+                      className="admin-switch"
                       checked={empresa.estado === "activa"}
                       onCheckedChange={() => alternarEstado(empresa)}
                       aria-label="Activar o desactivar empresa"
                     />
-                    <Button variant="ghost" size="icon" onClick={() => abrirEditar(empresa)}>
+                    <Button
+                      className="admin-ghost-button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => abrirEditar(empresa)}
+                    >
                       <Pencil className="h-4 w-4" />
                     </Button>
                   </div>
@@ -114,7 +123,7 @@ export function TablaEmpresas({ empresas }: TablaEmpresasProps) {
       </div>
 
       <Dialog open={dialogoAbierto} onOpenChange={setDialogoAbierto}>
-        <DialogContent>
+        <DialogContent className="admin-dialog">
           <DialogHeader>
             <DialogTitle>{empresaEditar ? "Editar empresa" : "Nueva empresa"}</DialogTitle>
             <DialogDescription>

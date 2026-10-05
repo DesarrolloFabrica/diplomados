@@ -526,6 +526,7 @@ function ShellPanelLateral({
 
   return (
     <div
+      data-admin-shell={tema === "superadmin" ? "true" : undefined}
       data-shell-variant={interfaceConfig?.dashboard.layout ?? "immersive"}
       style={
         esDashboardConVideo
@@ -534,6 +535,7 @@ function ShellPanelLateral({
       }
       className={cn(
         "flex min-h-dvh w-full bg-[#061120]",
+        tema === "superadmin" && "admin-shell",
         esBusiness && "business-shell",
         esEducational && "educational-shell",
         esGamified && "gamified-shell",
@@ -612,7 +614,13 @@ function ShellPanelLateral({
       )}
 
       <div className={cn("flex min-w-0 flex-1 flex-col", esMenuLateral && "lg:pl-[76px]")}>
-        <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden">
+        <header
+          className={cn(
+            "flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden",
+            tema === "superadmin" &&
+              "border-white/10 bg-[#071625]/92 text-white backdrop-blur-md",
+          )}
+        >
           <div className="flex items-center gap-2">
             <LogoMarcaFormacion />
             <span className="font-display text-sm font-semibold">Formación</span>
@@ -621,7 +629,10 @@ function ShellPanelLateral({
             type="button"
             aria-label="Abrir menú"
             onClick={() => setDrawerAbierto(true)}
-            className="rounded-md p-2 text-muted-foreground hover:bg-secondary"
+            className={cn(
+              "rounded-md p-2 text-muted-foreground hover:bg-secondary",
+              tema === "superadmin" && "text-white/70 hover:bg-white/10 hover:text-white",
+            )}
           >
             <Menu className="size-5" />
           </button>
@@ -662,6 +673,8 @@ function ShellPanelLateral({
           data-dashboard-layout={interfaceConfig?.dashboard.layout}
           className={cn(
             "relative min-w-0 flex-1 overflow-x-clip bg-[#061120]",
+            tema === "superadmin" &&
+              "admin-main text-white [--admin-accent:#2dd4bf] [--admin-accent-strong:#91DC00] [--admin-border:rgba(172,205,214,0.18)] [--admin-muted:rgba(218,232,238,0.72)] [--admin-panel:rgba(10,26,43,0.72)]",
             esDashboardInmersivo
               ? [
                   "isolate min-h-dvh",

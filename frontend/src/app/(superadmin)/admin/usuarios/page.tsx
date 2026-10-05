@@ -12,7 +12,7 @@ export default async function UsuariosPage() {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="admin-page space-y-6">
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">Usuarios</h1>
         <p className="mt-1 text-muted-foreground">
@@ -24,6 +24,7 @@ export default async function UsuariosPage() {
         rolesPermitidos={[...ROLES]}
         empresas={empresas}
         mostrarColumnaEmpresa
+        temaAdminOscuro
       />
     </div>
   );

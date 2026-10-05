@@ -17,6 +17,13 @@ interface GraficoBarrasProps {
 }
 
 export function GraficoBarras({ datos, etiquetaValor, sufijo = "" }: GraficoBarrasProps) {
+  const chartBorder = "var(--chart-border, hsl(var(--border)))";
+  const chartMuted = "var(--chart-muted, hsl(var(--muted-foreground)))";
+  const chartTooltipBg = "var(--chart-tooltip-bg, hsl(var(--card)))";
+  const chartTooltipText = "var(--chart-tooltip-text, hsl(var(--foreground)))";
+  const chartCursor = "var(--chart-cursor, hsl(var(--accent)))";
+  const chartBar = "var(--chart-bar, hsl(var(--primary)))";
+
   if (datos.length === 0) {
     return (
       <p className="flex h-64 items-center justify-center text-sm text-muted-foreground">
@@ -28,30 +35,31 @@ export function GraficoBarras({ datos, etiquetaValor, sufijo = "" }: GraficoBarr
   return (
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={datos} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke={chartBorder} vertical={false} />
         <XAxis
           dataKey="etiqueta"
-          tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
-          axisLine={{ stroke: "hsl(var(--border))" }}
+          tick={{ fontSize: 12, fill: chartMuted }}
+          axisLine={{ stroke: chartBorder }}
           tickLine={false}
         />
         <YAxis
-          tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+          tick={{ fontSize: 12, fill: chartMuted }}
           axisLine={false}
           tickLine={false}
           width={36}
         />
         <Tooltip
-          cursor={{ fill: "hsl(var(--accent))" }}
+          cursor={{ fill: chartCursor }}
           contentStyle={{
-            backgroundColor: "hsl(var(--card))",
-            border: "1px solid hsl(var(--border))",
+            backgroundColor: chartTooltipBg,
+            border: `1px solid ${chartBorder}`,
             borderRadius: "8px",
+            color: chartTooltipText,
             fontSize: 12,
           }}
           formatter={(value: number) => [`${value}${sufijo}`, etiquetaValor]}
         />
-        <Bar dataKey="valor" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={48} />
+        <Bar dataKey="valor" fill={chartBar} radius={[4, 4, 0, 0]} maxBarSize={48} />
       </BarChart>
     </ResponsiveContainer>
   );

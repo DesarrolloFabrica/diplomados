@@ -12,7 +12,7 @@ export function StatTile({ titulo, valor, icono: Icono }: StatTileProps) {
   return (
     <Card
       className={cn(
-        "border border-cun-blue/20",
+        "admin-stat-tile border border-cun-blue/20",
         "shadow-[0_0_16px_rgba(6,17,32,0.10)]",
         "transition-[border-color,box-shadow,transform] duration-200",
         "hover:-translate-y-0.5",

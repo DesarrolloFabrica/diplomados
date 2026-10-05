@@ -36,6 +36,7 @@ interface TablaUsuariosProps {
   empresas?: EmpresaOpcion[];
   empresaFija?: string;
   mostrarColumnaEmpresa?: boolean;
+  temaAdminOscuro?: boolean;
 }
 
 export function TablaUsuarios({
@@ -44,6 +45,7 @@ export function TablaUsuarios({
   empresas,
   empresaFija,
   mostrarColumnaEmpresa = false,
+  temaAdminOscuro = false,
 }: TablaUsuariosProps) {
   const router = useRouter();
   const [dialogoCrear, setDialogoCrear] = useState(false);
@@ -65,13 +67,13 @@ export function TablaUsuarios({
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => setDialogoCrear(true)}>
+        <Button className="admin-primary-button" onClick={() => setDialogoCrear(true)}>
           <Plus className="h-4 w-4" />
           Nuevo usuario
         </Button>
       </div>
 
-      <div className="rounded-lg border border-border bg-card">
+      <div className="admin-table-panel rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -99,7 +101,9 @@ export function TablaUsuarios({
                 <TableCell className="font-medium">{usuario.nombreCompleto}</TableCell>
                 <TableCell className="text-muted-foreground">{usuario.email}</TableCell>
                 <TableCell>
-                  <Badge variant="outline">{ETIQUETA_ROL[usuario.rol]}</Badge>
+                  <Badge className="admin-badge" variant="outline">
+                    {ETIQUETA_ROL[usuario.rol]}
+                  </Badge>
                 </TableCell>
                 {mostrarColumnaEmpresa && (
                   <TableCell className="text-muted-foreground">
@@ -108,13 +112,19 @@ export function TablaUsuarios({
                 )}
                 <TableCell>
                   <Switch
+                    className="admin-switch"
                     checked={usuario.activo}
                     onCheckedChange={() => alternarEstado(usuario)}
                     aria-label="Activar o desactivar usuario"
                   />
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => setUsuarioEditar(usuario)}>
+                  <Button
+                    className="admin-ghost-button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setUsuarioEditar(usuario)}
+                  >
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </TableCell>
@@ -125,7 +135,7 @@ export function TablaUsuarios({
       </div>
 
       <Dialog open={dialogoCrear} onOpenChange={setDialogoCrear}>
-        <DialogContent>
+        <DialogContent className={temaAdminOscuro ? "admin-dialog" : undefined}>
           <DialogHeader>
             <DialogTitle>Nuevo usuario</DialogTitle>
             <DialogDescription>
@@ -145,7 +155,7 @@ export function TablaUsuarios({
         open={!!usuarioEditar}
         onOpenChange={(abierto) => !abierto && setUsuarioEditar(null)}
       >
-        <DialogContent>
+        <DialogContent className={temaAdminOscuro ? "admin-dialog" : undefined}>
           <DialogHeader>
             <DialogTitle>Editar usuario</DialogTitle>
           </DialogHeader>

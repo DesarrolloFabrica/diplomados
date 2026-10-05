@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { FormularioCurso } from "./formulario-curso";
 import { PortadaMiniatura } from "@/components/shared/portada-curso";
+import { cn } from "@/lib/utils";
 import type { CursoFila } from "@backend/server/queries/cursos";
 import type { EmpresaOpcion } from "@backend/server/queries/empresas";
 
@@ -41,22 +42,23 @@ const VARIANTE_ESTADO: Record<CursoFila["estado"], "secondary" | "default" | "ou
 interface TablaCursosProps {
   cursos: CursoFila[];
   empresas: EmpresaOpcion[];
+  temaAdminOscuro?: boolean;
 }
 
-export function TablaCursos({ cursos, empresas }: TablaCursosProps) {
+export function TablaCursos({ cursos, empresas, temaAdminOscuro = false }: TablaCursosProps) {
   const router = useRouter();
   const [dialogoAbierto, setDialogoAbierto] = useState(false);
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => setDialogoAbierto(true)}>
+        <Button className="admin-primary-button" onClick={() => setDialogoAbierto(true)}>
           <Plus className="h-4 w-4" />
           Nuevo curso
         </Button>
       </div>
 
-      <div className="rounded-lg border border-border bg-card">
+      <div className="admin-table-panel rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -93,12 +95,15 @@ export function TablaCursos({ cursos, empresas }: TablaCursosProps) {
                   {curso.nivelDificultad}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={VARIANTE_ESTADO[curso.estado]}>
+                  <Badge
+                    className={curso.estado === "publicado" ? "admin-badge-success" : "admin-badge"}
+                    variant={VARIANTE_ESTADO[curso.estado]}
+                  >
                     {ETIQUETA_ESTADO[curso.estado]}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button className="admin-ghost-button" variant="ghost" size="sm" asChild>
                     <Link href={`/instructor/cursos/${curso.id}`}>
                       Administrar
                       <ArrowRight className="h-4 w-4" />
@@ -112,7 +117,12 @@ export function TablaCursos({ cursos, empresas }: TablaCursosProps) {
       </div>
 
       <Dialog open={dialogoAbierto} onOpenChange={setDialogoAbierto}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className={cn(
+            "max-h-[90vh] overflow-y-auto",
+            temaAdminOscuro && "admin-dialog",
+          )}
+        >
           <DialogHeader>
             <DialogTitle>Nuevo curso</DialogTitle>
             <DialogDescription>

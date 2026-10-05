@@ -7,7 +7,7 @@ export default async function EmpresasPage() {
   const empresas = await listarEmpresas(sesion.id);
 
   return (
-    <div className="space-y-6">
+    <div className="admin-page space-y-6">
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">Empresas</h1>
         <p className="mt-1 text-muted-foreground">

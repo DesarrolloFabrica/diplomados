@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { PortadaCurso } from "@/components/shared/portada-curso";
 import { AnilloProgreso } from "@/components/shared/anillo-progreso";
+import { BotonDesinscribirmePrueba } from "@/components/shared/boton-desinscribirme-prueba";
 import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { estiloFondoInterfaz } from "@/lib/interface-assets";
 import { cn } from "@/lib/utils";
@@ -54,6 +55,7 @@ type CatalogSection = "mis-cursos" | "diplomados" | "nuevos" | "descubrir" | "ca
 type NivelCatalogo = CursoCatalogoFila["nivelDificultad"];
 type FiltroNivel = "todos" | NivelCatalogo;
 type EscuelaCatalogo = Exclude<SchoolVisualId, "neutral">;
+type VarianteCatalogoVisual = "default" | "adventure" | "educational";
 
 const NEW_COURSE_DAYS = 30;
 
@@ -62,12 +64,12 @@ const SECCIONES_CATALOGO: ReadonlyArray<{ id: CatalogSection; label: string }> =
   { id: "diplomados", label: "Diplomados" },
   { id: "nuevos", label: "Nuevos" },
   { id: "descubrir", label: "Descubrir" },
-  { id: "categoria", label: "Por categoria" },
+  { id: "categoria", label: "Por categoría" },
 ];
 
 const NIVELES_CATALOGO: ReadonlyArray<{ id: FiltroNivel; label: string }> = [
   { id: "todos", label: "Todos" },
-  { id: "basico", label: "Basico" },
+  { id: "basico", label: "Básico" },
   { id: "intermedio", label: "Intermedio" },
   { id: "avanzado", label: "Avanzado" },
 ];
@@ -274,27 +276,24 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
     };
   }, [diplomados, escuelaActiva, misCursosFiltrados, nivelActivo, nuevos, seccionActiva, todosCursos]);
 
-  if (esEducational) {
-    return (
-      <DashboardEducativoColaborador
-        nombre={nombre}
-        cursosActivos={misCursosOrdenados}
-        cursoActual={cursoDestacado}
-        cursoExplorable={disponibles[0] ?? null}
-      />
-    );
-  }
-
-  if (esGamified) {
-    return (
-      <DashboardGamificadoColaborador
-        nombre={nombre}
-        cursosActivos={misCursosOrdenados}
-        disponibles={disponibles}
-        cursoDestacado={cursoDestacado}
-      />
-    );
-  }
+  const catalogoContenido = (
+    <ContenidoCatalogo
+      seccionActiva={seccionActiva}
+      onCambiarSeccion={setSeccionActiva}
+      escuelaActiva={escuelaActiva}
+      onCambiarEscuela={setEscuelaActiva}
+      nivelActivo={nivelActivo}
+      onCambiarNivel={setNivelActivo}
+      vistaCatalogo={vistaCatalogo}
+      cursoReferenciaDescubrimiento={cursoReferenciaDescubrimiento}
+      cursosRelacionados={cursosRelacionados}
+      recomendadosEmpresa={recomendadosEmpresa}
+      cursosCompletados={cursosCompletados}
+      variante={esGamified ? "adventure" : esEducational ? "educational" : "default"}
+      mostrarEncabezado={!esGamified}
+      ocultarTituloFila={esGamified}
+    />
+  );
 
   return (
     <div
@@ -302,6 +301,23 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
       className="flex w-full max-w-[1500px] flex-col items-start gap-5"
     >
       {MOSTRAR_BARRA_SUPERIOR_CATALOGO && <BarraSuperior nombre={nombre} />}
+
+      {esEducational && (
+        <DashboardEducativoColaborador
+          nombre={nombre}
+          cursoActual={cursoDestacado}
+          cursoExplorable={disponibles[0] ?? null}
+        />
+      )}
+
+      {esGamified && (
+        <DashboardGamificadoColaborador
+          nombre={nombre}
+          cursosActivos={misCursosOrdenados}
+        >
+          {catalogoContenido}
+        </DashboardGamificadoColaborador>
+      )}
 
       {esBusiness && (
         <ResumenDashboardBusiness
@@ -312,84 +328,132 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
         />
       )}
 
-      {cursosHero.length > 0 && <HeroDestacado cursos={cursosHero} />}
+      {!esEducational && !esGamified && cursosHero.length > 0 && (
+        <HeroDestacado cursos={cursosHero} />
+      )}
 
-      <section
-        data-catalog-density={config.catalog.density}
-        className="min-w-0 w-full space-y-5 overflow-hidden"
-        aria-labelledby="titulo-catalogo"
-      >
-        <div className="space-y-3">
+      {!esGamified && catalogoContenido}
+    </div>
+  );
+}
+
+function ContenidoCatalogo({
+  seccionActiva,
+  onCambiarSeccion,
+  escuelaActiva,
+  onCambiarEscuela,
+  nivelActivo,
+  onCambiarNivel,
+  vistaCatalogo,
+  cursoReferenciaDescubrimiento,
+  cursosRelacionados,
+  recomendadosEmpresa,
+  cursosCompletados,
+  variante = "default",
+  mostrarEncabezado = true,
+  ocultarTituloFila = false,
+}: {
+  seccionActiva: CatalogSection;
+  onCambiarSeccion: (seccion: CatalogSection) => void;
+  escuelaActiva: EscuelaCatalogo;
+  onCambiarEscuela: (escuela: EscuelaCatalogo) => void;
+  nivelActivo: FiltroNivel;
+  onCambiarNivel: (nivel: FiltroNivel) => void;
+  vistaCatalogo: {
+    titulo: string;
+    cursos: CursoCatalogoFila[];
+    mensajeVacio: string;
+  };
+  cursoReferenciaDescubrimiento: CursoCatalogoFila | null;
+  cursosRelacionados: CursoCatalogoFila[];
+  recomendadosEmpresa: CursoCatalogoFila[];
+  cursosCompletados: CursoCatalogoFila[];
+  variante?: VarianteCatalogoVisual;
+  mostrarEncabezado?: boolean;
+  ocultarTituloFila?: boolean;
+}) {
+  return (
+    <section
+      data-catalog-density={variante === "adventure" ? "adventure" : undefined}
+      className={cn(
+        "min-w-0 w-full overflow-hidden",
+        variante === "adventure" ? "space-y-4 pt-1" : "space-y-5",
+      )}
+      aria-labelledby={mostrarEncabezado ? "titulo-catalogo" : undefined}
+    >
+      <div className={cn("space-y-3", variante === "adventure" && "mx-auto max-w-5xl")}>
+        {mostrarEncabezado && (
           <p
             id="titulo-catalogo"
-            className={cn(
-              "text-xs font-extrabold uppercase tracking-[0.16em]",
-              esEducational || esGamified ? "text-[var(--interface-text-muted)]" : "text-white/75",
-            )}
+            className="text-xs font-extrabold uppercase tracking-[0.16em] text-white/75"
           >
             Catalogo
           </p>
-          <SelectorCatalogo
-            seccionActiva={seccionActiva}
-            onChange={setSeccionActiva}
-          />
-        </div>
-
-        {seccionActiva === "categoria" && (
-          <SelectorSecundario
-            ariaLabel="Filtrar cursos por escuela"
-            items={ESCUELAS_CATALOGO}
-            value={escuelaActiva}
-            onChange={setEscuelaActiva}
-          />
         )}
+        <SelectorCatalogo
+          seccionActiva={seccionActiva}
+          onChange={onCambiarSeccion}
+          variante={variante}
+        />
+      </div>
 
-        {seccionActiva === "descubrir" ? (
-          <DescubrirCatalogo
-            cursoReferencia={cursoReferenciaDescubrimiento}
-            relacionados={cursosRelacionados}
-            empresa={recomendadosEmpresa}
-            completados={cursosCompletados}
-          />
-        ) : (
-          <FilaCatalogo
-            titulo={vistaCatalogo.titulo}
-            cursos={vistaCatalogo.cursos}
-            mensajeVacio={vistaCatalogo.mensajeVacio}
-            controles={
-              seccionActiva === "mis-cursos" ? (
-                <SelectorSecundario
-                  ariaLabel="Filtrar mis cursos por nivel"
-                  items={NIVELES_CATALOGO}
-                  value={nivelActivo}
-                  onChange={setNivelActivo}
-                />
-              ) : undefined
-            }
-          />
-        )}
-      </section>
-    </div>
+      {seccionActiva === "categoria" && (
+        <SelectorSecundario
+          ariaLabel="Filtrar cursos por escuela"
+          items={ESCUELAS_CATALOGO}
+          value={escuelaActiva}
+          onChange={onCambiarEscuela}
+          variante={variante}
+        />
+      )}
+
+      {seccionActiva === "descubrir" ? (
+        <DescubrirCatalogo
+          cursoReferencia={cursoReferenciaDescubrimiento}
+          relacionados={cursosRelacionados}
+          empresa={recomendadosEmpresa}
+          completados={cursosCompletados}
+          ocultarTitulo={ocultarTituloFila}
+          variante={variante}
+        />
+      ) : (
+        <FilaCatalogo
+          titulo={vistaCatalogo.titulo}
+          cursos={vistaCatalogo.cursos}
+          mensajeVacio={vistaCatalogo.mensajeVacio}
+          ocultarTitulo={ocultarTituloFila}
+          variante={variante}
+          controles={
+            seccionActiva === "mis-cursos" ? (
+              <SelectorSecundario
+                ariaLabel="Filtrar mis cursos por nivel"
+                items={NIVELES_CATALOGO}
+                value={nivelActivo}
+                onChange={onCambiarNivel}
+                variante={variante}
+              />
+            ) : undefined
+          }
+        />
+      )}
+    </section>
   );
 }
 
 function DashboardEducativoColaborador({
   nombre,
-  cursosActivos,
   cursoActual,
   cursoExplorable,
 }: {
   nombre: string | null;
-  cursosActivos: CursoCatalogoFila[];
   cursoActual: CursoCatalogoFila | null;
   cursoExplorable: CursoCatalogoFila | null;
 }) {
-  const [categoriaActiva, setCategoriaActiva] = useState<string>(CATEGORIAS[0]!);
   const primerNombre = nombre?.trim().split(/\s+/)[0];
   const titulo = primerNombre
     ? `Tu aprendizaje continua, ${primerNombre}`
     : "Tu aprendizaje continua";
-  const hrefContinuar = cursoActual ? `/mis-cursos/${cursoActual.id}` : "#cursos-activos";
+  const hrefContinuar = cursoActual ? `/mis-cursos/${cursoActual.id}` : "#titulo-catalogo";
   const hrefExplorar = cursoExplorable
     ? `/mis-cursos/${cursoExplorable.id}/informacion`
     : "#cursos-activos";
@@ -397,11 +461,6 @@ function DashboardEducativoColaborador({
     "--interface-bg-image": 'url("/images/Edu-dash.png")',
     "--interface-bg-position": "center",
   } as CSSProperties;
-  const escuelaFiltro =
-    ESCUELA_POR_CATEGORIA[categoriaActiva as keyof typeof ESCUELA_POR_CATEGORIA];
-  const cursosActivosFiltrados = escuelaFiltro
-    ? cursosActivos.filter((curso) => curso.escuela === escuelaFiltro)
-    : cursosActivos;
 
   return (
     <div className="w-full space-y-6 text-[var(--interface-text)] sm:space-y-7">
@@ -438,124 +497,20 @@ function DashboardEducativoColaborador({
         </div>
       </section>
 
-      <section id="cursos-activos" className="pt-2" aria-labelledby="titulo-cursos-activos">
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <h2 id="titulo-cursos-activos" className="text-2xl font-bold tracking-tight text-white drop-shadow-[0_2px_6px_rgba(2,20,14,0.55)]">
-            Cursos activos
-          </h2>
-          <a
-            href="#cursos-activos"
-            className="text-sm font-semibold text-[var(--interface-accent-secondary)] drop-shadow-[0_2px_6px_rgba(2,20,14,0.55)] hover:text-white"
-          >
-            Ver todos
-          </a>
-        </div>
-
-        <nav className="mb-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible sm:pb-0" aria-label="Categorias de cursos">
-          {CATEGORIAS.map((categoria) => {
-            const activo = categoria === categoriaActiva;
-            return (
-              <button
-                key={categoria}
-                type="button"
-                aria-pressed={activo}
-                onClick={() => setCategoriaActiva(categoria)}
-                className={cn(
-                  "min-h-10 shrink-0 whitespace-nowrap rounded-full border px-4 text-sm font-semibold shadow-[0_4px_14px_rgba(2,44,34,0.28)] transition-colors sm:px-5",
-                  activo
-                    ? "border-white/40 bg-[linear-gradient(135deg,#022c22_0%,#065f46_60%,#047857_100%)] text-white"
-                    : "border-transparent bg-[#0b3d2e] text-white/85 hover:bg-[#0f4a38] hover:text-white",
-                )}
-              >
-                {categoria}
-              </button>
-            );
-          })}
-        </nav>
-
-        {cursosActivosFiltrados.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-[var(--interface-border)] bg-[var(--interface-surface-strong)] px-6 py-8 text-center text-sm font-semibold text-[var(--interface-text-muted)]">
-            Todavia no tienes cursos activos en esta categoria.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            {cursosActivosFiltrados.map((curso) => (
-              <TarjetaCursoActivaEducativa key={curso.id} curso={curso} />
-            ))}
-          </div>
-        )}
-      </section>
     </div>
   );
-}
-
-function TarjetaCursoActivaEducativa({ curso }: { curso: CursoCatalogoFila }) {
-  const porcentaje = porcentajeCurso(curso);
-
-  return (
-    <article className="rounded-2xl border border-[#ded4bf] bg-[#fffdf7]/95 p-5 text-[#061120] shadow-[0_8px_22px_rgba(61,45,20,0.08)] transition-[transform,border-color,box-shadow] hover:-translate-y-0.5 hover:border-[#cfc2aa] hover:shadow-[0_14px_34px_rgba(61,45,20,0.12)] sm:p-6">
-      <h3 className="line-clamp-2 text-lg font-bold uppercase leading-tight tracking-wide sm:text-xl">
-        {curso.titulo}
-      </h3>
-      <p className="mt-3 text-sm text-[#6f644e]">
-        Progreso
-      </p>
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#ded8ca]">
-        <div
-          className="h-full rounded-full bg-[#91DC00] transition-[width] duration-500"
-          style={{ width: `${porcentaje}%` }}
-        />
-      </div>
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
-        <Link
-          href={`/mis-cursos/${curso.id}`}
-          className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#91DC00] px-5 text-sm font-medium text-[#061120] transition hover:-translate-y-0.5 hover:bg-[#91DC00]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2"
-        >
-          Continuar
-        </Link>
-        <span className="text-2xl font-bold tabular-nums text-[#061120]">
-          {porcentaje}%
-        </span>
-      </div>
-    </article>
-  );
-}
-
-interface ItemCarruselGamificado {
-  curso: CursoCatalogoFila;
-  inscrito: boolean;
 }
 
 function DashboardGamificadoColaborador({
   nombre,
   cursosActivos,
-  disponibles,
-  cursoDestacado,
+  children,
 }: {
   nombre: string | null;
   cursosActivos: CursoCatalogoFila[];
-  disponibles: CursoCatalogoFila[];
-  cursoDestacado: CursoCatalogoFila | null;
+  children: ReactNode;
 }) {
   const primerNombre = nombre?.trim().split(/\s+/)[0];
-
-  const items = useMemo<ItemCarruselGamificado[]>(() => {
-    const idsInscritos = new Set(cursosActivos.map((curso) => curso.id));
-    const inscritos = cursosActivos.map((curso) => ({ curso, inscrito: true }));
-    const noInscritos = disponibles
-      .filter((curso) => !idsInscritos.has(curso.id))
-      .map((curso) => ({ curso, inscrito: false }));
-    return [...inscritos, ...noInscritos];
-  }, [cursosActivos, disponibles]);
-
-  const [indiceSeleccionado, setIndiceSeleccionado] = useState(() =>
-    Math.max(
-      0,
-      cursosActivos.findIndex((curso) => curso.id === cursoDestacado?.id),
-    ),
-  );
-  const indiceSeguro = items.length === 0 ? 0 : Math.min(indiceSeleccionado, items.length - 1);
-  const itemSeleccionado = items[indiceSeguro] ?? null;
 
   const progresoGeneral =
     cursosActivos.length === 0
@@ -570,18 +525,6 @@ function DashboardGamificadoColaborador({
   const certificados = cursosActivos.filter(
     (curso) => curso.esDiplomado && cursoCompletado(curso, porcentajeCurso(curso)),
   ).length;
-
-  const hrefContinuar = itemSeleccionado
-    ? itemSeleccionado.inscrito
-      ? `/mis-cursos/${itemSeleccionado.curso.id}`
-      : `/mis-cursos/${itemSeleccionado.curso.id}/informacion`
-    : "#";
-
-  function moverCarrusel(delta: number) {
-    setIndiceSeleccionado((valor) =>
-      Math.min(Math.max(valor + delta, 0), Math.max(items.length - 1, 0)),
-    );
-  }
 
   return (
     <div className="w-full space-y-5 text-[var(--interface-text)] sm:space-y-7">
@@ -650,149 +593,8 @@ function DashboardGamificadoColaborador({
         </p>
       </div>
 
-      {items.length > 0 && (
-        <div className="flex items-center justify-center gap-1 pt-4 sm:gap-4 sm:pt-7">
-          <button
-            type="button"
-            aria-label="Curso anterior"
-            onClick={() => moverCarrusel(-1)}
-            disabled={indiceSeguro === 0}
-            className="grid size-9 shrink-0 place-items-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 disabled:opacity-30 sm:size-10"
-          >
-            <ChevronLeft className="size-5" aria-hidden="true" />
-          </button>
-
-          <div className="flex min-w-0 flex-1 items-end justify-start gap-3 overflow-x-auto scroll-smooth px-1 pb-5 pt-4 [scrollbar-width:none] sm:justify-center sm:gap-4 sm:pb-6 sm:pt-7 [&::-webkit-scrollbar]:hidden">
-            {items.map((item, indice) => (
-              <TarjetaCursoGamified
-                key={item.curso.id}
-                curso={item.curso}
-                inscrito={item.inscrito}
-                seleccionado={indice === indiceSeguro}
-                onSeleccionar={() => setIndiceSeleccionado(indice)}
-              />
-            ))}
-          </div>
-
-          <button
-            type="button"
-            aria-label="Curso siguiente"
-            onClick={() => moverCarrusel(1)}
-            disabled={indiceSeguro === items.length - 1}
-            className="grid size-9 shrink-0 place-items-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 disabled:opacity-30 sm:size-10"
-          >
-            <ChevronRight className="size-5" aria-hidden="true" />
-          </button>
-        </div>
-      )}
-
-      {itemSeleccionado && (
-        <div className="flex justify-center pb-1">
-          <Link
-            href={hrefContinuar}
-            className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[var(--interface-accent)] bg-[#04140d] px-7 text-sm font-bold text-white shadow-[0_0_28px_rgba(79,138,0,0.45)] transition hover:-translate-y-0.5 hover:bg-[#062012] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]"
-          >
-            {itemSeleccionado.inscrito ? "Continuar recorrido" : "Explorar curso"}
-            <ChevronRight className="size-4" aria-hidden="true" />
-          </Link>
-        </div>
-      )}
+      {children}
     </div>
-  );
-}
-
-function TarjetaCursoGamified({
-  curso,
-  inscrito,
-  seleccionado,
-  onSeleccionar,
-}: {
-  curso: CursoCatalogoFila;
-  inscrito: boolean;
-  seleccionado: boolean;
-  onSeleccionar: () => void;
-}) {
-  const porcentaje = porcentajeCurso(curso);
-  const completado = cursoCompletado(curso, porcentaje);
-  const bloqueado = !inscrito;
-
-  return (
-    <button
-      type="button"
-      onClick={onSeleccionar}
-      aria-pressed={seleccionado}
-      aria-label={curso.titulo}
-      className={cn(
-        "group relative flex shrink-0 flex-col overflow-hidden rounded-[26px] text-left transition-all duration-300",
-        seleccionado
-          ? "w-[min(74vw,260px)] -translate-y-2 border-2 border-[var(--interface-accent)] shadow-[0_0_32px_rgba(79,138,0,0.55),0_22px_44px_rgba(2,10,6,0.45)] sm:w-[300px] sm:-translate-y-3"
-          : "w-[min(62vw,210px)] border border-white/15 opacity-80 hover:-translate-y-1 hover:opacity-100 sm:w-[240px]",
-      )}
-    >
-      <div className="relative h-[260px] w-full shrink-0 overflow-hidden bg-white/5 min-[430px]:h-[300px] sm:h-[360px]">
-        <PortadaCurso
-          cursoId={curso.id}
-          imagenPortadaUrl={curso.imagenPortadaUrl}
-          esDiplomado={curso.esDiplomado}
-          titulo={curso.titulo}
-          fallback="abstract"
-          className={cn("absolute inset-0 rounded-none object-cover", bloqueado && "grayscale")}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,8,16,0.05)_35%,rgba(2,8,16,0.85)_100%)]"
-        />
-        {seleccionado && (
-          <span className="absolute left-1/2 top-3.5 -translate-x-1/2 rounded-full border border-white/60 bg-[var(--interface-accent)] p-2 text-white shadow-[0_0_16px_rgba(79,138,0,0.6)]">
-            <Sparkles className="size-4" aria-hidden="true" />
-          </span>
-        )}
-        {bloqueado && (
-          <span className="absolute right-3.5 top-3.5 grid size-9 place-items-center rounded-full border border-white/30 bg-black/55 text-white backdrop-blur-sm">
-            <Lock className="size-4" aria-hidden="true" />
-          </span>
-        )}
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-3.5 sm:p-4">
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-white/15 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-            {curso.esDiplomado ? (
-              <GraduationCap className="size-3.5" aria-hidden="true" />
-            ) : (
-              <BookOpen className="size-3.5" aria-hidden="true" />
-            )}
-            {curso.esDiplomado ? "Diplomado" : "Curso"}
-          </span>
-          <p className="line-clamp-2 text-sm font-bold leading-snug text-white min-[430px]:text-base sm:text-lg">
-            {curso.titulo}
-          </p>
-        </div>
-      </div>
-
-      <div
-        className={cn(
-          "flex flex-col gap-1.5 px-4 py-3.5",
-          seleccionado ? "bg-[#04140d]" : "bg-[rgba(4,15,10,0.85)]",
-        )}
-      >
-        {bloqueado ? (
-          <>
-            <p className="text-sm font-bold text-white/85">Proximamente</p>
-            <p className="text-xs text-white/55">Nuevos contenidos en camino</p>
-          </>
-        ) : (
-          <>
-            <div className="h-2 overflow-hidden rounded-full bg-white/15">
-              <div
-                className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
-                style={{ width: `${porcentaje}%` }}
-              />
-            </div>
-            <p className="text-xs font-semibold text-white/70">
-              {completado ? "Completado" : `${porcentaje}% completado`}
-            </p>
-          </>
-        )}
-      </div>
-    </button>
   );
 }
 
@@ -857,18 +659,20 @@ function IndicadorBusiness({
 function SelectorCatalogo({
   seccionActiva,
   onChange,
+  variante = "default",
 }: {
   seccionActiva: CatalogSection;
   onChange: (section: CatalogSection) => void;
+  variante?: VarianteCatalogoVisual;
 }) {
-  const { config } = useInterfaceVariant();
-  const esBusiness = config.id === "business";
-
   return (
     <div
       role="group"
       aria-label="Secciones del catalogo"
-      className="flex max-w-full gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className={cn(
+        "flex max-w-full gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        variante === "adventure" && "snap-x snap-mandatory justify-start sm:justify-center",
+      )}
     >
       {SECCIONES_CATALOGO.map((seccion) => {
         const activa = seccion.id === seccionActiva;
@@ -880,17 +684,19 @@ function SelectorCatalogo({
             aria-pressed={activa}
             onClick={() => onChange(seccion.id)}
             className={cn(
-              "min-h-11 shrink-0 whitespace-nowrap rounded-full border px-5 text-sm font-bold backdrop-blur-xl transition-[transform,background-color,border-color,color,box-shadow] duration-200 hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]",
-              esBusiness
-                ? activa
-                  ? "border-[var(--interface-accent-secondary)] bg-[color-mix(in_srgb,var(--interface-accent)_30%,transparent)] text-white"
-                  : "border-white/15 bg-white/5 text-white/70 hover:border-white/25 hover:bg-white/10 hover:text-white"
-                : cn(
-                    "shadow-[inset_0_1px_0_rgba(255,255,255,0.24)]",
-                    activa
-                      ? "border-white/75 bg-white/30 text-white shadow-[0_8px_22px_rgba(6,17,32,0.14),inset_0_1px_0_rgba(255,255,255,0.65)]"
-                      : "border-white/30 bg-[#061120]/28 text-white hover:border-white/50 hover:bg-white/22",
-                  ),
+              "min-h-11 shrink-0 whitespace-nowrap rounded-full border px-5 text-sm font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] backdrop-blur-xl transition-[transform,background-color,border-color,color,box-shadow] duration-200 hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]",
+              variante === "adventure" && "snap-start",
+              activa
+                ? variante === "adventure"
+                  ? "border-[#8bd3ff]/80 bg-[linear-gradient(135deg,rgba(11,63,124,0.96)_0%,rgba(20,93,166,0.92)_48%,rgba(37,125,196,0.88)_100%)] text-white shadow-[0_10px_26px_rgba(8,38,86,0.38),inset_0_1px_0_rgba(255,255,255,0.34)]"
+                  : variante === "educational"
+                    ? "border-white/40 bg-[linear-gradient(135deg,#022c22_0%,#065f46_58%,#047857_100%)] text-white shadow-[0_8px_22px_rgba(2,44,34,0.26),inset_0_1px_0_rgba(255,255,255,0.22)]"
+                  : "border-white/75 bg-white/30 text-white shadow-[0_8px_22px_rgba(6,17,32,0.14),inset_0_1px_0_rgba(255,255,255,0.65)]"
+                : variante === "adventure"
+                  ? "border-[#9cc9ef]/34 bg-[linear-gradient(135deg,rgba(8,38,86,0.82)_0%,rgba(17,70,130,0.76)_52%,rgba(33,97,160,0.7)_100%)] text-white/92 shadow-[0_8px_20px_rgba(6,22,54,0.22),inset_0_1px_0_rgba(255,255,255,0.22)] hover:border-[#b8e0ff]/70 hover:bg-[linear-gradient(135deg,rgba(12,55,112,0.9)_0%,rgba(26,91,157,0.84)_52%,rgba(48,124,190,0.78)_100%)] hover:text-white"
+                  : variante === "educational"
+                    ? "border-white/20 bg-[linear-gradient(135deg,rgba(2,44,34,0.88)_0%,rgba(6,95,70,0.82)_58%,rgba(4,120,87,0.76)_100%)] text-white/90 shadow-[0_6px_16px_rgba(2,44,34,0.2),inset_0_1px_0_rgba(255,255,255,0.16)] hover:border-white/40 hover:bg-[linear-gradient(135deg,#022c22_0%,#065f46_58%,#047857_100%)] hover:text-white"
+                  : "border-white/30 bg-[#061120]/28 text-white hover:border-white/50 hover:bg-white/22",
             )}
           >
             {seccion.label}
@@ -906,17 +712,22 @@ function SelectorSecundario<T extends string>({
   items,
   value,
   onChange,
+  variante = "default",
 }: {
   ariaLabel: string;
   items: ReadonlyArray<{ id: T; label: string }>;
   value: T;
   onChange: (value: T) => void;
+  variante?: VarianteCatalogoVisual;
 }) {
   return (
     <div
       role="group"
       aria-label={ariaLabel}
-      className="flex max-w-full gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className={cn(
+        "flex max-w-full gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        variante === "adventure" && "snap-x snap-mandatory justify-start sm:justify-center",
+      )}
     >
       {items.map((item) => {
         const activo = item.id === value;
@@ -929,9 +740,18 @@ function SelectorSecundario<T extends string>({
             onClick={() => onChange(item.id)}
             className={cn(
               "min-h-9 shrink-0 whitespace-nowrap rounded-full border px-4 text-xs font-bold backdrop-blur-lg transition-[transform,background-color,border-color,color] hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]",
+              variante === "adventure" && "snap-start",
               activo
-                ? "border-[#83E6D4]/80 bg-[#83E6D4]/75 text-[#061120]"
-                : "border-white/25 bg-[#061120]/24 text-white/90 hover:bg-white/20",
+                ? variante === "adventure"
+                  ? "border-[#8bd3ff]/80 bg-[linear-gradient(135deg,rgba(11,63,124,0.96)_0%,rgba(20,93,166,0.92)_48%,rgba(37,125,196,0.88)_100%)] text-white shadow-[0_8px_20px_rgba(8,38,86,0.32),inset_0_1px_0_rgba(255,255,255,0.34)]"
+                  : variante === "educational"
+                    ? "border-white/40 bg-[linear-gradient(135deg,#022c22_0%,#065f46_58%,#047857_100%)] text-white shadow-[0_6px_16px_rgba(2,44,34,0.22)]"
+                  : "border-[#83E6D4]/80 bg-[#83E6D4]/75 text-[#061120]"
+                : variante === "adventure"
+                  ? "border-[#9cc9ef]/30 bg-[linear-gradient(135deg,rgba(8,38,86,0.72)_0%,rgba(17,70,130,0.66)_52%,rgba(33,97,160,0.6)_100%)] text-white/88 shadow-[0_6px_16px_rgba(6,22,54,0.18),inset_0_1px_0_rgba(255,255,255,0.18)] hover:border-[#b8e0ff]/64 hover:bg-[linear-gradient(135deg,rgba(12,55,112,0.86)_0%,rgba(26,91,157,0.8)_52%,rgba(48,124,190,0.74)_100%)] hover:text-white"
+                  : variante === "educational"
+                    ? "border-white/20 bg-[linear-gradient(135deg,rgba(2,44,34,0.78)_0%,rgba(6,95,70,0.72)_58%,rgba(4,120,87,0.66)_100%)] text-white/86 hover:border-white/38 hover:bg-[linear-gradient(135deg,#022c22_0%,#065f46_58%,#047857_100%)] hover:text-white"
+                  : "border-white/25 bg-[#061120]/24 text-white/90 hover:bg-white/20",
             )}
           >
             {item.label}
@@ -947,21 +767,28 @@ function DescubrirCatalogo({
   relacionados,
   empresa,
   completados,
+  ocultarTitulo = false,
+  variante = "default",
 }: {
   cursoReferencia: CursoCatalogoFila | null;
   relacionados: CursoCatalogoFila[];
   empresa: CursoCatalogoFila[];
   completados: CursoCatalogoFila[];
+  ocultarTitulo?: boolean;
+  variante?: VarianteCatalogoVisual;
 }) {
   return (
     <div className="min-w-0 space-y-8">
-      <h2 className="font-display text-2xl font-bold text-white drop-shadow-sm">Descubrir</h2>
+      {!ocultarTitulo && (
+        <h2 className="font-display text-2xl font-bold text-white drop-shadow-sm">Descubrir</h2>
+      )}
 
       {cursoReferencia && relacionados.length > 0 && (
         <FilaCatalogo
           titulo={`Porque empezaste ${cursoReferencia.titulo}`}
           cursos={relacionados}
           mensajeVacio=""
+          variante={variante}
         />
       )}
 
@@ -970,6 +797,7 @@ function DescubrirCatalogo({
           titulo="Recomendados para tu empresa"
           cursos={empresa}
           mensajeVacio=""
+          variante={variante}
         />
       )}
 
@@ -978,6 +806,7 @@ function DescubrirCatalogo({
           titulo="Cursos completados"
           cursos={completados}
           mensajeVacio=""
+          variante={variante}
         />
       )}
     </div>
@@ -989,15 +818,28 @@ function FilaCatalogo({
   cursos,
   mensajeVacio,
   controles,
+  ocultarTitulo = false,
+  variante = "default",
 }: {
   titulo: string;
   cursos: CursoCatalogoFila[];
   mensajeVacio: string;
   controles?: ReactNode;
+  ocultarTitulo?: boolean;
+  variante?: VarianteCatalogoVisual;
 }) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [puedeRetroceder, setPuedeRetroceder] = useState(false);
   const [puedeAvanzar, setPuedeAvanzar] = useState(false);
+  const [indiceSeleccionado, setIndiceSeleccionado] = useState(0);
+  const indiceSeguro = cursos.length === 0 ? 0 : Math.min(indiceSeleccionado, cursos.length - 1);
+  const cursoSeleccionado = cursos[indiceSeguro] ?? null;
+  const inscritoSeleccionado = Boolean(cursoSeleccionado?.inscripcionId);
+  const hrefCursoSeleccionado = cursoSeleccionado
+    ? inscritoSeleccionado
+      ? `/mis-cursos/${cursoSeleccionado.id}`
+      : `/mis-cursos/${cursoSeleccionado.id}/informacion`
+    : "#";
 
   useEffect(() => {
     const carrusel = carouselRef.current;
@@ -1025,6 +867,10 @@ function FilaCatalogo({
     };
   }, [cursos]);
 
+  useEffect(() => {
+    setIndiceSeleccionado(0);
+  }, [cursos]);
+
   function desplazar(direccion: -1 | 1) {
     const carrusel = carouselRef.current;
     if (!carrusel) return;
@@ -1037,37 +883,39 @@ function FilaCatalogo({
 
   return (
     <div className="min-w-0 space-y-3">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <h2 className="font-display text-2xl font-bold text-white drop-shadow-sm">{titulo}</h2>
-          {cursos.length > 0 && (
-            <p className="mt-1 text-xs font-semibold text-white/65">
-              {cursos.length} {cursos.length === 1 ? "curso" : "cursos"}
-            </p>
-          )}
-        </div>
+      {!ocultarTitulo && (
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h2 className="font-display text-2xl font-bold text-white drop-shadow-sm">{titulo}</h2>
+            {cursos.length > 0 && (
+              <p className="mt-1 text-xs font-semibold text-white/65">
+                {cursos.length} {cursos.length === 1 ? "curso" : "cursos"}
+              </p>
+            )}
+          </div>
 
-        <div className="hidden items-center gap-2 md:flex">
-          <button
-            type="button"
-            aria-label="Ver cursos anteriores"
-            disabled={!puedeRetroceder}
-            onClick={() => desplazar(-1)}
-            className="flex size-10 items-center justify-center rounded-full border border-white/35 bg-[#061120]/32 text-white backdrop-blur-xl transition hover:-translate-y-px hover:bg-white/24 disabled:pointer-events-none disabled:opacity-35"
-          >
-            <ChevronLeft className="size-5" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            aria-label="Ver cursos siguientes"
-            disabled={!puedeAvanzar}
-            onClick={() => desplazar(1)}
-            className="flex size-10 items-center justify-center rounded-full border border-white/35 bg-[#061120]/32 text-white backdrop-blur-xl transition hover:-translate-y-px hover:bg-white/24 disabled:pointer-events-none disabled:opacity-35"
-          >
-            <ChevronRight className="size-5" aria-hidden="true" />
-          </button>
+          <div className="hidden items-center gap-2 md:flex">
+            <button
+              type="button"
+              aria-label="Ver cursos anteriores"
+              disabled={!puedeRetroceder}
+              onClick={() => desplazar(-1)}
+              className="flex size-10 items-center justify-center rounded-full border border-white/35 bg-[#061120]/32 text-white backdrop-blur-xl transition hover:-translate-y-px hover:bg-white/24 disabled:pointer-events-none disabled:opacity-35"
+            >
+              <ChevronLeft className="size-5" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label="Ver cursos siguientes"
+              disabled={!puedeAvanzar}
+              onClick={() => desplazar(1)}
+              className="flex size-10 items-center justify-center rounded-full border border-white/35 bg-[#061120]/32 text-white backdrop-blur-xl transition hover:-translate-y-px hover:bg-white/24 disabled:pointer-events-none disabled:opacity-35"
+            >
+              <ChevronRight className="size-5" aria-hidden="true" />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {controles}
 
@@ -1075,6 +923,46 @@ function FilaCatalogo({
         <p className="rounded-2xl border border-dashed border-white/30 bg-[#061120]/24 px-6 py-8 text-center text-sm font-semibold text-white/80 backdrop-blur-lg">
           {mensajeVacio}
         </p>
+      ) : variante === "adventure" ? (
+        <div className="space-y-5">
+          <div
+            tabIndex={0}
+            aria-label={`Cursos de ${titulo}`}
+            className="flex min-w-0 items-end justify-start gap-3 overflow-x-auto scroll-smooth px-1 pb-5 pt-4 outline-none [scrollbar-width:none] focus-visible:ring-2 focus-visible:ring-[#91DC00]/80 sm:justify-center sm:gap-4 sm:pb-6 sm:pt-7 [&::-webkit-scrollbar]:hidden"
+          >
+            {cursos.map((curso, indice) => (
+              <TarjetaCursoAventuraSeleccionable
+                key={curso.id}
+                curso={curso}
+                seleccionado={indice === indiceSeguro}
+                onSeleccionar={() => setIndiceSeleccionado(indice)}
+              />
+            ))}
+          </div>
+
+          {cursoSeleccionado && (
+            <div className="flex justify-center pb-1">
+              <Link
+                href={hrefCursoSeleccionado}
+                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[var(--interface-accent)] bg-[#04140d] px-7 text-sm font-bold text-white shadow-[0_0_28px_rgba(79,138,0,0.45)] transition hover:-translate-y-0.5 hover:bg-[#062012] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]"
+              >
+                {inscritoSeleccionado ? "Continuar recorrido" : "Explorar curso"}
+                <ChevronRight className="size-4" aria-hidden="true" />
+              </Link>
+            </div>
+          )}
+        </div>
+      ) : variante === "educational" ? (
+        <div
+          ref={carouselRef}
+          tabIndex={0}
+          aria-label={`Cursos de ${titulo}`}
+          className="grid min-w-0 grid-cols-1 gap-4 outline-none focus-visible:ring-2 focus-visible:ring-[#065f46]/70 lg:grid-cols-2"
+        >
+          {cursos.map((curso) => (
+            <TarjetaCursoCatalogoEducativa key={curso.id} curso={curso} />
+          ))}
+        </div>
       ) : (
         <div className="relative min-w-0">
           <div
@@ -1097,6 +985,163 @@ function FilaCatalogo({
         </div>
       )}
     </div>
+  );
+}
+
+function TarjetaCursoAventuraSeleccionable({
+  curso,
+  seleccionado,
+  onSeleccionar,
+}: {
+  curso: CursoCatalogoFila;
+  seleccionado: boolean;
+  onSeleccionar: () => void;
+}) {
+  const porcentaje = porcentajeCurso(curso);
+  const completado = cursoCompletado(curso, porcentaje);
+  const inscrito = Boolean(curso.inscripcionId);
+
+  return (
+    <button
+      type="button"
+      onClick={onSeleccionar}
+      aria-pressed={seleccionado}
+      aria-label={curso.titulo}
+      className={cn(
+        "group relative flex shrink-0 flex-col overflow-hidden rounded-[26px] text-left transition-all duration-300",
+        seleccionado
+          ? "w-[min(74vw,260px)] -translate-y-2 border-2 border-[var(--interface-accent)] shadow-[0_0_32px_rgba(79,138,0,0.55),0_22px_44px_rgba(2,10,6,0.45)] sm:w-[300px] sm:-translate-y-3"
+          : "w-[min(62vw,210px)] border border-white/15 opacity-80 hover:-translate-y-1 hover:opacity-100 sm:w-[240px]",
+      )}
+    >
+      <div className="relative h-[260px] w-full shrink-0 overflow-hidden bg-white/5 min-[430px]:h-[300px] sm:h-[360px]">
+        <PortadaCurso
+          cursoId={curso.id}
+          imagenPortadaUrl={curso.imagenPortadaUrl}
+          esDiplomado={curso.esDiplomado}
+          titulo={curso.titulo}
+          fallback="abstract"
+          className={cn("absolute inset-0 rounded-none object-cover", !inscrito && "grayscale-[0.25]")}
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,8,16,0.05)_35%,rgba(2,8,16,0.85)_100%)]"
+        />
+        {seleccionado && (
+          <span className="absolute left-1/2 top-3.5 -translate-x-1/2 rounded-full border border-white/60 bg-[var(--interface-accent)] p-2 text-white shadow-[0_0_16px_rgba(79,138,0,0.6)]">
+            <Sparkles className="size-4" aria-hidden="true" />
+          </span>
+        )}
+        {!inscrito && (
+          <span className="absolute right-3.5 top-3.5 grid size-9 place-items-center rounded-full border border-white/30 bg-black/55 text-white backdrop-blur-sm">
+            <Lock className="size-4" aria-hidden="true" />
+          </span>
+        )}
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-3.5 sm:p-4">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-white/15 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur-sm">
+            {curso.esDiplomado ? (
+              <GraduationCap className="size-3.5" aria-hidden="true" />
+            ) : (
+              <BookOpen className="size-3.5" aria-hidden="true" />
+            )}
+            {curso.esDiplomado ? "Diplomado" : "Curso"}
+          </span>
+          <p className="line-clamp-2 text-sm font-bold leading-snug text-white min-[430px]:text-base sm:text-lg">
+            {curso.titulo}
+          </p>
+        </div>
+      </div>
+
+      <div
+        className={cn(
+          "flex flex-col gap-1.5 px-4 py-3.5",
+          seleccionado ? "bg-[#04140d]" : "bg-[rgba(4,15,10,0.85)]",
+        )}
+      >
+        {inscrito ? (
+          <>
+            <div className="h-2 overflow-hidden rounded-full bg-white/15">
+              <div
+                className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
+                style={{ width: `${porcentaje}%` }}
+              />
+            </div>
+            <p className="text-xs font-semibold text-white/70">
+              {completado ? "Completado" : `${porcentaje}% completado`}
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-sm font-bold text-white/85">Disponible</p>
+            <p className="text-xs text-white/55">Explora este recorrido</p>
+          </>
+        )}
+      </div>
+    </button>
+  );
+}
+
+function TarjetaCursoCatalogoEducativa({ curso }: { curso: CursoCatalogoFila }) {
+  const porcentaje = porcentajeCurso(curso);
+  const inscrito = Boolean(curso.inscripcionId);
+  const completado = cursoCompletado(curso, porcentaje);
+  const nivel = normalizarNivel(curso.nivelDificultad) ?? curso.nivelDificultad;
+  const hrefDestino = inscrito ? `/mis-cursos/${curso.id}` : `/mis-cursos/${curso.id}/informacion`;
+  const textoAccion = inscrito && completado ? "Revisar curso" : inscrito ? "Continuar" : "Conocer curso";
+
+  return (
+    <article className="relative overflow-hidden rounded-2xl border border-[#ded4bf] bg-[#fffdf7]/95 p-5 text-[#061120] shadow-[0_8px_22px_rgba(61,45,20,0.1)] transition-[transform,border-color,box-shadow] hover:-translate-y-0.5 hover:border-[#cfc2aa] hover:shadow-[0_14px_34px_rgba(61,45,20,0.14)] sm:p-6">
+      {inscrito && <BotonDesinscribirmePrueba cursoId={curso.id} />}
+      <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-[#e6ddc8] sm:w-48 sm:shrink-0">
+          <PortadaCurso
+            cursoId={curso.id}
+            imagenPortadaUrl={curso.imagenPortadaUrl}
+            esDiplomado={curso.esDiplomado}
+            titulo={curso.titulo}
+            fallback="abstract"
+            className="absolute inset-0 rounded-none object-cover"
+          />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex flex-wrap gap-2">
+            <span className="rounded-full bg-[#0b3d2e] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+              {curso.esDiplomado ? "Diplomado" : "Curso"}
+            </span>
+            <span className="rounded-full bg-[#efe8d8] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#6f644e]">
+              {capitalizar(nivel)}
+            </span>
+          </div>
+
+          <h3 className="line-clamp-2 text-lg font-bold uppercase leading-tight tracking-wide sm:text-xl">
+            {curso.titulo}
+          </h3>
+
+          <div className="mt-4">
+            <div className="mb-2 flex items-center justify-between gap-4 text-sm">
+              <span className="text-[#6f644e]">Progreso</span>
+              <span className="font-bold tabular-nums text-[#061120]">{porcentaje}%</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-[#ded8ca]">
+              <div
+                className="h-full rounded-full bg-[#91DC00] transition-[width] duration-500"
+                style={{ width: `${porcentaje}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <Link
+              href={hrefDestino}
+              className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#91DC00] px-5 text-sm font-medium text-[#061120] transition hover:-translate-y-0.5 hover:bg-[#91DC00]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2"
+            >
+              {textoAccion}
+            </Link>
+          </div>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -1835,9 +1880,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
     : inscrito
       ? "Continuar"
       : "Conocer curso";
-  const hrefDestino = inscrito
-    ? `/mis-cursos/${curso.id}`
-    : `/mis-cursos/${curso.id}/informacion`;
+  const hrefDestino = `/mis-cursos/${curso.id}/informacion`;
 
   const contenido = (
     <ContenidoTarjetaCurso
@@ -1855,7 +1898,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
         data-catalog-card="business"
         href={hrefDestino}
         aria-label={`${textoAccion}: ${curso.titulo}`}
-        className="business-course-card group flex min-h-[330px] w-[min(88vw,310px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] [box-shadow:var(--interface-card-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--interface-accent)_50%,transparent)] hover:[box-shadow:var(--interface-glow)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]"
+        className="business-course-card group relative flex min-h-[330px] w-[min(88vw,310px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] [box-shadow:var(--interface-card-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--interface-accent)_50%,transparent)] hover:[box-shadow:var(--interface-glow)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]"
       >
         <ContenidoTarjetaCursoBusiness
           curso={curso}
@@ -1864,6 +1907,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
           mostrarProgreso={inscrito}
           textoAccion={textoAccion}
         />
+        {inscrito && <BotonDesinscribirmePrueba cursoId={curso.id} />}
       </Link>
     );
   }
@@ -1874,7 +1918,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
         data-catalog-card="game"
         href={hrefDestino}
         aria-label={`${textoAccion}: ${curso.titulo}`}
-        className="gamified-course-card group flex min-h-[350px] w-[min(88vw,318px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-[var(--interface-accent-secondary)] hover:shadow-[0_0_0_1px_var(--interface-accent-secondary),0_18px_40px_rgba(103,232,249,0.14)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
+        className="gamified-course-card group relative flex min-h-[350px] w-[min(88vw,318px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-[var(--interface-accent-secondary)] hover:shadow-[0_0_0_1px_var(--interface-accent-secondary),0_18px_40px_rgba(103,232,249,0.14)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
       >
         <ContenidoTarjetaCursoGamified
           curso={curso}
@@ -1883,6 +1927,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
           mostrarProgreso={inscrito}
           textoAccion={textoAccion}
         />
+        {inscrito && <BotonDesinscribirmePrueba cursoId={curso.id} />}
       </Link>
     );
   }
@@ -1893,7 +1938,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
         data-catalog-card="academic"
         href={hrefDestino}
         aria-label={`${textoAccion}: ${curso.titulo}`}
-        className="educational-course-card group flex min-h-[350px] w-[min(88vw,318px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-hero-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] [box-shadow:var(--interface-card-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--interface-accent-secondary)_55%,transparent)] hover:[box-shadow:var(--interface-glow)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
+        className="educational-course-card group relative flex min-h-[350px] w-[min(88vw,318px)] shrink-0 snap-start flex-col overflow-hidden rounded-[var(--interface-radius)] border border-[var(--interface-hero-border)] bg-[var(--interface-surface-strong)] text-left text-[var(--interface-text)] [box-shadow:var(--interface-card-shadow)] outline-none transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--interface-accent-secondary)_55%,transparent)] hover:[box-shadow:var(--interface-glow)] focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
       >
         <ContenidoTarjetaCursoEducational
           curso={curso}
@@ -1902,6 +1947,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
           mostrarProgreso={inscrito}
           textoAccion={textoAccion}
         />
+        {inscrito && <BotonDesinscribirmePrueba cursoId={curso.id} />}
       </Link>
     );
   }
@@ -1914,6 +1960,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
       className={CLASE_TARJETA_GLASS}
     >
       {contenido}
+      {inscrito && <BotonDesinscribirmePrueba cursoId={curso.id} />}
     </Link>
   );
 }

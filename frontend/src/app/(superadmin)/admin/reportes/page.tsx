@@ -26,7 +26,7 @@ export default async function AdminReportesPage() {
   }));
 
   return (
-    <div className="space-y-8">
+    <div className="admin-page space-y-8">
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">Reportes</h1>
         <p className="mt-1 text-muted-foreground">Resumen global de la plataforma.</p>
@@ -47,12 +47,12 @@ export default async function AdminReportesPage() {
         />
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="admin-chart-panel rounded-lg border border-border bg-card p-4">
         <h2 className="mb-3 font-display text-base font-semibold">Avance promedio por empresa</h2>
         <GraficoBarras datos={datosGrafico} etiquetaValor="Avance" sufijo="%" />
       </div>
 
-      <div className="rounded-lg border border-border bg-card">
+      <div className="admin-table-panel rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
