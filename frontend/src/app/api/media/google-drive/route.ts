@@ -72,7 +72,9 @@ export async function GET(request: Request) {
       status: resultado.status,
       headers,
     });
-  } catch {
+  } catch (error) {
+    // TEMPORAL: diagnóstico, quitar una vez confirmado el problema.
+    console.error("[media-proxy] fallo al obtener el archivo multimedia", error);
     return new Response("Error al obtener el archivo multimedia.", { status: 502 });
   }
 }
