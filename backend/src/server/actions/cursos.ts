@@ -2,9 +2,9 @@
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { conSesion } from "@/lib/db";
-import { cursos } from "@/lib/db/schema";
+import { cursos, profiles } from "@/lib/db/schema";
 import { requerirRol } from "@/lib/auth/sesion";
 import { cursoSchema } from "@/lib/validators/cursos";
 import type { ResultadoAccion } from "@/types";
@@ -110,7 +110,9 @@ export async function actualizarCurso(
   _prev: ResultadoAccion | null,
   formData: FormData,
 ): Promise<ResultadoAccion> {
-  const sesion = await requerirRol("superadmin", "instructor");
+  // Los datos generales del curso los gestiona el superadmin; el instructor
+  // solo edita el contenido (módulos, lecciones, recursos, evaluaciones).
+  const sesion = await requerirRol("superadmin");
 
   const parsed = cursoSchema.safeParse(datosCursoDesdeFormData(formData));
   if (!parsed.success) {
@@ -154,7 +156,8 @@ export async function cambiarEstadoCurso(
   id: string,
   estado: "borrador" | "publicado" | "archivado",
 ): Promise<ResultadoAccion> {
-  const sesion = await requerirRol("superadmin", "instructor");
+  // Publicar/archivar es decisión del superadmin.
+  const sesion = await requerirRol("superadmin");
 
   const filas = await conSesion(sesion.id, (tx) =>
     tx.update(cursos).set({ estado }).where(eq(cursos.id, id)).returning({ id: cursos.id }),
@@ -167,5 +170,59 @@ export async function cambiarEstadoCurso(
   revalidatePath(`/instructor/cursos/${id}`);
   revalidatePath("/instructor/cursos");
   revalidatePath("/admin/cursos");
+  return { ok: true };
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Asigna el curso a un instructor (solo superadmin). Sin tablas nuevas: el
+ * instructor queda como autor (cursos.autor_id), que es lo que las políticas
+ * RLS existentes (puede_editar_curso) usan para permitirle editar el
+ * contenido. El superadmin conserva acceso total a todos los cursos.
+ */
+export async function asignarInstructorCurso(
+  cursoId: string,
+  instructorId: string,
+): Promise<ResultadoAccion> {
+  const sesion = await requerirRol("superadmin");
+
+  if (!UUID.test(cursoId) || !UUID.test(instructorId)) {
+    return { ok: false, mensaje: "Datos no válidos." };
+  }
+
+  const filas = await conSesion(sesion.id, async (tx) => {
+    const [instructor] = await tx
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(
+        and(
+          eq(profiles.id, instructorId),
+          eq(profiles.rol, "instructor"),
+          eq(profiles.activo, true),
+          isNull(profiles.deletedAt),
+        ),
+      )
+      .limit(1);
+    if (!instructor) return null;
+
+    return tx
+      .update(cursos)
+      .set({ autorId: instructorId })
+      .where(eq(cursos.id, cursoId))
+      .returning({ id: cursos.id });
+  });
+
+  if (filas === null) {
+    return { ok: false, mensaje: "El usuario seleccionado no es un instructor activo." };
+  }
+  if (!filas.length) {
+    return { ok: false, mensaje: "No se encontró el curso." };
+  }
+
+  revalidatePath("/admin/cursos");
+  revalidatePath("/instructor/cursos");
+  revalidatePath("/instructor/evaluaciones");
+  revalidatePath(`/instructor/cursos/${cursoId}`);
   return { ok: true };
 }

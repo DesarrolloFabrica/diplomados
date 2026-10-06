@@ -257,7 +257,7 @@ export function OnboardingInterfaz() {
         return;
       }
 
-      router.replace("/mis-cursos");
+      router.replace("/home");
       router.refresh();
     });
   }

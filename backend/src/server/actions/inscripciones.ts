@@ -46,6 +46,7 @@ export async function inscribirme(cursoId: string): Promise<ResultadoAccion> {
   }
 
   revalidatePath("/mis-cursos");
+  revalidatePath("/home");
   return { ok: true };
 }
 
@@ -67,5 +68,6 @@ export async function desinscribirmePrueba(cursoId: string): Promise<ResultadoAc
   );
 
   revalidatePath("/mis-cursos");
+  revalidatePath("/home");
   return { ok: true };
 }

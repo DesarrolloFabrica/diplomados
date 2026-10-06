@@ -101,7 +101,7 @@ export function TablaEvaluaciones({ cursoId, evaluaciones }: TablaEvaluacionesPr
       </div>
 
       <Dialog open={dialogoCrear} onOpenChange={setDialogoCrear}>
-        <DialogContent>
+        <DialogContent className="admin-dialog">
           <DialogHeader>
             <DialogTitle>Nueva evaluación</DialogTitle>
           </DialogHeader>

@@ -269,6 +269,10 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
 
 
   const contenidoTexto = (leccion.contenido as { texto?: string } | null)?.texto;
+  const metaLeccion = extraerMetaContenido(leccion.contenido);
+  const duracionLeccionSeg =
+    metaLeccion.duracionSeg ??
+    (metaLeccion.duracionMin ? metaLeccion.duracionMin * 60 : null);
   const primeraLeccionId = modulosRuta[0]?.lecciones[0]?.id;
   const infografiaInteractiva = obtenerInfografiaInteractivaLeccion(
     curso.titulo,
@@ -329,6 +333,7 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
           lessonContext={contextoLeccion}
           completionMode={leccion.marcado}
           completed={completada}
+          duracionSeg={duracionLeccionSeg}
           recursos={recursosConUrl.map((recurso) => ({
             id: recurso.id,
             nombre: recurso.nombre,

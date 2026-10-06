@@ -17,10 +17,17 @@ export default async function InstructorCursosPage() {
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">Mis cursos</h1>
         <p className="mt-1 text-muted-foreground">
-          Crea y edita cursos, módulos, lecciones y evaluaciones.
+          {soloPropios
+            ? "Cursos que el superadmin te asignó o que creaste. Puedes editar sus módulos, lecciones, recursos y evaluaciones; la publicación la gestiona el superadmin."
+            : "Crea y edita cursos, módulos, lecciones y evaluaciones."}
         </p>
       </div>
-      <TablaCursos cursos={cursos} empresas={empresas} />
+      <TablaCursos
+        cursos={cursos}
+        empresas={empresas}
+        temaAdminOscuro
+        vistaInstructor={soloPropios}
+      />
     </div>
   );
 }

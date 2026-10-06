@@ -32,6 +32,8 @@ interface ContenidoLeccionConCompletadoProps {
   lessonContext: string;
   completionMode: "automatico" | "manual";
   completed: boolean;
+  /** Duración declarada de la lección en segundos (video/audio en iframe). */
+  duracionSeg?: number | null;
   recursos: RecursoVista[];
   contenidoTexto?: string | null;
   infografiaInteractiva?: InfografiaInteractivaLeccion | null;
@@ -117,6 +119,7 @@ export function ContenidoLeccionConCompletado({
   lessonContext,
   completionMode,
   completed,
+  duracionSeg,
   recursos,
   contenidoTexto,
   infografiaInteractiva = null,
@@ -203,6 +206,7 @@ export function ContenidoLeccionConCompletado({
         infografiaInteractiva={infografiaInteractiva}
         enrollmentId={enrollmentId}
         lessonId={lessonId}
+        duracionSeg={duracionSeg}
         autoCompletion={
           automatic
             ? {

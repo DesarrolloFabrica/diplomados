@@ -100,19 +100,32 @@ export async function actualizarLeccion(
     return { ok: false, mensaje: parsed.error.issues[0]?.message ?? "Datos no válidos" };
   }
 
-  const filas = await conSesion(sesion.id, (tx) =>
-    tx
+  const filas = await conSesion(sesion.id, async (tx) => {
+    // El formulario solo edita `texto`: se conservan las demás claves de
+    // `contenido` (duracionMin/duracionSeg, portadaUrl, ...) en vez de
+    // sobrescribir el objeto completo.
+    const [actual] = await tx
+      .select({ contenido: lecciones.contenido })
+      .from(lecciones)
+      .where(eq(lecciones.id, leccionId))
+      .limit(1);
+    const contenidoPrevio =
+      actual?.contenido && typeof actual.contenido === "object"
+        ? (actual.contenido as Record<string, unknown>)
+        : {};
+
+    return tx
       .update(lecciones)
       .set({
         titulo: parsed.data.titulo,
         tipoContenido: parsed.data.tipoContenido,
-        contenido: { texto: parsed.data.contenido ?? "" },
+        contenido: { ...contenidoPrevio, texto: parsed.data.contenido ?? "" },
         esObligatoria: parsed.data.esObligatoria,
         marcado: parsed.data.marcado,
       })
       .where(eq(lecciones.id, leccionId))
-      .returning({ id: lecciones.id }),
-  );
+      .returning({ id: lecciones.id });
+  });
 
   if (!filas.length) {
     return { ok: false, mensaje: "No tienes permiso para editar esta lección." };

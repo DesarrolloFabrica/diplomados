@@ -163,7 +163,7 @@ export function RecursosLeccion({
       </div>
 
       <Dialog open={dialogoEnlace} onOpenChange={setDialogoEnlace}>
-        <DialogContent>
+        <DialogContent className="admin-dialog">
           <DialogHeader>
             <DialogTitle>Agregar enlace externo</DialogTitle>
           </DialogHeader>
@@ -182,7 +182,7 @@ export function RecursosLeccion({
           if (!abierto) setRecursoEditando(null);
         }}
       >
-        <DialogContent>
+        <DialogContent className="admin-dialog">
           <DialogHeader>
             <DialogTitle>Editar enlace externo</DialogTitle>
           </DialogHeader>
@@ -199,7 +199,7 @@ export function RecursosLeccion({
       </Dialog>
 
       <Dialog open={dialogoArchivo} onOpenChange={setDialogoArchivo}>
-        <DialogContent>
+        <DialogContent className="admin-dialog">
           <DialogHeader>
             <DialogTitle>Subir archivo</DialogTitle>
           </DialogHeader>

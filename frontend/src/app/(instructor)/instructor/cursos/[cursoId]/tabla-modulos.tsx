@@ -101,7 +101,7 @@ export function TablaModulos({ cursoId, modulos }: TablaModulosProps) {
       </div>
 
       <Dialog open={dialogoCrear} onOpenChange={setDialogoCrear}>
-        <DialogContent>
+        <DialogContent className="admin-dialog">
           <DialogHeader>
             <DialogTitle>Nuevo módulo</DialogTitle>
           </DialogHeader>
@@ -110,7 +110,7 @@ export function TablaModulos({ cursoId, modulos }: TablaModulosProps) {
       </Dialog>
 
       <Dialog open={!!moduloEditar} onOpenChange={(abierto) => !abierto && setModuloEditar(null)}>
-        <DialogContent>
+        <DialogContent className="admin-dialog">
           <DialogHeader>
             <DialogTitle>Editar módulo</DialogTitle>
           </DialogHeader>

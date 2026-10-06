@@ -13,7 +13,7 @@ export default async function OnboardingInterfazPage() {
 
   const preferencia = await obtenerPreferenciaInterfazUsuario(sesion.id);
   if (preferencia?.interfaceOnboardingCompletedAt) {
-    redirect("/mis-cursos");
+    redirect("/home");
   }
 
   return <OnboardingInterfaz />;

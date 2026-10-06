@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, ArrowRight } from "lucide-react";
+import { Plus, ArrowRight, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -22,9 +22,14 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { FormularioCurso } from "./formulario-curso";
+import { DialogoAsignarInstructor } from "./dialogo-asignar-instructor";
 import { PortadaMiniatura } from "@/components/shared/portada-curso";
 import { cn } from "@/lib/utils";
-import type { CursoFila } from "@backend/server/queries/cursos";
+import type {
+  CursoFila,
+  CursoFilaConAcceso,
+  InstructorOpcion,
+} from "@backend/server/queries/cursos";
 import type { EmpresaOpcion } from "@backend/server/queries/empresas";
 
 const ETIQUETA_ESTADO: Record<CursoFila["estado"], string> = {
@@ -40,14 +45,27 @@ const VARIANTE_ESTADO: Record<CursoFila["estado"], "secondary" | "default" | "ou
 };
 
 interface TablaCursosProps {
-  cursos: CursoFila[];
+  cursos: CursoFilaConAcceso[];
   empresas: EmpresaOpcion[];
   temaAdminOscuro?: boolean;
+  /** Vista de instructor: textos orientados a "mis cursos asignados". */
+  vistaInstructor?: boolean;
+  /** Si se pasa, muestra la columna Instructor y permite asignarlo (vista de superadmin). */
+  instructores?: InstructorOpcion[];
 }
 
-export function TablaCursos({ cursos, empresas, temaAdminOscuro = false }: TablaCursosProps) {
+export function TablaCursos({
+  cursos,
+  empresas,
+  temaAdminOscuro = false,
+  vistaInstructor = false,
+  instructores,
+}: TablaCursosProps) {
   const router = useRouter();
   const [dialogoAbierto, setDialogoAbierto] = useState(false);
+  const [cursoAsignar, setCursoAsignar] = useState<CursoFila | null>(null);
+  const columnas = 6 + (instructores ? 1 : 0);
+  const nombreInstructor = new Map(instructores?.map((i) => [i.id, i.nombreCompleto]));
 
   return (
     <div className="space-y-4">
@@ -67,14 +85,17 @@ export function TablaCursos({ cursos, empresas, temaAdminOscuro = false }: Tabla
               <TableHead>Tipo</TableHead>
               <TableHead>Nivel</TableHead>
               <TableHead>Estado</TableHead>
+              {instructores && <TableHead>Instructor</TableHead>}
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {cursos.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
-                  Todavía no hay cursos. Crea el primero.
+                <TableCell colSpan={columnas} className="py-10 text-center text-muted-foreground">
+                  {vistaInstructor
+                    ? "Todavía no tienes cursos. Crea uno o pide al superadmin que te asigne un curso."
+                    : "Todavía no hay cursos. Crea el primero."}
                 </TableCell>
               </TableRow>
             )}
@@ -102,13 +123,31 @@ export function TablaCursos({ cursos, empresas, temaAdminOscuro = false }: Tabla
                     {ETIQUETA_ESTADO[curso.estado]}
                   </Badge>
                 </TableCell>
+                {instructores && (
+                  <TableCell className="text-muted-foreground">
+                    {(curso.autorId && nombreInstructor.get(curso.autorId)) ?? "Sin asignar"}
+                  </TableCell>
+                )}
                 <TableCell className="text-right">
-                  <Button className="admin-ghost-button" variant="ghost" size="sm" asChild>
-                    <Link href={`/instructor/cursos/${curso.id}`}>
-                      Administrar
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
+                  <div className="flex items-center justify-end gap-1">
+                    {instructores && (
+                      <Button
+                        className="admin-ghost-button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCursoAsignar(curso)}
+                      >
+                        <UsersRound className="h-4 w-4" />
+                        Asignar instructor
+                      </Button>
+                    )}
+                    <Button className="admin-ghost-button" variant="ghost" size="sm" asChild>
+                      <Link href={`/instructor/cursos/${curso.id}`}>
+                        {curso.acceso === "contenido" ? "Editar contenido" : "Administrar"}
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -138,6 +177,14 @@ export function TablaCursos({ cursos, empresas, temaAdminOscuro = false }: Tabla
           />
         </DialogContent>
       </Dialog>
+
+      {instructores && (
+        <DialogoAsignarInstructor
+          curso={cursoAsignar}
+          instructores={instructores}
+          onCerrar={() => setCursoAsignar(null)}
+        />
+      )}
     </div>
   );
 }

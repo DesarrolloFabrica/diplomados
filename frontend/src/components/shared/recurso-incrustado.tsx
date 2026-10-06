@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import {
   Download,
   File,
@@ -21,6 +21,7 @@ import {
   type MediaConsumptionReporter,
 } from "@/hooks/use-auto-completion";
 import { claveReanudacion, usePlaybackResume } from "@/hooks/use-playback-resume";
+import { segundosRevisionIframe, useEngagedTime } from "@/hooks/use-engaged-time";
 import type { TipoRecurso } from "@backend/lib/db/schema";
 
 interface RecursoIncrustadoProps {
@@ -30,8 +31,43 @@ interface RecursoIncrustadoProps {
   url: string | null;
   autoCompletionEnabled?: boolean;
   onConsumptionProgress?: MediaConsumptionReporter;
+  /** Recursos sin progreso medible (iframe, imagen, enlace) avisan aquí al darse por revisados. */
+  onResourceReviewed?: () => void;
+  duracionSeg?: number | null;
   enrollmentId?: string;
   lessonId?: string;
+}
+
+/** Envuelve un recurso sin progreso medible y lo da por revisado por tiempo de atención. */
+function ZonaAtencion({
+  clave,
+  tipo,
+  enabled,
+  duracionSeg,
+  onReached,
+  className,
+  children,
+}: {
+  clave: string;
+  tipo: TipoRecurso;
+  enabled: boolean;
+  duracionSeg?: number | null;
+  onReached?: () => void;
+  className?: string;
+  children: ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEngagedTime(ref, {
+    clave,
+    enabled,
+    requiredSeconds: segundosRevisionIframe(tipo, duracionSeg),
+    onReached,
+  });
+  return (
+    <div ref={ref} className={className}>
+      {children}
+    </div>
+  );
 }
 
 const ICONO_DESCARGA: Record<TipoRecurso, typeof FileText> = {
@@ -107,9 +143,17 @@ export function RecursoIncrustado({
   url,
   autoCompletionEnabled = false,
   onConsumptionProgress,
+  onResourceReviewed,
+  duracionSeg,
   enrollmentId,
   lessonId,
 }: RecursoIncrustadoProps) {
+  const claveAtencion = `${lessonId ?? ""}:${resourceId}`;
+  const seguirAtencion = autoCompletionEnabled && Boolean(onResourceReviewed);
+  // Documentos que solo se abren en otra pestaña: no hay forma de saber qué
+  // tanto se leyeron, así que abrirlos cuenta como revisado.
+  const alAbrirExterno = seguirAtencion ? onResourceReviewed : undefined;
+
   if (!url) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/80 p-4 text-sm text-slate-600">
@@ -128,6 +172,8 @@ export function RecursoIncrustado({
         url={url}
         autoCompletionEnabled={autoCompletionEnabled}
         onConsumptionProgress={onConsumptionProgress}
+        onResourceReviewed={onResourceReviewed}
+        duracionSeg={duracionSeg}
         enrollmentId={enrollmentId}
         lessonId={lessonId}
       />
@@ -137,7 +183,14 @@ export function RecursoIncrustado({
   if (tipo === "video") {
     const embedYoutube = obtenerEmbedYoutube(url);
     return (
-      <div className="lesson-media aspect-video w-full overflow-hidden rounded-2xl border border-border/70 bg-black shadow-[0_8px_30px_rgba(6,17,32,0.08)] ring-1 ring-emerald-500/15">
+      <ZonaAtencion
+        clave={claveAtencion}
+        tipo={tipo}
+        enabled={seguirAtencion && Boolean(embedYoutube)}
+        duracionSeg={duracionSeg}
+        onReached={onResourceReviewed}
+        className="lesson-media aspect-video w-full overflow-hidden rounded-2xl border border-border/70 bg-black shadow-[0_8px_30px_rgba(6,17,32,0.08)] ring-1 ring-emerald-500/15"
+      >
         {embedYoutube ? (
           // La API JS de YouTube no se carga aquí: sin `enablejsapi`, este
           // iframe no expone currentTime, así que no se puede reanudar el
@@ -161,7 +214,7 @@ export function RecursoIncrustado({
             lessonId={lessonId}
           />
         )}
-      </div>
+      </ZonaAtencion>
     );
   }
 
@@ -181,12 +234,18 @@ export function RecursoIncrustado({
 
   if (tipo === "imagen") {
     return (
-      <div className="space-y-2">
+      <ZonaAtencion
+        clave={claveAtencion}
+        tipo={tipo}
+        enabled={seguirAtencion}
+        onReached={onResourceReviewed}
+        className="space-y-2"
+      >
         <p className="text-sm font-medium text-slate-800">{nombre}</p>
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm ring-1 ring-slate-100">
           <ImagenRecurso url={url} nombre={nombre} />
         </div>
-      </div>
+      </ZonaAtencion>
     );
   }
 
@@ -202,6 +261,7 @@ export function RecursoIncrustado({
           href={url}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={alAbrirExterno}
           className="flex items-center justify-between rounded-b-2xl border border-slate-200 bg-slate-50/90 p-4 shadow-sm transition-colors hover:border-slate-300 hover:bg-white"
         >
           <div className="flex items-center gap-2">
@@ -225,6 +285,7 @@ export function RecursoIncrustado({
         href={url}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={alAbrirExterno}
         className="flex items-center justify-between rounded-b-2xl border border-slate-200 bg-slate-50/90 p-4 shadow-sm transition-colors hover:border-slate-300 hover:bg-white"
       >
         <div className="flex items-center gap-2">

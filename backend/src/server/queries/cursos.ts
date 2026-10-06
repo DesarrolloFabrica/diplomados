@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import { conSesion } from "@/lib/db";
 import type { EscuelaVisual } from "@/config/escuelas";
-import { cursos, modulos } from "@/lib/db/schema";
+import { cursos, modulos, profiles } from "@/lib/db/schema";
 
 export interface CursoFila {
   id: string;
@@ -18,10 +18,31 @@ export interface CursoFila {
   createdAt: Date;
 }
 
-// soloPropios: true para el listado de autoría del instructor (solo sus
-// cursos); false para el listado global del superadmin.
-export async function listarCursos(usuarioId: string, soloPropios: boolean): Promise<CursoFila[]> {
-  return conSesion(usuarioId, (tx) => {
+/**
+ * Qué puede editar el usuario en el curso:
+ * - "total": superadmin (datos generales, estado y contenido).
+ * - "contenido": instructor del curso (módulos, lecciones, recursos y
+ *   evaluaciones). Los datos generales y el estado los gestiona el superadmin.
+ */
+export type AccesoCurso = "total" | "contenido";
+
+export interface CursoFilaConAcceso extends CursoFila {
+  acceso: AccesoCurso;
+}
+
+export function accesoCurso(sesion: { rol: string }): AccesoCurso {
+  return sesion.rol === "superadmin" ? "total" : "contenido";
+}
+
+// soloPropios: true para el instructor (cursos donde figura como autor, ya
+// sea porque los creó o porque el superadmin se los asignó); false para el
+// listado global del superadmin.
+export async function listarCursos(
+  usuarioId: string,
+  soloPropios: boolean,
+): Promise<CursoFilaConAcceso[]> {
+  const acceso: AccesoCurso = soloPropios ? "contenido" : "total";
+  const filas = await conSesion(usuarioId, (tx) => {
     const condiciones = [isNull(cursos.deletedAt)];
     if (soloPropios) condiciones.push(eq(cursos.autorId, usuarioId));
 
@@ -44,6 +65,27 @@ export async function listarCursos(usuarioId: string, soloPropios: boolean): Pro
       .where(and(...condiciones))
       .orderBy(desc(cursos.createdAt));
   });
+
+  return filas.map((fila) => ({ ...fila, acceso }));
+}
+
+export interface InstructorOpcion {
+  id: string;
+  nombreCompleto: string;
+  email: string;
+}
+
+/** Instructores activos, para el selector de asignación del superadmin. */
+export async function listarInstructores(usuarioId: string): Promise<InstructorOpcion[]> {
+  return conSesion(usuarioId, (tx) =>
+    tx
+      .select({ id: profiles.id, nombreCompleto: profiles.nombreCompleto, email: profiles.email })
+      .from(profiles)
+      .where(
+        and(eq(profiles.rol, "instructor"), eq(profiles.activo, true), isNull(profiles.deletedAt)),
+      )
+      .orderBy(asc(profiles.nombreCompleto)),
+  );
 }
 
 export interface CursoDetalle extends CursoFila {

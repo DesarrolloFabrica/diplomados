@@ -66,6 +66,8 @@ interface VistaContenidoLeccionProps {
     onMediaProgress: MediaConsumptionReporter;
     onDocumentEnd: () => void;
   };
+  /** Duración declarada de la lección (segundos), para video/audio en iframe. */
+  duracionSeg?: number | null;
   enrollmentId?: string;
   lessonId?: string;
 }
@@ -172,6 +174,7 @@ export function VistaContenidoLeccion({
   contenidoTexto,
   infografiaInteractiva = null,
   autoCompletion,
+  duracionSeg,
   enrollmentId,
   lessonId,
 }: VistaContenidoLeccionProps) {
@@ -395,6 +398,9 @@ export function VistaContenidoLeccion({
             <EmbedAdobeIndesign
               src={infografiaInteractiva.src}
               titulo={infografiaInteractiva.titulo}
+              claveAtencion={`${lessonId ?? ""}:infografia-interactiva`}
+              autoCompletionEnabled={autoCompletion?.enabled ?? false}
+              onReviewed={autoCompletion?.onDocumentEnd}
             />
           ) : null}
 
@@ -426,6 +432,8 @@ export function VistaContenidoLeccion({
                   url={recurso.url}
                   autoCompletionEnabled={autoCompletion?.enabled ?? false}
                   onConsumptionProgress={autoCompletion?.onMediaProgress}
+                  onResourceReviewed={autoCompletion?.onDocumentEnd}
+                  duracionSeg={duracionSeg}
                   enrollmentId={enrollmentId}
                   lessonId={lessonId}
                 />

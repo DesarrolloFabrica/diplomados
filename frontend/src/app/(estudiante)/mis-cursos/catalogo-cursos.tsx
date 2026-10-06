@@ -43,6 +43,8 @@ import { CLASE_HERO_PANEL, CLASE_PANEL_GLASS } from "@/config/paneles-glass";
 import type { CursoCatalogoFila } from "@backend/server/queries/mis-cursos";
 
 interface CatalogoCursosProps {
+  pagina: "home" | "mis-cursos";
+  seccionHome?: "descubrir" | "diplomados" | "nuevos";
   misCursos: CursoCatalogoFila[];
   disponibles: CursoCatalogoFila[];
   nombre: string | null;
@@ -58,31 +60,11 @@ type VarianteCatalogoVisual = "default" | "adventure" | "educational";
 
 const NEW_COURSE_DAYS = 30;
 
-const SECCIONES_CATALOGO: ReadonlyArray<{ id: CatalogSection; label: string }> = [
-  { id: "mis-cursos", label: "Mis cursos" },
-  { id: "diplomados", label: "Diplomados" },
-  { id: "nuevos", label: "Nuevos" },
-  { id: "descubrir", label: "Descubrir" },
-  { id: "categoria", label: "Por categoría" },
-];
-
 const NIVELES_CATALOGO: ReadonlyArray<{ id: FiltroNivel; label: string }> = [
   { id: "todos", label: "Todos" },
   { id: "basico", label: "Básico" },
   { id: "intermedio", label: "Intermedio" },
   { id: "avanzado", label: "Avanzado" },
-];
-
-const ESCUELAS_CATALOGO: ReadonlyArray<{
-  id: EscuelaCatalogo;
-  label: string;
-  fullLabel: string;
-}> = [
-  { id: "sociales", label: "Sociales", fullLabel: "Ciencias Sociales, Juridicas y Gobierno" },
-  { id: "diseno", label: "Diseno", fullLabel: "Diseno y Comunicacion" },
-  { id: "ingenieria", label: "Ingenieria", fullLabel: "Ingenieria" },
-  { id: "salud", label: "Salud", fullLabel: "Salud y Bienestar" },
-  { id: "empresarial", label: "Empresarial", fullLabel: "Transformacion Empresarial" },
 ];
 
 /** Oculta temporalmente buscador, categorías y perfil del catálogo. */
@@ -109,18 +91,19 @@ const CLASE_TARJETA_GLASS = cn(
   "focus-visible:ring-2 focus-visible:ring-[#91DC00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]",
 );
 
-export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCursosProps) {
+export function CatalogoCursos({
+  pagina,
+  seccionHome = "descubrir",
+  misCursos,
+  disponibles,
+  nombre,
+}: CatalogoCursosProps) {
   const { config } = useInterfaceVariant();
   const esBusiness = config.id === "business";
   const esEducational = config.id === "educational";
   const esGamified = config.id === "gamified";
   const todosCursos = useMemo(() => [...misCursos, ...disponibles], [disponibles, misCursos]);
-  const [seccionActiva, setSeccionActiva] = useState<CatalogSection>("mis-cursos");
   const [nivelActivo, setNivelActivo] = useState<FiltroNivel>("todos");
-  const [escuelaActiva, setEscuelaActiva] = useState<EscuelaCatalogo>(() =>
-    ESCUELAS_CATALOGO.find(({ id }) => todosCursos.some((curso) => curso.escuela === id))?.id ??
-    "sociales",
-  );
   const cursosPendientesInscritos = useMemo(
     () =>
       [...misCursos]
@@ -137,7 +120,10 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
     [misCursos],
   );
   const cursoDestacado =
-    cursosPendientesInscritos[0] ?? disponibles[0] ?? misCursos[0] ?? null;
+    cursosPendientesInscritos[0] ??
+    misCursos[0] ??
+    (pagina === "home" ? disponibles[0] : null) ??
+    null;
   const cursosHero =
     cursosPendientesInscritos.length > 0
       ? cursosPendientesInscritos
@@ -164,10 +150,6 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
           ),
     [misCursosOrdenados, nivelActivo],
   );
-  const diplomados = useMemo(
-    () => todosCursos.filter((curso) => curso.esDiplomado),
-    [todosCursos],
-  );
   const nuevos = useMemo(() => {
     const fechaLimite = Date.now() - NEW_COURSE_DAYS * 24 * 60 * 60 * 1000;
 
@@ -177,13 +159,6 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
   }, [todosCursos]);
-  const cursosCompletados = useMemo(
-    () =>
-      misCursosOrdenados.filter((curso) =>
-        cursoCompletado(curso, porcentajeCurso(curso)),
-      ),
-    [misCursosOrdenados],
-  );
   const cursoReferenciaDescubrimiento = useMemo(
     () =>
       misCursosOrdenados
@@ -239,58 +214,41 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
     return { activos: activos.length, completados: completados.length, progresoPromedio };
   }, [misCursosOrdenados]);
 
-  const vistaCatalogo = useMemo(() => {
-    if (seccionActiva === "diplomados") {
-      return {
-        titulo: "Diplomados",
-        cursos: diplomados,
-        mensajeVacio: "No hay diplomados disponibles.",
-      };
-    }
-
-    if (seccionActiva === "nuevos") {
-      return {
-        titulo: "Nuevos",
-        cursos: nuevos,
-        mensajeVacio: "No hay cursos nuevos en este momento.",
-      };
-    }
-
-    if (seccionActiva === "categoria") {
-      const escuela = ESCUELAS_CATALOGO.find((item) => item.id === escuelaActiva);
-      return {
-        titulo: escuela?.fullLabel ?? "Por categoria",
-        cursos: todosCursos.filter((curso) => curso.escuela === escuelaActiva),
-        mensajeVacio: `No hay cursos disponibles en ${escuela?.label ?? "esta categoria"}.`,
-      };
-    }
-
-    return {
-      titulo: "Mis cursos",
-      cursos: misCursosFiltrados,
-      mensajeVacio:
-        nivelActivo === "todos"
-          ? "Todavia no tienes cursos inscritos."
-          : `No tienes cursos inscritos de nivel ${nivelActivo}.`,
-    };
-  }, [diplomados, escuelaActiva, misCursosFiltrados, nivelActivo, nuevos, seccionActiva, todosCursos]);
+  const cursosDescubrimiento = useMemo(() => {
+    const vistos = new Set<string>();
+    return [...cursosRelacionados, ...recomendadosEmpresa, ...todosCursos].filter((curso) => {
+      if (vistos.has(curso.id)) return false;
+      vistos.add(curso.id);
+      return true;
+    });
+  }, [cursosRelacionados, recomendadosEmpresa, todosCursos]);
+  const cursosParaNuevos =
+    nuevos.length > 0
+      ? nuevos
+      : disponibles.length > 0
+        ? disponibles
+        : cursosRelacionados;
+  const tituloSeccionNuevos =
+    nuevos.length > 0
+      ? "Nuevos lanzamientos"
+      : disponibles.length > 0
+        ? "Cursos que aún no has explorado"
+        : cursoReferenciaDescubrimiento
+          ? `Porque viste ${cursoReferenciaDescubrimiento.titulo}`
+          : "Recomendados para ti";
 
   const catalogoContenido = (
     <ContenidoCatalogo
-      seccionActiva={seccionActiva}
-      onCambiarSeccion={setSeccionActiva}
-      escuelaActiva={escuelaActiva}
-      onCambiarEscuela={setEscuelaActiva}
+      pagina={pagina}
+      seccionHome={seccionHome}
       nivelActivo={nivelActivo}
       onCambiarNivel={setNivelActivo}
-      vistaCatalogo={vistaCatalogo}
-      cursoReferenciaDescubrimiento={cursoReferenciaDescubrimiento}
-      cursosRelacionados={cursosRelacionados}
-      recomendadosEmpresa={recomendadosEmpresa}
-      cursosCompletados={cursosCompletados}
+      misCursos={misCursosFiltrados}
+      todosCursos={todosCursos}
+      cursosDescubrimiento={cursosDescubrimiento}
+      cursosParaNuevos={cursosParaNuevos}
+      tituloSeccionNuevos={tituloSeccionNuevos}
       variante={esGamified ? "adventure" : esEducational ? "educational" : "default"}
-      mostrarEncabezado={!esGamified}
-      ocultarTituloFila={esGamified}
     />
   );
 
@@ -305,7 +263,8 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
         <DashboardEducativoColaborador
           nombre={nombre}
           cursoActual={cursoDestacado}
-          cursoExplorable={disponibles[0] ?? null}
+          cursoExplorable={pagina === "home" ? disponibles[0] ?? null : null}
+          mostrarExplorar={pagina === "home"}
         />
       )}
 
@@ -337,39 +296,27 @@ export function CatalogoCursos({ misCursos, disponibles, nombre }: CatalogoCurso
 }
 
 function ContenidoCatalogo({
-  seccionActiva,
-  onCambiarSeccion,
-  escuelaActiva,
-  onCambiarEscuela,
+  pagina,
+  seccionHome,
   nivelActivo,
   onCambiarNivel,
-  vistaCatalogo,
-  cursoReferenciaDescubrimiento,
-  cursosRelacionados,
-  recomendadosEmpresa,
-  cursosCompletados,
+  misCursos,
+  todosCursos,
+  cursosDescubrimiento,
+  cursosParaNuevos,
+  tituloSeccionNuevos,
   variante = "default",
-  mostrarEncabezado = true,
-  ocultarTituloFila = false,
 }: {
-  seccionActiva: CatalogSection;
-  onCambiarSeccion: (seccion: CatalogSection) => void;
-  escuelaActiva: EscuelaCatalogo;
-  onCambiarEscuela: (escuela: EscuelaCatalogo) => void;
+  pagina: "home" | "mis-cursos";
+  seccionHome: "descubrir" | "diplomados" | "nuevos";
   nivelActivo: FiltroNivel;
   onCambiarNivel: (nivel: FiltroNivel) => void;
-  vistaCatalogo: {
-    titulo: string;
-    cursos: CursoCatalogoFila[];
-    mensajeVacio: string;
-  };
-  cursoReferenciaDescubrimiento: CursoCatalogoFila | null;
-  cursosRelacionados: CursoCatalogoFila[];
-  recomendadosEmpresa: CursoCatalogoFila[];
-  cursosCompletados: CursoCatalogoFila[];
+  misCursos: CursoCatalogoFila[];
+  todosCursos: CursoCatalogoFila[];
+  cursosDescubrimiento: CursoCatalogoFila[];
+  cursosParaNuevos: CursoCatalogoFila[];
+  tituloSeccionNuevos: string;
   variante?: VarianteCatalogoVisual;
-  mostrarEncabezado?: boolean;
-  ocultarTituloFila?: boolean;
 }) {
   return (
     <section
@@ -378,60 +325,82 @@ function ContenidoCatalogo({
         "min-w-0 w-full overflow-hidden",
         variante === "adventure" ? "space-y-4 pt-1" : "space-y-5",
       )}
-      aria-labelledby={mostrarEncabezado ? "titulo-catalogo" : undefined}
+      aria-labelledby="titulo-catalogo"
     >
       <div className={cn("space-y-3", variante === "adventure" && "mx-auto max-w-5xl")}>
-        {mostrarEncabezado && (
-          <p
-            id="titulo-catalogo"
-            className="text-xs font-extrabold uppercase tracking-[0.16em] text-white/75"
-          >
-            Catalogo
-          </p>
-        )}
+        <p
+          id="titulo-catalogo"
+          className="text-xs font-extrabold uppercase tracking-[0.16em] text-white/75"
+        >
+          {pagina === "home" ? "Home" : "Mis cursos"}
+        </p>
         <SelectorCatalogo
-          seccionActiva={seccionActiva}
-          onChange={onCambiarSeccion}
+          pagina={pagina}
+          seccionHome={seccionHome}
           variante={variante}
         />
       </div>
 
-      {seccionActiva === "categoria" && (
-        <SelectorSecundario
-          ariaLabel="Filtrar cursos por escuela"
-          items={ESCUELAS_CATALOGO}
-          value={escuelaActiva}
-          onChange={onCambiarEscuela}
+      {pagina === "home" && seccionHome === "diplomados" ? (
+        <FilaCatalogo
+          titulo="Diplomados"
+          cursos={todosCursos.filter((curso) => curso.esDiplomado)}
+          mensajeVacio="No hay diplomados disponibles en este momento."
           variante={variante}
         />
-      )}
+      ) : pagina === "home" && seccionHome === "nuevos" ? (
+        <FilaCatalogo
+          titulo={tituloSeccionNuevos}
+          cursos={cursosParaNuevos}
+          mensajeVacio="No hay recomendaciones disponibles en este momento."
+          variante={variante}
+        />
+      ) : pagina === "home" ? (
+        <div className="space-y-8">
+          <FilaCatalogo
+            titulo="Descubrir"
+            cursos={cursosDescubrimiento}
+            mensajeVacio="No hay cursos disponibles para descubrir en este momento."
+            variante={variante}
+          />
 
-      {seccionActiva === "descubrir" ? (
-        <DescubrirCatalogo
-          cursoReferencia={cursoReferenciaDescubrimiento}
-          relacionados={cursosRelacionados}
-          empresa={recomendadosEmpresa}
-          completados={cursosCompletados}
-          ocultarTitulo={ocultarTituloFila}
-          variante={variante}
-        />
+          <FilaCatalogo
+            titulo={tituloSeccionNuevos}
+            cursos={cursosParaNuevos}
+            mensajeVacio="No hay recomendaciones disponibles en este momento."
+            variante={variante}
+          />
+
+          {NIVELES_CATALOGO.filter((nivel) => nivel.id !== "todos").map((nivel) => (
+            <FilaCatalogo
+              key={nivel.id}
+              titulo={`Nivel ${nivel.label.toLowerCase()}`}
+              cursos={todosCursos.filter(
+                (curso) => normalizarNivel(curso.nivelDificultad) === nivel.id,
+              )}
+              mensajeVacio={`No hay cursos de nivel ${nivel.label.toLowerCase()}.`}
+              variante={variante}
+            />
+          ))}
+        </div>
       ) : (
         <FilaCatalogo
-          titulo={vistaCatalogo.titulo}
-          cursos={vistaCatalogo.cursos}
-          mensajeVacio={vistaCatalogo.mensajeVacio}
-          ocultarTitulo={ocultarTituloFila}
+          titulo="Mis cursos"
+          cursos={misCursos}
+          mensajeVacio={
+            nivelActivo === "todos"
+              ? "Todavía no tienes cursos inscritos."
+              : `No tienes cursos inscritos de nivel ${nivelActivo}.`
+          }
           variante={variante}
           controles={
-            seccionActiva === "mis-cursos" ? (
-              <SelectorSecundario
-                ariaLabel="Filtrar mis cursos por nivel"
-                items={NIVELES_CATALOGO}
-                value={nivelActivo}
-                onChange={onCambiarNivel}
-                variante={variante}
-              />
-            ) : undefined
+            <SelectorSecundario
+              ariaLabel="Filtrar mis cursos por nivel"
+              items={NIVELES_CATALOGO}
+              value={nivelActivo}
+              onChange={onCambiarNivel}
+              variante={variante}
+            />
           }
         />
       )}
@@ -443,10 +412,12 @@ function DashboardEducativoColaborador({
   nombre,
   cursoActual,
   cursoExplorable,
+  mostrarExplorar,
 }: {
   nombre: string | null;
   cursoActual: CursoCatalogoFila | null;
   cursoExplorable: CursoCatalogoFila | null;
+  mostrarExplorar: boolean;
 }) {
   const primerNombre = nombre?.trim().split(/\s+/)[0];
   const titulo = primerNombre
@@ -486,12 +457,14 @@ function DashboardEducativoColaborador({
               Continuar aprendiendo
               <ChevronRight className="size-4" aria-hidden="true" />
             </Link>
-            <Link
-              href={hrefExplorar}
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/50 bg-transparent px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]"
-            >
-              Explorar cursos
-            </Link>
+            {mostrarExplorar && (
+              <Link
+                href={hrefExplorar}
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/50 bg-transparent px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#061120]"
+              >
+                Explorar cursos
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -656,34 +629,52 @@ function IndicadorBusiness({
 }
 
 function SelectorCatalogo({
-  seccionActiva,
-  onChange,
+  pagina,
+  seccionHome,
   variante = "default",
 }: {
-  seccionActiva: CatalogSection;
-  onChange: (section: CatalogSection) => void;
+  pagina: "home" | "mis-cursos";
+  seccionHome: "descubrir" | "diplomados" | "nuevos";
   variante?: VarianteCatalogoVisual;
 }) {
+  const secciones = [
+    { id: "home" as const, label: "Home", href: "/home", seccion: "descubrir" as const },
+    { id: "mis-cursos" as const, label: "Mis cursos", href: "/mis-cursos", seccion: null },
+    {
+      id: "diplomados" as const,
+      label: "Diplomados",
+      href: "/home?seccion=diplomados",
+      seccion: "diplomados" as const,
+    },
+    {
+      id: "nuevos" as const,
+      label: "Nuevos",
+      href: "/home?seccion=nuevos",
+      seccion: "nuevos" as const,
+    },
+  ];
+
   return (
-    <div
-      role="group"
-      aria-label="Secciones del catalogo"
+    <nav
+      aria-label="Secciones principales"
       className={cn(
         "flex max-w-full gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         variante === "adventure" && "snap-x snap-mandatory justify-start sm:justify-center",
       )}
     >
-      {SECCIONES_CATALOGO.map((seccion) => {
-        const activa = seccion.id === seccionActiva;
+      {secciones.map((seccion) => {
+        const activa =
+          seccion.id === "mis-cursos"
+            ? pagina === "mis-cursos"
+            : pagina === "home" && seccion.seccion === seccionHome;
 
         return (
-          <button
+          <Link
             key={seccion.id}
-            type="button"
-            aria-pressed={activa}
-            onClick={() => onChange(seccion.id)}
+            href={seccion.href}
+            aria-current={activa ? "page" : undefined}
             className={cn(
-              "min-h-11 shrink-0 whitespace-nowrap rounded-full border px-5 text-sm font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] backdrop-blur-xl transition-[transform,background-color,border-color,color,box-shadow] duration-200 hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]",
+              "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full border px-5 text-sm font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] backdrop-blur-xl transition-[transform,background-color,border-color,color,box-shadow] duration-200 hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]",
               variante === "adventure" && "snap-start",
               activa
                 ? variante === "adventure"
@@ -699,10 +690,10 @@ function SelectorCatalogo({
             )}
           >
             {seccion.label}
-          </button>
+          </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }
 
@@ -757,57 +748,6 @@ function SelectorSecundario<T extends string>({
           </button>
         );
       })}
-    </div>
-  );
-}
-
-function DescubrirCatalogo({
-  cursoReferencia,
-  relacionados,
-  empresa,
-  completados,
-  ocultarTitulo = false,
-  variante = "default",
-}: {
-  cursoReferencia: CursoCatalogoFila | null;
-  relacionados: CursoCatalogoFila[];
-  empresa: CursoCatalogoFila[];
-  completados: CursoCatalogoFila[];
-  ocultarTitulo?: boolean;
-  variante?: VarianteCatalogoVisual;
-}) {
-  return (
-    <div className="min-w-0 space-y-8">
-      {!ocultarTitulo && (
-        <h2 className="font-display text-2xl font-bold text-white drop-shadow-sm">Descubrir</h2>
-      )}
-
-      {cursoReferencia && relacionados.length > 0 && (
-        <FilaCatalogo
-          titulo={`Porque empezaste ${cursoReferencia.titulo}`}
-          cursos={relacionados}
-          mensajeVacio=""
-          variante={variante}
-        />
-      )}
-
-      {empresa.length > 0 && (
-        <FilaCatalogo
-          titulo="Recomendados para tu empresa"
-          cursos={empresa}
-          mensajeVacio=""
-          variante={variante}
-        />
-      )}
-
-      {completados.length > 0 && (
-        <FilaCatalogo
-          titulo="Cursos completados"
-          cursos={completados}
-          mensajeVacio=""
-          variante={variante}
-        />
-      )}
     </div>
   );
 }

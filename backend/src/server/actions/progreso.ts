@@ -36,5 +36,6 @@ export async function marcarLeccionCompletada(
 
   revalidatePath(`/mis-cursos/${cursoId}`);
   revalidatePath("/mis-cursos");
+  revalidatePath("/home");
   return { ok: true };
 }

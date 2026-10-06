@@ -36,6 +36,7 @@ export const NAVEGACION_POR_ROL: Record<Rol, ItemNavegacion[]> = {
     { titulo: "Evaluaciones", href: "/instructor/evaluaciones", icono: ClipboardList },
   ],
   colaborador: [
+    { titulo: "Home", href: "/home", icono: LayoutDashboard, exact: true },
     { titulo: "Mis cursos", href: "/mis-cursos", icono: BookOpen, exact: true },
   ],
 };

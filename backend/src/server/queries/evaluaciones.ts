@@ -1,6 +1,6 @@
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { conSesion } from "@/lib/db";
-import { evaluaciones, preguntas, opcionesRespuesta } from "@/lib/db/schema";
+import { cursos, evaluaciones, preguntas, opcionesRespuesta } from "@/lib/db/schema";
 
 export interface EvaluacionFila {
   id: string;
@@ -102,4 +102,43 @@ export async function listarPreguntas(
     }
     return resultado;
   });
+}
+
+export interface EvaluacionResumen {
+  id: string;
+  titulo: string;
+  cursoId: string;
+  cursoTitulo: string;
+  maxIntentos: number;
+  puntajeMinimo: string;
+  tiempoLimiteMin: number | null;
+  numPreguntas: number;
+}
+
+/** Evaluaciones de un conjunto de cursos (p.ej. los visibles para el instructor). */
+export async function listarEvaluacionesDeCursos(
+  usuarioId: string,
+  cursoIds: string[],
+): Promise<EvaluacionResumen[]> {
+  if (!cursoIds.length) return [];
+  return conSesion(usuarioId, (tx) =>
+    tx
+      .select({
+        id: evaluaciones.id,
+        titulo: evaluaciones.titulo,
+        cursoId: evaluaciones.cursoId,
+        cursoTitulo: cursos.titulo,
+        maxIntentos: evaluaciones.maxIntentos,
+        puntajeMinimo: evaluaciones.puntajeMinimo,
+        tiempoLimiteMin: evaluaciones.tiempoLimiteMin,
+        numPreguntas: sql<number>`(
+          select count(*)::int from ${preguntas}
+          where ${preguntas.evaluacionId} = ${evaluaciones.id} and ${preguntas.deletedAt} is null
+        )`,
+      })
+      .from(evaluaciones)
+      .innerJoin(cursos, eq(cursos.id, evaluaciones.cursoId))
+      .where(and(inArray(evaluaciones.cursoId, cursoIds), isNull(evaluaciones.deletedAt)))
+      .orderBy(asc(cursos.titulo), asc(evaluaciones.createdAt)),
+  );
 }

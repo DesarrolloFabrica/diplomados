@@ -107,11 +107,11 @@ const DOCK_AUTO_HIDE_MS = 8000;
 const ITEMS_NAV_COLABORADOR: ItemNavLateral[] = [
   {
     id: "home",
-    titulo: "Menú principal",
-    href: "/mis-cursos",
+    titulo: "Home",
+    href: "/home",
     icono: BookOpen,
     usarLogoMarca: true,
-    activo: (pathname) => pathname === "/mis-cursos",
+    activo: (pathname) => pathname === "/home",
   },
   {
     id: "cursos",
@@ -119,7 +119,8 @@ const ITEMS_NAV_COLABORADOR: ItemNavLateral[] = [
     href: "/mis-cursos",
     icono: BookOpen,
     activo: (pathname) =>
-      pathname.startsWith("/mis-cursos/") && !pathname.startsWith("/mis-cursos/perfil"),
+      pathname === "/mis-cursos" ||
+      (pathname.startsWith("/mis-cursos/") && !pathname.startsWith("/mis-cursos/perfil")),
   },
   {
     id: "perfil",
@@ -443,7 +444,8 @@ function ShellPanelLateral({
   const [dockOpen, setDockOpen] = useState(false);
   const capsulaRef = useRef<HTMLDivElement>(null);
   const ocultarTimeoutRef = useRef<number | null>(null);
-  const esDashboardColaborador = tema === "colaborador" && pathname === "/mis-cursos";
+  const esDashboardColaborador =
+    tema === "colaborador" && (pathname === "/home" || pathname === "/mis-cursos");
   // Visualizador de contenido (lección/evaluación): igual que creative, no
   // debe quedar acotado por --interface-content-width — el fondo y el panel
   // de esquema necesitan todo el ancho disponible, no solo el resto de
@@ -777,5 +779,43 @@ export function ShellPanelSuperadmin({
     >
       {children}
     </ShellPanelLateral>
+  );
+}
+
+const ITEMS_NAV_INSTRUCTOR: ItemNavLateral[] = NAVEGACION_POR_ROL.instructor.map((item) => ({
+  id: item.href,
+  titulo: item.titulo,
+  href: item.href,
+  icono: item.icono,
+  activo: (pathname) => isRouteActive(pathname, item.href, item.exact),
+}));
+
+/**
+ * Panel de instructor con la misma superficie que el superadmin (fondo azul
+ * degradado + dock inferior). `data-panel-oscuro` activa los tokens oscuros
+ * del sistema de diseño (ver globals.css) para que tablas, formularios y
+ * diálogos de shadcn queden legibles sobre ese fondo. Un superadmin que entra
+ * a /instructor/* conserva su propio menú.
+ */
+export function ShellPanelInstructor({
+  nombre,
+  esSuperadmin = false,
+  children,
+}: {
+  nombre: string | null;
+  esSuperadmin?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div data-panel-oscuro="true" className="contents">
+      <ShellPanelLateral
+        nombre={nombre}
+        items={esSuperadmin ? ITEMS_NAV_SUPERADMIN : ITEMS_NAV_INSTRUCTOR}
+        subtitulo={esSuperadmin ? "Superadmin" : "Instructor"}
+        tema="superadmin"
+      >
+        {children}
+      </ShellPanelLateral>
+    </div>
   );
 }

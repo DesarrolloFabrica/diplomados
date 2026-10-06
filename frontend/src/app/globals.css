@@ -77,7 +77,11 @@
     --radius: 0.625rem;
   }
 
-  .dark {
+  /* El panel de instructor (data-panel-oscuro, ver ShellPanelInstructor)
+     usa siempre los tokens oscuros: se aplican en :root para que también
+     los reciban los diálogos y selects que Radix monta en un portal. */
+  .dark,
+  :root:has([data-panel-oscuro="true"]) {
     /* Superficies — dark (#061120 / #0b1b2b / #10263a) */
     --background: 215 68% 7%;
     --foreground: 216 33% 97%;
@@ -390,6 +394,26 @@
 
   .admin-page .text-muted-foreground {
     color: var(--admin-muted);
+  }
+
+  .admin-page h2 {
+    color: #f7fbff;
+  }
+
+  /* Paneles genéricos (tablas de módulos, lecciones, recursos, preguntas)
+     con el mismo vidrio oscuro que .admin-table-panel. */
+  .admin-main .admin-page .rounded-lg.border.bg-card {
+    border-color: var(--admin-border);
+    background: linear-gradient(180deg, rgba(12, 31, 50, 0.86), rgba(7, 20, 35, 0.76));
+    box-shadow:
+      0 18px 46px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .admin-main .admin-page tbody tr:hover {
+    background: rgba(45, 212, 191, 0.075);
   }
 
   .admin-main .admin-table-panel,

@@ -73,13 +73,14 @@ export function TablaLecciones({ cursoId, moduloId, lecciones }: TablaLeccionesP
               <TableHead>Orden</TableHead>
               <TableHead>Título</TableHead>
               <TableHead>Tipo</TableHead>
+              <TableHead>Completado</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {lecciones.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
                   Todavía no hay lecciones.
                 </TableCell>
               </TableRow>
@@ -90,6 +91,14 @@ export function TablaLecciones({ cursoId, moduloId, lecciones }: TablaLeccionesP
                 <TableCell className="font-medium">{leccion.titulo}</TableCell>
                 <TableCell>
                   <Badge variant="outline">{ETIQUETA_TIPO[leccion.tipoContenido]}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={leccion.marcado === "automatico" ? "admin-badge-success" : "admin-badge"}
+                  >
+                    {leccion.marcado === "automatico" ? "Automático" : "Manual"}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1">
@@ -116,7 +125,7 @@ export function TablaLecciones({ cursoId, moduloId, lecciones }: TablaLeccionesP
       </div>
 
       <Dialog open={dialogoCrear} onOpenChange={setDialogoCrear}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="admin-dialog max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nueva lección</DialogTitle>
           </DialogHeader>
@@ -132,7 +141,7 @@ export function TablaLecciones({ cursoId, moduloId, lecciones }: TablaLeccionesP
         open={!!leccionEditar}
         onOpenChange={(abierto) => !abierto && setLeccionEditar(null)}
       >
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="admin-dialog max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar lección</DialogTitle>
           </DialogHeader>

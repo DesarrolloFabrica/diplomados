@@ -219,5 +219,7 @@ export async function enviarIntento(
 
   revalidatePath(`/mis-cursos/${cursoId}/evaluaciones/${evaluacionId}`);
   revalidatePath(`/mis-cursos/${cursoId}`);
+  revalidatePath("/mis-cursos");
+  revalidatePath("/home");
   return { ok: true, puntaje: resultado.puntaje, aprobado: resultado.aprobado };
 }

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requerirRol } from "@backend/lib/auth/sesion";
-import { obtenerCurso } from "@backend/server/queries/cursos";
+import { accesoCurso, obtenerCurso } from "@backend/server/queries/cursos";
 import { listarModulos } from "@backend/server/queries/cursos";
 import { listarEvaluaciones } from "@backend/server/queries/evaluaciones";
 import { listarEmpresasParaSelector } from "@backend/server/queries/empresas";
@@ -27,7 +27,11 @@ export default async function CursoDetallePage({ params }: CursoDetallePageProps
 
   return (
     <div className="space-y-8">
-      <EncabezadoCurso curso={curso} empresas={empresas} />
+      <EncabezadoCurso
+        curso={curso}
+        empresas={empresas}
+        soloContenido={accesoCurso(sesion) === "contenido"}
+      />
 
       <section className="space-y-4">
         <div>

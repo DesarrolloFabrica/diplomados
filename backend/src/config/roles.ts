@@ -5,7 +5,7 @@ export const RUTA_INICIO_POR_ROL: Record<Rol, string> = {
   superadmin: "/admin",
   admin_empresa: "/empresa",
   instructor: "/instructor",
-  colaborador: "/mis-cursos",
+  colaborador: "/home",
 };
 
 // Etiqueta legible de cada rol.
@@ -22,6 +22,7 @@ export const ACCESO_POR_PREFIJO: { prefijo: string; roles: Rol[] }[] = [
   { prefijo: "/admin", roles: ["superadmin"] },
   { prefijo: "/empresa", roles: ["superadmin", "admin_empresa"] },
   { prefijo: "/instructor", roles: ["superadmin", "instructor"] },
+  { prefijo: "/home", roles: ["colaborador", "admin_empresa", "instructor", "superadmin"] },
   { prefijo: "/mis-cursos", roles: ["colaborador", "admin_empresa", "instructor", "superadmin"] },
 ];
 

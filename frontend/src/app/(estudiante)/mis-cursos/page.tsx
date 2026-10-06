@@ -9,5 +9,12 @@ export default async function MisCursosPage() {
   const misCursos = cursos.filter((c) => c.inscripcionId);
   const disponibles = cursos.filter((c) => !c.inscripcionId);
 
-  return <CatalogoCursos misCursos={misCursos} disponibles={disponibles} nombre={sesion.nombreCompleto} />;
+  return (
+    <CatalogoCursos
+      pagina="mis-cursos"
+      misCursos={misCursos}
+      disponibles={disponibles}
+      nombre={sesion.nombreCompleto}
+    />
+  );
 }

@@ -27,9 +27,11 @@ const ETIQUETA_ESTADO: Record<CursoDetalle["estado"], string> = {
 interface EncabezadoCursoProps {
   curso: CursoDetalle;
   empresas: EmpresaOpcion[];
+  /** Instructor asignado: no puede editar datos generales ni el estado del curso. */
+  soloContenido?: boolean;
 }
 
-export function EncabezadoCurso({ curso, empresas }: EncabezadoCursoProps) {
+export function EncabezadoCurso({ curso, empresas, soloContenido = false }: EncabezadoCursoProps) {
   const router = useRouter();
   const [dialogoAbierto, setDialogoAbierto] = useState(false);
   const [, iniciar] = useTransition();
@@ -73,6 +75,11 @@ export function EncabezadoCurso({ curso, empresas }: EncabezadoCursoProps) {
           </div>
         </div>
 
+        {soloContenido ? (
+          <Badge variant="outline" className="admin-badge">
+            Instructor · puedes editar el contenido
+          </Badge>
+        ) : (
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setDialogoAbierto(true)}>
             <Pencil className="h-4 w-4" />
@@ -94,10 +101,11 @@ export function EncabezadoCurso({ curso, empresas }: EncabezadoCursoProps) {
             </Button>
           )}
         </div>
+        )}
       </div>
 
       <Dialog open={dialogoAbierto} onOpenChange={setDialogoAbierto}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="admin-dialog max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar curso</DialogTitle>
           </DialogHeader>

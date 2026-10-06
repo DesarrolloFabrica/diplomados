@@ -10,6 +10,7 @@ import {
   type MediaConsumptionReporter,
 } from "@/hooks/use-auto-completion";
 import { claveReanudacion, usePlaybackResume } from "@/hooks/use-playback-resume";
+import { segundosRevisionIframe, useEngagedTime } from "@/hooks/use-engaged-time";
 import {
   candidatosRecursoDrive,
   extraerMetaGoogleDrive,
@@ -27,6 +28,10 @@ interface DriveRecursoEmbedProps {
   className?: string;
   autoCompletionEnabled?: boolean;
   onConsumptionProgress?: MediaConsumptionReporter;
+  /** Se llama cuando un recurso en iframe/imagen alcanza el tiempo de atención. */
+  onResourceReviewed?: () => void;
+  /** Duración declarada de la lección; ajusta el tiempo exigido a video/audio en iframe. */
+  duracionSeg?: number | null;
   enrollmentId?: string;
   lessonId?: string;
 }
@@ -249,6 +254,8 @@ export function DriveRecursoEmbed({
   className,
   autoCompletionEnabled = false,
   onConsumptionProgress,
+  onResourceReviewed,
+  duracionSeg,
   enrollmentId,
   lessonId,
 }: DriveRecursoEmbedProps) {
@@ -321,6 +328,21 @@ export function DriveRecursoEmbed({
   }
 
   const modoActual = candidatoActual?.modo ?? "iframe";
+
+  // El iframe de Drive no expone scroll ni currentTime: para iframe e imagen
+  // se usa el tiempo de atención. Video/audio propios usan el % real visto.
+  const raizRef = useRef<HTMLDivElement>(null);
+  useEngagedTime(raizRef, {
+    clave: `${lessonId ?? ""}:${resourceId}`,
+    enabled:
+      autoCompletionEnabled &&
+      Boolean(candidatoActual) &&
+      !agotado &&
+      (modoActual === "iframe" || modoActual === "imagen"),
+    requiredSeconds: segundosRevisionIframe(tipo, duracionSeg),
+    onReached: onResourceReviewed,
+  });
+
   const contenedorClase = cn(clasesContenedorVisor(tipo, modoActual), className);
 
   function renderContenido() {
@@ -426,7 +448,7 @@ export function DriveRecursoEmbed({
     (modoActual !== "audio" || agotado || !candidatoActual) && tipo !== "audio";
 
   return (
-    <div className="space-y-2">
+    <div ref={raizRef} className="space-y-2">
       {modoActual !== "audio" && tipo !== "video" ? (
         <p className="text-sm font-medium text-foreground">{nombre}</p>
       ) : null}

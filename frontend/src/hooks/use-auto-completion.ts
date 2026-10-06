@@ -147,7 +147,20 @@ export function useAutoCompletion({
       ]);
       mediaStateRef.current.set(resourceId, { duration, ranges });
 
-      if (coveredSeconds(ranges) / duration >= AUTO_COMPLETION_THRESHOLD) {
+      const proporcion = coveredSeconds(ranges) / duration;
+      // Diagnóstico opcional para QA: localStorage "debug:autocompletado" = "1".
+      try {
+        if (window.localStorage.getItem("debug:autocompletado") === "1") {
+          console.debug(
+            `[autocompletado] ${resourceId}: ${(proporcion * 100).toFixed(1)}% visto ` +
+              `(umbral ${AUTO_COMPLETION_THRESHOLD * 100}%)`,
+          );
+        }
+      } catch {
+        // localStorage no disponible: sin diagnóstico.
+      }
+
+      if (proporcion >= AUTO_COMPLETION_THRESHOLD) {
         void requestCompletion();
       }
     },
