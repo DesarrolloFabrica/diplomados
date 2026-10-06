@@ -28,7 +28,6 @@ import {
   Lock,
   Play,
   Search,
-  Sparkles,
   TrendingUp,
   UserRound,
   type LucideIcon,
@@ -688,12 +687,12 @@ function SelectorCatalogo({
               variante === "adventure" && "snap-start",
               activa
                 ? variante === "adventure"
-                  ? "border-[#8bd3ff]/80 bg-[linear-gradient(135deg,rgba(11,63,124,0.96)_0%,rgba(20,93,166,0.92)_48%,rgba(37,125,196,0.88)_100%)] text-white shadow-[0_10px_26px_rgba(8,38,86,0.38),inset_0_1px_0_rgba(255,255,255,0.34)]"
+                  ? "border-[#91dc00]/80 bg-[#123b25] text-white shadow-[0_0_0_1px_rgba(145,220,0,0.18),0_0_24px_rgba(145,220,0,0.5),inset_0_1px_0_rgba(255,255,255,0.2)]"
                   : variante === "educational"
                     ? "border-white/40 bg-[linear-gradient(135deg,#022c22_0%,#065f46_58%,#047857_100%)] text-white shadow-[0_8px_22px_rgba(2,44,34,0.26),inset_0_1px_0_rgba(255,255,255,0.22)]"
                   : "border-white/75 bg-white/30 text-white shadow-[0_8px_22px_rgba(6,17,32,0.14),inset_0_1px_0_rgba(255,255,255,0.65)]"
                 : variante === "adventure"
-                  ? "border-[#9cc9ef]/34 bg-[linear-gradient(135deg,rgba(8,38,86,0.82)_0%,rgba(17,70,130,0.76)_52%,rgba(33,97,160,0.7)_100%)] text-white/92 shadow-[0_8px_20px_rgba(6,22,54,0.22),inset_0_1px_0_rgba(255,255,255,0.22)] hover:border-[#b8e0ff]/70 hover:bg-[linear-gradient(135deg,rgba(12,55,112,0.9)_0%,rgba(26,91,157,0.84)_52%,rgba(48,124,190,0.78)_100%)] hover:text-white"
+                  ? "border-white/34 bg-[#202b3b]/30 text-white shadow-[0_8px_20px_rgba(6,17,32,0.3),inset_0_1px_0_rgba(255,255,255,0.16)] hover:border-white/60 hover:bg-[#2b394c] hover:text-white"
                   : variante === "educational"
                     ? "border-white/20 bg-[linear-gradient(135deg,rgba(2,44,34,0.88)_0%,rgba(6,95,70,0.82)_58%,rgba(4,120,87,0.76)_100%)] text-white/90 shadow-[0_6px_16px_rgba(2,44,34,0.2),inset_0_1px_0_rgba(255,255,255,0.16)] hover:border-white/40 hover:bg-[linear-gradient(135deg,#022c22_0%,#065f46_58%,#047857_100%)] hover:text-white"
                   : "border-white/30 bg-[#061120]/28 text-white hover:border-white/50 hover:bg-white/22",
@@ -743,12 +742,12 @@ function SelectorSecundario<T extends string>({
               variante === "adventure" && "snap-start",
               activo
                 ? variante === "adventure"
-                  ? "border-[#8bd3ff]/80 bg-[linear-gradient(135deg,rgba(11,63,124,0.96)_0%,rgba(20,93,166,0.92)_48%,rgba(37,125,196,0.88)_100%)] text-white shadow-[0_8px_20px_rgba(8,38,86,0.32),inset_0_1px_0_rgba(255,255,255,0.34)]"
+                  ? "border-[#91dc00]/80 bg-[#123b25] text-white shadow-[0_0_0_1px_rgba(145,220,0,0.18),0_0_20px_rgba(145,220,0,0.46),inset_0_1px_0_rgba(255,255,255,0.18)]"
                   : variante === "educational"
                     ? "border-white/40 bg-[linear-gradient(135deg,#022c22_0%,#065f46_58%,#047857_100%)] text-white shadow-[0_6px_16px_rgba(2,44,34,0.22)]"
                   : "border-[#83E6D4]/80 bg-[#83E6D4]/75 text-[#061120]"
                 : variante === "adventure"
-                  ? "border-[#9cc9ef]/30 bg-[linear-gradient(135deg,rgba(8,38,86,0.72)_0%,rgba(17,70,130,0.66)_52%,rgba(33,97,160,0.6)_100%)] text-white/88 shadow-[0_6px_16px_rgba(6,22,54,0.18),inset_0_1px_0_rgba(255,255,255,0.18)] hover:border-[#b8e0ff]/64 hover:bg-[linear-gradient(135deg,rgba(12,55,112,0.86)_0%,rgba(26,91,157,0.8)_52%,rgba(48,124,190,0.74)_100%)] hover:text-white"
+                  ? "border-white/32 bg-[#202b3b]/30 text-white shadow-[0_6px_16px_rgba(6,17,32,0.28),inset_0_1px_0_rgba(255,255,255,0.14)] hover:border-white/58 hover:bg-[#2b394c] hover:text-white"
                   : variante === "educational"
                     ? "border-white/20 bg-[linear-gradient(135deg,rgba(2,44,34,0.78)_0%,rgba(6,95,70,0.72)_58%,rgba(4,120,87,0.66)_100%)] text-white/86 hover:border-white/38 hover:bg-[linear-gradient(135deg,#022c22_0%,#065f46_58%,#047857_100%)] hover:text-white"
                   : "border-white/25 bg-[#061120]/24 text-white/90 hover:bg-white/20",
@@ -833,13 +832,6 @@ function FilaCatalogo({
   const [puedeAvanzar, setPuedeAvanzar] = useState(false);
   const [indiceSeleccionado, setIndiceSeleccionado] = useState(0);
   const indiceSeguro = cursos.length === 0 ? 0 : Math.min(indiceSeleccionado, cursos.length - 1);
-  const cursoSeleccionado = cursos[indiceSeguro] ?? null;
-  const inscritoSeleccionado = Boolean(cursoSeleccionado?.inscripcionId);
-  const hrefCursoSeleccionado = cursoSeleccionado
-    ? inscritoSeleccionado
-      ? `/mis-cursos/${cursoSeleccionado.id}`
-      : `/mis-cursos/${cursoSeleccionado.id}/informacion`
-    : "#";
 
   useEffect(() => {
     const carrusel = carouselRef.current;
@@ -940,17 +932,6 @@ function FilaCatalogo({
             ))}
           </div>
 
-          {cursoSeleccionado && (
-            <div className="flex justify-center pb-1">
-              <Link
-                href={hrefCursoSeleccionado}
-                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[var(--interface-accent)] bg-[#04140d] px-7 text-sm font-bold text-white shadow-[0_0_28px_rgba(79,138,0,0.45)] transition hover:-translate-y-0.5 hover:bg-[#062012] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent)]"
-              >
-                {inscritoSeleccionado ? "Continuar recorrido" : "Explorar curso"}
-                <ChevronRight className="size-4" aria-hidden="true" />
-              </Link>
-            </div>
-          )}
         </div>
       ) : variante === "educational" ? (
         <div
@@ -1000,21 +981,27 @@ function TarjetaCursoAventuraSeleccionable({
   const porcentaje = porcentajeCurso(curso);
   const completado = cursoCompletado(curso, porcentaje);
   const inscrito = Boolean(curso.inscripcionId);
+  const hrefDestino = inscrito
+    ? `/mis-cursos/${curso.id}`
+    : `/mis-cursos/${curso.id}/informacion`;
 
   return (
-    <button
-      type="button"
-      onClick={onSeleccionar}
-      aria-pressed={seleccionado}
-      aria-label={curso.titulo}
+    <article
       className={cn(
-        "group relative flex shrink-0 flex-col overflow-hidden rounded-[26px] text-left transition-all duration-300",
+        "group relative shrink-0 overflow-hidden rounded-[26px] text-left transition-all duration-300",
         seleccionado
           ? "w-[min(74vw,260px)] -translate-y-2 border-2 border-[var(--interface-accent)] shadow-[0_0_32px_rgba(79,138,0,0.55),0_22px_44px_rgba(2,10,6,0.45)] sm:w-[300px] sm:-translate-y-3"
           : "w-[min(62vw,210px)] border border-white/15 opacity-80 hover:-translate-y-1 hover:opacity-100 sm:w-[240px]",
       )}
     >
-      <div className="relative h-[260px] w-full shrink-0 overflow-hidden bg-white/5 min-[430px]:h-[300px] sm:h-[360px]">
+      <button
+        type="button"
+        onClick={onSeleccionar}
+        aria-pressed={seleccionado}
+        aria-label={`Seleccionar ${curso.titulo}`}
+        className="flex w-full flex-col text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#91dc00]"
+      >
+        <div className="relative h-[260px] w-full shrink-0 overflow-hidden bg-white/5 min-[430px]:h-[300px] sm:h-[360px]">
         <PortadaCurso
           cursoId={curso.id}
           imagenPortadaUrl={curso.imagenPortadaUrl}
@@ -1027,11 +1014,6 @@ function TarjetaCursoAventuraSeleccionable({
           aria-hidden="true"
           className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,8,16,0.05)_35%,rgba(2,8,16,0.85)_100%)]"
         />
-        {seleccionado && (
-          <span className="absolute left-1/2 top-3.5 -translate-x-1/2 rounded-full border border-white/60 bg-[var(--interface-accent)] p-2 text-white shadow-[0_0_16px_rgba(79,138,0,0.6)]">
-            <Sparkles className="size-4" aria-hidden="true" />
-          </span>
-        )}
         {!inscrito && (
           <span className="absolute right-3.5 top-3.5 grid size-9 place-items-center rounded-full border border-white/30 bg-black/55 text-white backdrop-blur-sm">
             <Lock className="size-4" aria-hidden="true" />
@@ -1050,14 +1032,14 @@ function TarjetaCursoAventuraSeleccionable({
             {curso.titulo}
           </p>
         </div>
-      </div>
+        </div>
 
-      <div
-        className={cn(
-          "flex flex-col gap-1.5 px-4 py-3.5",
-          seleccionado ? "bg-[#04140d]" : "bg-[rgba(4,15,10,0.85)]",
-        )}
-      >
+        <div
+          className={cn(
+            "flex flex-col gap-1.5 px-4 py-3.5",
+            seleccionado ? "bg-[#04140d]" : "bg-[rgba(4,15,10,0.85)]",
+          )}
+        >
         {inscrito ? (
           <>
             <div className="h-2 overflow-hidden rounded-full bg-white/15">
@@ -1076,8 +1058,19 @@ function TarjetaCursoAventuraSeleccionable({
             <p className="text-xs text-white/55">Explora este recorrido</p>
           </>
         )}
-      </div>
-    </button>
+        </div>
+      </button>
+
+      {seleccionado && (
+        <Link
+          href={hrefDestino}
+          aria-label={`${inscrito ? "Continuar" : "Explorar"} ${curso.titulo}`}
+          className="absolute left-1/2 top-[42%] z-20 grid size-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-2 border-[#b8f25c] bg-[#123b25] text-white shadow-[0_0_0_7px_rgba(145,220,0,0.16),0_0_30px_rgba(145,220,0,0.72),0_12px_28px_rgba(2,10,6,0.5)] transition-[transform,background-color,box-shadow] duration-200 hover:scale-110 hover:bg-[#195231] hover:shadow-[0_0_0_9px_rgba(145,220,0,0.2),0_0_38px_rgba(145,220,0,0.85)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#123b25]"
+        >
+          <Play className="ml-1 size-7 fill-current" aria-hidden="true" />
+        </Link>
+      )}
+    </article>
   );
 }
 
