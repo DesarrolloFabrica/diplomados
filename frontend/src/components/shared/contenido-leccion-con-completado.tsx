@@ -1,24 +1,31 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 import Link from "next/link";
+import { registrarUltimaLeccion } from "@backend/server/actions/progreso";
 import {
   AlertCircle,
   ArrowLeft,
-  ArrowRight,
   CheckCircle2,
   Loader2,
-  LockKeyhole,
   PartyPopper,
   RotateCcw,
 } from "lucide-react";
 import { CLASE_PANEL_GLASS_LEGIBLE } from "@/config/paneles-glass";
 import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
-import { useAutoCompletion } from "@/hooks/use-auto-completion";
+import {
+  CLAVE_INFOGRAFIA_INTERACTIVA,
+  CLAVE_TEXTO_LECCION,
+  useAutoCompletion,
+  type ElementoLeccion,
+  type ResumenApartados,
+} from "@/hooks/use-auto-completion";
+import { ETIQUETA_TAB, tabDeTipo } from "@/lib/contenido-leccion";
 import type { InfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
 import type { ProximosContenidosResultado } from "@/lib/ruta-curso";
 import { cn } from "@/lib/utils";
 import { ProximosContenidos } from "@/components/shared/proximos-contenidos";
+import { AtajosClase } from "@/components/shared/atajos-clase";
 import {
   VistaContenidoLeccion,
   type RecursoVista,
@@ -47,15 +54,25 @@ function EstadoCompletadoAutomatico({
   status,
   errorMessage,
   justCompleted,
+  resumen,
   onRetry,
 }: {
   completed: boolean;
   status: ReturnType<typeof useAutoCompletion>["status"];
   errorMessage: string | null;
   justCompleted: boolean;
+  resumen: ResumenApartados;
   onRetry: () => void;
 }) {
   const isCompleted = completed || status === "completed";
+  const obligatoriosPendientes = resumen.apartados.filter((a) => a.obligatorio && !a.completo);
+  const faltanPorMayoria = Math.max(0, resumen.requeridos - resumen.completos);
+  const textoPendiente =
+    obligatoriosPendientes.length > 0
+      ? `Falta: ${obligatoriosPendientes.map((a) => ETIQUETA_TAB[a.apartado]).join(" y ")}`
+      : faltanPorMayoria > 0
+        ? `Revisa ${faltanPorMayoria} apartado${faltanPorMayoria === 1 ? "" : "s"} más`
+        : null;
 
   return (
     <div
@@ -94,7 +111,10 @@ function EstadoCompletadoAutomatico({
             ? "Guardando progreso..."
             : status === "error"
               ? errorMessage ?? "No se pudo guardar el progreso."
-              : "Completado automatico activo"}
+              : `Completado automatico · ${resumen.completos}/${resumen.apartados.length} apartados`}
+        {!isCompleted && status === "watching" && textoPendiente ? (
+          <span className="ml-1.5 font-normal opacity-80">· {textoPendiente}</span>
+        ) : null}
       </span>
 
       {status === "error" && (
@@ -130,23 +150,55 @@ export function ContenidoLeccionConCompletado({
   const { config } = useInterfaceVariant();
   const esAventura = config.id === "gamified";
   const automatic = completionMode === "automatico";
+  // Cada recurso disponible, el texto y la infografía interactiva son
+  // elementos medibles; se agrupan por apartado (pestaña) para la regla.
+  const elementos = useMemo<ElementoLeccion[]>(() => {
+    const lista: ElementoLeccion[] = recursos
+      .filter((recurso) => recurso.url)
+      .map((recurso) => ({ clave: recurso.id, apartado: tabDeTipo(recurso.tipo) }));
+    if (contenidoTexto) lista.push({ clave: CLAVE_TEXTO_LECCION, apartado: "documento" });
+    if (infografiaInteractiva) {
+      lista.push({ clave: CLAVE_INFOGRAFIA_INTERACTIVA, apartado: "infografia_interactiva" });
+    }
+    return lista;
+  }, [recursos, contenidoTexto, infografiaInteractiva]);
   const autoCompletion = useAutoCompletion({
     enabled: automatic,
     alreadyCompleted: completed,
     courseId,
     enrollmentId,
     lessonId,
+    elementos,
   });
   const siguiente = proximos.principal;
 
+  // Guarda esta lección como "última clase" del estudiante: es a donde
+  // llevan los botones "Continuar" del home y del mapa. Si falla (sin red),
+  // la lección sigue funcionando; solo "Continuar" queda en la anterior.
+  useEffect(() => {
+    registrarUltimaLeccion(courseId, enrollmentId, lessonId).catch(() => undefined);
+  }, [courseId, enrollmentId, lessonId]);
+
+  // Respaldo del autocompletado: con todos los apartados abiertos, el botón
+  // manual queda disponible por si el seguimiento automático no se dispara.
+  const mostrarRespaldoManual =
+    automatic &&
+    !completed &&
+    autoCompletion.respaldoManualDisponible &&
+    (autoCompletion.status === "watching" || autoCompletion.status === "error");
+
   const estadoCompletado = automatic ? (
-    <EstadoCompletadoAutomatico
-      completed={completed}
-      status={autoCompletion.status}
-      errorMessage={autoCompletion.errorMessage}
-      justCompleted={autoCompletion.justCompleted}
-      onRetry={autoCompletion.retry}
-    />
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      <EstadoCompletadoAutomatico
+        completed={completed}
+        status={autoCompletion.status}
+        errorMessage={autoCompletion.errorMessage}
+        justCompleted={autoCompletion.justCompleted}
+        resumen={autoCompletion.resumen}
+        onRetry={autoCompletion.retry}
+      />
+      {mostrarRespaldoManual ? manualCompletionControl : null}
+    </div>
   ) : (
     manualCompletionControl
   );
@@ -170,32 +222,19 @@ export function ContenidoLeccionConCompletado({
             {estadoCompletado}
           </div>
 
+          {/* "Siguiente clase" vive en la barra estándar AtajosClase. */}
           <div className="flex justify-start sm:justify-end">
             {proximos.cursoCompletado ? (
               <span className="inline-flex min-h-10 items-center gap-2 rounded-full border border-emerald-200/80 bg-white/85 px-4 py-2 text-sm font-bold text-emerald-700 shadow-sm">
                 <PartyPopper className="size-4" aria-hidden="true" />
                 Recorrido completado
               </span>
-            ) : siguiente?.bloqueado ? (
-              <span className="inline-flex min-h-10 cursor-not-allowed items-center gap-2 rounded-full border border-white/45 bg-white/55 px-4 py-2 text-sm font-bold text-slate-500 opacity-75">
-                <LockKeyhole className="size-4" aria-hidden="true" />
-                {siguiente.tipo === "evaluacion" ? "Siguiente desafio" : "Siguiente leccion"}
-              </span>
-            ) : siguiente ? (
-              <Link
-                href={siguiente.href}
-                className="group inline-flex min-h-10 items-center gap-2 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-sm font-bold text-slate-800 shadow-sm transition-[transform,background-color] hover:translate-x-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]"
-              >
-                {siguiente.tipo === "evaluacion" ? "Siguiente desafio" : "Siguiente leccion"}
-                <ArrowRight
-                  className="size-4 transition-transform group-hover:translate-x-0.5"
-                  aria-hidden="true"
-                />
-              </Link>
             ) : null}
           </div>
         </nav>
       )}
+
+      <AtajosClase anterior={proximos.anterior} siguiente={siguiente} />
 
       <VistaContenidoLeccion
         tituloLeccion={lessonTitle}
@@ -212,7 +251,8 @@ export function ContenidoLeccionConCompletado({
             ? {
                 enabled: autoCompletion.trackingEnabled,
                 onMediaProgress: autoCompletion.registerMediaProgress,
-                onDocumentEnd: autoCompletion.registerDocumentEnd,
+                onItemReviewed: autoCompletion.registerReviewed,
+                onApartadoAbierto: autoCompletion.registerApartadoAbierto,
               }
             : undefined
         }

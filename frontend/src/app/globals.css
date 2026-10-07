@@ -619,12 +619,17 @@
   }
 
   [data-interface-variant="business"] .collaborator-sidebar {
-    border-color: var(--interface-border);
-    background: var(--interface-surface-strong);
-    color: var(--interface-text);
-    box-shadow: var(--interface-shadow);
-    backdrop-filter: blur(var(--interface-blur));
-    -webkit-backdrop-filter: blur(var(--interface-blur));
+    border-color: rgba(173, 232, 239, 0.2);
+    background:
+      linear-gradient(135deg, rgba(5, 20, 34, 0.88), rgba(8, 35, 48, 0.76)),
+      radial-gradient(circle at 24% 0%, rgba(45, 212, 191, 0.13), transparent 52%);
+    color: rgba(237, 250, 251, 0.88);
+    box-shadow:
+      0 18px 50px rgba(1, 10, 18, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.13),
+      inset 0 -1px 0 rgba(4, 12, 22, 0.28);
+    backdrop-filter: blur(24px) saturate(1.35);
+    -webkit-backdrop-filter: blur(24px) saturate(1.35);
   }
 
   [data-interface-variant="business"] .collaborator-sidebar a,
@@ -635,6 +640,38 @@
   [data-interface-variant="business"] .collaborator-sidebar p,
   [data-interface-variant="business"] .collaborator-sidebar span {
     color: inherit;
+  }
+
+  [data-interface-variant="business"] .collaborator-sidebar a,
+  [data-interface-variant="business"] .collaborator-sidebar button {
+    color: rgba(216, 236, 240, 0.78);
+  }
+
+  [data-interface-variant="business"] .collaborator-sidebar a:hover,
+  [data-interface-variant="business"] .collaborator-sidebar button:hover {
+    border-color: rgba(94, 234, 212, 0.2);
+    background: rgba(94, 234, 212, 0.09);
+    color: #f5ffff;
+  }
+
+  [data-interface-variant="business"] .collaborator-sidebar a[aria-current="page"] {
+    border-color: rgba(94, 234, 212, 0.34);
+    background: linear-gradient(145deg, rgba(45, 212, 191, 0.2), rgba(45, 212, 191, 0.1));
+    color: #9ff5e8;
+    box-shadow:
+      0 8px 24px rgba(0, 8, 15, 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.11);
+  }
+
+  [data-interface-variant="business"] .collaborator-sidebar nav + div {
+    border-color: rgba(196, 236, 241, 0.14);
+  }
+
+  [data-interface-variant="business"] .collaborator-sidebar .group > span {
+    border-color: rgba(173, 232, 239, 0.2);
+    background: rgba(5, 20, 34, 0.9);
+    color: rgba(237, 250, 251, 0.92);
+    box-shadow: 0 10px 30px rgba(1, 10, 18, 0.34);
   }
 
   [data-interface-variant="business"] [data-dashboard-layout="executive"] {
@@ -922,6 +959,19 @@
     box-shadow: var(--interface-shadow);
   }
 
+  /* El rail compacto debe dejar visible el ambiente educativo. Cada lección
+     conserva su propia superficie opaca para mantener contraste y jerarquía. */
+  [data-interface-variant="educational"] [data-lesson-variant="study"] .lesson-module-rail {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  [data-interface-variant="educational"] [data-lesson-variant="study"] .lesson-module-node {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
   /* Panel del reproductor (Fase 14): vidrio verde oscuro translúcido con
      borde dorado, para que la biblioteca de fondo se vea a través de él —
      independiente de --interface-surface/-strong (esos siguen siendo el
@@ -929,11 +979,23 @@
      clase", que se quedan como están). Mismo valor en claro/oscuro: la
      referencia visual pide una única atmósfera fija para esta pantalla. */
   .study-player-panel {
-    --study-surface: color-mix(in srgb, #16211a 80%, transparent);
-    --study-surface-strong: color-mix(in srgb, #16211a 90%, transparent);
+    --study-player-bg: color-mix(in srgb, #13251a 78%, transparent);
+    --study-header-bg: color-mix(in srgb, #fffaf0 92%, transparent);
+    --study-content-bg: color-mix(in srgb, #203527 62%, transparent);
+    --study-document-bg: color-mix(in srgb, #fffdf5 94%, transparent);
     --study-border: rgba(212, 175, 100, 0.45);
-    --study-text: #f4ecd8;
-    --study-text-muted: rgba(244, 236, 216, 0.72);
+    --study-text: #f7efdc;
+    --study-text-muted: rgba(247, 239, 220, 0.74);
+    --study-header-text: #173722;
+    --study-accent: #a87325;
+    --study-control-bg: rgba(255, 250, 240, 0.88);
+    --study-control-bg-hover: #fffdf5;
+    --study-control-text: #28563b;
+    --study-progress-bg: #f7ead0;
+    --study-progress-text: #765018;
+    --study-success: #2f7a50;
+    --study-success-bg: #e3f2e8;
+    --study-success-text: #225c3c;
   }
 
   [data-interface-variant="educational"] .quiz-view:has([data-quiz-variant="academic"]) {

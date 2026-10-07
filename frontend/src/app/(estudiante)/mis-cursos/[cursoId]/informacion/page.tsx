@@ -188,7 +188,7 @@ export default async function InformacionCursoPage({ params }: InformacionCursoP
               {curso.titulo}
             </h1>
             {descripcionHero && (
-              <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-white/82 sm:text-lg">
+              <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-white/90 drop-shadow-[0_1px_8px_rgba(0,0,0,0.45)] sm:text-lg">
                 {descripcionHero}
               </p>
             )}

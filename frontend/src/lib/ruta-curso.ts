@@ -47,6 +47,8 @@ export interface ProximosContenidosResultado {
   etiqueta: "Siguiente clase" | "Siguiente módulo" | null;
   principal: ItemRutaContenido | null;
   secundarios: ItemRutaContenido[];
+  /** Contenido inmediatamente anterior en la ruta (atajo "Clase anterior"). */
+  anterior: ItemRutaContenido | null;
   cursoCompletado: boolean;
 }
 
@@ -169,17 +171,20 @@ export function obtenerProximosContenidos(
       etiqueta: null,
       principal: null,
       secundarios: [],
+      anterior: null,
       cursoCompletado: false,
     };
   }
 
   const siguientes = items.slice(indiceActual + 1, indiceActual + maxTotal);
+  const anterior = items[indiceActual - 1] ?? null;
 
   if (siguientes.length === 0) {
     return {
       etiqueta: null,
       principal: null,
       secundarios: [],
+      anterior,
       cursoCompletado: true,
     };
   }
@@ -197,6 +202,7 @@ export function obtenerProximosContenidos(
     etiqueta,
     principal,
     secundarios,
+    anterior,
     cursoCompletado: false,
   };
 }

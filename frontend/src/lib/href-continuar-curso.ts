@@ -1,12 +1,8 @@
-import type { CursoCatalogoFila } from "@backend/server/queries/mis-cursos";
-
-/** Enlace directo a la última lección vista o, si no hay, a la primera del curso. */
-export function hrefContinuarCurso(
-  curso: Pick<CursoCatalogoFila, "id" | "ultimaLeccionId" | "primeraLeccionId">,
-): string {
-  const leccionId = curso.ultimaLeccionId ?? curso.primeraLeccionId;
-  if (leccionId) {
-    return `/mis-cursos/${curso.id}/lecciones/${leccionId}`;
-  }
-  return `/mis-cursos/${curso.id}`;
+/**
+ * Enlace de "Continuar" para un curso inscrito: la ruta /continuar resuelve
+ * en el servidor la última clase abierta (inscripciones.ultima_leccion_id) o
+ * la siguiente pendiente, con la misma regla que el mapa del curso.
+ */
+export function hrefContinuarCurso(cursoId: string): string {
+  return `/mis-cursos/${cursoId}/continuar`;
 }

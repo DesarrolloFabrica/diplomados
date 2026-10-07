@@ -39,3 +39,41 @@ export async function marcarLeccionCompletada(
   revalidatePath("/home");
   return { ok: true };
 }
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Guarda la última clase abierta (inscripciones.ultima_leccion_id) cada vez
+ * que el estudiante abre una lección. Es el destino de los botones
+ * "Continuar" del home y del mapa (ver resolverNodoContinuar). Al completar
+ * una lección, registrar_progreso_leccion() también la actualiza.
+ *
+ * Solo toca la inscripción del propio usuario (RLS inscripciones_update) y
+ * solo si la lección pertenece a ese curso. Sin revalidatePath: las vistas
+ * del home y del mapa son dinámicas y leen el valor fresco al navegar.
+ */
+export async function registrarUltimaLeccion(
+  cursoId: string,
+  inscripcionId: string,
+  leccionId: string,
+): Promise<ResultadoAccion> {
+  const sesion = await requerirSesion();
+  if (![cursoId, inscripcionId, leccionId].every((id) => UUID.test(id))) {
+    return { ok: false, mensaje: "Datos no válidos." };
+  }
+
+  await conSesion(sesion.id, (tx) =>
+    tx.execute(sql`
+      update public.inscripciones
+      set ultima_leccion_id = ${leccionId}::uuid,
+          updated_at = now()
+      where id = ${inscripcionId}::uuid
+        and profile_id = ${sesion.id}::uuid
+        and curso_id = ${cursoId}::uuid
+        and public.curso_de_leccion(${leccionId}::uuid) = ${cursoId}::uuid
+        and ultima_leccion_id is distinct from ${leccionId}::uuid
+    `),
+  );
+
+  return { ok: true };
+}

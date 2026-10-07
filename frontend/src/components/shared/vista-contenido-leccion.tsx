@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AudioLines,
   ChartNoAxesCombined,
@@ -28,6 +28,8 @@ import {
 import type { InfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
 import { marcarLeccionIniciada } from "@/lib/progreso-leccion-local";
 import {
+  CLAVE_INFOGRAFIA_INTERACTIVA,
+  CLAVE_TEXTO_LECCION,
   MIN_DOCUMENT_REVIEW_SECONDS,
   type MediaConsumptionReporter,
 } from "@/hooks/use-auto-completion";
@@ -64,7 +66,10 @@ interface VistaContenidoLeccionProps {
   autoCompletion?: {
     enabled: boolean;
     onMediaProgress: MediaConsumptionReporter;
-    onDocumentEnd: () => void;
+    /** Marca un elemento (recurso, texto o infografía interactiva) como revisado. */
+    onItemReviewed: (clave: string) => void;
+    /** Registra que el estudiante abrió un apartado (pestaña) de la lección. */
+    onApartadoAbierto: (apartado: TabContenido) => void;
   };
   /** Duración declarada de la lección (segundos), para video/audio en iframe. */
   duracionSeg?: number | null;
@@ -179,6 +184,17 @@ export function VistaContenidoLeccion({
   lessonId,
 }: VistaContenidoLeccionProps) {
   const recursosScrollRef = useRef<HTMLDivElement | null>(null);
+  // Callbacks estables: DocumentoTextoObservable reinicia su observador si
+  // cambia la referencia de onDocumentEnd.
+  const onItemReviewed = autoCompletion?.onItemReviewed;
+  const alTerminarTexto = useCallback(
+    () => onItemReviewed?.(CLAVE_TEXTO_LECCION),
+    [onItemReviewed],
+  );
+  const alRevisarInfografia = useCallback(
+    () => onItemReviewed?.(CLAVE_INFOGRAFIA_INTERACTIVA),
+    [onItemReviewed],
+  );
   const { config } = useInterfaceVariant();
   // Se resuelve por `config.lesson.variant` (no por `config.id`) para que la
   // presentación de esta vista quede atada a la config declarativa de cada
@@ -188,6 +204,7 @@ export function VistaContenidoLeccion({
   const esFocused = lessonVariant === "focused"; // business
   const esStudy = lessonVariant === "study"; // educational
   const esMission = lessonVariant === "mission"; // gamified
+  const usaEstructuraAventura = esStudy || esMission;
 
   useEffect(() => {
     if (!enrollmentId || !lessonId) return;
@@ -226,6 +243,13 @@ export function VistaContenidoLeccion({
   const tabActual = tabsDisponibles.some((t) => t.id === tabActiva)
     ? tabActiva
     : (tabsDisponibles[0]?.id ?? "documento");
+
+  // Apartados por los que pasó el estudiante: habilitan el botón manual de
+  // respaldo si el autocompletado falla (ver respaldoManualDisponible).
+  const onApartadoAbierto = autoCompletion?.onApartadoAbierto;
+  useEffect(() => {
+    onApartadoAbierto?.(tabActual);
+  }, [onApartadoAbierto, tabActual]);
 
   useEffect(() => {
     if (!tabStorageKey) return;
@@ -268,7 +292,7 @@ export function VistaContenidoLeccion({
           esFocused
             ? "business-player-panel rounded-[20px] border border-[var(--business-player-border)] bg-[var(--business-player-panel)] shadow-[0_22px_55px_rgba(4,28,74,0.32)] backdrop-blur-sm"
             : esStudy
-              ? "study-player-panel rounded-2xl border border-[var(--study-border)] bg-[var(--study-surface-strong)] shadow-[0_20px_50px_rgba(6,17,10,0.35)]"
+              ? "study-player-panel rounded-2xl border border-[var(--study-border)] bg-[var(--study-player-bg)] shadow-[0_20px_50px_rgba(6,17,10,0.35)] backdrop-blur-md"
               : esMission
                 ? "rounded-2xl border border-white/30 bg-[#061120]/24 shadow-[0_16px_42px_rgba(6,17,32,0.2)] backdrop-blur-md"
                 : cn(
@@ -281,7 +305,7 @@ export function VistaContenidoLeccion({
           className={cn(
             "relative overflow-hidden px-4 py-4 sm:px-6 sm:py-5",
             esStudy
-              ? "border-b border-[var(--study-border)] bg-[var(--study-surface)]"
+              ? "border-b border-[var(--study-border)] bg-[var(--study-header-bg)] shadow-[0_8px_24px_rgba(38,28,11,0.16)] backdrop-blur-xl"
               : esFocused
                 ? "border-b border-[var(--business-player-border)] bg-[linear-gradient(180deg,rgba(245,250,255,0.94),rgba(213,233,255,0.78))]"
               : esMission
@@ -302,7 +326,7 @@ export function VistaContenidoLeccion({
                 esFocused
                   ? "text-[var(--business-player-muted)]"
                   : esStudy
-                  ? "text-[var(--interface-accent-secondary)]"
+                  ? "text-[var(--study-accent)]"
                   : esMission
                     ? "text-[#08708a]"
                   : "text-teal-100/75",
@@ -315,7 +339,7 @@ export function VistaContenidoLeccion({
                 className={cn(
                   "font-display text-lg font-bold min-[430px]:text-xl sm:text-2xl",
                   esStudy
-                    ? "text-[var(--study-text)]"
+                    ? "text-[var(--study-header-text)]"
                     : esFocused
                       ? "text-[var(--business-player-text)]"
                     : esMission
@@ -333,7 +357,9 @@ export function VistaContenidoLeccion({
                       ? "border-[var(--business-player-accent)] bg-[rgba(200,255,245,0.78)] text-[var(--business-player-text)] shadow-[0_0_18px_rgba(34,212,189,0.28)]"
                       : "border-[var(--business-player-accent)] bg-[rgba(200,255,245,0.72)] text-[var(--business-player-text)] shadow-[0_0_18px_rgba(34,212,189,0.22)]"
                     : esStudy
-                      ? "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)]"
+                      ? completada
+                        ? "border-[var(--study-success)] bg-[var(--study-success-bg)] text-[var(--study-success-text)] shadow-sm"
+                        : "border-[var(--study-accent)] bg-[var(--study-progress-bg)] text-[var(--study-progress-text)] shadow-sm"
                       : esMission
                         ? completada
                           ? "border-emerald-600/35 bg-emerald-100/90 text-emerald-800 shadow-sm"
@@ -347,7 +373,9 @@ export function VistaContenidoLeccion({
                   className={cn(
                     "h-1.5 w-1.5 rounded-full",
                     esStudy
-                      ? "bg-[var(--interface-accent-foreground)]"
+                      ? completada
+                        ? "bg-[var(--study-success)]"
+                        : "bg-[var(--study-accent)]"
                       : esFocused
                         ? "bg-[var(--business-player-accent)]"
                         : esMission
@@ -365,7 +393,7 @@ export function VistaContenidoLeccion({
           </div>
         </div>
 
-        {esMission && tabsDisponibles.length > 0 && (
+        {usaEstructuraAventura && tabsDisponibles.length > 0 && (
           <div className="px-4 py-3 sm:px-5">
             <SelectorRecursosAventura
               recursos={tabsDisponibles.map(({ id, etiqueta, Icono }) => ({
@@ -375,6 +403,7 @@ export function VistaContenidoLeccion({
               }))}
               activoId={tabActual}
               onSeleccionar={setTabActiva}
+              variante={esStudy ? "educational" : "adventure"}
             />
           </div>
         )}
@@ -382,11 +411,11 @@ export function VistaContenidoLeccion({
         <div
           className={cn(
             tabActual === "video"
-              ? esMission
+              ? usaEstructuraAventura
                 ? "bg-black/45 p-1 sm:p-1.5"
                 : "bg-black/90 p-1 sm:p-1.5"
               : esStudy
-                ? "border-y-2 border-[var(--interface-accent-secondary)] bg-[#fffdf6] p-2.5 sm:p-3"
+                ? "border-t border-[var(--study-border)] bg-[var(--study-content-bg)] p-2.5 backdrop-blur-sm sm:p-3"
                 : esFocused
                   ? "bg-[rgba(245,250,255,0.76)] p-2.5 sm:p-3"
                 : esMission
@@ -400,7 +429,7 @@ export function VistaContenidoLeccion({
               titulo={infografiaInteractiva.titulo}
               claveAtencion={`${lessonId ?? ""}:infografia-interactiva`}
               autoCompletionEnabled={autoCompletion?.enabled ?? false}
-              onReviewed={autoCompletion?.onDocumentEnd}
+              onReviewed={onItemReviewed ? alRevisarInfografia : undefined}
             />
           ) : null}
 
@@ -408,15 +437,17 @@ export function VistaContenidoLeccion({
             <div
               className={cn(
                 "min-h-[240px] rounded-lg px-4 py-5 sm:min-h-[300px] sm:px-7 sm:py-6",
-                esMission
-                  ? "border border-white/25 bg-white/62 backdrop-blur-md"
+                usaEstructuraAventura
+                  ? esStudy
+                    ? "border border-[var(--study-border)] bg-[var(--study-document-bg)] backdrop-blur-md"
+                    : "border border-white/25 bg-white/62 backdrop-blur-md"
                   : "bg-white/70",
               )}
             >
               <DocumentoTextoObservable
                 contenido={contenidoTexto}
                 enabled={autoCompletion?.enabled ?? false}
-                onDocumentEnd={autoCompletion?.onDocumentEnd}
+                onDocumentEnd={onItemReviewed ? alTerminarTexto : undefined}
               />
             </div>
           )}
@@ -432,7 +463,9 @@ export function VistaContenidoLeccion({
                   url={recurso.url}
                   autoCompletionEnabled={autoCompletion?.enabled ?? false}
                   onConsumptionProgress={autoCompletion?.onMediaProgress}
-                  onResourceReviewed={autoCompletion?.onDocumentEnd}
+                  onResourceReviewed={
+                    onItemReviewed ? () => onItemReviewed(recurso.id) : undefined
+                  }
                   duracionSeg={duracionSeg}
                   enrollmentId={enrollmentId}
                   lessonId={lessonId}
@@ -450,7 +483,7 @@ export function VistaContenidoLeccion({
         </div>
       </div>
 
-      {!esMission && tabsDisponibles.length > 0 && (
+      {!usaEstructuraAventura && tabsDisponibles.length > 0 && (
         <div>
           <div className="mb-2 flex items-center justify-between gap-3">
             <p

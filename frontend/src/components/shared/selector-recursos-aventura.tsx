@@ -15,15 +15,18 @@ interface SelectorRecursosAventuraProps {
   recursos: RecursoSelectorAventura[];
   activoId: TabContenido;
   onSeleccionar: (id: TabContenido) => void;
+  variante?: "adventure" | "educational";
 }
 
 export function SelectorRecursosAventura({
   recursos,
   activoId,
   onSeleccionar,
+  variante = "adventure",
 }: SelectorRecursosAventuraProps) {
   const contenedorRef = useRef<HTMLDivElement | null>(null);
   const indiceActivo = Math.max(0, recursos.findIndex((item) => item.id === activoId));
+  const esEducational = variante === "educational";
 
   function enfocarRecurso(id: TabContenido) {
     window.requestAnimationFrame(() => {
@@ -57,7 +60,12 @@ export function SelectorRecursosAventura({
           onClick={() => seleccionarIndice(indiceActivo - 1)}
           disabled={indiceActivo === 0}
           aria-label="Seleccionar recurso anterior"
-          className="grid size-10 shrink-0 place-items-center rounded-full border border-white/75 bg-white/85 text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.2)] transition-[transform,background-color,opacity] duration-200 hover:-translate-x-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none"
+          className={cn(
+            "grid size-10 shrink-0 place-items-center rounded-full border shadow-[0_4px_12px_rgba(15,23,42,0.2)] transition-[transform,background-color,opacity] duration-200 hover:-translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none",
+            esEducational
+              ? "border-[var(--study-border)] bg-[var(--study-control-bg)] text-[var(--study-control-text)] hover:bg-[var(--study-control-bg-hover)]"
+              : "border-white/75 bg-white/85 text-slate-700 hover:bg-white",
+          )}
         >
           <ChevronLeft className="size-4" aria-hidden="true" />
         </button>
@@ -98,16 +106,26 @@ export function SelectorRecursosAventura({
                     }
                   }}
                   className={cn(
-                    "group flex w-20 snap-center flex-col items-center gap-2 rounded-xl px-1 py-1.5 text-center text-[var(--interface-text-muted)] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] motion-reduce:transition-none sm:w-24",
-                    activo && "font-bold text-[var(--interface-text)]",
+                    "group flex w-20 snap-center flex-col items-center gap-2 rounded-xl px-1 py-1.5 text-center transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] motion-reduce:transition-none sm:w-24",
+                    esEducational
+                      ? "text-[var(--study-text-muted)]"
+                      : "text-[var(--interface-text-muted)]",
+                    activo &&
+                      (esEducational
+                        ? "font-bold text-[var(--study-text)]"
+                        : "font-bold text-[var(--interface-text)]"),
                   )}
                 >
                   <span
                     className={cn(
-                      "grid size-12 shrink-0 place-items-center rounded-full border bg-white/70 text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.18)] transition-[transform,border-color,background-color,box-shadow] duration-200 motion-reduce:transition-none",
+                      "grid size-12 shrink-0 place-items-center rounded-full border shadow-[0_4px_12px_rgba(15,23,42,0.18)] transition-[transform,border-color,background-color,box-shadow] duration-200 motion-reduce:transition-none",
                       activo
-                        ? "scale-110 border-[var(--interface-accent-secondary)] bg-white/95 text-[var(--interface-accent-secondary)] shadow-[0_4px_12px_rgba(15,23,42,0.18),0_0_18px_rgba(103,232,249,0.34)]"
-                        : "border-white/60 group-hover:scale-105 group-hover:border-[var(--interface-accent-secondary)] group-hover:bg-white/90 group-hover:text-[var(--interface-accent-secondary)] group-focus-visible:scale-105",
+                        ? esEducational
+                          ? "scale-110 border-[var(--interface-accent-secondary)] bg-[var(--study-control-bg-hover)] text-[var(--interface-accent-secondary)] shadow-[0_4px_12px_rgba(15,23,42,0.18),var(--interface-glow)]"
+                          : "scale-110 border-[var(--interface-accent-secondary)] bg-white/95 text-[var(--interface-accent-secondary)] shadow-[0_4px_12px_rgba(15,23,42,0.18),0_0_18px_rgba(103,232,249,0.34)]"
+                        : esEducational
+                          ? "border-[var(--study-border)] bg-[var(--study-control-bg)] text-[var(--study-control-text)] group-hover:scale-105 group-hover:border-[var(--interface-accent-secondary)] group-hover:bg-[var(--study-control-bg-hover)] group-hover:text-[var(--interface-accent-secondary)] group-focus-visible:scale-105"
+                          : "border-white/60 bg-white/70 text-slate-700 group-hover:scale-105 group-hover:border-[var(--interface-accent-secondary)] group-hover:bg-white/90 group-hover:text-[var(--interface-accent-secondary)] group-focus-visible:scale-105",
                     )}
                   >
                     <Icono className="size-5" aria-hidden="true" />
@@ -124,7 +142,12 @@ export function SelectorRecursosAventura({
           onClick={() => seleccionarIndice(indiceActivo + 1)}
           disabled={indiceActivo === recursos.length - 1}
           aria-label="Seleccionar recurso siguiente"
-          className="grid size-10 shrink-0 place-items-center rounded-full border border-white/75 bg-white/85 text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.2)] transition-[transform,background-color,opacity] duration-200 hover:translate-x-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none"
+          className={cn(
+            "grid size-10 shrink-0 place-items-center rounded-full border shadow-[0_4px_12px_rgba(15,23,42,0.2)] transition-[transform,background-color,opacity] duration-200 hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] disabled:cursor-not-allowed disabled:opacity-35 motion-reduce:transition-none",
+            esEducational
+              ? "border-[var(--study-border)] bg-[var(--study-control-bg)] text-[var(--study-control-text)] hover:bg-[var(--study-control-bg-hover)]"
+              : "border-white/75 bg-white/85 text-slate-700 hover:bg-white",
+          )}
         >
           <ChevronRight className="size-4" aria-hidden="true" />
         </button>

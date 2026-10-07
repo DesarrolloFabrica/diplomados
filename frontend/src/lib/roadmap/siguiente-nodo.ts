@@ -37,3 +37,35 @@ export function cursoRoadmapCompletado(grupos: GrupoRoadmapSiguiente[]): boolean
     )
   );
 }
+
+/**
+ * Destino del botón "Continuar" (home y mapa): la última clase abierta por el
+ * estudiante (`inscripciones.ultima_leccion_id`).
+ * - Si esa clase no está completada → se retoma esa misma clase.
+ * - Si ya está completada → la siguiente estación disponible después de ella.
+ * - Sin última clase registrada (o ya no existe/está bloqueada) → la primera
+ *   estación pendiente del roadmap, como antes.
+ */
+export function resolverNodoContinuar(
+  grupos: GrupoRoadmapSiguiente[],
+  ultimaLeccionId: string | null | undefined,
+): { nodo: NodoRoadmapSiguiente; indiceModulo: number } | null {
+  if (ultimaLeccionId) {
+    const planos = grupos.flatMap((grupo, indiceModulo) =>
+      grupo.nodos.map((nodo) => ({ nodo, indiceModulo })),
+    );
+    const indiceUltima = planos.findIndex(({ nodo }) => nodo.id === ultimaLeccionId);
+    const ultima = planos[indiceUltima];
+
+    if (ultima && !ultima.nodo.bloqueado && ultima.nodo.href) {
+      if (!ultima.nodo.completado) return ultima;
+
+      const siguiente = planos
+        .slice(indiceUltima + 1)
+        .find(({ nodo }) => !nodo.completado && !nodo.bloqueado && Boolean(nodo.href));
+      if (siguiente) return siguiente;
+    }
+  }
+
+  return obtenerSiguienteNodoRoadmap(grupos);
+}

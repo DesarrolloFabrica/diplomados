@@ -38,6 +38,98 @@ export interface CursoCatalogoFila {
   primeraLeccionId: string | null;
 }
 
+export interface ElementoBusquedaShell {
+  id: string;
+  tipo: "curso" | "leccion";
+  titulo: string;
+  contexto: string;
+  href: string;
+}
+
+/**
+ * Indice liviano para el buscador global del shell. Los cursos publicados
+ * respetan RLS; las lecciones se limitan a inscripciones activas del usuario
+ * para no ofrecer enlaces a contenido que todavia no puede abrir.
+ */
+export async function listarIndiceBusquedaColaborador(
+  usuarioId: string,
+): Promise<ElementoBusquedaShell[]> {
+  return conSesion(usuarioId, async (tx) => {
+    const cursosVisibles = await tx
+      .select({
+        id: cursos.id,
+        titulo: cursos.titulo,
+        inscripcionId: inscripciones.id,
+      })
+      .from(cursos)
+      .leftJoin(
+        inscripciones,
+        and(
+          eq(inscripciones.cursoId, cursos.id),
+          eq(inscripciones.profileId, usuarioId),
+          isNull(inscripciones.deletedAt),
+        ),
+      )
+      .where(and(eq(cursos.estado, "publicado"), isNull(cursos.deletedAt)))
+      .orderBy(asc(cursos.titulo));
+
+    const clasesVisibles = await tx
+      .select({
+        id: lecciones.id,
+        titulo: lecciones.titulo,
+        cursoId: cursos.id,
+        cursoTitulo: cursos.titulo,
+        moduloTitulo: modulos.titulo,
+      })
+      .from(lecciones)
+      .innerJoin(unidades, eq(lecciones.unidadId, unidades.id))
+      .innerJoin(modulos, eq(unidades.moduloId, modulos.id))
+      .innerJoin(cursos, eq(modulos.cursoId, cursos.id))
+      .innerJoin(
+        inscripciones,
+        and(
+          eq(inscripciones.cursoId, cursos.id),
+          eq(inscripciones.profileId, usuarioId),
+          isNull(inscripciones.deletedAt),
+        ),
+      )
+      .where(
+        and(
+          eq(cursos.estado, "publicado"),
+          isNull(cursos.deletedAt),
+          isNull(modulos.deletedAt),
+          isNull(unidades.deletedAt),
+          isNull(lecciones.deletedAt),
+        ),
+      )
+      .orderBy(
+        asc(cursos.titulo),
+        asc(modulos.orden),
+        asc(unidades.orden),
+        asc(lecciones.orden),
+      );
+
+    return [
+      ...cursosVisibles.map<ElementoBusquedaShell>((curso) => ({
+        id: `curso:${curso.id}`,
+        tipo: "curso",
+        titulo: curso.titulo,
+        contexto: curso.inscripcionId ? "Curso inscrito" : "Curso disponible",
+        href: curso.inscripcionId
+          ? `/mis-cursos/${curso.id}`
+          : `/mis-cursos/${curso.id}/informacion`,
+      })),
+      ...clasesVisibles.map<ElementoBusquedaShell>((leccion) => ({
+        id: `leccion:${leccion.id}`,
+        tipo: "leccion",
+        titulo: leccion.titulo,
+        contexto: `${leccion.cursoTitulo} · ${leccion.moduloTitulo}`,
+        href: `/mis-cursos/${leccion.cursoId}/lecciones/${leccion.id}`,
+      })),
+    ];
+  });
+}
+
 // RLS ya limita `cursos` a publicados (globales o de la empresa del
 // usuario); el LEFT JOIN agrega el estado de inscripción de este usuario
 // si ya se matriculó, sin filtrar los que todavía no.

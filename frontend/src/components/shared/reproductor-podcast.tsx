@@ -16,6 +16,7 @@ import {
   type MediaConsumptionReporter,
 } from "@/hooks/use-auto-completion";
 import { claveReanudacion, usePlaybackResume } from "@/hooks/use-playback-resume";
+import { segundosRevisionIframe, useEngagedTime } from "@/hooks/use-engaged-time";
 
 interface ReproductorPodcastProps {
   nombre: string;
@@ -405,9 +406,36 @@ const IFRAME_SIN_CREDENCIALES = {
   credentialless: "",
 } as unknown as IframeHTMLAttributes<HTMLIFrameElement>;
 
-function PodcastIframeFallback({ nombre, src }: { nombre: string; src: string }) {
+/**
+ * El iframe de Drive no expone currentTime: en el respaldo embebido el audio
+ * se da por escuchado por tiempo de atención (ver use-engaged-time), para que
+ * el apartado obligatorio de audio pueda completarse igual.
+ */
+function PodcastIframeFallback({
+  nombre,
+  src,
+  claveAtencion,
+  autoCompletionEnabled = false,
+  duracionSeg,
+  onReviewed,
+}: {
+  nombre: string;
+  src: string;
+  claveAtencion: string;
+  autoCompletionEnabled?: boolean;
+  duracionSeg?: number | null;
+  onReviewed?: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEngagedTime(ref, {
+    clave: claveAtencion,
+    enabled: autoCompletionEnabled,
+    requiredSeconds: segundosRevisionIframe("audio", duracionSeg),
+    onReached: onReviewed,
+  });
+
   return (
-    <div className="space-y-3">
+    <div ref={ref} className="space-y-3">
       <p className="text-sm font-medium text-foreground">{nombre}</p>
       <div className={MARCO_PODCAST}>
         <div
@@ -433,6 +461,9 @@ interface ReproductorPodcastDriveProps {
   resourceId?: string;
   autoCompletionEnabled?: boolean;
   onConsumptionProgress?: MediaConsumptionReporter;
+  /** Se llama cuando el respaldo en iframe alcanza el tiempo de atención. */
+  onResourceReviewed?: () => void;
+  duracionSeg?: number | null;
   enrollmentId?: string;
   lessonId?: string;
 }
@@ -444,9 +475,17 @@ export function ReproductorPodcastDrive({
   resourceId,
   autoCompletionEnabled = false,
   onConsumptionProgress,
+  onResourceReviewed,
+  duracionSeg,
   enrollmentId,
   lessonId,
 }: ReproductorPodcastDriveProps) {
+  const propsRespaldo = {
+    claveAtencion: `${lessonId ?? ""}:${resourceId ?? url}`,
+    autoCompletionEnabled,
+    duracionSeg,
+    onReviewed: onResourceReviewed,
+  };
   const candidatos = useMemo(
     () =>
       candidatosRecursoDrive(url, "audio").filter(
@@ -463,11 +502,11 @@ export function ReproductorPodcastDrive({
   const candidatoActual = candidatos[indiceCandidato] ?? candidatos[candidatos.length - 1];
 
   if (!candidatoActual) {
-    return <PodcastIframeFallback nombre={nombre} src={url} />;
+    return <PodcastIframeFallback nombre={nombre} src={url} {...propsRespaldo} />;
   }
 
   if (candidatoActual.modo === "iframe") {
-    return <PodcastIframeFallback nombre={nombre} src={candidatoActual.url} />;
+    return <PodcastIframeFallback nombre={nombre} src={candidatoActual.url} {...propsRespaldo} />;
   }
 
   return (

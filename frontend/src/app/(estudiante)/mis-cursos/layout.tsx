@@ -4,7 +4,9 @@ import { ShellPanel } from "@/components/layout/shell-panel";
 import { ShellPanelColaborador } from "@/components/layout/shell-panel-colaborador";
 import { InterfaceVariantProvider } from "@/components/providers/interface-variant-provider";
 import { obtenerPreferenciaInterfazUsuario } from "@backend/server/queries/preferencia-interfaz";
+import { listarIndiceBusquedaColaborador } from "@backend/server/queries/mis-cursos";
 import { resolveInterfaceVariant } from "@backend/config/interface-variants";
+import { IndiceBusquedaCursosProvider } from "@/components/layout/buscador-shell-cursos";
 
 export default async function EstudianteLayout({
   children,
@@ -18,10 +20,15 @@ export default async function EstudianteLayout({
     }
 
     const interfaceVariant = resolveInterfaceVariant(preferencia.interfaceVariantRaw);
+    const indiceBusqueda = await listarIndiceBusquedaColaborador(sesion.id);
 
     return (
       <InterfaceVariantProvider initialVariant={interfaceVariant}>
-        <ShellPanelColaborador nombre={sesion.nombreCompleto}>{children}</ShellPanelColaborador>
+        <IndiceBusquedaCursosProvider elementos={indiceBusqueda}>
+          <ShellPanelColaborador nombre={sesion.nombreCompleto}>
+            {children}
+          </ShellPanelColaborador>
+        </IndiceBusquedaCursosProvider>
       </InterfaceVariantProvider>
     );
   }

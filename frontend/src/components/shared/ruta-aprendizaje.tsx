@@ -32,7 +32,10 @@ import {
 import { obtenerFondoModuloInmersivo } from "@/config/roadmap-inmersivo";
 import { CLASE_TARJETA_GLASS_LEGIBLE } from "@/config/paneles-glass";
 import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
-import { obtenerSiguienteNodoRoadmap } from "@/lib/roadmap/siguiente-nodo";
+import {
+  obtenerSiguienteNodoRoadmap,
+  resolverNodoContinuar,
+} from "@/lib/roadmap/siguiente-nodo";
 import { estiloFondoInterfaz } from "@/lib/interface-assets";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +67,8 @@ export interface HeroInmersivoRoadmap {
   porcentajeAvance: number;
   cursoCompletado?: boolean;
   nombreUsuario?: string | null;
+  /** Última clase abierta (inscripciones.ultima_leccion_id): destino de "Continuar". */
+  ultimaLeccionId?: string | null;
 }
 
 const ETIQUETA_DIFICULTAD_HERO_INMERSIVO = {
@@ -3370,7 +3375,7 @@ function RoadmapInmersivoExperimental({
 }) {
   const layouts = layoutNodosMundo(grupo.nodos);
   const fondoModulo = obtenerFondoModuloInmersivo(indiceModulo, esUltimoModulo);
-  const siguienteNodo = obtenerSiguienteNodoRoadmap(grupos);
+  const siguienteNodo = resolverNodoContinuar(grupos, hero?.ultimaLeccionId);
   const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
   const [exploreMode, setExploreMode] = useState(false);
   const [activeObjectId, setActiveObjectId] = useState<string | null>(null);

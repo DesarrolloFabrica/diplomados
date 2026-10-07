@@ -344,15 +344,16 @@ export default async function LeccionColaboradorPage({ params }: LeccionColabora
           infografiaInteractiva={infografiaInteractiva}
           portadaCursoUrl={curso.imagenPortadaUrl}
           proximos={proximos}
+          // En lecciones manuales es el control principal; en las automáticas
+          // ContenidoLeccionConCompletado solo lo muestra como respaldo,
+          // cuando el estudiante ya abrió todos los apartados.
           manualCompletionControl={
-            leccion.marcado === "manual" ? (
-              <BotonCompletar
-                cursoId={cursoId}
-                inscripcionId={inscripcion.id}
-                leccionId={leccionId}
-                completada={completada}
-              />
-            ) : null
+            <BotonCompletar
+              cursoId={cursoId}
+              inscripcionId={inscripcion.id}
+              leccionId={leccionId}
+              completada={completada}
+            />
           }
         />
 

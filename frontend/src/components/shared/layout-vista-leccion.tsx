@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { PanelRightOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CLASE_PANEL_GLASS } from "@/config/paneles-glass";
@@ -10,6 +10,18 @@ import {
   type GrupoEsquema,
 } from "@/components/shared/esquema-contenidos";
 import { RailModulosAventura } from "@/components/shared/rail-modulos-aventura";
+
+interface EsquemaLeccionContexto {
+  alternarEsquema: () => void;
+  esquemaAbierto: boolean;
+}
+
+const EsquemaLeccionContext = createContext<EsquemaLeccionContexto | null>(null);
+
+/** Control del esquema del curso para los atajos de clase (null fuera del layout). */
+export function useEsquemaLeccion() {
+  return useContext(EsquemaLeccionContext);
+}
 
 interface LayoutVistaLeccionProps {
   cursoId: string;
@@ -38,6 +50,7 @@ export function LayoutVistaLeccion({
   const esEducational = config.id === "educational";
   const esGamified = config.id === "gamified";
   const esBusiness = config.id === "business";
+  const usaNavegacionAventura = esEducational || esGamified;
   const esTemaPropio = esEducational || esGamified || esBusiness;
   // Educational/Gamified dan protagonismo al índice de contenidos/objetivos:
   // el esquema queda visible por defecto (70/30) en vez de requerir abrirlo.
@@ -111,7 +124,37 @@ export function LayoutVistaLeccion({
     }
   }
 
-  if (esGamified) {
+  // Atajo "Esquema del curso" de la barra de clase (AtajosClase). Gamified
+  // solo muestra el panel lateral desde xl; por debajo abre el cajón.
+  function alternarEsquemaAtajo() {
+    const esEscritorioAncho = window.matchMedia("(min-width: 1280px)").matches;
+    if (usaNavegacionAventura && !esEscritorioAncho) {
+      if (esquemaMobileVisible) cerrarEsquemaMobile();
+      else abrirEsquemaMobile();
+      return;
+    }
+    const abriendo = !esquemaVisible;
+    alternarEsquema();
+    // Bajo xl el panel queda debajo del contenido: se lleva la vista hasta él.
+    if (abriendo && !esEscritorioAncho) {
+      window.requestAnimationFrame(() =>
+        document
+          .getElementById("esquema-contenidos-panel")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+    }
+  }
+
+  const contextoEsquema: EsquemaLeccionContexto = {
+    alternarEsquema: alternarEsquemaAtajo,
+    esquemaAbierto: esquemaVisible || esquemaMobileVisible,
+  };
+
+  // En lecciones, la barra estándar AtajosClase ya trae el botón "Esquema del
+  // curso"; el botón flotante solo se conserva en las evaluaciones.
+  const mostrarBotonFlotante = !leccionActivaId;
+
+  if (usaNavegacionAventura) {
     return (
       <div
         data-lesson-variant={config.lesson.variant}
@@ -124,18 +167,22 @@ export function LayoutVistaLeccion({
         )}
       >
         <section className="relative min-w-0 px-3 pb-28 pt-4 sm:px-4 sm:pb-28 lg:px-6 lg:pb-28 lg:pt-5">
-          <button
-            type="button"
-            onClick={abrirEsquemaMobile}
-            aria-expanded={esquemaMobileVisible}
-            aria-controls="esquema-contenidos-aventura-mobile"
-            className="fixed bottom-20 right-4 z-40 inline-flex items-center gap-2 rounded-full border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] px-4 py-2.5 text-sm font-semibold text-[var(--interface-text)] shadow-[0_0_20px_rgba(103,232,249,0.2)] backdrop-blur-md transition-colors hover:border-[var(--interface-accent-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] sm:bottom-6 sm:right-6 lg:hidden"
-          >
-            <PanelRightOpen className="size-4" aria-hidden="true" />
-            Contenido
-          </button>
+          {mostrarBotonFlotante && (
+            <button
+              type="button"
+              onClick={abrirEsquemaMobile}
+              aria-expanded={esquemaMobileVisible}
+              aria-controls="esquema-contenidos-aventura-mobile"
+              className="fixed bottom-20 right-4 z-40 inline-flex items-center gap-2 rounded-full border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] px-4 py-2.5 text-sm font-semibold text-[var(--interface-text)] shadow-[0_0_20px_rgba(103,232,249,0.2)] backdrop-blur-md transition-colors hover:border-[var(--interface-accent-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] sm:bottom-6 sm:right-6 lg:hidden"
+            >
+              <PanelRightOpen className="size-4" aria-hidden="true" />
+              Contenido
+            </button>
+          )}
 
-          <div className="mx-auto w-full max-w-[1520px]">{children}</div>
+          <EsquemaLeccionContext.Provider value={contextoEsquema}>
+            <div className="mx-auto w-full max-w-[1520px]">{children}</div>
+          </EsquemaLeccionContext.Provider>
         </section>
 
         <div
@@ -177,7 +224,7 @@ export function LayoutVistaLeccion({
         )}
 
         {esquemaMobileEnLayout && (
-          <div className="fixed inset-0 z-[90] lg:hidden">
+          <div className="fixed inset-0 z-[90] xl:hidden">
             <button
               type="button"
               aria-label="Cerrar esquema de contenidos"
@@ -226,7 +273,7 @@ export function LayoutVistaLeccion({
       )}
     >
       <section className="relative min-w-0 px-3 py-4 sm:px-4 lg:px-6 lg:py-5">
-        {!esquemaEnLayout && (
+        {!esquemaEnLayout && mostrarBotonFlotante && (
           <button
             type="button"
             onClick={alternarEsquema}
@@ -253,7 +300,9 @@ export function LayoutVistaLeccion({
           </button>
         )}
 
-        <div className="mx-auto w-full max-w-[1520px]">{children}</div>
+        <EsquemaLeccionContext.Provider value={contextoEsquema}>
+          <div className="mx-auto w-full max-w-[1520px]">{children}</div>
+        </EsquemaLeccionContext.Provider>
       </section>
 
       {esquemaEnLayout && (

@@ -1,11 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { requerirSesion } from "@backend/lib/auth/sesion";
 import { cargarVistaCursoColaborador } from "@backend/server/queries/mis-cursos";
-import {
-  RutaAprendizaje,
-  type GrupoRuta,
-  type NodoRuta,
-} from "@/components/shared/ruta-aprendizaje";
+import { RutaAprendizaje } from "@/components/shared/ruta-aprendizaje";
+import { construirGruposRuta } from "@/lib/roadmap/grupos-curso";
 import { cursoRoadmapCompletado } from "@/lib/roadmap/siguiente-nodo";
 
 interface CursoColaboradorPageProps {
@@ -24,59 +21,13 @@ export default async function CursoColaboradorPage({
   const vista = await cargarVistaCursoColaborador(sesion.id, cursoId);
   if (!vista) notFound();
 
-  const { curso, modulos, inscripcion, modulosConLecciones, evaluaciones } = vista;
+  const { curso, modulos, inscripcion } = vista;
 
   if (!inscripcion) {
     redirect(`/mis-cursos/${cursoId}/informacion`);
   }
 
-  const esObligatoria = curso.navegacion === "obligatoria";
-  let previoCompletado = true;
-  const EVALUACIONES_POR_MODULO = 3;
-
-  const grupos: GrupoRuta[] = modulosConLecciones.map((modulo, indiceModulo) => {
-    const nodos: NodoRuta[] = [];
-
-    for (const leccion of modulo.lecciones) {
-      const bloqueado = esObligatoria && !previoCompletado;
-      previoCompletado = leccion.completada;
-      nodos.push({
-        id: leccion.id,
-        tipo: "leccion",
-        titulo: leccion.titulo,
-        href: `/mis-cursos/${cursoId}/lecciones/${leccion.id}`,
-        completado: leccion.completada,
-        bloqueado,
-      });
-    }
-
-    const inicio = indiceModulo * EVALUACIONES_POR_MODULO;
-    const esUltimo = indiceModulo === modulosConLecciones.length - 1;
-    const evaluacionesModulo = evaluaciones.slice(
-      inicio,
-      esUltimo ? undefined : inicio + EVALUACIONES_POR_MODULO,
-    );
-
-    for (const evaluacion of evaluacionesModulo) {
-      const bloqueado = esObligatoria && !previoCompletado;
-      previoCompletado = evaluacion.aprobado;
-      nodos.push({
-        id: evaluacion.id,
-        tipo: "evaluacion",
-        titulo: evaluacion.titulo,
-        href: `/mis-cursos/${cursoId}/evaluaciones/${evaluacion.id}`,
-        completado: evaluacion.aprobado,
-        bloqueado,
-      });
-    }
-
-    return {
-      moduloId: modulo.id,
-      titulo: `Módulo ${indiceModulo + 1}: ${modulo.titulo}`,
-      nodos,
-    };
-  });
-
+  const grupos = construirGruposRuta(cursoId, vista);
   const hayContenido = grupos.some((g) => g.nodos.length > 0);
   const porcentajeAvance = Number(inscripcion.porcentajeAvance);
   const cursoCompletado = cursoRoadmapCompletado(grupos);
@@ -99,6 +50,7 @@ export default async function CursoColaboradorPage({
             porcentajeAvance,
             cursoCompletado,
             nombreUsuario: sesion.nombreCompleto,
+            ultimaLeccionId: inscripcion.ultimaLeccionId,
           }}
         />
       ) : (

@@ -33,10 +33,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PortadaCurso } from "@/components/shared/portada-curso";
+import { BuscadorCatalogoCursos } from "@/components/layout/buscador-shell-cursos";
 import { AnilloProgreso } from "@/components/shared/anillo-progreso";
 import { BotonDesinscribirmePrueba } from "@/components/shared/boton-desinscribirme-prueba";
 import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { estiloFondoInterfaz } from "@/lib/interface-assets";
+import { hrefContinuarCurso } from "@/lib/href-continuar-curso";
 import { cn } from "@/lib/utils";
 import type { SchoolVisualId } from "@/config/visual-themes/types";
 import { CLASE_HERO_PANEL, CLASE_PANEL_GLASS } from "@/config/paneles-glass";
@@ -257,6 +259,8 @@ export function CatalogoCursos({
       data-dashboard-layout={config.dashboard.layout}
       className="flex w-full max-w-[1500px] flex-col items-start gap-5"
     >
+      <BuscadorCatalogoCursos />
+
       {MOSTRAR_BARRA_SUPERIOR_CATALOGO && <BarraSuperior nombre={nombre} />}
 
       {esEducational && (
@@ -423,7 +427,7 @@ function DashboardEducativoColaborador({
   const titulo = primerNombre
     ? `Tu aprendizaje continua, ${primerNombre}`
     : "Tu aprendizaje continua";
-  const hrefContinuar = cursoActual ? `/mis-cursos/${cursoActual.id}` : "#titulo-catalogo";
+  const hrefContinuar = cursoActual ? hrefContinuarCurso(cursoActual.id) : "#titulo-catalogo";
   const hrefExplorar = cursoExplorable
     ? `/mis-cursos/${cursoExplorable.id}/informacion`
     : "#cursos-activos";
@@ -922,7 +926,9 @@ function TarjetaCursoAventuraSeleccionable({
   const completado = cursoCompletado(curso, porcentaje);
   const inscrito = Boolean(curso.inscripcionId);
   const hrefDestino = inscrito
-    ? `/mis-cursos/${curso.id}`
+    ? completado
+      ? `/mis-cursos/${curso.id}`
+      : hrefContinuarCurso(curso.id)
     : `/mis-cursos/${curso.id}/informacion`;
 
   return (
@@ -1019,7 +1025,11 @@ function TarjetaCursoCatalogoEducativa({ curso }: { curso: CursoCatalogoFila }) 
   const inscrito = Boolean(curso.inscripcionId);
   const completado = cursoCompletado(curso, porcentaje);
   const nivel = normalizarNivel(curso.nivelDificultad) ?? curso.nivelDificultad;
-  const hrefDestino = inscrito ? `/mis-cursos/${curso.id}` : `/mis-cursos/${curso.id}/informacion`;
+  const hrefDestino = !inscrito
+    ? `/mis-cursos/${curso.id}/informacion`
+    : completado
+      ? `/mis-cursos/${curso.id}`
+      : hrefContinuarCurso(curso.id);
   const textoAccion = inscrito && completado ? "Revisar curso" : inscrito ? "Continuar" : "Conocer curso";
 
   return (
@@ -1220,7 +1230,7 @@ function HeroDestacado({ cursos }: { cursos: CursoCatalogoFila[] }) {
       : "Continuar"
     : "Conocer programa";
   const hrefInformacion = `/mis-cursos/${curso.id}/informacion`;
-  const hrefCurso = `/mis-cursos/${curso.id}`;
+  const hrefCurso = completado ? `/mis-cursos/${curso.id}` : hrefContinuarCurso(curso.id);
   const hayVariosCursos = cursos.length > 1;
 
   if (config.hero.variant === "corporate") {

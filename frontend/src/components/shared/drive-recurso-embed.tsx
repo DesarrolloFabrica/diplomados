@@ -355,6 +355,8 @@ export function DriveRecursoEmbed({
             url={url}
             autoCompletionEnabled={autoCompletionEnabled}
             onConsumptionProgress={onConsumptionProgress}
+            onResourceReviewed={onResourceReviewed}
+            duracionSeg={duracionSeg}
             enrollmentId={enrollmentId}
             lessonId={lessonId}
           />
@@ -424,6 +426,8 @@ export function DriveRecursoEmbed({
             url={url}
             autoCompletionEnabled={autoCompletionEnabled}
             onConsumptionProgress={onConsumptionProgress}
+            onResourceReviewed={onResourceReviewed}
+            duracionSeg={duracionSeg}
             enrollmentId={enrollmentId}
             lessonId={lessonId}
           />

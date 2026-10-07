@@ -95,15 +95,15 @@ function claseEstadoItemFlyout(item: ItemModuloRail, activo: boolean): string {
 /** Misma idea que `claseEstadoItemFlyout`, pero para el circulo grande del rail colapsado (fondo neutro + borde de color en vez de relleno solido, salvo quices/completadas). */
 function claseEstadoItemRail(item: ItemModuloRail, activo: boolean): string {
   if (item.tipo === "evaluacion" && !item.bloqueado) {
-    return "border-[#64748B] bg-gradient-to-br from-[#E2E8F0] to-[#94A3B8] text-[#1E293B]";
+    return "border-[#64748B] bg-gradient-to-br from-[#E2E8F0] to-[#94A3B8] text-[#1E293B] shadow-[0_4px_12px_rgba(30,41,59,0.2)]";
   }
   if (item.completada) {
-    return "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)]";
+    return "border-[var(--interface-accent)] bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)] shadow-[0_4px_14px_color-mix(in_srgb,var(--interface-accent)_28%,transparent)]";
   }
   if (activo) {
     return "border-[var(--interface-accent-secondary)] bg-[var(--interface-surface-strong)] text-[var(--interface-accent-secondary)]";
   }
-  return "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)]";
+  return "border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text-muted)] shadow-[0_4px_12px_rgba(48,36,16,0.14)]";
 }
 
 export function RailModulosAventura({
@@ -261,7 +261,7 @@ export function RailModulosAventura({
   );
 
   return (
-    <aside className="relative flex h-full min-h-dvh w-20 flex-col items-center px-2 py-4">
+    <aside className="lesson-module-rail relative flex h-full min-h-dvh w-20 flex-col items-center px-2 py-4">
       <nav
         className="flex flex-1 flex-col items-center justify-center gap-2.5"
         aria-label="Lecciones del modulo actual"
@@ -276,11 +276,11 @@ export function RailModulosAventura({
           const nodo = (
             <span
               className={cn(
-                "grid place-items-center rounded-full border text-xs font-extrabold tabular-nums transition-[transform,box-shadow,border-color] duration-200 motion-reduce:transition-none",
+                "lesson-module-node grid place-items-center rounded-full border text-xs font-extrabold tabular-nums transition-[transform,box-shadow,border-color] duration-200 motion-reduce:transition-none",
                 activo ? "size-11" : "size-8",
                 claseEstadoItemRail(item, activo),
                 activo &&
-                  "shadow-[0_0_0_5px_color-mix(in_srgb,var(--interface-accent-secondary)_14%,transparent),0_0_20px_rgba(103,232,249,0.3)]",
+                  "shadow-[0_0_0_5px_color-mix(in_srgb,var(--interface-accent-secondary)_14%,transparent),var(--interface-glow)]",
                 item.bloqueado && "opacity-50",
               )}
             >

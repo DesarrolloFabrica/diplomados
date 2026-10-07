@@ -361,7 +361,7 @@ export function EsquemaContenidos({
     setQuicesAbiertos((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
-  if (esGamified) {
+  if (esGamified || esEducational) {
     return (
       <EsquemaContenidosAventura
         cursoId={cursoId}
