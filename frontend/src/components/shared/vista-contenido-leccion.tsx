@@ -32,6 +32,7 @@ import {
   CLAVE_TEXTO_LECCION,
   MIN_DOCUMENT_REVIEW_SECONDS,
   type MediaConsumptionReporter,
+  type ResumenApartados,
 } from "@/hooks/use-auto-completion";
 
 export interface RecursoVista {
@@ -70,6 +71,7 @@ interface VistaContenidoLeccionProps {
     onItemReviewed: (clave: string) => void;
     /** Registra que el estudiante abrió un apartado (pestaña) de la lección. */
     onApartadoAbierto: (apartado: TabContenido) => void;
+    resumen: ResumenApartados;
   };
   /** Duración declarada de la lección (segundos), para video/audio en iframe. */
   duracionSeg?: number | null;
@@ -243,6 +245,20 @@ export function VistaContenidoLeccion({
   const tabActual = tabsDisponibles.some((t) => t.id === tabActiva)
     ? tabActiva
     : (tabsDisponibles[0]?.id ?? "documento");
+  const apartadosCompletados = new Set(
+    autoCompletion?.resumen.apartados
+      .filter((apartado) => completada || apartado.completo)
+      .map((apartado) => apartado.apartado) ?? [],
+  );
+  const totalApartados = autoCompletion?.resumen.apartados.length ?? 0;
+  const cantidadCompletados = completada
+    ? totalApartados
+    : (autoCompletion?.resumen.completos ?? 0);
+  const porcentajeProgreso = totalApartados > 0
+    ? Math.round((cantidadCompletados / totalApartados) * 100)
+    : completada
+      ? 100
+      : 0;
 
   // Apartados por los que pasó el estudiante: habilitan el botón manual de
   // respaldo si el autocompletado falla (ver respaldoManualDisponible).
@@ -389,6 +405,26 @@ export function VistaContenidoLeccion({
                 />
                 {completada ? "Completado" : "En progreso"}
               </span>
+              {esMission && autoCompletion ? (
+                <div className="flex min-w-[180px] max-w-md flex-1 items-center gap-2.5">
+                  <div
+                    role="progressbar"
+                    aria-label={`Progreso de contenidos: ${porcentajeProgreso}%`}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={porcentajeProgreso}
+                    className="h-2.5 min-w-24 flex-1 overflow-hidden rounded-full bg-slate-300/80 shadow-inner"
+                  >
+                    <div
+                      className="h-full rounded-full bg-[linear-gradient(90deg,#65a30d,#0891b2)] transition-[width] duration-500 ease-out motion-reduce:transition-none"
+                      style={{ width: `${porcentajeProgreso}%` }}
+                    />
+                  </div>
+                  <span className="shrink-0 text-xs font-bold tabular-nums text-slate-800">
+                    {porcentajeProgreso}%
+                  </span>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -400,6 +436,7 @@ export function VistaContenidoLeccion({
                 id,
                 etiqueta,
                 Icono,
+                completado: esMission && apartadosCompletados.has(id),
               }))}
               activoId={tabActual}
               onSeleccionar={setTabActiva}

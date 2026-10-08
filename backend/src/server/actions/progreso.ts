@@ -48,6 +48,12 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * "Continuar" del home y del mapa (ver resolverNodoContinuar). Al completar
  * una lección, registrar_progreso_leccion() también la actualiza.
  *
+ * Se escribe en CADA apertura, aunque sea la misma lección: `updated_at` de
+ * la inscripción marca el curso con actividad más reciente, que es el que
+ * elige el botón "Continuar aprendiendo" del menú inferior
+ * (obtenerUltimaLeccionAbierta). Si solo se escribiera al cambiar de
+ * lección, volver a la misma clase de otro curso no lo marcaría como reciente.
+ *
  * Solo toca la inscripción del propio usuario (RLS inscripciones_update) y
  * solo si la lección pertenece a ese curso. Sin revalidatePath: las vistas
  * del home y del mapa son dinámicas y leen el valor fresco al navegar.
@@ -71,7 +77,34 @@ export async function registrarUltimaLeccion(
         and profile_id = ${sesion.id}::uuid
         and curso_id = ${cursoId}::uuid
         and public.curso_de_leccion(${leccionId}::uuid) = ${cursoId}::uuid
-        and ultima_leccion_id is distinct from ${leccionId}::uuid
+    `),
+  );
+
+  return { ok: true };
+}
+
+/**
+ * Marca actividad en el curso al abrir un quiz (inscripciones.updated_at),
+ * para que "Continuar aprendiendo" del menú inferior elija este curso. No
+ * cambia ultima_leccion_id (la columna solo admite lecciones); el quiz
+ * concreto se recuerda en la cookie COOKIE_CONTINUAR_EVALUACION.
+ */
+export async function registrarActividadCurso(
+  cursoId: string,
+  inscripcionId: string,
+): Promise<ResultadoAccion> {
+  const sesion = await requerirSesion();
+  if (![cursoId, inscripcionId].every((id) => UUID.test(id))) {
+    return { ok: false, mensaje: "Datos no válidos." };
+  }
+
+  await conSesion(sesion.id, (tx) =>
+    tx.execute(sql`
+      update public.inscripciones
+      set updated_at = now()
+      where id = ${inscripcionId}::uuid
+        and profile_id = ${sesion.id}::uuid
+        and curso_id = ${cursoId}::uuid
     `),
   );
 

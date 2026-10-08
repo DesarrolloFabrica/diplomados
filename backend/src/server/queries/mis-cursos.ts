@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { conSesion } from "@/lib/db";
 import {
   cursos,
@@ -240,6 +240,48 @@ export async function obtenerInscripcion(
       .where(and(eq(inscripciones.cursoId, cursoId), eq(inscripciones.profileId, usuarioId)))
       .limit(1);
     return fila ?? null;
+  });
+}
+
+/**
+ * Curso cuya última clase fue registrada más recientemente para el usuario.
+ * Sirve como punto de entrada global de "Continuar" desde el dock.
+ */
+export async function obtenerCursoRecienteParaContinuar(
+  usuarioId: string,
+): Promise<string | null> {
+  return (await obtenerUltimaLeccionAbierta(usuarioId))?.cursoId ?? null;
+}
+
+/**
+ * Última lección abierta por el estudiante entre TODOS sus cursos: la de la
+ * inscripción con actividad más reciente (updated_at, que se actualiza en
+ * cada apertura de lección; ver registrarUltimaLeccion). Destino del botón
+ * "Continuar aprendiendo" del menú inferior.
+ */
+export async function obtenerUltimaLeccionAbierta(
+  usuarioId: string,
+): Promise<{ cursoId: string; leccionId: string } | null> {
+  return conSesion(usuarioId, async (tx) => {
+    const [fila] = await tx
+      .select({ cursoId: inscripciones.cursoId, leccionId: inscripciones.ultimaLeccionId })
+      .from(inscripciones)
+      .innerJoin(cursos, eq(inscripciones.cursoId, cursos.id))
+      .innerJoin(lecciones, eq(lecciones.id, inscripciones.ultimaLeccionId))
+      .where(
+        and(
+          eq(inscripciones.profileId, usuarioId),
+          isNotNull(inscripciones.ultimaLeccionId),
+          isNull(inscripciones.deletedAt),
+          eq(cursos.estado, "publicado"),
+          isNull(cursos.deletedAt),
+          isNull(lecciones.deletedAt),
+        ),
+      )
+      .orderBy(desc(inscripciones.updatedAt), desc(inscripciones.fechaAsignacion))
+      .limit(1);
+
+    return fila?.leccionId ? { cursoId: fila.cursoId, leccionId: fila.leccionId } : null;
   });
 }
 

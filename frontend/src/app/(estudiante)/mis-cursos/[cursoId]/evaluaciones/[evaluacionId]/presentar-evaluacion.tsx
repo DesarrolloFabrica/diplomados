@@ -19,6 +19,8 @@ import {
   obtenerPreguntasDeIntento,
 } from "@backend/server/actions/evaluacion-colaborador";
 import type { PreguntaPresentacion } from "@backend/server/queries/evaluacion-colaborador";
+import { registrarActividadCurso } from "@backend/server/actions/progreso";
+import { recordarEvaluacionAbierta } from "@/lib/continuar-evaluacion";
 
 interface PresentarEvaluacionProps {
   titulo: string;
@@ -58,6 +60,13 @@ export function PresentarEvaluacion({
   } | null>(null);
   const [preguntaActual, setPreguntaActual] = useState(0);
   const [direccion, setDireccion] = useState<"adelante" | "atras">("adelante");
+
+  // Este quiz pasa a ser lo último abierto: destino de "Continuar
+  // aprendiendo" del menú inferior mientras siga pendiente.
+  useEffect(() => {
+    recordarEvaluacionAbierta(cursoId, evaluacionId);
+    registrarActividadCurso(cursoId, inscripcionId).catch(() => undefined);
+  }, [cursoId, evaluacionId, inscripcionId]);
   const [enviando, iniciar] = useTransition();
 
   // El intento sigue siendo la semilla estable para la seleccion y el orden.

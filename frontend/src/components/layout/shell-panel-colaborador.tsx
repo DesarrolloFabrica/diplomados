@@ -115,8 +115,8 @@ const ITEMS_NAV_COLABORADOR: ItemNavLateral[] = [
   },
   {
     id: "cursos",
-    titulo: "Mis cursos",
-    href: "/mis-cursos",
+    titulo: "Continuar aprendiendo",
+    href: "/mis-cursos/continuar",
     icono: BookOpen,
     activo: (pathname) =>
       pathname === "/mis-cursos" ||
@@ -456,6 +456,7 @@ function ShellPanelLateral({
   const esBusiness = interfaceConfig?.id === "business";
   const esEducational = interfaceConfig?.id === "educational";
   const esGamified = interfaceConfig?.id === "gamified";
+  const esInterfazEstudiante = Boolean(interfaceConfig);
   // El menú es siempre el dock inferior estilo "creative" para las 4
   // interfaces (pedido explícito: unificar el menú, no la superficie).
   const esMenuLateral = false;
@@ -573,7 +574,9 @@ function ShellPanelLateral({
               "pointer-events-auto flex flex-col items-center transition-[opacity,transform] duration-300 ease-out motion-reduce:duration-0",
               dockOpen
                 ? "translate-y-0 opacity-100"
-                : "translate-y-[calc(100%-1.75rem)] opacity-95",
+                : esInterfazEstudiante
+                  ? "translate-y-0 opacity-100 lg:translate-y-[calc(100%-1.75rem)] lg:opacity-95"
+                  : "translate-y-[calc(100%-1.75rem)] opacity-95",
             )}
           >
             <button
@@ -591,6 +594,7 @@ function ShellPanelLateral({
               }}
               className={cn(
                 "-mb-1 flex h-6 min-w-12 items-center justify-center rounded-full px-3 text-white/85",
+                esInterfazEstudiante && "max-lg:hidden",
                 "transition-[color,transform] duration-200 hover:-translate-y-0.5 hover:text-white",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
               )}
@@ -618,7 +622,9 @@ function ShellPanelLateral({
       <div className={cn("flex min-w-0 flex-1 flex-col", esMenuLateral && "lg:pl-[76px]")}>
         <header
           className={cn(
-            "flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden",
+            esInterfazEstudiante
+              ? "hidden"
+              : "flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden",
             tema === "superadmin" &&
               "border-white/10 bg-[#071625]/92 text-white backdrop-blur-md",
           )}
@@ -640,7 +646,7 @@ function ShellPanelLateral({
           </button>
         </header>
 
-        {drawerAbierto && (
+        {!esInterfazEstudiante && drawerAbierto && (
           <div className="fixed inset-0 z-50 lg:hidden">
             <div
               className="absolute inset-0 bg-foreground/40"
@@ -675,6 +681,7 @@ function ShellPanelLateral({
           data-dashboard-layout={interfaceConfig?.dashboard.layout}
           className={cn(
             "relative min-w-0 flex-1 overflow-x-clip bg-[#061120]",
+            esInterfazEstudiante && "max-lg:pb-28",
             tema === "superadmin" &&
               "admin-main text-white [--admin-accent:#2dd4bf] [--admin-accent-strong:#91DC00] [--admin-border:rgba(172,205,214,0.18)] [--admin-muted:rgba(218,232,238,0.72)] [--admin-panel:rgba(10,26,43,0.72)]",
             esDashboardInmersivo

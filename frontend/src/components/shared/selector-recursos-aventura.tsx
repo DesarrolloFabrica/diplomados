@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TabContenido } from "@/lib/contenido-leccion";
 
@@ -9,6 +9,7 @@ interface RecursoSelectorAventura {
   id: TabContenido;
   etiqueta: string;
   Icono: LucideIcon;
+  completado?: boolean;
 }
 
 interface SelectorRecursosAventuraProps {
@@ -79,7 +80,7 @@ export function SelectorRecursosAventura({
             aria-label="Recursos de la lección"
             className="flex min-w-max snap-x snap-mandatory items-stretch justify-center gap-2 px-1 py-1"
           >
-            {recursos.map(({ id, etiqueta, Icono }, indice) => {
+            {recursos.map(({ id, etiqueta, Icono, completado = false }, indice) => {
               const activo = id === activoId;
               return (
                 <button
@@ -87,6 +88,7 @@ export function SelectorRecursosAventura({
                   type="button"
                   role="tab"
                   aria-selected={activo}
+                  aria-label={`${etiqueta}${completado ? ", completado" : ""}`}
                   tabIndex={activo ? 0 : -1}
                   data-recurso-aventura={id}
                   onClick={() => seleccionarIndice(indice)}
@@ -114,21 +116,31 @@ export function SelectorRecursosAventura({
                       (esEducational
                         ? "font-bold text-[var(--study-text)]"
                         : "font-bold text-[var(--interface-text)]"),
+                    completado && !esEducational && "font-bold text-emerald-700",
                   )}
                 >
                   <span
                     className={cn(
                       "grid size-12 shrink-0 place-items-center rounded-full border shadow-[0_4px_12px_rgba(15,23,42,0.18)] transition-[transform,border-color,background-color,box-shadow] duration-200 motion-reduce:transition-none",
-                      activo
-                        ? esEducational
-                          ? "scale-110 border-[var(--interface-accent-secondary)] bg-[var(--study-control-bg-hover)] text-[var(--interface-accent-secondary)] shadow-[0_4px_12px_rgba(15,23,42,0.18),var(--interface-glow)]"
-                          : "scale-110 border-[var(--interface-accent-secondary)] bg-white/95 text-[var(--interface-accent-secondary)] shadow-[0_4px_12px_rgba(15,23,42,0.18),0_0_18px_rgba(103,232,249,0.34)]"
-                        : esEducational
-                          ? "border-[var(--study-border)] bg-[var(--study-control-bg)] text-[var(--study-control-text)] group-hover:scale-105 group-hover:border-[var(--interface-accent-secondary)] group-hover:bg-[var(--study-control-bg-hover)] group-hover:text-[var(--interface-accent-secondary)] group-focus-visible:scale-105"
-                          : "border-white/60 bg-white/70 text-slate-700 group-hover:scale-105 group-hover:border-[var(--interface-accent-secondary)] group-hover:bg-white/90 group-hover:text-[var(--interface-accent-secondary)] group-focus-visible:scale-105",
+                      completado && !esEducational
+                        ? cn(
+                            "border-emerald-500 bg-emerald-50/95 text-emerald-600 shadow-[0_4px_12px_rgba(15,23,42,0.18),0_0_18px_rgba(34,197,94,0.34)]",
+                            activo ? "scale-110 ring-2 ring-emerald-400/45" : "group-hover:scale-105",
+                          )
+                        : activo
+                          ? esEducational
+                            ? "scale-110 border-[var(--interface-accent-secondary)] bg-[var(--study-control-bg-hover)] text-[var(--interface-accent-secondary)] shadow-[0_4px_12px_rgba(15,23,42,0.18),var(--interface-glow)]"
+                            : "scale-110 border-[var(--interface-accent-secondary)] bg-white/95 text-[var(--interface-accent-secondary)] shadow-[0_4px_12px_rgba(15,23,42,0.18),0_0_18px_rgba(103,232,249,0.34)]"
+                          : esEducational
+                            ? "border-[var(--study-border)] bg-[var(--study-control-bg)] text-[var(--study-control-text)] group-hover:scale-105 group-hover:border-[var(--interface-accent-secondary)] group-hover:bg-[var(--study-control-bg-hover)] group-hover:text-[var(--interface-accent-secondary)] group-focus-visible:scale-105"
+                            : "border-white/60 bg-white/70 text-slate-700 group-hover:scale-105 group-hover:border-[var(--interface-accent-secondary)] group-hover:bg-white/90 group-hover:text-[var(--interface-accent-secondary)] group-focus-visible:scale-105",
                     )}
                   >
-                    <Icono className="size-5" aria-hidden="true" />
+                    {completado && !esEducational ? (
+                      <Check className="size-7 stroke-[2.5]" aria-hidden="true" />
+                    ) : (
+                      <Icono className="size-5" aria-hidden="true" />
+                    )}
                   </span>
                   <span className="block max-w-full truncate text-[11px] font-semibold">{etiqueta}</span>
                 </button>

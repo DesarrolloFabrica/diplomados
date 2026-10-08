@@ -58,7 +58,7 @@ export interface EstadoApartado {
 export interface ResumenApartados {
   apartados: EstadoApartado[];
   completos: number;
-  /** Apartados completos necesarios para la mayoría (más de la mitad). */
+  /** Apartados completos necesarios para finalizar la lección. */
   requeridos: number;
   obligatoriosCompletos: boolean;
   cumple: boolean;
@@ -66,8 +66,7 @@ export interface ResumenApartados {
 
 /**
  * Regla de completado automático de la lección:
- * 1. Todos los apartados obligatorios presentes (video y audio) completos, y
- * 2. la mayoría (más de la mitad) de los apartados de la lección completos.
+ * todos los apartados disponibles deben estar completos.
  * Un apartado está completo cuando todos sus elementos llegaron a su umbral.
  */
 export function evaluarApartados(
@@ -88,7 +87,7 @@ export function evaluarApartados(
   }));
 
   const completos = apartados.filter((a) => a.completo).length;
-  const requeridos = Math.floor(apartados.length / 2) + 1;
+  const requeridos = apartados.length;
   const obligatoriosCompletos = apartados.every((a) => !a.obligatorio || a.completo);
 
   return {
@@ -96,7 +95,7 @@ export function evaluarApartados(
     completos,
     requeridos,
     obligatoriosCompletos,
-    cumple: apartados.length > 0 && obligatoriosCompletos && completos >= requeridos,
+    cumple: apartados.length > 0 && completos === requeridos,
   };
 }
 
