@@ -12,7 +12,8 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { BookOpen, GraduationCap, Search, X } from "lucide-react";
+import { BookOpen, Check, GraduationCap, Search, SlidersHorizontal, X } from "lucide-react";
+import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { cn } from "@/lib/utils";
 import type { ElementoBusquedaShell } from "@backend/server/queries/mis-cursos";
 
@@ -48,12 +49,21 @@ function normalizar(texto: string): string {
     .trim();
 }
 
-export function BuscadorCatalogoCursos() {
+export function BuscadorCatalogoCursos({
+  compacto = false,
+  mostrarFiltros = true,
+}: {
+  compacto?: boolean;
+  mostrarFiltros?: boolean;
+}) {
+  const { config } = useInterfaceVariant();
+  const esCreativa = config.id === "creative";
   const elementos = useContext(IndiceBusquedaCursosContext);
   const idBase = useId().replace(/:/g, "");
   const contenedorRef = useRef<HTMLDivElement | null>(null);
   const [consulta, setConsulta] = useState("");
   const [enfocado, setEnfocado] = useState(false);
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
   const [indiceActivo, setIndiceActivo] = useState(0);
   const [filtro, setFiltro] = useState<FiltroBusqueda>("todos");
 
@@ -94,15 +104,18 @@ export function BuscadorCatalogoCursos() {
   }, [consulta, filtro]);
 
   useEffect(() => {
-    if (!enfocado) return;
+    if (!enfocado && !filtrosAbiertos) return;
 
     function cerrarAlHacerClickFuera(evento: PointerEvent) {
-      if (!contenedorRef.current?.contains(evento.target as Node)) setEnfocado(false);
+      if (!contenedorRef.current?.contains(evento.target as Node)) {
+        setEnfocado(false);
+        setFiltrosAbiertos(false);
+      }
     }
 
     document.addEventListener("pointerdown", cerrarAlHacerClickFuera);
     return () => document.removeEventListener("pointerdown", cerrarAlHacerClickFuera);
-  }, [enfocado]);
+  }, [enfocado, filtrosAbiertos]);
 
   function limpiar() {
     setConsulta("");
@@ -129,11 +142,27 @@ export function BuscadorCatalogoCursos() {
   }
 
   return (
-    <div ref={contenedorRef} className="relative z-[70] w-full max-w-4xl">
+    <div
+      ref={contenedorRef}
+      className={cn(
+        "relative z-[70] w-full min-w-0",
+        compacto ? "max-w-3xl lg:flex-1" : "max-w-4xl",
+        esCreativa &&
+          "[--interface-border:rgba(255,255,255,0.82)] [--interface-surface-strong:rgba(238,242,247,0.94)] [--interface-text-muted:#536273] [--interface-text:#0b1b2b]",
+      )}
+    >
       <div className="flex w-full flex-col gap-2 sm:flex-row">
-        <label className="flex min-h-12 min-w-0 flex-1 items-center gap-3 rounded-full border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] px-4 text-[var(--interface-text)] shadow-[var(--interface-card-shadow)] backdrop-blur-xl transition-[border-color,box-shadow] focus-within:border-[var(--interface-accent-secondary)] focus-within:shadow-[var(--interface-glow)] sm:px-5">
+        <label
+          className={cn(
+            "relative flex min-w-0 flex-1 items-center rounded-full border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] text-[var(--interface-text)] shadow-[var(--interface-card-shadow)] backdrop-blur-xl transition-[border-color,box-shadow] focus-within:border-[var(--interface-accent-secondary)] focus-within:shadow-[var(--interface-glow)]",
+            compacto ? "min-h-10 gap-2.5 px-3.5" : "min-h-12 gap-3 px-4 sm:px-5",
+          )}
+        >
           <Search
-            className="size-5 shrink-0 text-[var(--interface-accent-secondary)]"
+            className={cn(
+              "shrink-0 text-[var(--interface-accent-secondary)]",
+              compacto ? "size-4" : "size-5",
+            )}
             aria-hidden="true"
           />
           <span className="sr-only">Buscar cursos y clases por nombre</span>
@@ -154,7 +183,10 @@ export function BuscadorCatalogoCursos() {
             onChange={(evento) => setConsulta(evento.target.value)}
             onKeyDown={manejarTeclado}
             placeholder="Buscar cursos o clases por nombre..."
-            className="min-w-0 flex-1 bg-transparent text-sm font-medium text-[var(--interface-text)] outline-none placeholder:text-[var(--interface-text-muted)]"
+            className={cn(
+              "shell-course-search-input min-w-0 flex-1 bg-transparent font-medium text-[var(--interface-text)] outline-none placeholder:text-[var(--interface-text-muted)]",
+              compacto ? "text-xs" : "text-sm",
+            )}
           />
           {consulta && (
             <button
@@ -166,43 +198,69 @@ export function BuscadorCatalogoCursos() {
               <X className="size-4" aria-hidden="true" />
             </button>
           )}
+          {mostrarFiltros ? (
+            <button
+              type="button"
+              aria-label={`Filtrar búsqueda. Opción actual: ${FILTROS_BUSQUEDA.find((opcion) => opcion.id === filtro)?.etiqueta ?? "Todo"}`}
+              aria-haspopup="menu"
+              aria-expanded={filtrosAbiertos}
+              onClick={(evento) => {
+                evento.preventDefault();
+                setFiltrosAbiertos((abiertoActual) => !abiertoActual);
+                setEnfocado(false);
+              }}
+              className={cn(
+                "relative grid shrink-0 place-items-center rounded-full border border-[var(--interface-border)] text-[var(--interface-text-muted)] transition-colors hover:border-[var(--interface-accent-secondary)] hover:bg-[color-mix(in_srgb,var(--interface-accent-secondary)_10%,transparent)] hover:text-[var(--interface-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]",
+                compacto ? "size-8" : "size-9",
+              )}
+            >
+              <SlidersHorizontal className="size-4" aria-hidden="true" />
+              {filtro !== "todos" ? (
+                <span
+                  className="absolute right-0 top-0 size-2 rounded-full bg-[var(--interface-accent-secondary)] ring-2 ring-[var(--interface-surface-strong)]"
+                  aria-hidden="true"
+                />
+              ) : null}
+            </button>
+          ) : null}
         </label>
+      </div>
 
+      {mostrarFiltros && filtrosAbiertos ? (
         <div
-          role="group"
+          role="menu"
           aria-label="Filtrar búsqueda por tipo"
-          className="flex min-h-12 shrink-0 items-center gap-1 rounded-full border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-1 shadow-[var(--interface-card-shadow)] backdrop-blur-xl"
+          className="absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-44 overflow-hidden rounded-2xl border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-1.5 text-[var(--interface-text)] shadow-[0_18px_48px_rgba(2,12,24,0.3)] backdrop-blur-2xl"
         >
           {FILTROS_BUSQUEDA.map((opcion) => {
             const activo = filtro === opcion.id;
-            const esCurso = opcion.id === "curso";
-            const esClase = opcion.id === "leccion";
             return (
               <button
                 key={opcion.id}
                 type="button"
-                aria-pressed={activo}
+                role="menuitemradio"
+                aria-checked={activo}
                 onClick={() => {
                   setFiltro(opcion.id);
-                  setEnfocado(true);
+                  setFiltrosAbiertos(false);
+                  setEnfocado(Boolean(consulta.trim()));
                 }}
                 className={cn(
-                  "min-h-9 flex-1 rounded-full px-3 text-xs font-bold transition-[background-color,color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)] sm:flex-none sm:px-4",
+                  "flex min-h-9 w-full items-center justify-between gap-3 rounded-xl px-3 text-left text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent-secondary)]",
                   activo
-                    ? esCurso
-                      ? "bg-[var(--interface-accent)] text-[var(--interface-accent-foreground)] shadow-sm"
-                      : esClase
-                        ? "bg-[var(--interface-accent-secondary)] text-[#061120] shadow-sm"
-                        : "bg-[var(--interface-text)] text-[var(--interface-bg)] shadow-sm"
-                    : "text-[var(--interface-text-muted)] hover:bg-[color-mix(in_srgb,var(--interface-text)_8%,transparent)] hover:text-[var(--interface-text)]",
+                    ? "bg-[color-mix(in_srgb,var(--interface-accent-secondary)_16%,transparent)] text-[var(--interface-text)]"
+                    : "text-[var(--interface-text-muted)] hover:bg-[color-mix(in_srgb,var(--interface-text)_7%,transparent)] hover:text-[var(--interface-text)]",
                 )}
               >
                 {opcion.etiqueta}
+                {activo ? (
+                  <Check className="size-4 text-[var(--interface-accent-secondary)]" aria-hidden="true" />
+                ) : null}
               </button>
             );
           })}
         </div>
-      </div>
+      ) : null}
 
       {abierto && (
         <div

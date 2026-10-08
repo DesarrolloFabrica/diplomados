@@ -18,6 +18,10 @@ import { useInterfaceVariant } from "@/components/providers/interface-variant-pr
 import { RecursoIncrustado } from "@/components/shared/recurso-incrustado";
 import { EmbedAdobeIndesign } from "@/components/shared/embed-adobe-indesign";
 import { SelectorRecursosAventura } from "@/components/shared/selector-recursos-aventura";
+import {
+  PlayerType1Layout,
+  PlayerType2Layout,
+} from "@/components/shared/player-layouts";
 import type { TipoRecurso } from "@backend/lib/db/schema";
 import {
   ETIQUETA_TAB,
@@ -26,6 +30,7 @@ import {
   type TabContenido,
 } from "@/lib/contenido-leccion";
 import type { InfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
+import { resolvePlayerLayoutType } from "@/lib/player-layout";
 import { marcarLeccionIniciada } from "@/lib/progreso-leccion-local";
 import {
   CLAVE_INFOGRAFIA_INTERACTIVA,
@@ -206,7 +211,8 @@ export function VistaContenidoLeccion({
   const esFocused = lessonVariant === "focused"; // business
   const esStudy = lessonVariant === "study"; // educational
   const esMission = lessonVariant === "mission"; // gamified
-  const usaEstructuraAventura = esStudy || esMission;
+  const playerLayoutType = resolvePlayerLayoutType(config.id);
+  const esPlayerType2 = playerLayoutType === "type-2";
 
   useEffect(() => {
     if (!enrollmentId || !lessonId) return;
@@ -300,23 +306,20 @@ export function VistaContenidoLeccion({
     });
   }
 
-  return (
-    <div className="space-y-4">
-      <div
-        className={cn(
-          "overflow-hidden",
-          esFocused
-            ? "business-player-panel rounded-[20px] border border-[var(--business-player-border)] bg-[var(--business-player-panel)] shadow-[0_22px_55px_rgba(4,28,74,0.32)] backdrop-blur-sm"
-            : esStudy
-              ? "study-player-panel rounded-2xl border border-[var(--study-border)] bg-[var(--study-player-bg)] shadow-[0_20px_50px_rgba(6,17,10,0.35)] backdrop-blur-md"
-              : esMission
-                ? "rounded-2xl border border-white/30 bg-[#061120]/24 shadow-[0_16px_42px_rgba(6,17,32,0.2)] backdrop-blur-md"
-                : cn(
-                    "rounded-2xl border border-white/45 bg-white/18 shadow-[0_16px_45px_rgba(3,12,28,0.2)] backdrop-blur-xl",
-                    CLASE_PANEL_GLASS_LEGIBLE,
-                  ),
-        )}
-      >
+  const panelClassName = cn(
+    esFocused
+      ? "business-player-panel rounded-[20px] border border-[var(--business-player-border)] bg-[var(--business-player-panel)] shadow-[0_22px_55px_rgba(4,28,74,0.32)] backdrop-blur-sm"
+      : esStudy
+        ? "study-player-panel rounded-2xl border border-[var(--study-border)] bg-[var(--study-player-bg)] shadow-[0_20px_50px_rgba(6,17,10,0.35)] backdrop-blur-md"
+        : esMission
+          ? "rounded-2xl border border-white/30 bg-[#061120]/24 shadow-[0_16px_42px_rgba(6,17,32,0.2)] backdrop-blur-md"
+          : cn(
+              "rounded-2xl border border-white/45 bg-white/18 shadow-[0_16px_45px_rgba(3,12,28,0.2)] backdrop-blur-xl",
+              CLASE_PANEL_GLASS_LEGIBLE,
+            ),
+  );
+
+  const playerHeader = (
         <div
           className={cn(
             "relative overflow-hidden px-4 py-4 sm:px-6 sm:py-5",
@@ -405,7 +408,7 @@ export function VistaContenidoLeccion({
                 />
                 {completada ? "Completado" : "En progreso"}
               </span>
-              {esMission && autoCompletion ? (
+              {esPlayerType2 && autoCompletion ? (
                 <div className="flex min-w-[180px] max-w-md flex-1 items-center gap-2.5">
                   <div
                     role="progressbar"
@@ -413,14 +416,29 @@ export function VistaContenidoLeccion({
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={porcentajeProgreso}
-                    className="h-2.5 min-w-24 flex-1 overflow-hidden rounded-full bg-slate-300/80 shadow-inner"
+                    className={cn(
+                      "h-2.5 min-w-24 flex-1 overflow-hidden rounded-full shadow-inner",
+                      esStudy
+                        ? "bg-[color-mix(in_srgb,var(--study-text)_16%,transparent)]"
+                        : "bg-slate-300/80",
+                    )}
                   >
                     <div
-                      className="h-full rounded-full bg-[linear-gradient(90deg,#65a30d,#0891b2)] transition-[width] duration-500 ease-out motion-reduce:transition-none"
+                      className={cn(
+                        "h-full rounded-full transition-[width] duration-500 ease-out motion-reduce:transition-none",
+                        esStudy
+                          ? "bg-[linear-gradient(90deg,var(--study-success),var(--interface-accent-secondary))]"
+                          : "bg-[linear-gradient(90deg,#65a30d,#0891b2)]",
+                      )}
                       style={{ width: `${porcentajeProgreso}%` }}
                     />
                   </div>
-                  <span className="shrink-0 text-xs font-bold tabular-nums text-slate-800">
+                  <span
+                    className={cn(
+                      "shrink-0 text-xs font-bold tabular-nums",
+                      esStudy ? "text-[var(--study-header-text)]" : "text-slate-800",
+                    )}
+                  >
                     {porcentajeProgreso}%
                   </span>
                 </div>
@@ -428,27 +446,29 @@ export function VistaContenidoLeccion({
             </div>
           </div>
         </div>
+  );
 
-        {usaEstructuraAventura && tabsDisponibles.length > 0 && (
-          <div className="px-4 py-3 sm:px-5">
+  const playerType2ResourceSelector = tabsDisponibles.length > 0 ? (
+          <div className="resource-selector px-4 py-3 sm:px-5">
             <SelectorRecursosAventura
               recursos={tabsDisponibles.map(({ id, etiqueta, Icono }) => ({
                 id,
                 etiqueta,
                 Icono,
-                completado: esMission && apartadosCompletados.has(id),
+                completado: apartadosCompletados.has(id),
               }))}
               activoId={tabActual}
               onSeleccionar={setTabActiva}
               variante={esStudy ? "educational" : "adventure"}
             />
           </div>
-        )}
+        ) : null;
 
+  const playerVisualizer = (
         <div
           className={cn(
             tabActual === "video"
-              ? usaEstructuraAventura
+              ? esPlayerType2
                 ? "bg-black/45 p-1 sm:p-1.5"
                 : "bg-black/90 p-1 sm:p-1.5"
               : esStudy
@@ -474,7 +494,7 @@ export function VistaContenidoLeccion({
             <div
               className={cn(
                 "min-h-[240px] rounded-lg px-4 py-5 sm:min-h-[300px] sm:px-7 sm:py-6",
-                usaEstructuraAventura
+                esPlayerType2
                   ? esStudy
                     ? "border border-[var(--study-border)] bg-[var(--study-document-bg)] backdrop-blur-md"
                     : "border border-white/25 bg-white/62 backdrop-blur-md"
@@ -518,10 +538,10 @@ export function VistaContenidoLeccion({
             )
           )}
         </div>
-      </div>
+  );
 
-      {!usaEstructuraAventura && tabsDisponibles.length > 0 && (
-        <div>
+  const playerType1ResourceSelector = tabsDisponibles.length > 0 ? (
+        <div className="resource-selector">
           <div className="mb-2 flex items-center justify-between gap-3">
             <p
               className={cn(
@@ -674,7 +694,25 @@ export function VistaContenidoLeccion({
             </div>
           </div>
         </div>
-      )}
-    </div>
+      ) : null;
+
+  if (esPlayerType2) {
+    return (
+      <PlayerType2Layout
+        header={playerHeader}
+        visualizer={playerVisualizer}
+        resourceSelector={playerType2ResourceSelector}
+        panelClassName={panelClassName}
+      />
+    );
+  }
+
+  return (
+    <PlayerType1Layout
+      header={playerHeader}
+      visualizer={playerVisualizer}
+      resourceSelector={playerType1ResourceSelector}
+      panelClassName={panelClassName}
+    />
   );
 }

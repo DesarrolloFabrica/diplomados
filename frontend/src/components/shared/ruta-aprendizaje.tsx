@@ -1547,7 +1547,58 @@ function crearZonasMundo(nodos: NodoRuta[]): WorldZone[] {
   }));
 }
 
-function layoutNodosMundo(nodos: NodoRuta[]): LayoutNodoMundo[] {
+function etiquetaGuiaNodo(nodos: NodoRuta[], indice: number): string {
+  const nodo = nodos[indice];
+  if (!nodo) return `Módulo ${indice + 1}`;
+
+  const numeroDelTipo = nodos
+    .slice(0, indice + 1)
+    .filter((candidato) => candidato.tipo === nodo.tipo).length;
+
+  return nodo.tipo === "evaluacion"
+    ? `Quiz ${numeroDelTipo}`
+    : `Módulo ${numeroDelTipo}`;
+}
+
+function layoutNodosMundoAtardecer(nodos: NodoRuta[]): LayoutNodoMundo[] {
+  const total = nodos.length;
+
+  return nodos.map((nodo, indice) => {
+    // Arco amplio de 280°: comienza abajo a la izquierda, rodea el
+    // santuario floral por arriba y termina abajo a la derecha.
+    const avance = total <= 1 ? 0.5 : indice / (total - 1);
+    const angulo = ((140 + avance * 280) * Math.PI) / 180;
+    const x = 50 + Math.cos(angulo) * 31;
+    const y = 52 + Math.sin(angulo) * 29;
+    const placement: PlacementMundo =
+      x < 39 ? "left" : x > 61 ? "right" : y < 38 ? "top" : "bottom";
+    const anchorId: WorldAnchorId =
+      indice === 0
+        ? "startPlatform"
+        : indice === total - 1
+          ? "finalMonument"
+          : x < 40
+            ? "officePlatform"
+            : x > 60
+              ? "upperMonument"
+              : "flowerPlatform";
+
+    return {
+      nodo,
+      indice,
+      indiceLeccion: indiceLeccionEnNodo(nodos, indice),
+      anchorId,
+      x,
+      y,
+      placement,
+      zoneLabel: etiquetaGuiaNodo(nodos, indice),
+    };
+  });
+}
+
+function layoutNodosMundo(nodos: NodoRuta[], indiceModulo: number): LayoutNodoMundo[] {
+  if (indiceModulo === 4) return layoutNodosMundoAtardecer(nodos);
+
   const zonas = crearZonasMundo(nodos);
   const contadorPorZona = new Map<WorldAnchorId, number>();
 
@@ -1572,7 +1623,7 @@ function layoutNodosMundo(nodos: NodoRuta[]): LayoutNodoMundo[] {
       x: anchor.x + offset.x,
       y: anchor.y + offset.y,
       placement: anchor.placement,
-      zoneLabel: anchor.label,
+      zoneLabel: etiquetaGuiaNodo(nodos, indice),
     };
   });
 }
@@ -1934,6 +1985,64 @@ function WorldStationsLayer({
 }) {
   return (
     <div className="absolute inset-x-0 bottom-14 top-20 z-30 sm:bottom-12 sm:top-20">
+      {indiceModulo === 4 && layouts.length > 1 ? (
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          className="pointer-events-none absolute inset-0 z-10 size-full overflow-visible"
+        >
+          <defs>
+            <linearGradient id="roadmap-atardecer-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#a7f3d0" />
+              <stop offset="48%" stopColor="#67e8f9" />
+              <stop offset="100%" stopColor="#fef3c7" />
+            </linearGradient>
+            <filter id="roadmap-atardecer-blur" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="5" />
+            </filter>
+            <filter id="roadmap-atardecer-soft-glow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <polyline
+            points={layouts.map((layout) => `${layout.x},${layout.y}`).join(" ")}
+            fill="none"
+            stroke="#5eead4"
+            strokeOpacity="0.24"
+            strokeWidth="15"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+            filter="url(#roadmap-atardecer-blur)"
+          />
+          <polyline
+            points={layouts.map((layout) => `${layout.x},${layout.y}`).join(" ")}
+            fill="none"
+            stroke="url(#roadmap-atardecer-glow)"
+            strokeOpacity="0.62"
+            strokeWidth="6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+            filter="url(#roadmap-atardecer-soft-glow)"
+          />
+          <polyline
+            points={layouts.map((layout) => `${layout.x},${layout.y}`).join(" ")}
+            fill="none"
+            stroke="rgba(240,253,250,0.82)"
+            strokeWidth="1.35"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="2 4"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      ) : null}
       {layouts.map((layout) => (
         <EstacionMundo
           key={layout.nodo.id}
@@ -3373,7 +3482,7 @@ function RoadmapInmersivoExperimental({
   moduloEnCambio: boolean;
   onSeleccionarModulo: (indiceModulo: number) => void;
 }) {
-  const layouts = layoutNodosMundo(grupo.nodos);
+  const layouts = layoutNodosMundo(grupo.nodos, indiceModulo);
   const fondoModulo = obtenerFondoModuloInmersivo(indiceModulo, esUltimoModulo);
   const siguienteNodo = resolverNodoContinuar(grupos, hero?.ultimaLeccionId);
   const [selectedStationId, setSelectedStationId] = useState<string | null>(null);

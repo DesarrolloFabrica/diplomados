@@ -24,6 +24,7 @@ import { ETIQUETA_TAB, tabDeTipo } from "@/lib/contenido-leccion";
 import type { InfografiaInteractivaLeccion } from "@/lib/embeds-prueba-leccion";
 import type { ProximosContenidosResultado } from "@/lib/ruta-curso";
 import { cn } from "@/lib/utils";
+import { resolvePlayerLayoutType } from "@/lib/player-layout";
 import { ProximosContenidos } from "@/components/shared/proximos-contenidos";
 import { AtajosClase } from "@/components/shared/atajos-clase";
 import {
@@ -211,6 +212,7 @@ export function ContenidoLeccionConCompletado({
 }: ContenidoLeccionConCompletadoProps) {
   const { config } = useInterfaceVariant();
   const esAventura = config.id === "gamified";
+  const usaProgresoIntegrado = resolvePlayerLayoutType(config.id) === "type-2";
   const automatic = completionMode === "automatico";
   // Cada recurso disponible, el texto y la infografía interactiva son
   // elementos medibles; se agrupan por apartado (pestaña) para la regla.
@@ -323,7 +325,7 @@ export function ContenidoLeccionConCompletado({
         }
       />
 
-      {!esAventura && automatic && (
+      {!usaProgresoIntegrado && automatic && (
         <div className="mt-5">
           {estadoCompletado}
         </div>

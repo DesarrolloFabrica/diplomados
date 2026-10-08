@@ -322,6 +322,21 @@
 }
 
 @layer utilities {
+  /* El buscador ya incluye su propio botón accesible para limpiar. Oculta el
+     segundo control que insertan WebKit/Edge en los input type="search". */
+  .shell-course-search-input::-webkit-search-cancel-button {
+    display: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .shell-course-search-input::-ms-clear,
+  .shell-course-search-input::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
   .bg-cun-auth-panel {
     background:
       radial-gradient(
@@ -864,10 +879,12 @@
     position: absolute;
     inset: 0;
     z-index: -1;
-    background-image: var(--interface-bg-image, none);
-    background-size: cover;
-    background-position: var(--interface-bg-position, center);
-    background-repeat: no-repeat;
+    background-image:
+      var(--interface-overlay, linear-gradient(transparent, transparent)),
+      var(--interface-bg-image, none);
+    background-size: cover, cover;
+    background-position: var(--interface-bg-position, center), var(--interface-bg-position, center);
+    background-repeat: no-repeat, no-repeat;
     filter: blur(6px);
   }
 

@@ -54,7 +54,7 @@ export function SelectorRecursosAventura({
   }, [activoId]);
 
   return (
-    <section className="mx-auto w-fit max-w-full">
+    <section className="resource-selector mx-auto w-fit max-w-full" data-player-layout="type-2">
       <div className="flex max-w-full items-center justify-center gap-2">
         <button
           type="button"
@@ -116,17 +116,29 @@ export function SelectorRecursosAventura({
                       (esEducational
                         ? "font-bold text-[var(--study-text)]"
                         : "font-bold text-[var(--interface-text)]"),
-                    completado && !esEducational && "font-bold text-emerald-700",
+                    completado &&
+                      (esEducational
+                        ? "font-bold text-[var(--study-success-text)]"
+                        : "font-bold text-emerald-700"),
                   )}
                 >
                   <span
                     className={cn(
                       "grid size-12 shrink-0 place-items-center rounded-full border shadow-[0_4px_12px_rgba(15,23,42,0.18)] transition-[transform,border-color,background-color,box-shadow] duration-200 motion-reduce:transition-none",
-                      completado && !esEducational
-                        ? cn(
-                            "border-emerald-500 bg-emerald-50/95 text-emerald-600 shadow-[0_4px_12px_rgba(15,23,42,0.18),0_0_18px_rgba(34,197,94,0.34)]",
-                            activo ? "scale-110 ring-2 ring-emerald-400/45" : "group-hover:scale-105",
-                          )
+                      completado
+                        ? esEducational
+                          ? cn(
+                              "border-[var(--study-success)] bg-[var(--study-success-bg)] text-[var(--study-success)] shadow-[0_4px_12px_rgba(15,23,42,0.14),0_0_16px_color-mix(in_srgb,var(--study-success)_30%,transparent)]",
+                              activo
+                                ? "scale-110 ring-2 ring-[var(--study-success)]/35"
+                                : "group-hover:scale-105",
+                            )
+                          : cn(
+                              "border-emerald-500 bg-emerald-50/95 text-emerald-600 shadow-[0_4px_12px_rgba(15,23,42,0.18),0_0_18px_rgba(34,197,94,0.34)]",
+                              activo
+                                ? "scale-110 ring-2 ring-emerald-400/45"
+                                : "group-hover:scale-105",
+                            )
                         : activo
                           ? esEducational
                             ? "scale-110 border-[var(--interface-accent-secondary)] bg-[var(--study-control-bg-hover)] text-[var(--interface-accent-secondary)] shadow-[0_4px_12px_rgba(15,23,42,0.18),var(--interface-glow)]"
@@ -136,7 +148,7 @@ export function SelectorRecursosAventura({
                             : "border-white/60 bg-white/70 text-slate-700 group-hover:scale-105 group-hover:border-[var(--interface-accent-secondary)] group-hover:bg-white/90 group-hover:text-[var(--interface-accent-secondary)] group-focus-visible:scale-105",
                     )}
                   >
-                    {completado && !esEducational ? (
+                    {completado ? (
                       <Check className="size-7 stroke-[2.5]" aria-hidden="true" />
                     ) : (
                       <Icono className="size-5" aria-hidden="true" />

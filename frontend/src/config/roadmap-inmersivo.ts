@@ -25,9 +25,10 @@ export const DEFAULT_MODULE_BACKGROUND =
 
 const DEFAULT_MODULE_BACKGROUNDS: readonly string[] = [
   DEFAULT_MODULE_BACKGROUND,
-  "/images/roadmap_asset/Desert_landscape_with_dunes_and_202608281557.jpeg",
+  "/images/roadmap_asset/Desert_landscape_with_dunes_and_2K_20261008155358.jpg",
   "/images/roadmap_asset/desert_landscape_glowing_202608281557.jpeg",
   "/images/roadmap_asset/Rain_falling_in_desert_landscape_202608281557.jpeg",
+  "/images/roadmap_asset/atardecer.jpg",
 ];
 
 const DEFAULT_FINAL_MODULE_BACKGROUND = "/images/roadmap_asset/Final_peak.mp4";
@@ -71,12 +72,18 @@ export function obtenerFondoModuloInmersivo(
 ): string {
   const config = obtenerConfigRoadmapInmersivo(cursoId);
   const fallback = config.defaultBackground ?? DEFAULT_ROADMAP_BACKGROUND;
+  const backgrounds = config.backgrounds ?? DEFAULT_MODULE_BACKGROUNDS;
+
+  // El módulo 5 tiene una composición propia alrededor del santuario
+  // central, incluso cuando también es el último módulo del curso.
+  if (indiceModulo === 4 && backgrounds[indiceModulo]) {
+    return backgrounds[indiceModulo];
+  }
 
   if (esUltimoModulo) {
     return config.finalModuleBackground ?? DEFAULT_FINAL_MODULE_BACKGROUND;
   }
 
-  const backgrounds = config.backgrounds ?? DEFAULT_MODULE_BACKGROUNDS;
   return backgrounds[indiceModulo] ?? fallback;
 }
 

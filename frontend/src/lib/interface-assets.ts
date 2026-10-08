@@ -54,9 +54,9 @@ const OVERLAY_POR_ASSET: Record<string, string> = {
   // imagen navy oscura en modo claro). La referencia quiere el fondo
   // tecnológico bien visible.
   "business:dashboardBackground": "",
-  // Pedido explícito: el dashboard educativo un poco más oscuro que el
-  // velo por defecto de la variante (45%).
-  "educational:dashboardBackground": overlaySolido("color-mix(in srgb, var(--interface-bg) 60%, transparent)"),
+  // Velo negro suave para bajar el brillo del fondo sin alterar las
+  // superficies, tarjetas ni textos situados encima.
+  "educational:dashboardBackground": overlaySolido("rgba(0, 0, 0, 0.15)"),
   // Reproductor de contenido (Fase 14): la biblioteca de fondo debe quedar
   // claramente visible — el panel se rediseñó como vidrio verde oscuro con
   // su propia superficie clara para el contenido, así que ya no necesita un

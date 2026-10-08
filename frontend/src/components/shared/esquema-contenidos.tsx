@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ProgresoCursoLeccion } from "@/components/shared/progreso-curso-leccion";
 import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
+import { resolvePlayerLayoutType } from "@/lib/player-layout";
 import type { TabContenido } from "@/lib/contenido-leccion";
 import {
   EVENTO_LECCION_INICIADA,
@@ -258,6 +259,7 @@ export function EsquemaContenidos({
   const esEducational = config.id === "educational";
   const esGamified = config.id === "gamified";
   const esBusiness = config.id === "business";
+  const playerLayoutType = resolvePlayerLayoutType(config.id);
 
   // Gate genérico "tema propio (tokens) vs. creative (colores fijos)". Las
   // tres variantes no-creative comparten aquí las mismas clases porque son
@@ -361,9 +363,9 @@ export function EsquemaContenidos({
     setQuicesAbiertos((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
-  if (esGamified || esEducational) {
+  if (playerLayoutType === "type-2") {
     return (
-      <EsquemaContenidosAventura
+      <PlayerType2ModuleRail
         cursoId={cursoId}
         leccionActivaId={leccionActivaId}
         evaluacionActivaId={evaluacionActivaId}
@@ -721,13 +723,13 @@ export function EsquemaContenidos({
 }
 
 /**
- * Esquema de contenidos para la interfaz aventura: en vez del acordeón con
- * todos los módulos a la vez (el resto de variantes), muestra solo el
+ * Rail expandido del Player Tipo 2: en vez del acordeón con todos los
+ * módulos a la vez (Player Tipo 1), muestra solo el
  * módulo visible con sus lecciones/quices y navega entre módulos con los
  * botones anterior/siguiente — misma idea que el flyout del rail lateral
  * colapsado, para que la experiencia sea consistente en toda la interfaz.
  */
-function EsquemaContenidosAventura({
+function PlayerType2ModuleRail({
   cursoId,
   leccionActivaId,
   evaluacionActivaId,
@@ -769,7 +771,7 @@ function EsquemaContenidosAventura({
   }
 
   return (
-    <aside className="flex h-full flex-col">
+    <aside className="module-rail flex h-full flex-col" data-player-layout="type-2">
       <div className="flex items-center justify-between gap-2 border-b border-[var(--interface-border)] px-4 py-3.5">
         <h2 className="text-sm font-semibold text-[var(--interface-text)]">Esquema de contenidos</h2>
         {onCerrar && (

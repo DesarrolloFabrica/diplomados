@@ -10,6 +10,7 @@ import {
   type GrupoEsquema,
 } from "@/components/shared/esquema-contenidos";
 import { RailModulosAventura } from "@/components/shared/rail-modulos-aventura";
+import { resolvePlayerLayoutType } from "@/lib/player-layout";
 
 interface EsquemaLeccionContexto {
   alternarEsquema: () => void;
@@ -50,13 +51,14 @@ export function LayoutVistaLeccion({
   const esEducational = config.id === "educational";
   const esGamified = config.id === "gamified";
   const esBusiness = config.id === "business";
-  const usaNavegacionAventura = esEducational || esGamified;
+  const playerLayoutType = resolvePlayerLayoutType(config.id);
+  const esPlayerType2 = playerLayoutType === "type-2";
   const esTemaPropio = esEducational || esGamified || esBusiness;
-  // Educational/Gamified dan protagonismo al índice de contenidos/objetivos:
+  // Player Tipo 2 da protagonismo al índice de contenidos/objetivos:
   // el esquema queda visible por defecto (70/30) en vez de requerir abrirlo.
   // Business no hereda ese comportamiento (no lo pidió Fase 11): mantiene el
   // esquema colapsado por defecto, igual que creative.
-  const [esquemaVisible, setEsquemaVisible] = useState(esEducational || esGamified);
+  const [esquemaVisible, setEsquemaVisible] = useState(esPlayerType2);
   const [esquemaCerrando, setEsquemaCerrando] = useState(false);
   const [esquemaMobileVisible, setEsquemaMobileVisible] = useState(false);
   const [esquemaMobileCerrando, setEsquemaMobileCerrando] = useState(false);
@@ -124,11 +126,11 @@ export function LayoutVistaLeccion({
     }
   }
 
-  // Atajo "Esquema del curso" de la barra de clase (AtajosClase). Gamified
-  // solo muestra el panel lateral desde xl; por debajo abre el cajón.
+  // Atajo "Esquema del curso" de la barra de clase (AtajosClase). Player
+  // Tipo 2 muestra el panel lateral desde xl; por debajo abre el cajón.
   function alternarEsquemaAtajo() {
     const esEscritorioAncho = window.matchMedia("(min-width: 1280px)").matches;
-    if (usaNavegacionAventura && !esEscritorioAncho) {
+    if (esPlayerType2 && !esEscritorioAncho) {
       if (esquemaMobileVisible) cerrarEsquemaMobile();
       else abrirEsquemaMobile();
       return;
@@ -154,9 +156,10 @@ export function LayoutVistaLeccion({
   // curso"; el botón flotante solo se conserva en las evaluaciones.
   const mostrarBotonFlotante = !leccionActivaId;
 
-  if (usaNavegacionAventura) {
+  if (esPlayerType2) {
     return (
       <div
+        data-player-layout={playerLayoutType}
         data-lesson-variant={config.lesson.variant}
         className={cn(
           "grid min-h-full w-full grid-cols-1",
@@ -187,7 +190,7 @@ export function LayoutVistaLeccion({
 
         <div
           className={cn(
-            "hidden min-w-0 lg:sticky lg:top-0 lg:block lg:h-dvh lg:self-start",
+            "module-rail hidden min-w-0 lg:sticky lg:top-0 lg:block lg:h-dvh lg:self-start",
             esquemaEnLayout && "xl:hidden",
           )}
         >
@@ -205,7 +208,7 @@ export function LayoutVistaLeccion({
           <aside
             id="esquema-contenidos-panel"
             className={cn(
-              "hidden min-w-0 border-l border-[var(--interface-border)] bg-[var(--interface-surface)] shadow-none xl:sticky xl:top-0 xl:block xl:h-dvh xl:self-start",
+              "module-rail hidden min-w-0 border-l border-[var(--interface-border)] bg-[var(--interface-surface)] shadow-none xl:sticky xl:top-0 xl:block xl:h-dvh xl:self-start",
               esquemaCerrando
                 ? "motion-safe:animate-out motion-safe:fade-out motion-safe:slide-out-to-right-4 motion-safe:duration-200"
                 : "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-200",
@@ -239,7 +242,7 @@ export function LayoutVistaLeccion({
             <aside
               id="esquema-contenidos-aventura-mobile"
               className={cn(
-                "absolute inset-y-0 right-0 w-[min(92vw,380px)] overflow-y-auto border-l border-[var(--interface-border)] bg-[var(--interface-surface)] shadow-[-20px_0_50px_rgba(6,17,32,0.32)]",
+                "module-rail absolute inset-y-0 right-0 w-[min(92vw,380px)] overflow-y-auto border-l border-[var(--interface-border)] bg-[var(--interface-surface)] shadow-[-20px_0_50px_rgba(6,17,32,0.32)]",
                 esquemaMobileCerrando
                   ? "motion-safe:animate-out motion-safe:fade-out motion-safe:slide-out-to-right-4 motion-safe:duration-200"
                   : "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-200",
@@ -263,6 +266,7 @@ export function LayoutVistaLeccion({
 
   return (
     <div
+      data-player-layout={playerLayoutType}
       data-lesson-variant={config.lesson.variant}
       className={cn(
         "grid min-h-full w-full grid-cols-1",
