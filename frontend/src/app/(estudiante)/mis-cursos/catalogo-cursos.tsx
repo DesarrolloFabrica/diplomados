@@ -34,7 +34,7 @@ import {
 import { PortadaCurso } from "@/components/shared/portada-curso";
 import { BuscadorCatalogoCursos } from "@/components/layout/buscador-shell-cursos";
 import { AnilloProgreso } from "@/components/shared/anillo-progreso";
-import { BotonDesinscribirmePrueba } from "@/components/shared/boton-desinscribirme-prueba";
+import { MenuOpcionesCurso } from "@/components/shared/menu-opciones-curso";
 import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { estiloFondoInterfaz } from "@/lib/interface-assets";
 import { hrefContinuarCurso } from "@/lib/href-continuar-curso";
@@ -1028,11 +1028,9 @@ function TarjetaCursoAventuraSeleccionable({
   const porcentaje = porcentajeCurso(curso);
   const completado = cursoCompletado(curso, porcentaje);
   const inscrito = Boolean(curso.inscripcionId);
-  const hrefDestino = inscrito
-    ? completado
-      ? `/mis-cursos/${curso.id}`
-      : hrefContinuarCurso(curso.id)
-    : `/mis-cursos/${curso.id}/informacion`;
+  // Tarjeta de curso (no el botón "Continuar"): inscrito → roadmap del curso;
+  // sin inscripción → ficha/landing del curso.
+  const hrefDestino = hrefTarjetaCurso(curso);
 
   return (
     <article
@@ -1115,6 +1113,10 @@ function TarjetaCursoAventuraSeleccionable({
         </div>
       </button>
 
+      {inscrito && (
+        <MenuOpcionesCurso cursoId={curso.id} cursoTitulo={curso.titulo} className="right-2.5 top-2.5" />
+      )}
+
       {seleccionado && (
         <Link
           href={hrefDestino}
@@ -1133,16 +1135,14 @@ function TarjetaCursoCatalogoEducativa({ curso }: { curso: CursoCatalogoFila }) 
   const inscrito = Boolean(curso.inscripcionId);
   const completado = cursoCompletado(curso, porcentaje);
   const nivel = normalizarNivel(curso.nivelDificultad) ?? curso.nivelDificultad;
-  const hrefDestino = !inscrito
-    ? `/mis-cursos/${curso.id}/informacion`
-    : completado
-      ? `/mis-cursos/${curso.id}`
-      : hrefContinuarCurso(curso.id);
+  // Tarjeta de curso (no el botón "Continuar"): inscrito → roadmap del curso;
+  // sin inscripción → ficha/landing del curso.
+  const hrefDestino = hrefTarjetaCurso(curso);
   const textoAccion = inscrito && completado ? "Revisar curso" : inscrito ? "Continuar" : "Conocer curso";
 
   return (
     <article className="relative overflow-hidden rounded-2xl border border-[#ded4bf] bg-[#fffdf7]/95 p-5 text-[#061120] shadow-[0_8px_22px_rgba(61,45,20,0.1)] transition-[transform,border-color,box-shadow] hover:-translate-y-0.5 hover:border-[#cfc2aa] hover:shadow-[0_14px_34px_rgba(61,45,20,0.14)] sm:p-6">
-      {inscrito && <BotonDesinscribirmePrueba cursoId={curso.id} />}
+      {inscrito && <MenuOpcionesCurso cursoId={curso.id} cursoTitulo={curso.titulo} />}
       <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
         <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-[#e6ddc8] sm:w-48 sm:shrink-0">
           <PortadaCurso
@@ -1931,7 +1931,9 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
     : inscrito
       ? "Continuar"
       : "Conocer curso";
-  const hrefDestino = `/mis-cursos/${curso.id}/informacion`;
+  // Tarjeta de curso (no el botón "Continuar"): inscrito → roadmap del curso;
+  // sin inscripción → ficha/landing del curso.
+  const hrefDestino = hrefTarjetaCurso(curso);
 
   const contenido = (
     <ContenidoTarjetaCurso
@@ -1958,7 +1960,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
           mostrarProgreso={inscrito}
           textoAccion={textoAccion}
         />
-        {inscrito && <BotonDesinscribirmePrueba cursoId={curso.id} />}
+        {inscrito && <MenuOpcionesCurso cursoId={curso.id} cursoTitulo={curso.titulo} />}
       </Link>
     );
   }
@@ -1978,7 +1980,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
           mostrarProgreso={inscrito}
           textoAccion={textoAccion}
         />
-        {inscrito && <BotonDesinscribirmePrueba cursoId={curso.id} />}
+        {inscrito && <MenuOpcionesCurso cursoId={curso.id} cursoTitulo={curso.titulo} />}
       </Link>
     );
   }
@@ -1998,7 +2000,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
           mostrarProgreso={inscrito}
           textoAccion={textoAccion}
         />
-        {inscrito && <BotonDesinscribirmePrueba cursoId={curso.id} />}
+        {inscrito && <MenuOpcionesCurso cursoId={curso.id} cursoTitulo={curso.titulo} />}
       </Link>
     );
   }
@@ -2011,7 +2013,7 @@ function TarjetaCursoCatalogo({ curso }: { curso: CursoCatalogoFila }) {
       className={CLASE_TARJETA_GLASS}
     >
       {contenido}
-      {inscrito && <BotonDesinscribirmePrueba cursoId={curso.id} />}
+      {inscrito && <MenuOpcionesCurso cursoId={curso.id} cursoTitulo={curso.titulo} />}
     </Link>
   );
 }
@@ -2371,6 +2373,11 @@ function ContenidoTarjetaCurso({
       </div>
     </>
   );
+}
+
+/** Destino de las tarjetas de curso en las 4 interfaces. */
+function hrefTarjetaCurso(curso: CursoCatalogoFila): string {
+  return curso.inscripcionId ? `/mis-cursos/${curso.id}` : `/mis-cursos/${curso.id}/informacion`;
 }
 
 function porcentajeCurso(curso: CursoCatalogoFila): number {
