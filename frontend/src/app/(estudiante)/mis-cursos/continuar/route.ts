@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { requerirSesion } from "@backend/lib/auth/sesion";
 import {
   cargarVistaCursoColaborador,
@@ -8,6 +8,7 @@ import {
   COOKIE_CONTINUAR_EVALUACION,
   leerEvaluacionAbierta,
 } from "@/lib/continuar-evaluacion";
+import { redireccionRelativa } from "@/lib/redireccion-relativa";
 import { construirGruposRuta } from "@/lib/roadmap/grupos-curso";
 import { resolverNodoContinuar } from "@/lib/roadmap/siguiente-nodo";
 
@@ -22,8 +23,7 @@ import { resolverNodoContinuar } from "@/lib/roadmap/siguiente-nodo";
  */
 export async function GET(request: NextRequest) {
   const sesion = await requerirSesion();
-  const base = new URL(request.url);
-  const ir = (ruta: string) => NextResponse.redirect(new URL(ruta, base));
+  const ir = redireccionRelativa;
 
   const cursoId = await obtenerCursoRecienteParaContinuar(sesion.id);
   if (!cursoId) return ir("/mis-cursos");

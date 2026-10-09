@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
 import { requerirSesion } from "@backend/lib/auth/sesion";
 import { cargarVistaCursoColaborador } from "@backend/server/queries/mis-cursos";
+import { redireccionRelativa } from "@/lib/redireccion-relativa";
 import { construirGruposRuta } from "@/lib/roadmap/grupos-curso";
 import { resolverNodoContinuar } from "@/lib/roadmap/siguiente-nodo";
 
@@ -10,19 +10,18 @@ import { resolverNodoContinuar } from "@/lib/roadmap/siguiente-nodo";
  * la misma regla que el "Continuar" del mapa del curso.
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ cursoId: string }> },
 ) {
   const { cursoId } = await params;
   const sesion = await requerirSesion();
-  const base = new URL(request.url);
 
   const vista = await cargarVistaCursoColaborador(sesion.id, cursoId);
   if (!vista) {
-    return NextResponse.redirect(new URL("/mis-cursos", base));
+    return redireccionRelativa("/mis-cursos");
   }
   if (!vista.inscripcion) {
-    return NextResponse.redirect(new URL(`/mis-cursos/${cursoId}/informacion`, base));
+    return redireccionRelativa(`/mis-cursos/${cursoId}/informacion`);
   }
 
   const destino = resolverNodoContinuar(
@@ -31,5 +30,5 @@ export async function GET(
   );
 
   // Curso terminado o sin contenido disponible: se muestra el mapa.
-  return NextResponse.redirect(new URL(destino?.nodo.href ?? `/mis-cursos/${cursoId}`, base));
+  return redireccionRelativa(destino?.nodo.href ?? `/mis-cursos/${cursoId}`);
 }
