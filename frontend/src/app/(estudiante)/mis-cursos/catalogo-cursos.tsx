@@ -967,7 +967,7 @@ function FilaCatalogo({
           <div
             tabIndex={0}
             aria-label={`Cursos de ${titulo}`}
-            className="flex min-w-0 items-end justify-start gap-3 overflow-x-auto scroll-smooth px-1 pb-5 pt-4 outline-none [scrollbar-width:none] focus-visible:ring-2 focus-visible:ring-[#91DC00]/80 sm:justify-center sm:gap-4 sm:pb-6 sm:pt-7 [&::-webkit-scrollbar]:hidden"
+            className="flex min-w-0 items-end justify-start gap-4 overflow-x-auto scroll-smooth px-2 pb-6 pt-5 outline-none [scrollbar-width:none] focus-visible:ring-2 focus-visible:ring-[#91DC00]/80 sm:justify-center sm:gap-6 sm:pb-8 sm:pt-9 [&::-webkit-scrollbar]:hidden"
           >
             {cursos.map((curso, indice) => (
               <TarjetaCursoAventuraSeleccionable
@@ -1037,8 +1037,8 @@ function TarjetaCursoAventuraSeleccionable({
       className={cn(
         "group relative shrink-0 overflow-hidden rounded-[26px] text-left transition-all duration-300",
         seleccionado
-          ? "w-[min(74vw,230px)] -translate-y-2 border-2 border-[var(--interface-accent)] shadow-[0_0_32px_rgba(79,138,0,0.55),0_22px_44px_rgba(2,10,6,0.45)] sm:w-[220px] sm:-translate-y-3"
-          : "w-[min(62vw,190px)] border border-white/15 opacity-80 hover:-translate-y-1 hover:opacity-100 sm:w-[176px]",
+          ? "w-[min(84vw,290px)] -translate-y-2 border-2 border-[var(--interface-accent)] shadow-[0_0_32px_rgba(79,138,0,0.55),0_22px_44px_rgba(2,10,6,0.45)] sm:w-[280px] sm:-translate-y-3"
+          : "w-[min(74vw,250px)] border border-white/15 opacity-80 hover:-translate-y-1 hover:opacity-100 sm:w-[232px]",
       )}
     >
       <button
@@ -1051,65 +1051,65 @@ function TarjetaCursoAventuraSeleccionable({
         <div
           className={cn(
             "relative w-full shrink-0 overflow-hidden bg-white/5",
-            seleccionado ? "h-[270px] sm:h-[250px]" : "h-[235px] sm:h-[215px]",
+            seleccionado ? "h-[330px] sm:h-[315px]" : "h-[290px] sm:h-[275px]",
           )}
         >
-        <PortadaCurso
-          cursoId={curso.id}
-          imagenPortadaUrl={curso.imagenPortadaUrl}
-          esDiplomado={curso.esDiplomado}
-          titulo={curso.titulo}
-          fallback="abstract"
-          className={cn("absolute inset-0 rounded-none object-cover", !inscrito && "grayscale-[0.25]")}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,8,16,0.05)_35%,rgba(2,8,16,0.85)_100%)]"
-        />
-        {!inscrito && (
-          <span className="absolute right-3.5 top-3.5 grid size-9 place-items-center rounded-full border border-white/30 bg-black/55 text-white backdrop-blur-sm">
-            <Lock className="size-4" aria-hidden="true" />
-          </span>
-        )}
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-3.5 sm:p-4">
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-white/15 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-            {curso.esDiplomado ? (
-              <GraduationCap className="size-3.5" aria-hidden="true" />
-            ) : (
-              <BookOpen className="size-3.5" aria-hidden="true" />
-            )}
-            {curso.esDiplomado ? "Diplomado" : "Curso"}
-          </span>
-          <p className="line-clamp-2 text-sm font-bold leading-snug text-white min-[430px]:text-base sm:text-lg">
-            {curso.titulo}
-          </p>
-        </div>
+          <PortadaCurso
+            cursoId={curso.id}
+            imagenPortadaUrl={curso.imagenPortadaUrl}
+            esDiplomado={curso.esDiplomado}
+            titulo={curso.titulo}
+            fallback="abstract"
+            className={cn("absolute inset-0 rounded-none object-cover", !inscrito && "grayscale-[0.25]")}
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,8,16,0.05)_35%,rgba(2,8,16,0.85)_100%)]"
+          />
+          {!inscrito && (
+            <span className="absolute right-4 top-4 z-20 grid size-10 place-items-center rounded-full border border-white/30 bg-black/60 text-white shadow-[0_6px_18px_rgba(0,0,0,0.28)] backdrop-blur-sm">
+              <Lock className="size-[18px]" aria-hidden="true" />
+            </span>
+          )}
+          <div className="absolute inset-x-0 bottom-0 z-10 flex min-h-[124px] flex-col justify-end gap-2.5 bg-gradient-to-t from-black/85 via-black/55 to-transparent px-5 pb-5 pt-12 sm:px-6 sm:pb-6">
+            <span className="inline-flex max-w-full w-fit items-center gap-1.5 rounded-md bg-white/15 px-2.5 py-1.5 text-xs font-bold uppercase tracking-wide text-white backdrop-blur-sm">
+              {curso.esDiplomado ? (
+                <GraduationCap className="size-3.5 shrink-0" aria-hidden="true" />
+              ) : (
+                <BookOpen className="size-3.5 shrink-0" aria-hidden="true" />
+              )}
+              <span className="truncate">{curso.esDiplomado ? "Diplomado" : "Curso"}</span>
+            </span>
+            <p className="line-clamp-2 min-h-[2.5em] text-base font-bold leading-tight text-white sm:text-xl">
+              {curso.titulo}
+            </p>
+          </div>
         </div>
 
         <div
           className={cn(
-            "flex flex-col gap-1.5 px-4 py-3.5",
+            "flex min-h-[104px] flex-col justify-center gap-2.5 px-5 py-5 sm:px-6 sm:py-5",
             seleccionado ? "bg-[#04140d]" : "bg-[rgba(4,15,10,0.85)]",
           )}
         >
-        {inscrito ? (
-          <>
-            <div className="h-2 overflow-hidden rounded-full bg-white/15">
-              <div
-                className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
-                style={{ width: `${porcentaje}%` }}
-              />
-            </div>
-            <p className="text-xs font-semibold text-white/70">
-              {completado ? "Completado" : `${porcentaje}% completado`}
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="text-sm font-bold text-white/85">Disponible</p>
-            <p className="text-xs text-white/55">Explora este recorrido</p>
-          </>
-        )}
+          {inscrito ? (
+            <>
+              <div className="h-2 overflow-hidden rounded-full bg-white/15">
+                <div
+                  className="h-full rounded-full bg-[linear-gradient(90deg,var(--interface-accent),var(--interface-accent-secondary))]"
+                  style={{ width: `${porcentaje}%` }}
+                />
+              </div>
+              <p className="text-sm font-semibold text-white/70">
+                {completado ? "Completado" : `${porcentaje}% completado`}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-base font-bold text-white/85">Disponible</p>
+              <p className="text-sm text-white/55">Explora este recorrido</p>
+            </>
+          )}
         </div>
       </button>
 
@@ -1121,7 +1121,7 @@ function TarjetaCursoAventuraSeleccionable({
         <Link
           href={hrefDestino}
           aria-label={`${inscrito ? "Continuar" : "Explorar"} ${curso.titulo}`}
-          className="absolute left-1/2 top-[42%] z-20 grid size-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-2 border-[#b8f25c] bg-[#123b25] text-white shadow-[0_0_0_7px_rgba(145,220,0,0.16),0_0_30px_rgba(145,220,0,0.72),0_12px_28px_rgba(2,10,6,0.5)] transition-[transform,background-color,box-shadow] duration-200 hover:scale-110 hover:bg-[#195231] hover:shadow-[0_0_0_9px_rgba(145,220,0,0.2),0_0_38px_rgba(145,220,0,0.85)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#123b25]"
+          className="absolute left-1/2 top-[32%] z-20 grid size-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-2 border-[#b8f25c] bg-[#123b25] text-white shadow-[0_0_0_7px_rgba(145,220,0,0.16),0_0_30px_rgba(145,220,0,0.72),0_12px_28px_rgba(2,10,6,0.5)] transition-[transform,background-color,box-shadow] duration-200 hover:scale-110 hover:bg-[#195231] hover:shadow-[0_0_0_9px_rgba(145,220,0,0.2),0_0_38px_rgba(145,220,0,0.85)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#123b25]"
         >
           <Play className="ml-1 size-7 fill-current" aria-hidden="true" />
         </Link>
