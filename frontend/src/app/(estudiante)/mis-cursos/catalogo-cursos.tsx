@@ -34,6 +34,7 @@ import {
 import { PortadaCurso } from "@/components/shared/portada-curso";
 import { BuscadorCatalogoCursos } from "@/components/layout/buscador-shell-cursos";
 import { AnilloProgreso } from "@/components/shared/anillo-progreso";
+import { HelperdAnimacion } from "@/components/shared/helperd-animacion";
 import { MenuOpcionesCurso } from "@/components/shared/menu-opciones-curso";
 import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { estiloFondoInterfaz } from "@/lib/interface-assets";
@@ -314,6 +315,8 @@ export function CatalogoCursos({
       )}
 
       {!esGamified && catalogoContenido}
+
+      <HelperdAnimacion variante="pantallaCompleta" />
     </div>
   );
 }
