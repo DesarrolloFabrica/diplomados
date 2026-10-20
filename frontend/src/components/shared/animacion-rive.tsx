@@ -9,6 +9,8 @@ import {
 } from "@rive-app/react-webgl2";
 import { cn } from "@/lib/utils";
 
+type InstanciaRive = NonNullable<ReturnType<typeof useRive>["rive"]>;
+
 type FitKey =
   | "cover"
   | "contain"
@@ -58,6 +60,12 @@ interface AnimacionRiveProps {
    * `states` son los nombres reportados por Rive (p. ej. "Normal").
    */
   onStateChange?: (states: string[]) => void;
+  /**
+   * Textos a inyectar en el View Model / text runs del .riv.
+   * Clave = nombre de la propiedad string (o text run); valor = contenido.
+   * Requiere que en el editor de Rive la propiedad esté enlazada al texto.
+   */
+  textos?: Record<string, string>;
 }
 
 const FIT_MAP = {
@@ -91,6 +99,27 @@ function normalizarEstados(data: unknown): string[] {
 }
 
 /**
+ * Escribe strings en el View Model (preferido) o, si no hay propiedad,
+ * intenta `setTextRunValue` como respaldo en runtimes que aún lo expongan.
+ */
+function aplicarTextosRive(rive: InstanciaRive, textos: Record<string, string>) {
+  const vmi = rive.viewModelInstance;
+
+  for (const [nombre, valor] of Object.entries(textos)) {
+    const propiedad = vmi?.string?.(nombre);
+    if (propiedad) {
+      propiedad.value = valor;
+      continue;
+    }
+
+    const riveConTextRun = rive as InstanciaRive & {
+      setTextRunValue?: (name: string, value: string) => void;
+    };
+    riveConTextRun.setTextRunValue?.(nombre, valor);
+  }
+}
+
+/**
  * Contenedor genérico para animaciones Rive (.riv) con renderer WebGL2.
  * Solo Client Components: depende de canvas/WebGL en el navegador.
  *
@@ -98,6 +127,7 @@ function normalizarEstados(data: unknown): string[] {
  * - `stateMachine` con el nombre exacto del editor
  * - `autoBind` si el archivo usa View Model
  * - el contenedor debe tener ancho y alto definidos (no height: auto vacío)
+ * - `textos` para cambiar copy enlazado a propiedades string del View Model
  */
 export function AnimacionRive({
   src,
@@ -111,17 +141,22 @@ export function AnimacionRive({
   className,
   ariaLabel = "Animación",
   onStateChange,
+  textos,
 }: AnimacionRiveProps) {
   const stateMachineName =
     stateMachine ??
     (Array.isArray(stateMachines) ? stateMachines[0] : stateMachines);
 
   const onStateChangeRef = useRef(onStateChange);
+  const textosRef = useRef(textos);
   useEffect(() => {
     onStateChangeRef.current = onStateChange;
   }, [onStateChange]);
+  useEffect(() => {
+    textosRef.current = textos;
+  }, [textos]);
 
-  const { RiveComponent } = useRive({
+  const { rive, RiveComponent } = useRive({
     src,
     artboard,
     stateMachine: stateMachineName,
@@ -134,11 +169,19 @@ export function AnimacionRive({
     }),
     onRiveReady: (instance) => {
       instance.resizeDrawingSurfaceToCanvas();
+      if (textosRef.current) {
+        aplicarTextosRive(instance, textosRef.current);
+      }
     },
     onStateChange: (event) => {
       onStateChangeRef.current?.(normalizarEstados(event.data));
     },
   });
+
+  useEffect(() => {
+    if (!rive || !textos) return;
+    aplicarTextosRive(rive, textos);
+  }, [rive, textos]);
 
   return (
     <div

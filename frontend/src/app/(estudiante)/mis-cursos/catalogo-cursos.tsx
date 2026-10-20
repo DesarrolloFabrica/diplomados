@@ -34,7 +34,10 @@ import {
 import { PortadaCurso } from "@/components/shared/portada-curso";
 import { BuscadorCatalogoCursos } from "@/components/layout/buscador-shell-cursos";
 import { AnilloProgreso } from "@/components/shared/anillo-progreso";
-import { HelperdAnimacion } from "@/components/shared/helperd-animacion";
+import {
+  HELPERD_TEXTO_POR_SECCION,
+  HelperdAnimacion,
+} from "@/components/shared/helperd-animacion";
 import { MenuOpcionesCurso } from "@/components/shared/menu-opciones-curso";
 import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { estiloFondoInterfaz } from "@/lib/interface-assets";
@@ -316,9 +319,34 @@ export function CatalogoCursos({
 
       {!esGamified && catalogoContenido}
 
-      <HelperdAnimacion variante="pantallaCompleta" />
+      <HelperdAnimacion
+        variante="pantallaCompleta"
+        texto={textoHelperdPorCatalogo(pagina, seccionHome)}
+      />
     </div>
   );
+}
+
+function textoHelperdPorCatalogo(
+  pagina: "home" | "mis-cursos",
+  seccionHome: "descubrir" | "diplomados" | "nuevos",
+): string {
+  if (pagina === "mis-cursos") {
+    return HELPERD_TEXTO_POR_SECCION["mis-cursos"];
+  }
+
+  switch (seccionHome) {
+    case "descubrir":
+      return HELPERD_TEXTO_POR_SECCION.descubrir;
+    case "diplomados":
+      return HELPERD_TEXTO_POR_SECCION.diplomados;
+    case "nuevos":
+      return HELPERD_TEXTO_POR_SECCION.nuevos;
+    default: {
+      const _exhaustive: never = seccionHome;
+      return _exhaustive;
+    }
+  }
 }
 
 function ContenidoCatalogo({

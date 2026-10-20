@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const AnimacionRive = dynamic(
@@ -31,6 +31,28 @@ export const HELPERD_ARTBOARD = "Artboard 1";
 /** Estado idle de la State Machine al que vuelve tras completar la animación. */
 export const HELPERD_ESTADO_NORMAL = "Normal";
 
+/**
+ * Nombre de la propiedad string del View Model (o text run) en helperd.riv
+ * enlazada al texto visible. Debe coincidir con el editor de Rive.
+ */
+export const HELPERD_PROPIEDAD_TEXTO = "texto";
+
+export type SeccionHelperd =
+  | "descubrir"
+  | "diplomados"
+  | "nuevos"
+  | "mis-cursos"
+  | "categoria";
+
+/** Copy por sección del catálogo; editar aquí para cambiar el diálogo de Helperd. */
+export const HELPERD_TEXTO_POR_SECCION: Record<SeccionHelperd, string> = {
+  descubrir: "¡Hola! Explora cursos nuevos y encuentra tu próximo aprendizaje.",
+  diplomados: "Aquí tienes los diplomados disponibles para ti.",
+  nuevos: "Estos son los cursos recién publicados. ¡Dale un vistazo!",
+  "mis-cursos": "Continúa donde lo dejaste. ¿Seguimos con tu formación?",
+  categoria: "Filtra por categoría y encuentra justo lo que buscas.",
+};
+
 interface HelperdAnimacionProps {
   className?: string;
   /**
@@ -46,6 +68,13 @@ interface HelperdAnimacionProps {
    * (sm ≈ 8rem, md ≈ 11rem, lg ≈ 14rem, xl ≈ 18rem).
    */
   tamanoFlotante?: "sm" | "md" | "lg" | "xl";
+  /**
+   * Texto del diálogo en la animación (View Model / text run).
+   * Cambia por sección desde el padre.
+   */
+  texto?: string;
+  /** Nombre de la propiedad string en el .riv (por defecto `texto`). */
+  propiedadTexto?: string;
 }
 
 const TAMANO_FLOTANTE = {
@@ -68,24 +97,41 @@ function tieneEstadoActivo(states: string[]): boolean {
 
 /**
  * Animación Helperd (Rive) con State Machine + Data Binding.
- * Overlay: se activa con click y se apaga al volver al estado "Normal".
+ * Overlay: se activa con click y se cierra al volver a "Normal",
+ * liberando de nuevo la interacción con el resto de la página.
  */
 export function HelperdAnimacion({
   className,
   variante = "seccion",
   artboard = HELPERD_ARTBOARD,
   tamanoFlotante = "md",
+  texto,
+  propiedadTexto = HELPERD_PROPIEDAD_TEXTO,
 }: HelperdAnimacionProps) {
   const [enfocado, setEnfocado] = useState(false);
   const enfocadoRef = useRef(false);
-  const estadosPreviosRef = useRef<string[]>([]);
+  /** True tras salir de Normal con el overlay abierto (evita cerrar en el frame del click). */
+  const salioDeNormalRef = useRef(false);
+
+  const textos = useMemo(() => {
+    if (texto == null) return undefined;
+    // `texto` = propiedad VM; `Texto9` = text run hallado en helperd.riv (respaldo).
+    return {
+      [propiedadTexto]: texto,
+      Texto9: texto,
+    };
+  }, [texto, propiedadTexto]);
 
   const setEnfocadoSync = (valor: boolean) => {
     enfocadoRef.current = valor;
     setEnfocado(valor);
+    if (!valor) {
+      salioDeNormalRef.current = false;
+    }
   };
 
   const activarOverlayPorClick = () => {
+    salioDeNormalRef.current = false;
     setEnfocadoSync(true);
   };
 
@@ -94,17 +140,17 @@ export function HelperdAnimacion({
   };
 
   const onStateChange = (states: string[]) => {
-    const previos = estadosPreviosRef.current;
-    const veniaDeEstadoActivo = tieneEstadoActivo(previos);
-    const volvioANormal = esSoloNormal(states);
+    if (!enfocadoRef.current) return;
 
-    // Solo cierra si ya hubo un estado distinto de Normal (evita cerrar
-    // en el mismo frame del click, cuando aún sigue en Normal).
-    if (enfocadoRef.current && veniaDeEstadoActivo && volvioANormal) {
-      setEnfocadoSync(false);
+    if (tieneEstadoActivo(states)) {
+      salioDeNormalRef.current = true;
+      return;
     }
 
-    estadosPreviosRef.current = states;
+    // Overlay abierto → hubo animación activa → volvió a Normal: cerrar.
+    if (salioDeNormalRef.current && esSoloNormal(states)) {
+      setEnfocadoSync(false);
+    }
   };
 
   useEffect(() => {
@@ -129,6 +175,7 @@ export function HelperdAnimacion({
       alignment="center"
       ariaLabel="Helperd, asistente de formación"
       className="size-full"
+      textos={textos}
       onStateChange={onStateChange}
     />
   );
@@ -142,7 +189,6 @@ export function HelperdAnimacion({
           ? "pointer-events-auto opacity-100"
           : "pointer-events-none opacity-0",
       )}
-      onClick={salirFoco}
     />
   );
 
@@ -152,12 +198,25 @@ export function HelperdAnimacion({
         {overlayFoco}
 
         <section
-          className={cn("pointer-events-none fixed inset-0 z-50 size-full", className)}
+          className={cn(
+            "pointer-events-none fixed inset-0 z-50 size-full",
+            className,
+          )}
           aria-label="Escena interactiva Helperd"
           aria-modal={enfocado || undefined}
         >
+          {/*
+            Con overlay cerrado no capturamos todo el viewport (bloquearía el
+            catálogo). Solo la zona del personaje recibe eventos; con overlay
+            abierto sí ocupamos pantalla completa encima del dimmer.
+          */}
           <div
-            className="pointer-events-auto absolute inset-0 size-full"
+            className={cn(
+              "pointer-events-auto absolute",
+              enfocado
+                ? "inset-0 size-full"
+                : "bottom-0 right-0 h-[min(75vh,640px)] w-[min(100%,22rem)] sm:w-[26rem] md:w-[30rem]",
+            )}
             onClick={() => {
               if (!enfocadoRef.current) activarOverlayPorClick();
             }}
