@@ -32,12 +32,12 @@ export const HELPERD_ARTBOARD = "Artboard 1";
 export const HELPERD_ESTADO_NORMAL = "Normal";
 
 /**
- * Nombre de la propiedad string del View Model (o text run) en helperd.riv
+ * Nombre de la propiedad string del View Model en helperd.riv
  * enlazada al texto visible. Debe coincidir con el editor de Rive.
  */
-export const HELPERD_PROPIEDAD_TEXTO = "texto";
+export const HELPERD_PROPIEDAD_TEXTO = "contenido";
 
-export type SeccionHelperd =
+export type SeccionHelperd = 
   | "descubrir"
   | "diplomados"
   | "nuevos"
@@ -46,7 +46,7 @@ export type SeccionHelperd =
 
 /** Copy por sección del catálogo; editar aquí para cambiar el diálogo de Helperd. */
 export const HELPERD_TEXTO_POR_SECCION: Record<SeccionHelperd, string> = {
-  descubrir: "¡Hola! Explora cursos nuevos y encuentra tu próximo aprendizaje.",
+  descubrir: "Selecciona un curso o inscríbete en uno para comenzar.",
   diplomados: "Aquí tienes los diplomados disponibles para ti.",
   nuevos: "Estos son los cursos recién publicados. ¡Dale un vistazo!",
   "mis-cursos": "Continúa donde lo dejaste. ¿Seguimos con tu formación?",
@@ -73,7 +73,7 @@ interface HelperdAnimacionProps {
    * Cambia por sección desde el padre.
    */
   texto?: string;
-  /** Nombre de la propiedad string en el .riv (por defecto `texto`). */
+  /** Nombre de la propiedad string en el .riv (por defecto `contenido`). */
   propiedadTexto?: string;
 }
 
@@ -84,15 +84,30 @@ const TAMANO_FLOTANTE = {
   xl: "size-64 sm:size-72 md:size-80",
 } as const;
 
-function esSoloNormal(states: string[]): boolean {
-  return (
-    states.length > 0 &&
-    states.every((state) => state === HELPERD_ESTADO_NORMAL)
-  );
+function nombreEstadoNormalizado(state: string): string {
+  return state.trim().toLowerCase();
+}
+
+function esEstadoIdle(states: string[]): boolean {
+  if (states.length === 0) return false;
+  return states.every((state) => {
+    const nombre = nombreEstadoNormalizado(state);
+    return (
+      nombre === nombreEstadoNormalizado(HELPERD_ESTADO_NORMAL) ||
+      nombre === "idle" ||
+      nombre.includes("entrada")
+    );
+  });
 }
 
 function tieneEstadoActivo(states: string[]): boolean {
-  return states.some((state) => state !== HELPERD_ESTADO_NORMAL);
+  return states.some((state) => {
+    const nombre = nombreEstadoNormalizado(state);
+    return (
+      nombre !== nombreEstadoNormalizado(HELPERD_ESTADO_NORMAL) &&
+      nombre !== "idle"
+    );
+  });
 }
 
 /**
@@ -112,13 +127,16 @@ export function HelperdAnimacion({
   const enfocadoRef = useRef(false);
   /** True tras salir de Normal con el overlay abierto (evita cerrar en el frame del click). */
   const salioDeNormalRef = useRef(false);
+  /** Timestamp de apertura del overlay; evita cerrar si Rive aún reporta Normal al click. */
+  const abiertoEnRef = useRef(0);
 
   const textos = useMemo(() => {
     if (texto == null) return undefined;
-    // `texto` = propiedad VM; `Texto9` = text run hallado en helperd.riv (respaldo).
+    // `contenido` = propiedad VM enlazada al globo; text runs como respaldo.
     return {
       [propiedadTexto]: texto,
       Texto9: texto,
+      Texto9x: texto,
     };
   }, [texto, propiedadTexto]);
 
@@ -127,15 +145,31 @@ export function HelperdAnimacion({
     setEnfocado(valor);
     if (!valor) {
       salioDeNormalRef.current = false;
+      abiertoEnRef.current = 0;
     }
   };
 
   const activarOverlayPorClick = () => {
     salioDeNormalRef.current = false;
+    abiertoEnRef.current = Date.now();
     setEnfocadoSync(true);
+    // Si el click solo dispara timelines dentro de Normal (sin StateChange),
+    // igual marcamos salida para poder cerrar al siguiente idle/evento.
+    window.setTimeout(() => {
+      if (enfocadoRef.current) salioDeNormalRef.current = true;
+    }, 120);
   };
 
   const salirFoco = () => {
+    setEnfocadoSync(false);
+  };
+
+  const intentarCerrarPorIdle = () => {
+    if (!enfocadoRef.current) return;
+    const msAbierto = Date.now() - abiertoEnRef.current;
+    // Ignorar el idle inmediato del click.
+    if (msAbierto < 450) return;
+    if (!salioDeNormalRef.current) return;
     setEnfocadoSync(false);
   };
 
@@ -147,10 +181,15 @@ export function HelperdAnimacion({
       return;
     }
 
-    // Overlay abierto → hubo animación activa → volvió a Normal: cerrar.
-    if (salioDeNormalRef.current && esSoloNormal(states)) {
-      setEnfocadoSync(false);
+    if (esEstadoIdle(states)) {
+      intentarCerrarPorIdle();
     }
+  };
+
+  const onRiveEvent = (_nombre: string) => {
+    if (!enfocadoRef.current) return;
+    salioDeNormalRef.current = true;
+    intentarCerrarPorIdle();
   };
 
   useEffect(() => {
@@ -177,6 +216,7 @@ export function HelperdAnimacion({
       className="size-full"
       textos={textos}
       onStateChange={onStateChange}
+      onRiveEvent={onRiveEvent}
     />
   );
 
@@ -206,16 +246,16 @@ export function HelperdAnimacion({
           aria-modal={enfocado || undefined}
         >
           {/*
-            Con overlay cerrado no capturamos todo el viewport (bloquearía el
-            catálogo). Solo la zona del personaje recibe eventos; con overlay
-            abierto sí ocupamos pantalla completa encima del dimmer.
+            Artboard a viewport completo + Listeners nativos de Rive (hover/click
+            / estados). En idle, clip-path reduce la hitbox al tercio inferior
+            derecho para no tapar menú, tarjetas ni el botón ⋮.
           */}
           <div
             className={cn(
-              "pointer-events-auto absolute",
-              enfocado
-                ? "inset-0 size-full"
-                : "bottom-0 right-0 h-[min(75vh,640px)] w-[min(100%,22rem)] sm:w-[26rem] md:w-[30rem]",
+              "pointer-events-auto absolute inset-0 size-full",
+              !enfocado &&
+                // DEBUG: fondo negro = área del clip-path / hitbox (quitar al terminar)
+                "[clip-path:inset(45%_0_0_58%)] sm:[clip-path:inset(42%_0_0_62%)] md:[clip-path:inset(40%_0_0_65%)] lg:[clip-path:inset(80%_20%_0_65%)]",
             )}
             onClick={() => {
               if (!enfocadoRef.current) activarOverlayPorClick();

@@ -911,6 +911,20 @@
     border-radius: 16px;
   }
 
+  /* Logout y demás botones del dock: blanco sobre el verde esmeralda. */
+  [data-interface-variant="educational"] .collaborator-sidebar button {
+    color: #ffffff;
+  }
+
+  [data-interface-variant="educational"] .collaborator-sidebar button:hover {
+    color: #ffffff;
+  }
+
+  [data-interface-variant="educational"] .collaborator-sidebar button svg {
+    color: #ffffff;
+    stroke: #ffffff;
+  }
+
   [data-interface-variant="educational"] .collaborator-sidebar p,
   [data-interface-variant="educational"] .collaborator-sidebar span {
     color: inherit;

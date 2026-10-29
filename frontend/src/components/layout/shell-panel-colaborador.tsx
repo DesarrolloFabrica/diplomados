@@ -42,6 +42,8 @@ interface ItemNavLateral {
   titulo: string;
   href: string;
   icono: LucideIcon;
+  iconoImagen?: string;
+  iconoImagenInactivo?: string;
   usarLogoMarca?: boolean;
   activo: (pathname: string) => boolean;
 }
@@ -110,7 +112,8 @@ const ITEMS_NAV_COLABORADOR: ItemNavLateral[] = [
     titulo: "Home",
     href: "/home",
     icono: BookOpen,
-    usarLogoMarca: true,
+    iconoImagen: "/ico2.png",
+    iconoImagenInactivo: "/offico.png",
     activo: (pathname) => pathname === "/home",
   },
   {
@@ -220,7 +223,42 @@ function EnlaceNav({
         )}
       >
         <span className="grid size-8 shrink-0 place-items-center">
-          {item.usarLogoMarca ? (
+          {item.iconoImagen && item.iconoImagenInactivo ? (
+            <span className="relative z-10 grid size-8 place-items-center" aria-hidden>
+              {/* El enlace ya aporta el nombre accesible; ambas imágenes son decorativas. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.iconoImagenInactivo}
+                alt=""
+                className={cn(
+                  "absolute inset-0 size-8 rounded-lg object-contain opacity-100 transition-[opacity,transform] duration-300 ease-out will-change-transform motion-reduce:transition-none",
+                  activo
+                    ? "scale-75 rotate-[8deg] opacity-0"
+                    : "scale-100 rotate-0 opacity-100",
+                )}
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.iconoImagen}
+                alt=""
+                className={cn(
+                  "absolute inset-0 size-8 rounded-lg object-contain opacity-100 transition-[opacity,transform] duration-300 ease-out will-change-transform motion-reduce:transition-none",
+                  activo
+                    ? "scale-100 rotate-0 opacity-100"
+                    : "scale-75 -rotate-[8deg] opacity-0",
+                )}
+              />
+            </span>
+          ) : item.iconoImagen ? (
+            // El enlace ya aporta el nombre accesible; la imagen es decorativa.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={item.iconoImagen}
+              alt=""
+              aria-hidden
+              className="relative z-10 size-8 rounded-lg object-contain opacity-100"
+            />
+          ) : item.usarLogoMarca ? (
             <IconoMarcaFormacion className="size-6" />
           ) : (
             <Icono className="size-[1.125rem] shrink-0" aria-hidden="true" />
@@ -308,6 +346,7 @@ function BarraLateral({
   onToggle,
   onNavigate,
   orientacion = "vertical",
+  oscurecerDock = false,
 }: {
   pathname: string;
   isExpanded: boolean;
@@ -318,6 +357,7 @@ function BarraLateral({
   onToggle?: () => void;
   onNavigate?: () => void;
   orientacion?: OrientacionNav;
+  oscurecerDock?: boolean;
 }) {
   const config = TEMAS_SIDEBAR[tema];
   const esBottom = orientacion === "bottom";
@@ -333,6 +373,9 @@ function BarraLateral({
             )
           : "h-full min-h-0 flex-col px-2 py-4",
         config.clasesSidebar,
+        esBottom &&
+          oscurecerDock &&
+          "border-white/30 bg-[rgba(174,190,206,0.82)] shadow-[0_14px_44px_rgba(5,18,32,0.24),inset_0_1px_0_rgba(255,255,255,0.28)] backdrop-blur-[20px] backdrop-saturate-[1.08]",
       )}
     >
       <div
@@ -614,6 +657,7 @@ function ShellPanelLateral({
               tema={tema}
               onToggle={() => setIsExpanded((value) => !value)}
               orientacion="bottom"
+              oscurecerDock={interfaceConfig?.id === "creative" || esGamified}
             />
           </div>
         </aside>

@@ -8,9 +8,9 @@ export const metadata: Metadata = {
   title: "Plataforma de Formación",
   description: "Formación empresarial autoguiada: cursos y diplomados para tu equipo.",
   icons: {
-    icon: "/images/Favicon.ico",
-    shortcut: "/images/Favicon.ico",
-    apple: "/images/Favicon.ico",
+    icon: "/ico2.png",
+    shortcut: "/ico2.png",
+    apple: "/ico2.png",
   },
 };
 
