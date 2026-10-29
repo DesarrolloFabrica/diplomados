@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ThemeScript } from "@/components/providers/theme-script";
 import { Toaster } from "@/components/ui/sonner";
+import { TutorialProvider } from "@/components/tutorial/tutorial-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -38,7 +39,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider>
-          {children}
+          <TutorialProvider>{children}</TutorialProvider>
           <Toaster position="top-center" richColors />
         </ThemeProvider>
       </body>

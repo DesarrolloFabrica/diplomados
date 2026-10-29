@@ -7,6 +7,7 @@ import { obtenerPreferenciaInterfazUsuario } from "@backend/server/queries/prefe
 import { listarIndiceBusquedaColaborador } from "@backend/server/queries/mis-cursos";
 import { resolveInterfaceVariant } from "@backend/config/interface-variants";
 import { IndiceBusquedaCursosProvider } from "@/components/layout/buscador-shell-cursos";
+import { TutorialAssistant } from "@/components/tutorial/tutorial-assistant";
 
 export default async function EstudianteLayout({
   children,
@@ -27,6 +28,7 @@ export default async function EstudianteLayout({
         <IndiceBusquedaCursosProvider elementos={indiceBusqueda}>
           <ShellPanelColaborador nombre={sesion.nombreCompleto}>
             {children}
+            <TutorialAssistant />
           </ShellPanelColaborador>
         </IndiceBusquedaCursosProvider>
       </InterfaceVariantProvider>

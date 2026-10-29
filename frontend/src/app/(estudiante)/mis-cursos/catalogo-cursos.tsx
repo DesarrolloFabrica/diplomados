@@ -34,10 +34,6 @@ import {
 import { PortadaCurso } from "@/components/shared/portada-curso";
 import { BuscadorCatalogoCursos } from "@/components/layout/buscador-shell-cursos";
 import { AnilloProgreso } from "@/components/shared/anillo-progreso";
-import {
-  HELPERD_TEXTO_POR_SECCION,
-  HelperdAnimacion,
-} from "@/components/shared/helperd-animacion";
 import { MenuOpcionesCurso } from "@/components/shared/menu-opciones-curso";
 import { useInterfaceVariant } from "@/components/providers/interface-variant-provider";
 import { estiloFondoInterfaz } from "@/lib/interface-assets";
@@ -319,34 +315,8 @@ export function CatalogoCursos({
 
       {!esGamified && catalogoContenido}
 
-      <HelperdAnimacion
-        variante="pantallaCompleta"
-        texto={textoHelperdPorCatalogo(pagina, seccionHome)}
-      />
     </div>
   );
-}
-
-function textoHelperdPorCatalogo(
-  pagina: "home" | "mis-cursos",
-  seccionHome: "descubrir" | "diplomados" | "nuevos",
-): string {
-  if (pagina === "mis-cursos") {
-    return HELPERD_TEXTO_POR_SECCION["mis-cursos"];
-  }
-
-  switch (seccionHome) {
-    case "descubrir":
-      return HELPERD_TEXTO_POR_SECCION.descubrir;
-    case "diplomados":
-      return HELPERD_TEXTO_POR_SECCION.diplomados;
-    case "nuevos":
-      return HELPERD_TEXTO_POR_SECCION.nuevos;
-    default: {
-      const _exhaustive: never = seccionHome;
-      return _exhaustive;
-    }
-  }
 }
 
 function ContenidoCatalogo({
@@ -374,6 +344,7 @@ function ContenidoCatalogo({
 }) {
   return (
     <section
+      data-tutorial="course-catalog"
       data-catalog-density={variante === "adventure" ? "adventure" : undefined}
       className={cn(
         "min-w-0 w-full overflow-hidden",
@@ -504,6 +475,7 @@ function DashboardEducativoColaborador({
   return (
     <div className="w-full space-y-6 text-[var(--interface-text)] sm:space-y-7">
       <section
+        data-tutorial="dashboard-hero"
         className="educational-hero relative isolate min-h-[360px] overflow-hidden rounded-[22px] border border-solid border-[#263d32] bg-[#061120] bg-clip-padding text-white shadow-[0_24px_70px_rgba(6,17,32,0.18)] ring-1 ring-inset ring-white/10 sm:min-h-[360px] sm:rounded-[28px]"
         style={estiloHero}
       >
@@ -635,7 +607,8 @@ function DashboardGamificadoColaborador({
 
   return (
     <div className="w-full space-y-4 text-[var(--interface-text)] sm:space-y-5">
-      <div className="flex items-center gap-3 px-1 sm:px-0">
+      <section data-tutorial="dashboard-hero" className="space-y-4 sm:space-y-5">
+        <div className="flex items-center gap-3 px-1 sm:px-0">
         <span className="grid size-10 shrink-0 place-items-center rounded-full border border-white/40 bg-white/10 text-white backdrop-blur-sm">
           <UserRound className="size-5" aria-hidden="true" />
         </span>
@@ -647,9 +620,9 @@ function DashboardGamificadoColaborador({
             Tu aprendizaje construye un mejor mañana
           </p>
         </div>
-      </div>
+        </div>
 
-      <div className="grid grid-cols-1 gap-2 min-[430px]:grid-cols-2 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 min-[430px]:grid-cols-2 sm:grid-cols-3">
         <div className="flex min-h-14 items-center gap-3 rounded-xl border border-white/15 bg-[rgba(4,15,30,0.55)] px-3 py-2 backdrop-blur-md">
           <AnilloProgreso
             porcentaje={progresoGeneral}
@@ -689,16 +662,17 @@ function DashboardGamificadoColaborador({
             </p>
           </div>
         </div>
-      </div>
+        </div>
 
-      <div className="pt-1 text-center">
+        <div className="pt-1 text-center">
         <h1 className="font-display text-2xl font-bold tracking-tight text-white drop-shadow-[0_3px_10px_rgba(2,10,20,0.55)] min-[430px]:text-3xl">
           Selecciona tu curso
         </h1>
         <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.22em] text-white/70 sm:text-xs sm:tracking-[0.3em]">
           Explora · Aprende · Transforma
         </p>
-      </div>
+        </div>
+      </section>
 
       {controlesCatalogo}
 
@@ -721,7 +695,10 @@ function ResumenDashboardBusiness({
   const primerNombre = nombre?.trim().split(/\s+/)[0] ?? "Usuario";
 
   return (
-    <section className="business-dashboard-summary w-full rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] sm:p-6">
+    <section
+      data-tutorial="dashboard-hero"
+      className="business-dashboard-summary w-full rounded-[var(--interface-radius)] border border-[var(--interface-border)] bg-[var(--interface-surface-strong)] p-5 text-[var(--interface-text)] [box-shadow:var(--interface-shadow)] sm:p-6"
+    >
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--interface-accent)]">
@@ -793,6 +770,7 @@ function SelectorCatalogo({
 
   return (
     <nav
+      data-tutorial="catalog-filters"
       aria-label="Secciones principales"
       className={cn(
         "flex max-w-full shrink-0 gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
@@ -1594,7 +1572,11 @@ function HeroDestacado({ cursos }: { cursos: CursoCatalogoFila[] }) {
 
   if (inscrito) {
     return (
-      <article data-hero-variant={config.hero.variant} className={claseHero}>
+      <article
+        data-hero-variant={config.hero.variant}
+        data-tutorial={config.id === "business" ? undefined : "dashboard-hero"}
+        className={claseHero}
+      >
         {contenido}
       </article>
     );
@@ -1603,6 +1585,7 @@ function HeroDestacado({ cursos }: { cursos: CursoCatalogoFila[] }) {
   return (
     <article
       data-hero-variant={config.hero.variant}
+      data-tutorial={config.id === "business" ? undefined : "dashboard-hero"}
       role="button"
       tabIndex={0}
       onClick={activarCurso}

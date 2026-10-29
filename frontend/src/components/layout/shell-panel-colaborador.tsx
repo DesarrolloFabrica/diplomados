@@ -589,6 +589,7 @@ function ShellPanelLateral({
     >
       {esMenuLateral ? (
         <aside
+          data-tutorial={tema === "colaborador" ? "main-navigation" : undefined}
           className={cn(
             "fixed inset-y-0 left-0 z-40 hidden p-3 transition-[width] duration-200 lg:block",
             isExpanded ? "w-[224px]" : "w-[76px] hover:w-[224px]",
@@ -608,6 +609,7 @@ function ShellPanelLateral({
         <aside className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center overflow-visible px-3 pb-2 sm:px-4">
           <div
             ref={capsulaRef}
+            data-tutorial={tema === "colaborador" ? "main-navigation" : undefined}
             onMouseEnter={mantenerDockActivo}
             onMouseLeave={manejarSalidaCapsula}
             onFocusCapture={mantenerDockActivo}
