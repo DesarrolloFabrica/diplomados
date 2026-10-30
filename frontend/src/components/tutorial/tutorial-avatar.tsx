@@ -1,13 +1,27 @@
 "use client";
 
-import { Component, type ReactNode } from "react";
-import { HelperdAnimacion } from "@/components/shared/helperd-animacion";
+import { Component, useEffect, useState, type ReactNode } from "react";
+import type { Rive } from "@rive-app/react-webgl2";
+import {
+  esEstadoTutorialHelperd,
+  HelperdAnimacion,
+} from "@/components/shared/helperd-animacion";
 import { cn } from "@/lib/utils";
 import { TUTORIAL_LAYERS } from "./tutorial-config";
 import type {
   TutorialAvatarPosition,
   TutorialTargetRect,
 } from "./tutorial-types";
+
+// DEBUG: poner en false para ocultar el fondo negro de la hitbox Normal/Hover.
+const SHOW_HOVER_HITBOX = true;
+
+// RECORTE MANUAL: inset(arriba derecha abajo izquierda), en porcentajes.
+// Aumentar un valor recorta mas desde ese borde. Los guiones bajos son espacios.
+// Sin prefijo: movil; sm: >=640px; md: >=768px; lg: >=1024px.
+// Solo se aplica en Normal/Hover; Entrada, Hablar y el tutorial no se recortan.
+const HOVER_HITBOX_CLIP =
+  "[clip-path:inset(0_0_0_40%)] sm:[clip-path:inset(0_0_0_45%)] md:[clip-path:inset(0_4%_0_48%)] lg:[clip-path:inset(0_5%_0_50%)]";
 
 interface TutorialAvatarProps {
   avatarState?: string;
@@ -20,6 +34,8 @@ interface TutorialAvatarProps {
   ariaLabel?: string;
   interactive?: boolean;
   screenScale?: boolean;
+  onStateChange?: (states: string[]) => void;
+  onReady?: (rive: Rive) => void;
 }
 
 const FIXED_POSITION_CLASSES: Record<
@@ -61,7 +77,32 @@ export function TutorialAvatar({
   ariaLabel = "Abrir ayuda",
   interactive = true,
   screenScale = false,
+  onStateChange,
+  onReady,
 }: TutorialAvatarProps) {
+  const [sceneExpanded, setSceneExpanded] = useState(false);
+  const [introOverlayVisible, setIntroOverlayVisible] = useState(false);
+  useEffect(() => {
+    // El overlay de introduccion no debe reaparecer al finalizar el recorrido.
+    if (!interactive) setIntroOverlayVisible(false);
+  }, [interactive]);
+  const handleStateChange = (states: string[]) => {
+    const names = states.map((state) => state.trim().toLowerCase());
+    const isNormal = names.length > 0 && names.every((name) => name === "normal");
+    if (
+      names.some(
+        (name) => name.includes("entrada") || name === "hablar" || esEstadoTutorialHelperd(name),
+      )
+    ) {
+      setSceneExpanded(true);
+    } else if (isNormal) {
+      setSceneExpanded(false);
+    }
+    if (names.some(esEstadoTutorialHelperd) || isNormal) {
+      setIntroOverlayVisible(false);
+    }
+    onStateChange?.(states);
+  };
   const viewportWidth = typeof window === "undefined" ? 1024 : window.innerWidth;
   const avatarSize = viewportWidth >= 1024 ? 240 : viewportWidth >= 640 ? 176 : 128;
   const targetPosition =
@@ -81,16 +122,29 @@ export function TutorialAvatar({
       <TutorialAvatarErrorBoundary>
         <aside
           data-avatar-state={avatarState}
-          className="pointer-events-none fixed inset-0"
+          className="pointer-events-none fixed inset-0 overflow-visible"
           style={{ zIndex: TUTORIAL_LAYERS.avatar }}
           aria-label="Guia del tutorial"
         >
+          {introOverlayVisible && interactive && (
+            <div
+              aria-hidden="true"
+              data-rive-intro-overlay="true"
+              className="pointer-events-auto absolute inset-0 bg-black/55"
+            />
+          )}
           <button
             type="button"
-            onClick={onActivate}
+            onClick={() => {
+              if (!interactive) return;
+              setSceneExpanded(true);
+              setIntroOverlayVisible(true);
+              onActivate?.();
+            }}
             className={cn(
-              "absolute inset-0 size-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent,#10b981)] focus-visible:ring-inset",
-              "[clip-path:inset(0_0_0_40%)] sm:[clip-path:inset(0_0_0_45%)] md:[clip-path:inset(0_4%_0_48%)] lg:[clip-path:inset(0_5%_0_50%)]",
+              "absolute inset-0 size-full overflow-visible cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--interface-accent,#10b981)] focus-visible:ring-inset",
+              !sceneExpanded && HOVER_HITBOX_CLIP,
+              !sceneExpanded && SHOW_HOVER_HITBOX && "bg-black",
               interactive ? "pointer-events-auto" : "pointer-events-none",
             )}
             aria-label={ariaLabel}
@@ -99,6 +153,9 @@ export function TutorialAvatar({
             <HelperdAnimacion
               variante="seccion"
               texto={riveText}
+              onStateChange={handleStateChange}
+              onReady={onReady}
+              overflowVisible={sceneExpanded}
               className="!fixed !inset-0 !h-dvh !w-screen"
             />
           </button>

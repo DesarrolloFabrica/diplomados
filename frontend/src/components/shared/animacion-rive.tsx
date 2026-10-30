@@ -36,6 +36,8 @@ type AlignmentKey =
 
 interface AnimacionRiveProps {
   src: string;
+  /** Expone la instancia ya cargada sin recrear el canvas. */
+  onReady?: (rive: InstanciaRive) => void;
   /** Nombre del artboard en el archivo .riv (opcional; por defecto el primero). */
   artboard?: string;
   /**
@@ -178,6 +180,7 @@ function aplicarHoverExterno(
  */
 export function AnimacionRive({
   src,
+  onReady,
   artboard,
   stateMachine,
   stateMachines,
@@ -243,6 +246,10 @@ export function AnimacionRive({
   useEffect(() => {
     riveRef.current = rive ?? null;
   }, [rive]);
+
+  useEffect(() => {
+    if (rive) onReady?.(rive);
+  }, [rive, onReady]);
 
   useEffect(() => {
     if (!rive || !textos) return;

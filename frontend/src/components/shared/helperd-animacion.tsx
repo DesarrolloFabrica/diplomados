@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { Rive } from "@rive-app/react-webgl2";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +31,12 @@ export const HELPERD_ARTBOARD = "Artboard 1";
 
 /** Estado idle de la State Machine al que vuelve tras completar la animación. */
 export const HELPERD_ESTADO_NORMAL = "Normal";
+
+/** Idle_anim es el nombre serializado en el .riv; los otros son alias de integracion. */
+export function esEstadoTutorialHelperd(state: string): boolean {
+  const name = state.trim().toLowerCase();
+  return name === "idle_anim" || name === "idle_anim9x" || name === "idle tutorial";
+}
 
 /**
  * Nombre de la propiedad string del View Model en helperd.riv
@@ -75,6 +82,11 @@ interface HelperdAnimacionProps {
   texto?: string;
   /** Nombre de la propiedad string en el .riv (por defecto `contenido`). */
   propiedadTexto?: string;
+  /** Notifica estados sin sustituir el control de foco interno. */
+  onStateChange?: (states: string[]) => void;
+  onReady?: (rive: Rive) => void;
+  /** Escena de tutorial sin recortes HTML alrededor del canvas. */
+  overflowVisible?: boolean;
 }
 
 const TAMANO_FLOTANTE = {
@@ -122,6 +134,9 @@ export function HelperdAnimacion({
   tamanoFlotante = "md",
   texto,
   propiedadTexto = HELPERD_PROPIEDAD_TEXTO,
+  onStateChange: notificarEstado,
+  onReady,
+  overflowVisible = false,
 }: HelperdAnimacionProps) {
   const [enfocado, setEnfocado] = useState(false);
   const enfocadoRef = useRef(false);
@@ -174,6 +189,7 @@ export function HelperdAnimacion({
   };
 
   const onStateChange = (states: string[]) => {
+    notificarEstado?.(states);
     if (!enfocadoRef.current) return;
 
     if (tieneEstadoActivo(states)) {
@@ -205,6 +221,7 @@ export function HelperdAnimacion({
 
   const animacion = (
     <AnimacionRive
+      onReady={onReady}
       src={HELPERD_RIV_SRC}
       artboard={artboard}
       stateMachine={HELPERD_STATE_MACHINE}
@@ -213,7 +230,7 @@ export function HelperdAnimacion({
       fit="contain"
       alignment="center"
       ariaLabel="Helperd, asistente de formación"
-      className="size-full"
+      className={cn("size-full", overflowVisible && "overflow-visible")}
       textos={textos}
       onStateChange={onStateChange}
       onRiveEvent={onRiveEvent}
